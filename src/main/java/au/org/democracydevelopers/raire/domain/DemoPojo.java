@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data //This Code will auto generate getter, setter classes, toSting and hashcode/equals methods for this class.
 @NoArgsConstructor //generate a default constructor for this class.
 @AllArgsConstructor // generate a parameterised constructor for this class
-public class DemoPOJO {
+public class DemoPojo {
   private String salutation;
   private String firstName;
   private String lastName;

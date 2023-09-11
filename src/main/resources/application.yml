@@ -3,3 +3,8 @@ spring:
     active: local #default active profile
 server:
   port: 8080
+
+
+logging:
+  level:
+    ROOT: DEBUG
