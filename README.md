@@ -30,7 +30,8 @@ your output should look like
 ```
 
 - To test post request please run following curl command. The post request expects a JSON request body and produces a JSON output
-```curl --location 'localhost:8080/demo/hello' \
+```
+curl --location 'localhost:8080/demo/hello' \
 --header 'Content-Type: application/json' \
 --data '{
     "salutation": "Amazing",
