@@ -5,12 +5,14 @@ import au.org.democracydevelopers.raire.domain.CvrContestInfo;
 import au.org.democracydevelopers.raire.domain.ElectionData;
 import au.org.democracydevelopers.raire.domain.Vote;
 import au.org.democracydevelopers.raire.repository.CvrContestInfoRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +25,7 @@ import org.springframework.stereotype.Component;
 public class CvrContestInfoService {
 
   private final CvrContestInfoRepository cvrContestInfoRepository;
-
+  private static final ObjectMapper objectMapper = new ObjectMapper();
   public ElectionData findCvrContestInfo() {
     List<CvrContestInfo> cvrContestInfos = cvrContestInfoRepository.findAll();
     log.info("retrieved cvrContestInfos records {}", cvrContestInfos.size());
@@ -38,12 +40,12 @@ public class CvrContestInfoService {
         .map(choice -> StringUtils.replace(choice, "\"", ""))
         .map(StringUtils::trim).toList();
 
-    Map<String, Integer> candidates = buildCandidatesMap(sanitizedChoices);
+    Map<String, Integer> candidatesMap = buildCandidatesMap(sanitizedChoices);
     Map<List<Integer>, Integer> raireBallots = new HashMap<>();
     sanitizedChoices.stream()
         .map(sanitizedChoice -> sanitizedChoice.trim().split(","))
         .map(strings -> Arrays.stream(strings)
-            .map(preference -> candidates.get(preference.split("\\(")[0].trim())).toList())
+            .map(preference -> candidatesMap.get(preference.split("\\(")[0].trim())).toList())
         .toList()
         .forEach(ballot -> raireBallots.put(ballot, raireBallots.getOrDefault(ballot, 0) + 1));
 
@@ -56,8 +58,13 @@ public class CvrContestInfoService {
             .preference(entry.getKey())
             .build())
         .collect(Collectors.toList());
+    Map<Integer, String> orderedCandidates = new TreeMap<>();
+    candidatesMap.forEach((key, value) -> orderedCandidates.put(value, key));
+    Map<String, Object> metadata = new HashMap<>() ;
+    metadata.put("candidates", orderedCandidates.values());
 
     return ElectionData.builder()
+        .metadata(objectMapper.valueToTree(metadata))
         .audit(Audit.builder().totalAuditableBallots(String.valueOf(cvrContestInfos.size()))
             .type("dummy") //TODO discuss how to build audit object
             .build())
