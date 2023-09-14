@@ -36,15 +36,14 @@ public class CvrContestInfoService {
         .map(choice -> StringUtils.replace(choice, "[", ""))
         .map(choice -> StringUtils.replace(choice, "", ""))
         .map(choice -> StringUtils.replace(choice, "\"", ""))
-        .map(choice -> StringUtils.replace(choice, "CANDIDATE", ""))
-        .map(choice -> StringUtils.replace(choice, "WRITE-IN", "99"))
         .map(StringUtils::trim).toList();
 
+    Map<String, Integer> candidates = buildCandidatesMap(sanitizedChoices);
     Map<List<Integer>, Integer> raireBallots = new HashMap<>();
     sanitizedChoices.stream()
         .map(sanitizedChoice -> sanitizedChoice.trim().split(","))
         .map(strings -> Arrays.stream(strings)
-            .map(preference -> preference.split("\\(")[0].trim()).map(Integer::parseInt).toList())
+            .map(preference -> candidates.get(preference.split("\\(")[0].trim())).toList())
         .toList()
         .forEach(ballot -> raireBallots.put(ballot, raireBallots.getOrDefault(ballot, 0) + 1));
 
@@ -58,8 +57,6 @@ public class CvrContestInfoService {
             .build())
         .collect(Collectors.toList());
 
-
-
     return ElectionData.builder()
         .audit(Audit.builder().totalAuditableBallots(String.valueOf(cvrContestInfos.size()))
             .type("dummy") //TODO discuss how to build audit object
@@ -69,4 +66,20 @@ public class CvrContestInfoService {
         .votes(votes)
         .build();
   }
+
+  private Map<String, Integer> buildCandidatesMap(List<String> sanitizedChoices) {
+    int count = 1;
+    Map<String, Integer> candidatesMap = new HashMap<>();
+    for (String sanitizedChoice : sanitizedChoices) {
+      String[] choices = sanitizedChoice.split(",");
+      for (String choice : choices) {
+        String candidateName = choice.split("\\(")[0].trim();
+        if(!candidatesMap.containsKey(candidateName)) {
+          candidatesMap.put(candidateName, count++);
+        }
+      }
+    }
+    return candidatesMap;
+  }
+
 }
