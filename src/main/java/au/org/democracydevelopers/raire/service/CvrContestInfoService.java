@@ -64,7 +64,7 @@ public class CvrContestInfoService {
         .audit(Audit.builder().totalAuditableBallots(String.valueOf(cvrContestInfos.size()))
             .type("dummy") //TODO discuss how to build audit object
             .build())
-        .totalVotes(uniqueCandidates.size())
+        .totalVotes(cvrContestInfos.size())
         .numberOfCandidates(uniqueCandidates.size())
         .votes(votes)
         .build();
