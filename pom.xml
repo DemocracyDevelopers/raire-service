@@ -18,11 +18,10 @@
     <java.version>17</java.version>
   </properties>
   <dependencies>
-    <dependency>src/main/java/au/org/democracydevelopers/raire/controller/CvrContestInfoController.java
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>

@@ -5,10 +5,13 @@ import au.org.democracydevelopers.raire.domain.CvrContestInfo;
 import au.org.democracydevelopers.raire.domain.ElectionData;
 import au.org.democracydevelopers.raire.domain.Vote;
 import au.org.democracydevelopers.raire.repository.CvrContestInfoRepository;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,7 +20,9 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 @Component
 @RequiredArgsConstructor
@@ -25,6 +30,7 @@ import org.springframework.stereotype.Component;
 public class CvrContestInfoService {
 
   private final CvrContestInfoRepository cvrContestInfoRepository;
+//  private final RaireClient raireClient;
   private static final ObjectMapper objectMapper = new ObjectMapper();
   public ElectionData findCvrContestInfo() {
     List<CvrContestInfo> cvrContestInfos = cvrContestInfoRepository.findAll();
@@ -45,8 +51,12 @@ public class CvrContestInfoService {
     sanitizedChoices.stream()
         .map(sanitizedChoice -> sanitizedChoice.trim().split(","))
         .map(strings -> Arrays.stream(strings)
-            .map(preference -> candidatesMap.get(preference.split("\\(")[0].trim())).toList())
-        .toList()
+            .map(preference -> {
+              String[] vote = preference.split("\\(");
+              String rank = vote[1].split("\\)")[0];
+
+              return candidatesMap.get(vote[0].trim());
+            }).toList())
         .forEach(ballot -> raireBallots.put(ballot, raireBallots.getOrDefault(ballot, 0) + 1));
 
     Set<Integer> uniqueCandidates = new HashSet<>();
@@ -62,16 +72,27 @@ public class CvrContestInfoService {
     candidatesMap.forEach((key, value) -> orderedCandidates.put(value, key));
     Map<String, Object> metadata = new HashMap<>() ;
     metadata.put("candidates", orderedCandidates.values());
-
-    return ElectionData.builder()
+    ElectionData electionData = ElectionData.builder()
         .metadata(objectMapper.valueToTree(metadata))
-        .audit(Audit.builder().totalAuditableBallots(String.valueOf(cvrContestInfos.size()))
-            .type("dummy") //TODO discuss how to build audit object
+        .audit(Audit.builder().totalAuditableBallots(cvrContestInfos.size())
+            .type("OneOnMargin")
             .build())
         .totalVotes(cvrContestInfos.size())
         .numberOfCandidates(uniqueCandidates.size())
         .votes(votes)
         .build();
+    //call raire service
+    getRaireResponse(electionData);
+    return electionData;
+  }
+
+  private void getRaireResponse(ElectionData electionData) {
+    RestTemplate restTemplate = new RestTemplate();
+    ResponseEntity<Map> mapResponseEntity = restTemplate.postForEntity(
+        "http://localhost:3000/raire", electionData, Map.class);
+//    JsonNode raireAuditResult = raireClient.getRaireAuditResult(electionData);
+    log.info("Received Raire Audit Result {}", mapResponseEntity.getBody());
+
   }
 
   private Map<String, Integer> buildCandidatesMap(List<String> sanitizedChoices) {

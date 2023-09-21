@@ -15,5 +15,5 @@ public class Audit {
 
   private String type;
   @JsonProperty("total_auditable_ballots")
-  private String totalAuditableBallots;
+  private Integer totalAuditableBallots;
 }
