@@ -5,13 +5,10 @@ import au.org.democracydevelopers.raire.domain.CvrContestInfo;
 import au.org.democracydevelopers.raire.domain.ElectionData;
 import au.org.democracydevelopers.raire.domain.Vote;
 import au.org.democracydevelopers.raire.repository.CvrContestInfoRepository;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.JSONPObject;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,8 +27,9 @@ import org.springframework.web.client.RestTemplate;
 public class CvrContestInfoService {
 
   private final CvrContestInfoRepository cvrContestInfoRepository;
-//  private final RaireClient raireClient;
+  //  private final RaireClient raireClient;
   private static final ObjectMapper objectMapper = new ObjectMapper();
+
   public ElectionData findCvrContestInfo() {
     List<CvrContestInfo> cvrContestInfos = cvrContestInfoRepository.findAll();
     log.info("retrieved cvrContestInfos records {}", cvrContestInfos.size());
@@ -48,17 +46,22 @@ public class CvrContestInfoService {
 
     Map<String, Integer> candidatesMap = buildCandidatesMap(sanitizedChoices);
     Map<List<Integer>, Integer> raireBallots = new HashMap<>();
-    sanitizedChoices.stream()
-        .map(sanitizedChoice -> sanitizedChoice.trim().split(","))
-        .map(strings -> Arrays.stream(strings)
-            .map(preference -> {
-              String[] vote = preference.split("\\(");
-              String rank = vote[1].split("\\)")[0];
-
-              return candidatesMap.get(vote[0].trim());
-            }).toList())
-        .forEach(ballot -> raireBallots.put(ballot, raireBallots.getOrDefault(ballot, 0) + 1));
-
+    for (String choice : sanitizedChoices) {
+      String[] preferences = choice.trim().split(",");
+      List<Integer> preferenceOrder = new ArrayList<>();
+      if (preferences.length == 0) {
+        continue; // if the list of preferences is empty we cannot use the vote. This cannot happen but having a validation safeguards us against potential null pointer exception
+      }
+      for (String preference : preferences) {
+        String[] vote = preference.split("\\(");
+        String rank = vote[1].split("\\)")[0];
+        if (!StringUtils.isNumeric(rank)) {
+          break; //Invalid rank. Ballot is not usable. IF ballot is invalid, this safeguards us against number format exception
+        }
+        preferenceOrder.add(Integer.parseInt(rank) - 1, candidatesMap.get(vote[0].trim()));
+      }
+      raireBallots.put(preferenceOrder, raireBallots.getOrDefault(preferenceOrder, 0) + 1);
+    }
     Set<Integer> uniqueCandidates = new HashSet<>();
     raireBallots.keySet().forEach(uniqueCandidates::addAll);
     //Build ElectionData
@@ -70,7 +73,7 @@ public class CvrContestInfoService {
         .collect(Collectors.toList());
     Map<Integer, String> orderedCandidates = new TreeMap<>();
     candidatesMap.forEach((key, value) -> orderedCandidates.put(value, key));
-    Map<String, Object> metadata = new HashMap<>() ;
+    Map<String, Object> metadata = new HashMap<>();
     metadata.put("candidates", orderedCandidates.values());
     ElectionData electionData = ElectionData.builder()
         .metadata(objectMapper.valueToTree(metadata))
@@ -102,7 +105,7 @@ public class CvrContestInfoService {
       String[] choices = sanitizedChoice.split(",");
       for (String choice : choices) {
         String candidateName = choice.split("\\(")[0].trim();
-        if(!candidatesMap.containsKey(candidateName)) {
+        if (!candidatesMap.containsKey(candidateName)) {
           candidatesMap.put(candidateName, count++);
         }
       }
