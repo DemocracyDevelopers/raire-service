@@ -8,7 +8,7 @@ Run instructions:
   - Go to au.org.democracydevelopes.raise.RaireJavaApplication class and run the main method from IDE
 - Option 2:
   - Go to home directory of the service and run following command
-     `./mvnw spring-boot run`
+     `./mvnw spring-boot:run`
 
 This will run the application on port 8080.
 
