@@ -1,4 +1,4 @@
-package au.org.democracydevelopers.raire.domain;
+package au.org.democracydevelopers.raireconnector.domain.raire;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
