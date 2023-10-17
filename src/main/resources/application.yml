@@ -24,4 +24,4 @@ raire:
 
 logging:
   level:
-    ROOT: INFO
+    ROOT: DEBUG

@@ -29,6 +29,7 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 @Slf4j
 public class CvrContestInfoService {
+  // When gettiong contests by name, group contestIDs and assertions based on names as well not contestIds
 
   private final ObjectMapper objectMapper;
   private final CvrContestInfoRepository cvrContestInfoRepository;
@@ -87,6 +88,7 @@ public class CvrContestInfoService {
         .audit(Audit.builder().totalAuditableBallots(cvrContestInfos.size())
             .type("OneOnMargin")
             .build())
+//        .winner(2)
         .totalVotes(cvrContestInfos.size())
         .numberOfCandidates(uniqueCandidates.size())
         .votes(votes)
@@ -118,15 +120,6 @@ public class CvrContestInfoService {
       preferenceOrder.add(Integer.parseInt(rank) - 1, candidatesMap.get(vote[0].trim()));
     }
     raireBallots.put(preferenceOrder, raireBallots.getOrDefault(preferenceOrder, 0) + 1);
-  }
-
-  private RaireResponse getRaireResponse(ElectionData electionData) {
-    RestTemplate restTemplate = new RestTemplate();
-    ResponseEntity<RaireResponse> raireResponseEntity = restTemplate.postForEntity(
-        "http://localhost:3000/raire", electionData, RaireResponse.class);
-//    JsonNode raireAuditResult = raireClient.getRaireAuditResult(electionData);
-    log.info("Received Raire Audit Result {}", raireResponseEntity.getBody());
-    return raireResponseEntity.getBody();
   }
 
   private Map<String, Integer> buildCandidatesMap(List<String> sanitizedChoices) {

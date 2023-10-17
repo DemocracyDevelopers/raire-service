@@ -21,7 +21,7 @@ public class CvrContestInfoController {
 
   private final CvrContestInfoService cvrContestInfoService;
 
-  @PostMapping(path = "parser", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(path = "audit", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<AuditResponse> serve(@RequestBody List<Contest> contests) {
     //TODO: validate request
     log.info("Received request to audit contests with ids: {}", contests.stream().map(Contest::getContestId).collect(
