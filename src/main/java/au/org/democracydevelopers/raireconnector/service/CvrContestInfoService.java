@@ -134,7 +134,7 @@ public class CvrContestInfoService {
   }
 
   private Map<String, Integer> buildCandidatesMap(List<String> sanitizedChoices) {
-    int count = 1;
+    int count = 0;
     Map<String, Integer> candidatesMap = new HashMap<>();
     for (String sanitizedChoice : sanitizedChoices) {
       String[] choices = sanitizedChoice.split(",");
