@@ -117,7 +117,18 @@ public class CvrContestInfoService {
       if (!StringUtils.isNumeric(rank)) {
         break; //Invalid rank. Ballot is not usable. IF ballot is invalid, this safeguards us against number format exception
       }
-      preferenceOrder.add(Integer.parseInt(rank) - 1, candidatesMap.get(vote[0].trim()));
+      try {
+        preferenceOrder.add(Integer.parseInt(rank) - 1, candidatesMap.get(vote[0].trim()));
+
+        // FIXME At the moment, this will simply skip any preference that is out of order.
+        // This currently has the effect of accepting only the shortest valid prefix, which may
+        // be empty.
+        // Later, when this code is part of CVR upload parsing, we need to send an error back to the
+        // user and get them to correct their CVR.
+      } catch (IndexOutOfBoundsException e) {
+        log.error("Invalid preferences: "+choice);
+        break;
+      }
     }
     raireBallots.put(preferenceOrder, raireBallots.getOrDefault(preferenceOrder, 0) + 1);
   }

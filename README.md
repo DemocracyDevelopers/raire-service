@@ -12,9 +12,11 @@ Run instructions:
 
 This will run the application on port 8080.
 
+You need to have a running copy of the [Raire webserver](https://github.com/DemocracyDevelopers/raire-rs).
+
 - To run the audit please follow the syntax in following curl
 ```
-curl --location 'localhost:8080/cvr/parser' \
+curl --location 'localhost:8080/cvr/audit' \
 --header 'Content-Type: application/json' \
 --data '[
 {
