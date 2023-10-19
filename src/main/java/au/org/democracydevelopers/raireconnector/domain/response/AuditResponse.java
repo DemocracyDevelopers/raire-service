@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 public class AuditResponse {
-  private Integer contestId;
+  private String contestName;
   private RaireResponse result;
 }

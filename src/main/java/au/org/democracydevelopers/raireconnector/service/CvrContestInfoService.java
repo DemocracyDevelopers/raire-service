@@ -12,6 +12,7 @@ import au.org.democracydevelopers.raireconnector.repository.entity.Contest;
 import au.org.democracydevelopers.raireconnector.repository.entity.CvrContestInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +36,7 @@ public class CvrContestInfoService {
   private final ContestRepository contestRepository;
   private final RaireClient raireClient;
 
-  public Map<String, Set<AuditResponse>> findCvrContestInfo(List<ContestRequest> contests) {
+  public Set<AuditResponse> findCvrContestInfo(List<ContestRequest> contests) {
     List<String> contestNames = contests.stream().map(ContestRequest::getContestName)
         .collect(Collectors.toList());
 
@@ -51,32 +52,31 @@ public class CvrContestInfoService {
     log.info("Retrieved all cvrContestInfos records {}", cvrContestInfos.size());
     Map<Integer, List<CvrContestInfo>> contestAudiRequests = cvrContestInfos.stream()
         .collect(Collectors.groupingBy(CvrContestInfo::getContestId));
-    //iterate over all contestAuditRequests and collect results
-    List<AuditResponse> auditResponses = new ArrayList<>();
-    Map<String, Set<AuditResponse>> auditResponseMappedByName = new HashMap<>();
 
     Map<Integer, String> contestIdToContestNameMapping = contestDetails.stream()
         .collect(Collectors.toMap(contestDetail -> Math.toIntExact(contestDetail.getId()),
             Contest::getName));
 
-    contestAudiRequests.forEach((contestId, cvrContests) -> {
-      var electionData = buildRaireRequest(cvrContests);
-      AuditResponse audit = AuditResponse.builder().contestId(contestId)
-          .result(raireClient.getRaireResponse(electionData))
-          .build();
-
-      if (auditResponseMappedByName.containsKey(contestIdToContestNameMapping.get(contestId))) {
-        auditResponseMappedByName.get(contestIdToContestNameMapping.get(contestId)).add(audit);
-      } else {
-        Set<AuditResponse> auditResponseSet = new HashSet<>();
-        auditResponseSet.add(audit);
-        auditResponseMappedByName.put(contestIdToContestNameMapping.get(contestId), auditResponseSet);
-      }
+    Map<String, Set<CvrContestInfo>> cvrContestInfosGroupedByContestNames = new HashMap<>();
+    cvrContestInfos.forEach(cvrContestInfo -> {
+      Set<CvrContestInfo> cvrContestInfoSet = cvrContestInfosGroupedByContestNames.getOrDefault(contestIdToContestNameMapping.get(cvrContestInfo.getContestId()), new HashSet<>());
+      cvrContestInfoSet.add(cvrContestInfo);
+      cvrContestInfosGroupedByContestNames.put(contestIdToContestNameMapping.get(cvrContestInfo.getContestId()), cvrContestInfoSet);
     });
-    return auditResponseMappedByName;
+
+
+    Set<AuditResponse> auditResponsesGroupedByContestName = new HashSet<>();
+    cvrContestInfosGroupedByContestNames.forEach((contestName, cvrContests) -> {
+      var electionData = buildRaireRequest(cvrContests);
+      auditResponsesGroupedByContestName.add(AuditResponse.builder().contestName(contestName)
+          .result(raireClient.getRaireResponse(electionData))
+          .build());
+    });
+
+    return auditResponsesGroupedByContestName;
   }
 
-  public ElectionData buildRaireRequest(List<CvrContestInfo> cvrContestInfos) {
+  public ElectionData buildRaireRequest(Collection<CvrContestInfo> cvrContestInfos) {
     List<String> choices = cvrContestInfos.stream().map(CvrContestInfo::getChoices).toList();
     List<String> sanitizedChoices = choices.stream().map(StringUtils::toRootUpperCase)
         .map(choice -> StringUtils.replace(choice, "[", ""))
@@ -103,7 +103,7 @@ public class CvrContestInfoService {
         metadata);
   }
 
-  private ElectionData buildElectionDataModel(List<CvrContestInfo> cvrContestInfos,
+  private ElectionData buildElectionDataModel(Collection<CvrContestInfo> cvrContestInfos,
       Set<Integer> uniqueCandidates, List<Vote> votes, Map<String, Object> metadata) {
     return ElectionData.builder()
         .metadata(objectMapper.valueToTree(metadata))
