@@ -4,10 +4,11 @@ import au.org.democracydevelopers.raireconnector.client.RaireClient;
 import au.org.democracydevelopers.raireconnector.domain.raire.Audit;
 import au.org.democracydevelopers.raireconnector.domain.raire.ElectionData;
 import au.org.democracydevelopers.raireconnector.domain.raire.Vote;
-import au.org.democracydevelopers.raireconnector.domain.request.Contest;
+import au.org.democracydevelopers.raireconnector.domain.request.ContestRequest;
 import au.org.democracydevelopers.raireconnector.domain.response.AuditResponse;
-import au.org.democracydevelopers.raireconnector.domain.response.RaireResponse;
+import au.org.democracydevelopers.raireconnector.repository.ContestRepository;
 import au.org.democracydevelopers.raireconnector.repository.CvrContestInfoRepository;
+import au.org.democracydevelopers.raireconnector.repository.entity.Contest;
 import au.org.democracydevelopers.raireconnector.repository.entity.CvrContestInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -21,9 +22,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 @Component
 @RequiredArgsConstructor
@@ -33,25 +32,48 @@ public class CvrContestInfoService {
 
   private final ObjectMapper objectMapper;
   private final CvrContestInfoRepository cvrContestInfoRepository;
+  private final ContestRepository contestRepository;
   private final RaireClient raireClient;
 
-  public List<AuditResponse> findCvrContestInfo(List<Contest> contests) {
-    List<Integer> contestIds = contests.stream().map(Contest::getContestId)
+  public Map<String, Set<AuditResponse>> findCvrContestInfo(List<ContestRequest> contests) {
+    List<String> contestNames = contests.stream().map(ContestRequest::getContestName)
         .collect(Collectors.toList());
+
+    //group contestIds by Name;
+    List<Contest> contestDetails = contestRepository.findByNameIn(contestNames);
+
+    Set<Integer> contestIds = contestDetails.stream().map(Contest::getId).map(Math::toIntExact)
+        .collect(Collectors.toSet());
+
+    //have a single db interaction
     List<CvrContestInfo> cvrContestInfos = cvrContestInfoRepository.findByContestIdIn(contestIds);
+
     log.info("Retrieved all cvrContestInfos records {}", cvrContestInfos.size());
     Map<Integer, List<CvrContestInfo>> contestAudiRequests = cvrContestInfos.stream()
         .collect(Collectors.groupingBy(CvrContestInfo::getContestId));
     //iterate over all contestAuditRequests and collect results
     List<AuditResponse> auditResponses = new ArrayList<>();
+    Map<String, Set<AuditResponse>> auditResponseMappedByName = new HashMap<>();
+
+    Map<Integer, String> contestIdToContestNameMapping = contestDetails.stream()
+        .collect(Collectors.toMap(contestDetail -> Math.toIntExact(contestDetail.getId()),
+            Contest::getName));
+
     contestAudiRequests.forEach((contestId, cvrContests) -> {
       var electionData = buildRaireRequest(cvrContests);
-      auditResponses.add(
-          AuditResponse.builder().contestId(contestId)
-              .result(raireClient.getRaireResponse(electionData))
-              .build());
+      AuditResponse audit = AuditResponse.builder().contestId(contestId)
+          .result(raireClient.getRaireResponse(electionData))
+          .build();
+
+      if (auditResponseMappedByName.containsKey(contestIdToContestNameMapping.get(contestId))) {
+        auditResponseMappedByName.get(contestIdToContestNameMapping.get(contestId)).add(audit);
+      } else {
+        Set<AuditResponse> auditResponseSet = new HashSet<>();
+        auditResponseSet.add(audit);
+        auditResponseMappedByName.put(contestIdToContestNameMapping.get(contestId), auditResponseSet);
+      }
     });
-    return auditResponses;
+    return auditResponseMappedByName;
   }
 
   public ElectionData buildRaireRequest(List<CvrContestInfo> cvrContestInfos) {

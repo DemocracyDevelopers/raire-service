@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Contest {
-  private Integer contestId;
+public class ContestRequest {
+  private String contestName;
   private Integer totalAuditableBallots;
   private Integer timeProvisionForResult;
 }
