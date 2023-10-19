@@ -120,14 +120,12 @@ public class CvrContestInfoService {
       try {
         preferenceOrder.add(Integer.parseInt(rank) - 1, candidatesMap.get(vote[0].trim()));
 
-        // FIXME At the moment, this will simply skip any preference that is out of order.
-        // This currently has the effect of accepting only the shortest valid prefix, which may
-        // be empty.
-        // Later, when this code is part of CVR upload parsing, we need to send an error back to the
-        // user and get them to correct their CVR.
-      } catch (IndexOutOfBoundsException e) {
+        // FIXME This should be a call to IRVBallotUtils::isValid().
+        // We need to check that all the CVRs are valid on upload, then it's OK
+        // to throw an exception here, because an invalid vote here should never happen.
+        } catch (IndexOutOfBoundsException e) {
         log.error("Invalid preferences: "+choice);
-        break;
+        throw new RuntimeException("Error: Invalid preferences sent to RAIRE: "+choice);
       }
     }
     raireBallots.put(preferenceOrder, raireBallots.getOrDefault(preferenceOrder, 0) + 1);
