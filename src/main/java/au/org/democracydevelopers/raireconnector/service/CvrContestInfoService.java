@@ -50,8 +50,6 @@ public class CvrContestInfoService {
     List<CvrContestInfo> cvrContestInfos = cvrContestInfoRepository.findByContestIdIn(contestIds);
 
     log.info("Retrieved all cvrContestInfos records {}", cvrContestInfos.size());
-    Map<Integer, List<CvrContestInfo>> contestAudiRequests = cvrContestInfos.stream()
-        .collect(Collectors.groupingBy(CvrContestInfo::getContestId));
 
     Map<Integer, String> contestIdToContestNameMapping = contestDetails.stream()
         .collect(Collectors.toMap(contestDetail -> Math.toIntExact(contestDetail.getId()),
@@ -63,7 +61,6 @@ public class CvrContestInfoService {
       cvrContestInfoSet.add(cvrContestInfo);
       cvrContestInfosGroupedByContestNames.put(contestIdToContestNameMapping.get(cvrContestInfo.getContestId()), cvrContestInfoSet);
     });
-
 
     Set<AuditResponse> auditResponsesGroupedByContestName = new HashSet<>();
     cvrContestInfosGroupedByContestNames.forEach((contestName, cvrContests) -> {
