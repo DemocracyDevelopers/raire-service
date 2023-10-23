@@ -19,6 +19,8 @@ spring:
 server:
   port: 8080
 
+raire:
+  url: http://localhost:3000/raire
 
 logging:
   level:

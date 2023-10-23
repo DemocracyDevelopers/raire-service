@@ -1,4 +1,4 @@
-package au.org.democracydevelopers.raire.domain;
+package au.org.democracydevelopers.raireconnector.domain.raire;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,7 +16,7 @@ public class ElectionData {
   @JsonProperty("num_candidates")
   private Integer numberOfCandidates;
   private List<Vote> votes;
-  private String winner;
+  private Integer winner;
   private Audit audit;
   private Integer totalVotes;
 }

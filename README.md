@@ -12,38 +12,74 @@ Run instructions:
 
 This will run the application on port 8080.
 
-- To test GET request go to following url in your browser. It accepts 2 path variables and 1 request parameter.
-    - 'http://localhost:8080/demo/hello/democracy/developer?salutation=Amazing'
-    - Structure of this URL
-      1. baseURL:  'http://localhost:8080/demo/hello'
-      2. first Path varible: democracy
-      3. second Path variable: developer
-      4. requestParameter: salutation
+You need to have a running copy of the [Raire webserver](https://github.com/DemocracyDevelopers/raire-rs).
 
-your output should look like 
+- To run the audit please follow the syntax in following curl
 ```
-{
-    "salutation": "Amazing",
-    "firstName": "democracy",
-    "lastName": "developer"
-}
-```
-
-- To test post request please run following curl command. The post request expects a JSON request body and produces a JSON output
-```
-curl --location 'localhost:8080/demo/hello' \
+curl --location 'localhost:8080/cvr/audit' \
 --header 'Content-Type: application/json' \
---data '{
-    "salutation": "Amazing",
-    "firstName": "democracy",
-    "lastName": "developer"
-}'
-```
-Expected output for this request should be following
-```
+--data '[
 {
-    "salutation": "AMAZING",
-    "firstName": "DEMOCRACY",
-    "lastName": "DEVELOPER"
+"contestId": 6002,
+"timeProvisionForResult": 10
 }
+]'
+```
+
+your output should look similar to  
+```
+[
+    {
+        "contestId": 6002,
+        "result": {
+            "metadata": {
+                "candidates": [
+                    "CANDIDATE 1",
+                    "CANDIDATE 2",
+                    "WRITE-IN"
+                ]
+            },
+            "solution": {
+                "Ok": {
+                    "winner": 1,
+                    "margin": 4,
+                    "difficulty": 78.0,
+                    "assertions": [
+                        {
+                            "margin": 48,
+                            "difficulty": 6.5,
+                            "assertion": {
+                                "type": "NEB",
+                                "winner": 1,
+                                "loser": 0
+                            }
+                        },
+                        {
+                            "margin": 4,
+                            "difficulty": 78.0,
+                            "assertion": {
+                                "type": "NEB",
+                                "winner": 1,
+                                "loser": 2
+                            }
+                        },
+                    ],
+                    "num_candidates": 13,
+                    "time_to_determine_winners": {
+                        "work": 13,
+                        "seconds": "0.000039899"
+                    },
+                    "time_to_find_assertions": {
+                        "work": 25,
+                        "seconds": "0.000454404"
+                    },
+                    "time_to_trim_assertions": {
+                        "work": 24,
+                        "seconds": "0.00002241999999999997"
+                    }
+                }
+            }
+        }
+    }
+]
 ```

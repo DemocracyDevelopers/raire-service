@@ -1,4 +1,4 @@
-package au.org.democracydevelopers.raire.domain;
+package au.org.democracydevelopers.raireconnector.repository.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
