@@ -11,5 +11,5 @@ public class Assertion {
   private String type;
   private Integer winner;
   private Integer loser;
-  // private int[] continuing;
+  private int[] continuing;
 }
