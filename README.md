@@ -20,7 +20,7 @@ curl --location 'localhost:8080/cvr/audit' \
 --header 'Content-Type: application/json' \
 --data '[
 {
-"contestId": 6002,
+"contestName": "Denver Mayoral",
 "timeProvisionForResult": 10
 }
 ]'
@@ -30,7 +30,7 @@ your output should look similar to
 ```
 [
     {
-        "contestId": 6002,
+        "contestName": "Denver Mayoral",
         "result": {
             "metadata": {
                 "candidates": [
