@@ -3,6 +3,8 @@ Java implementation of RAIRE
 
 PreReq: Java 11, Maven.
 
+## Running the connector
+
 Run instructions:
 - Option 1: 
   - Go to au.org.democracydevelopes.raise.RaireJavaApplication class and run the main method from IDE
@@ -12,8 +14,27 @@ Run instructions:
 
 This will run the application on port 8080.
 
-You need to have a running copy of the [Raire webserver](https://github.com/DemocracyDevelopers/raire-rs).
+## Running RAIRE
 
+You need to have a running copy of the [Raire webserver](https://github.com/DemocracyDevelopers/raire-rs).
+If you are also running the colorado-rla client at the same time, ensure that it is running on a different port - by default, they use the same port.
+
+For example, you might choose to run raire on port 3001 by starting it with
+```
+raire-webserver --socket 3001
+```
+
+If you do so, you need to change application.yml correspondingly. Set the raire line to:
+```
+raire:
+ url: http://localhost:3001/raire
+```
+or whatever other non-default port number you chose.
+
+## Running the database
+The rla-raire-connector service retrieves data from the database set up by colorado-rla. This is also defined `application.yml`. Ensure that the url, username and password match the database colorado-rla is writing to.
+
+## Running the audit 
 - To run the audit please follow the syntax in following curl
 ```
 curl --location 'localhost:8080/cvr/audit' \
