@@ -11,14 +11,8 @@ import au.org.democracydevelopers.raireconnector.repository.CvrContestInfoReposi
 import au.org.democracydevelopers.raireconnector.repository.entity.Contest;
 import au.org.democracydevelopers.raireconnector.repository.entity.CvrContestInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,23 +68,35 @@ public class CvrContestInfoService {
   }
 
   public ElectionData buildRaireRequest(Collection<CvrContestInfo> cvrContestInfos) {
+    // List of votes
     List<String> choices = cvrContestInfos.stream().map(CvrContestInfo::getChoices).toList();
+
     List<String> sanitizedChoices = choices.stream().map(StringUtils::toRootUpperCase)
         .map(choice -> StringUtils.replace(choice, "[", ""))
-        .map(choice -> StringUtils.replace(choice, "", ""))
+        .map(choice -> StringUtils.replace(choice, "]", ""))
         .map(choice -> StringUtils.replace(choice, "\"", ""))
         .map(StringUtils::trim).toList();
 
-    Map<String, Integer> candidatesMap = buildCandidatesMap(sanitizedChoices);
+    List<String[]> splitChoices = sanitizedChoices.stream().map(s -> s.split(",")).toList();
+
+    // A map from candidate name to ID.
+    Map<String, Integer> candidatesMap = buildCandidatesMap(splitChoices);
+
+    // Iterate through the votes, converting them from a list of names to a list of IDs.
+    // Store them in a map from preference orderings to the number of times that order was encountered.
     Map<List<Integer>, Integer> raireBallots = new HashMap<>();
-    for (String choice : sanitizedChoices) {
-      buildChoices(candidatesMap, raireBallots, choice);
+    for (String[] preferences : splitChoices) {
+      List<Integer> IDPreferenceList = nameListToIDList(candidatesMap, preferences);
+      raireBallots.put(IDPreferenceList, raireBallots.getOrDefault(IDPreferenceList, 0) + 1);
     }
+
     Set<Integer> uniqueCandidates = new HashSet<>();
+    // Not sure what this line is doing.
     raireBallots.keySet().forEach(uniqueCandidates::addAll);
     //Build ElectionData
     List<Vote> votes = getVotes(raireBallots);
 
+    // Build candidate metadata, i.e. the list of candidates with corresponding IDs.
     Map<Integer, String> orderedCandidates = new TreeMap<>();
     candidatesMap.forEach((key, value) -> orderedCandidates.put(value, key));
 
@@ -123,40 +129,26 @@ public class CvrContestInfoService {
         .collect(Collectors.toList());
   }
 
-  private void buildChoices(Map<String, Integer> candidatesMap,
-      Map<List<Integer>, Integer> raireBallots, String choice) {
-    String[] preferences = choice.trim().split(",");
-    List<Integer> preferenceOrder = new ArrayList<>();
-    if (preferences.length == 0) {
-      return;
-    }
-    for (String preference : preferences) {
-      String[] vote = preference.split("\\(");
-      String rank = vote[1].split("\\)")[0];
-      if (!StringUtils.isNumeric(rank)) {
-        break; //Invalid rank. Ballot is not usable. IF ballot is invalid, this safeguards us against number format exception
-      }
-      try {
-        preferenceOrder.add(Integer.parseInt(rank) - 1, candidatesMap.get(vote[0].trim()));
-
-        // FIXME This should be a call to IRVBallotUtils::isValid().
-        // We need to check that all the CVRs are valid on upload, then it's OK
-        // to throw an exception here, because an invalid vote here should never happen.
-        } catch (IndexOutOfBoundsException e) {
-        log.error("Invalid preferences: "+choice);
-        throw new RuntimeException("Error: Invalid preferences sent to RAIRE: "+choice);
-      }
-    }
-    raireBallots.put(preferenceOrder, raireBallots.getOrDefault(preferenceOrder, 0) + 1);
+  // Input:
+  // preferences - an ordered list of candidate names
+  // candidatesMap - a map from candidate names to IDs
+  // Convert a list of names (assumed to be in the order of preference) into the corresponding list of IDs
+  // according to the candidate map.
+  private List<Integer> nameListToIDList(Map <String, Integer> candidatesMap, String[] preferences) {
+      return Arrays.stream(preferences).map(c -> candidatesMap.get(c)).toList();
   }
 
-  private Map<String, Integer> buildCandidatesMap(List<String> sanitizedChoices) {
+  // Generates a map from candidate name to (arbitrary) ID. This ID is used to express votes to RAIRE.
+  // It simply ignores multiple copies of the same candidate name.
+  // TODO This could probably be done more easily than deriving them from the complete set of CVRs.
+  // Should be able to retrieve the list of choices from the ContestChoice table (name column) in the database.
+  // If these are not identical for every contestID with the same contest name, that's an error.
+  // Then this function would simply need to iterate through the single list/set of expected choice names.
+  private Map<String, Integer> buildCandidatesMap(List<String[]> sanitizedChoices) {
     int count = 0;
     Map<String, Integer> candidatesMap = new HashMap<>();
-    for (String sanitizedChoice : sanitizedChoices) {
-      String[] choices = sanitizedChoice.split(",");
-      for (String choice : choices) {
-        String candidateName = choice.split("\\(")[0].trim();
+    for (String[] choiceArray : sanitizedChoices) {
+      for (String candidateName : choiceArray) {
         if (!candidatesMap.containsKey(candidateName)) {
           candidatesMap.put(candidateName, count++);
         }
