@@ -17,6 +17,12 @@ This will run the application on port 8080.
 ## Running RAIRE
 
 You need to have a running copy of the [Raire webserver](https://github.com/DemocracyDevelopers/raire-rs).
+If you are also running the colorado-rla client at the same time, ensure that it is running on a different port - by default, they use the same port.
+
+For example, you might choose to run raire on port 3001 by starting it with
+```
+raire-webserver --socket 3001
+```
 
 If you are also running the colorado-rla client at the same time, ensure that they are running on different ports - by default, they use the same port.
 
@@ -33,6 +39,7 @@ raire:
 or whatever other non-default port number you chose.
 
 ## Running the database
+
 The rla-raire-connector service retrieves data from the database set up by colorado-rla. This is also defined in `application.yml`. Ensure that the url, username and password match the database colorado-rla is writing to.
 
 ## Generating assertions from corla
@@ -46,6 +53,7 @@ You can request assertions for any IRV contest already present in the colorado-r
 Alternatively, you can request assertions directly via the command line.
 
 - Follow the syntax in following curl
+
 ```
 curl --location 'localhost:8080/cvr/audit' \
 --header 'Content-Type: application/json' \
