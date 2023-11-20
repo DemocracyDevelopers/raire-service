@@ -1,5 +1,6 @@
 package au.org.democracydevelopers.raireconnector.controller;
 
+import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raireconnector.domain.request.ContestRequest;
 import au.org.democracydevelopers.raireconnector.domain.response.AuditResponse;
 import au.org.democracydevelopers.raireconnector.service.CvrContestInfoService;
@@ -24,7 +25,7 @@ public class CvrContestInfoController {
   private final CvrContestInfoService cvrContestInfoService;
 
   @PostMapping(path = "audit", produces = MediaType.APPLICATION_JSON_VALUE)
-  public Set<AuditResponse> serve(@RequestBody List<ContestRequest> contests) {
+  public Set<RaireSolution> serve(@RequestBody List<ContestRequest> contests) {
     //TODO: validate request
     log.info("Received request to audit contests with ids: {}", contests.stream().map(
         ContestRequest::getContestName).collect(

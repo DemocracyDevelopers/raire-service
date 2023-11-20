@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
-public class Vote {
+public class ConnectorVote {
   @JsonProperty("n")
   private Integer count;
   @JsonProperty("prefs")

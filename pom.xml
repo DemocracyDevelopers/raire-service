@@ -10,14 +10,19 @@
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
   <groupId>au.org.democracydevelopers</groupId>
-  <artifactId>raire</artifactId>
+  <artifactId>raire-service</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>rla-raire-connector-service</name>
+  <name>raire-service</name>
   <description>program designed to help with performing a risk limiting audit</description>
   <properties>
     <java.version>17</java.version>
   </properties>
   <dependencies>
+    <dependency>
+      <groupId>au.org.democracydevelopers</groupId>
+      <artifactId>raire-java</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>

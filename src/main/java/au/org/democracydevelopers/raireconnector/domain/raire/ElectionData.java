@@ -15,7 +15,7 @@ public class ElectionData {
   private JsonNode metadata;
   @JsonProperty("num_candidates")
   private Integer numberOfCandidates;
-  private List<Vote> votes;
+  private List<ConnectorVote> votes;
   private Integer winner;
   private Audit audit;
   private Integer totalVotes;

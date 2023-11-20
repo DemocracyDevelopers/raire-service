@@ -7,36 +7,17 @@ PreReq: Java 11, Maven.
 
 Run instructions:
 - Option 1: 
-  - Go to au.org.democracydevelopers.raise.RaireJavaApplication class and run the main method from IDE
+  - Go to au.org.democracydevelopers.raise.RaireJavaApplication class and run the main method from an IDE
+  - If there are compile issues you might need to:
+    1. Right-click on `raire-java/pom.xml` (the sub-project pom.xml) and add it as a Maven project,
+    2. Right-click on `raire-service/pom.xml` (the parent project pom.xml) and Maven -> reload,
+    3. Then recompile.
 - Option 2:
-  - Go to home directory of the service and run following command
-     `./mvnw spring-boot:run`
+  - Go to the home directory of the service and run following command
+    `./mvnw spring-boot:run`
+  - If there are compile issues you might need to follow the instructions for [multi-module maven projects](https://www.baeldung.com/maven-multi-module).
 
 This will run the application on port 8080.
-
-## Running RAIRE
-
-You need to have a running copy of the [Raire webserver](https://github.com/DemocracyDevelopers/raire-rs).
-If you are also running the colorado-rla client at the same time, ensure that it is running on a different port - by default, they use the same port.
-
-For example, you might choose to run raire on port 3001 by starting it with
-```
-raire-webserver --socket 3001
-```
-
-If you are also running the colorado-rla client at the same time, ensure that they are running on different ports - by default, they use the same port.
-
-For example, you might choose to run raire on port 3001 by starting it with
-```
-./target/release/raire-webserver --socket 3001
-```
-
-If you do so, you need to change application.yml correspondingly. Set the raire line to:
-```
-raire:
- url: http://localhost:3001/raire
-```
-or whatever other non-default port number you chose.
 
 ## Running the database
 

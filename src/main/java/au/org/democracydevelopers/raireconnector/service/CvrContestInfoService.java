@@ -1,15 +1,25 @@
 package au.org.democracydevelopers.raireconnector.service;
 
+import au.org.democracydevelopers.raire.RaireException;
+import au.org.democracydevelopers.raire.RaireProblem;
+import au.org.democracydevelopers.raire.RaireSolution;
+import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMargin;
+import au.org.democracydevelopers.raire.irv.Vote;
+import au.org.democracydevelopers.raire.irv.Votes;
+import au.org.democracydevelopers.raire.pruning.HeuristicWorkOutWhichAssertionsAreUsed;
+import au.org.democracydevelopers.raire.pruning.TrimAlgorithm;
+import au.org.democracydevelopers.raire.time.TimeOut;
 import au.org.democracydevelopers.raireconnector.client.RaireClient;
 import au.org.democracydevelopers.raireconnector.domain.raire.Audit;
 import au.org.democracydevelopers.raireconnector.domain.raire.ElectionData;
-import au.org.democracydevelopers.raireconnector.domain.raire.Vote;
+import au.org.democracydevelopers.raireconnector.domain.raire.ConnectorVote;
 import au.org.democracydevelopers.raireconnector.domain.request.ContestRequest;
 import au.org.democracydevelopers.raireconnector.domain.response.AuditResponse;
 import au.org.democracydevelopers.raireconnector.repository.ContestRepository;
 import au.org.democracydevelopers.raireconnector.repository.CvrContestInfoRepository;
 import au.org.democracydevelopers.raireconnector.repository.entity.Contest;
 import au.org.democracydevelopers.raireconnector.repository.entity.CvrContestInfo;
+import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.*;
@@ -23,14 +33,28 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class CvrContestInfoService {
-  // When gettiong contests by name, group contestIDs and assertions based on names as well not contestIds
+  // When getting contests by name, group contestIDs and assertions based on names as well not contestIds
 
   private final ObjectMapper objectMapper;
   private final CvrContestInfoRepository cvrContestInfoRepository;
   private final ContestRepository contestRepository;
   private final RaireClient raireClient;
 
-  public Set<AuditResponse> findCvrContestInfo(List<ContestRequest> contests) {
+  private final Vote testVote1 = new Vote(2, new int[]{0,1});
+  private final Vote testVote2 = new Vote(3, new int[]{1,0});
+
+
+  public Set<RaireSolution> findCvrContestInfo(List<ContestRequest> contests) {
+
+    Votes votes;
+
+    try {
+      votes = new Votes(new Vote[]{testVote1, testVote2}, 2);
+    } catch (RaireException e) {
+      log.error(e.getMessage());
+      throw new RuntimeException();
+    }
+
     List<String> contestNames = contests.stream().map(ContestRequest::getContestName)
         .collect(Collectors.toList());
 
@@ -56,13 +80,24 @@ public class CvrContestInfoService {
       cvrContestInfosGroupedByContestNames.put(contestIdToContestNameMapping.get(cvrContestInfo.getContestId()), cvrContestInfoSet);
     });
 
-    Set<AuditResponse> auditResponsesGroupedByContestName = new HashSet<>();
+    Set<RaireSolution> auditResponsesGroupedByContestName = new HashSet<>();
     cvrContestInfosGroupedByContestNames.forEach((contestName, cvrContests) -> {
       var electionData = buildRaireRequest(cvrContests);
-      auditResponsesGroupedByContestName.add(AuditResponse.builder().contestName(contestName)
-          .result(raireClient.getRaireResponse(electionData))
-          .build());
     });
+      int ballotTotal = 5; // **use ballots from colorado-rla.
+      var auditType = new BallotComparisonOneOnDilutedMargin(ballotTotal);
+      RaireResult raireResult;
+
+        var candidatesAndMetadata = new HashMap<String, Object>();
+        candidatesAndMetadata.put("candidates", new String[]{"A","B","C","D"});
+        candidatesAndMetadata.put("contest", "TestContestName");
+        RaireProblem raireProblem = new RaireProblem(candidatesAndMetadata,
+                new Vote[]{testVote1, testVote2},
+                4, null, auditType , TrimAlgorithm.MinimizeAssertions, null,
+                120.0);
+      auditResponsesGroupedByContestName.add(raireProblem.solve());
+
+    // public RaireResult(Votes votes, Integer claimed_winner, AuditType audit, TrimAlgorithm trim_algorithm, TimeOut timeout) throws
 
     return auditResponsesGroupedByContestName;
   }
@@ -94,7 +129,7 @@ public class CvrContestInfoService {
     // Not sure what this line is doing.
     raireBallots.keySet().forEach(uniqueCandidates::addAll);
     //Build ElectionData
-    List<Vote> votes = getVotes(raireBallots);
+    List<ConnectorVote> votes = getVotes(raireBallots);
 
     // Build candidate metadata, i.e. the list of candidates with corresponding IDs.
     Map<Integer, String> orderedCandidates = new TreeMap<>();
@@ -107,7 +142,7 @@ public class CvrContestInfoService {
   }
 
   private ElectionData buildElectionDataModel(Collection<CvrContestInfo> cvrContestInfos,
-      Set<Integer> uniqueCandidates, List<Vote> votes, Map<String, Object> metadata) {
+                                              Set<Integer> uniqueCandidates, List<ConnectorVote> votes, Map<String, Object> metadata) {
     return ElectionData.builder()
         .metadata(objectMapper.valueToTree(metadata))
         .audit(Audit.builder().totalAuditableBallots(cvrContestInfos.size())
@@ -120,9 +155,9 @@ public class CvrContestInfoService {
         .build();
   }
 
-  private List<Vote> getVotes(Map<List<Integer>, Integer> raireBallots) {
+  private List<ConnectorVote> getVotes(Map<List<Integer>, Integer> raireBallots) {
     return raireBallots.entrySet().stream()
-        .map(entry -> Vote.builder()
+        .map(entry -> ConnectorVote.builder()
             .count(entry.getValue())
             .preference(entry.getKey())
             .build())
