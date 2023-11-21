@@ -46,15 +46,6 @@ public class CvrContestInfoService {
 
   public Set<RaireSolution> findCvrContestInfo(List<ContestRequest> contests) {
 
-    Votes votes;
-
-    try {
-      votes = new Votes(new Vote[]{testVote1, testVote2}, 2);
-    } catch (RaireException e) {
-      log.error(e.getMessage());
-      throw new RuntimeException();
-    }
-
     List<String> contestNames = contests.stream().map(ContestRequest::getContestName)
         .collect(Collectors.toList());
 

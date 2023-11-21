@@ -3,7 +3,8 @@ Java implementation of RAIRE
 
 PreReq: Java 11, Maven.
 
-## Running the connector
+
+## Running the raire service
 
 Run instructions:
 - Option 1: 
@@ -17,20 +18,30 @@ Run instructions:
     `./mvnw spring-boot:run`
   - If there are compile issues you might need to follow the instructions for [multi-module maven projects](https://www.baeldung.com/maven-multi-module).
 
-This will run the application on port 8080.
+This will run the application on port 8080.  (If you want to change the port, reset `server` in `application.yml`.)
 
-## Running the database
+## Configuring and running colorado-rla with the raire-service
+The prototype `colorado-rla` edits are on the **scratch** branch.
 
-The rla-raire-connector service retrieves data from the database set up by colorado-rla. This is also defined in `application.yml`. Ensure that the url, username and password match the database colorado-rla is writing to.
+1. Clone [https://github.com/DemocracyDevelopers/colorado-rla/tree/scratch](https://github.com/DemocracyDevelopers/colorado-rla/tree/scratch)
+2. Follow the dev installation instructions at 
+[https://github.com/DemocracyDevelopers/colorado-rla/blob/scratch/docs/25_developer.md](https://github.com/DemocracyDevelopers/colorado-rla/blob/scratch/docs/25_developer.md)
+particularly `Install and Setup.`
+4. If you are running the `raire-service` on a different computer, update the `raire_url` in
+`server/eclipse-project/src/test/resources/test.properties` and 
+`server/eclipse-project/src/main/resources/us/freeandfair/corla/default.properties`.
+If you are running on localhost, you do not need to change anything.
 
 ## Generating assertions from corla
 You can request assertions for any IRV contest already present in the colorado-rla database.
 
 1. Log in as a stateadmin.
-2. From the browser where you are logged in as stateadmin, visit [http://localhost:8888/generate-assertions](http://localhost:8888/generate-assertions).
-
+2. Go through the steps of defining an audit. When you reach the `Generate Assertions` page,
+click the `Generate Assertions` button. This should save the assertions in the database and return a json
+file describing the assertions.
 
 ## Generating assertions from the command line 
+## TODO - out of date - update for vote data.
 Alternatively, you can request assertions directly via the command line.
 
 - Follow the syntax in following curl
