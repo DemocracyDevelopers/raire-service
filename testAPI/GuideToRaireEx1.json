@@ -1,0 +1,22 @@
+{
+"contestName": "TinyExample1",
+"timeProvisionForResult": 10,
+"candidates": ["Alice","Bob","Chuan","Diego"],
+"votes": [
+    ["Alice","Bob","Chuan","Diego"],
+    ["Alice","Bob","Chuan","Diego"],
+    ["Alice","Bob","Chuan","Diego"],
+    ["Alice","Bob","Chuan","Diego"],
+    ["Alice","Bob","Chuan","Diego"]
+    ["Bob","Alice","Chuan"],
+    ["Bob","Diego","Alice"],
+    ["Chuan"],
+    ["Chuan"],
+    ["Chuan","Diego"],
+    ["Chuan","Diego"],
+    ["Diego","Chuan"]
+    ["Diego","Chuan"]
+    ["Diego","Chuan"]
+    ["Diego","Chuan"]
+  ],
+}
