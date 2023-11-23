@@ -10,7 +10,6 @@ import au.org.democracydevelopers.raireconnector.domain.raire.Audit;
 import au.org.democracydevelopers.raireconnector.domain.raire.ElectionData;
 import au.org.democracydevelopers.raireconnector.domain.request.VoteWithNames;
 import au.org.democracydevelopers.raireconnector.domain.request.ContestRequest;
-import au.org.democracydevelopers.raireconnector.repository.ContestRepository;
 import au.org.democracydevelopers.raireconnector.repository.CvrContestInfoRepository;
 import au.org.democracydevelopers.raireconnector.repository.entity.CvrContestInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
