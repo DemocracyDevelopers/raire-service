@@ -1,6 +1,5 @@
 package au.org.democracydevelopers.raireconnector.request;
 
-import au.org.democracydevelopers.raire.irv.Vote;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
