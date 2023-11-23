@@ -1,16 +1,11 @@
 package au.org.democracydevelopers.raireconnector.domain.request;
 
 import au.org.democracydevelopers.raire.irv.Vote;
-import au.org.democracydevelopers.raireconnector.domain.raire.Audit;
-import au.org.democracydevelopers.raireconnector.domain.raire.ElectionData;
-import au.org.democracydevelopers.raireconnector.repository.entity.CvrContestInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
 

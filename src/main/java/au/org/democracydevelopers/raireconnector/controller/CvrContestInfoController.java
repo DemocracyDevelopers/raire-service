@@ -2,7 +2,6 @@ package au.org.democracydevelopers.raireconnector.controller;
 
 import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raireconnector.domain.request.ContestRequest;
-import au.org.democracydevelopers.raireconnector.domain.response.AuditResponse;
 import au.org.democracydevelopers.raireconnector.service.CvrContestInfoService;
 import java.util.List;
 import java.util.Map;
