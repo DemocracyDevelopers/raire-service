@@ -5,17 +5,13 @@ import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMargin;
 import au.org.democracydevelopers.raire.irv.Vote;
 import au.org.democracydevelopers.raire.pruning.TrimAlgorithm;
-import au.org.democracydevelopers.raireconnector.domain.request.VoteWithNames;
-import au.org.democracydevelopers.raireconnector.domain.request.ContestRequest;
-import au.org.democracydevelopers.raireconnector.repository.CvrContestInfoRepository;
-import au.org.democracydevelopers.raireconnector.repository.entity.CvrContestInfo;
+import au.org.democracydevelopers.raireconnector.request.ContestRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 @Component
