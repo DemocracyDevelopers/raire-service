@@ -5,6 +5,7 @@ import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMargin;
 import au.org.democracydevelopers.raire.irv.Vote;
 import au.org.democracydevelopers.raire.pruning.TrimAlgorithm;
+import au.org.democracydevelopers.raire.util.VoteConsolidator;
 import au.org.democracydevelopers.raireconnector.request.ContestRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,21 +20,38 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class CvrContestInfoService {
 
-  private final ObjectMapper objectMapper;
+  public RaireSolution findCvrContestInfo(ContestRequest request) {
 
-  public RaireSolution findCvrContestInfo(ContestRequest contest) {
+      List<String[]> votesByName = request.getVotes();
+      VoteConsolidator consolidator = new VoteConsolidator(request.getCandidates());
 
-      var auditType = new BallotComparisonOneOnDilutedMargin(contest.getTotalAuditableBallots());
-      Vote[] votes = contest.toRaireVotes();
+      // Check that the request is valid
+      if (request.votesAreValid()) {
+        try {
+            // Try converting it into RAIRE format. RAIRE will throw an exception if unexpected candidate names appear.
+            votesByName.forEach(consolidator::addVoteNames);
+        } catch ( VoteConsolidator.InvalidCandidateName e) {
+          log.error("Invalid vote sent to raire-service: {}", request.getContestName());
+          throw new RuntimeException("Error: invalid votes sent to raire-service.");
+        }
+      } else {
+        log.error("Vote with repeated names sent to raire-service: {}", request.getContestName());
+        throw new RuntimeException("Error: vote with repeated names sent to raire-service.");
+      }
 
-        var candidatesAndMetadata = new HashMap<String, Object>();
-        candidatesAndMetadata.put("candidates", contest.getCandidates());
-        candidatesAndMetadata.put("contest", contest.getContestName());
-        candidatesAndMetadata.put("totalAuditableBallots", contest.getTotalAuditableBallots());
-        RaireProblem raireProblem = new RaireProblem(candidatesAndMetadata,
-                votes,
-                contest.getCandidates().size(), null, auditType , TrimAlgorithm.MinimizeAssertions, null,
-                120.0);
+      // If it's valid, get RAIRE to solve it.
+      // BallotComparisonOneOnDilutedMargin is the appropriate audit type for Colorado, which uses ballot-level
+      // Comparison audits.
+      RaireProblem raireProblem = new RaireProblem(
+              request.getMetadata(),
+              consolidator.getVotes(),
+              request.getCandidates().length,
+              null,
+              new BallotComparisonOneOnDilutedMargin(request.getTotalAuditableBallots()),
+              TrimAlgorithm.MinimizeAssertions,
+              null,
+              Double.valueOf(request.getTimeProvisionForResult()));
+
     return raireProblem.solve();
   }
 
