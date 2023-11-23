@@ -25,11 +25,9 @@ public class CvrContestInfoController {
   private final CvrContestInfoService cvrContestInfoService;
 
   @PostMapping(path = "audit", produces = MediaType.APPLICATION_JSON_VALUE)
-  public Set<RaireSolution> serve(@RequestBody List<ContestRequest> contests) {
+  public RaireSolution serve(@RequestBody ContestRequest contest) {
     //TODO: validate request
-    log.info("Received request to audit contests with ids: {}", contests.stream().map(
-        ContestRequest::getContestName).collect(
-        Collectors.toList()));
-    return cvrContestInfoService.findCvrContestInfo(contests);
+    log.info("Received request to audit contests with name: {}", contest.getContestName());
+    return cvrContestInfoService.findCvrContestInfo(contest);
   }
 }
