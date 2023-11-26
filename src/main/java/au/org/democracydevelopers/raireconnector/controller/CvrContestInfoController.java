@@ -2,6 +2,7 @@ package au.org.democracydevelopers.raireconnector.controller;
 
 import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raireconnector.request.ContestRequest;
+import au.org.democracydevelopers.raireconnector.response.RaireSolutionWithNames;
 import au.org.democracydevelopers.raireconnector.service.CvrContestInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
