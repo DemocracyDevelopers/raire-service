@@ -58,3 +58,5 @@ You can request assertions for any IRV contest already present in the colorado-r
 5. When you reach the `Generate Assertions` page,
 click the `Generate Assertions` button. This should save the assertions in the database. 
 It takes between 5 and 30 seconds, depending on how many votes are relevant.
+6. You can retrieve the json for the assertions by visiting [http://localhost:8888/generate-assertions](http://localhost:8888/generate-assertions).
+You might like to visualise each one using the [Assertion Explainer](https://democracydevelopers.github.io/raire-rs/WebContent/explain_assertions.html). (Make sure you enter each contest's raire response individually, not the whole list.)
