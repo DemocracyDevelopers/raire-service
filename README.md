@@ -20,6 +20,19 @@ Run instructions:
 
 This will run the application on port 8080.  (If you want to change the port, reset `server` in `application.yml`.)
 
+### Generating assertions from the command line
+To test that the RAIRE service is running correctly, go to the `testAPI` directory an run
+```agsl
+./testScript.sh
+```
+Your output should look like:
+```
+File: GuideToRaireEx1.json
+{"metadata":{"candidates":["Alice","Bob","Chuan","Diego"],"contest":"GuideToRAIREExample1","totalAuditableBallots":15},"solution":{"Ok":{"assertions":[{"assertion":{"type":"NEB","winner":0,"loser":1},"difficulty":5.0,"margin":3},{"assertion":{"type":"NEN","winner":3,"loser":0,"continuing":[0,3]},"difficulty":15.0,"margin":1},{"assertion":{"type":"NEN","winner":0,"loser":2,"continuing":[0,2,3]},"difficulty":7.5,"margin":2},{"assertion":{"type":"NEN","winner":3,"loser":1,"continuing":[0,1,3]},"difficulty":3.75,"margin":4},{"assertion":{"type":"NEN","winner":3,"loser":2,"continuing":[0,2,3]},"difficulty":15.0,"margin":1},{"assertion":{"type":"NEN","winner":3,"loser":1,"continuing":[0,1,2,3]},"difficulty":7.5,"margin":2}],"difficulty":15.0,"margin":1,"winner":3,"num_candidates":4,"time_to_determine_winners":{"work":4,"seconds":0.0},"time_to_find_assertions":{"work":13,"seconds":0.0},"time_to_trim_assertions":{"work":36,"seconds":0.001},"warning_trim_timed_out":false}}}
+File: TrivialExample.json
+{"metadata":{"candidates":["Alice","Bob"],"contest":"TrivialExample1","totalAuditableBallots":15},"solution":{"Ok":{"assertions":[{"assertion":{"type":"NEB","winner":0,"loser":1},"difficulty":7.5,"margin":2}],"difficulty":7.5,"margin":2,"winner":0,"num_candidates":2,"time_to_determine_winners":{"work":2,"seconds":0.0},"time_to_find_assertions":{"work":1,"seconds":0.001},"time_to_trim_assertions":{"work":2,"seconds":0.0},"warning_trim_timed_out":false}}}
+```
+
 ## Configuring and running colorado-rla with the raire-service
 The prototype `colorado-rla` edits are on the **scratch** branch.
 
@@ -35,82 +48,13 @@ If you are running on localhost, you do not need to change anything.
 ## Generating assertions from corla
 You can request assertions for any IRV contest already present in the colorado-rla database.
 
-1. Log in as a stateadmin.
-2. Go through the steps of defining an audit. When you reach the `Generate Assertions` page,
-click the `Generate Assertions` button. This should save the assertions in the database and return a json
-file describing the assertions.
-
-## Generating assertions from the command line 
-## TODO - out of date - update for vote data.
-Alternatively, you can request assertions directly via the command line.
-
-- Follow the syntax in following curl
-
-```
-curl --location 'localhost:8080/cvr/audit' \
---header 'Content-Type: application/json' \
---data '[
-{
-"contestName": "Denver Mayoral",
-"timeProvisionForResult": 10
-}
-]'
-```
-
-your output should look similar to  
-```
-[
-    {
-        "contestName": "Denver Mayoral",
-        "result": {
-            "metadata": {
-                "candidates": [
-                    "CANDIDATE 1",
-                    "CANDIDATE 2",
-                    "CANDIDATE 3"
-                ]
-            },
-            "solution": {
-                "Ok": {
-                    "winner": 1,
-                    "margin": 4,
-                    "difficulty": 78.0,
-                    "assertions": [
-                        {
-                            "margin": 48,
-                            "difficulty": 6.5,
-                            "assertion": {
-                                "type": "NEB",
-                                "winner": 1,
-                                "loser": 0
-                            }
-                        },
-                        {
-                            "margin": 4,
-                            "difficulty": 78.0,
-                            "assertion": {
-                                "type": "NEB",
-                                "winner": 1,
-                                "loser": 2
-                            }
-                        },
-                    ],
-                    "num_candidates": 13,
-                    "time_to_determine_winners": {
-                        "work": 13,
-                        "seconds": "0.000039899"
-                    },
-                    "time_to_find_assertions": {
-                        "work": 25,
-                        "seconds": "0.000454404"
-                    },
-                    "time_to_trim_assertions": {
-                        "work": 24,
-                        "seconds": "0.00002241999999999997"
-                    }
-                }
-            }
-        }
-    }
-]
-```
+1. Log in to colorado-rla as countyadminN, for as many different N as you like. 
+2. Upload some example IRV CVRs, one per county. You can use the test CSVs, manifests and sha256sums in
+   [the NSW test data directory](https://github.com/DemocracyDevelopers/Utilities-and-experiments/tree/main/src/main/resources/test-data) 
+   or [the Colorado-rla example data directory](https://github.com/DemocracyDevelopers/colorado-rla/tree/main/test/IRV-test) or make your own.
+3. Log in to colorado-rla as a stateadmin.
+4. Go through the steps of defining an audit. You may need a canonical list file - use either
+[the NSW test one](https://github.com/DemocracyDevelopers/colorado-rla/tree/scratch/test/NSW2021Data) or [the Colorado-rla example one](https://github.com/DemocracyDevelopers/colorado-rla/blob/main/test/IRV-test/IRV_Test_Canonical_List.csv) or make your own. 
+5. When you reach the `Generate Assertions` page,
+click the `Generate Assertions` button. This should save the assertions in the database. 
+It takes between 5 and 30 seconds, depending on how many votes are relevant.
