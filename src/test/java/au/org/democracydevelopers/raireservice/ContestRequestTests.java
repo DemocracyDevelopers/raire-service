@@ -15,6 +15,9 @@ class ContestRequestTests {
     private String[] v3 = {"Alice", "Alice"};
     private String[] v4 = {"Eli", "Alice"};
     @Test
+    /**
+     * Check that a vote we expect to be valid is valid.
+     */
     void validVoteListIsValid () {
         List<String[]> testVotes = List.of(v1,v2);
         ContestRequest testValidRequest
@@ -23,7 +26,9 @@ class ContestRequestTests {
     }
 
     @Test
-    // This should detect the repeated preference for Alice.
+    /**
+     * Check that the repeated choice 'Alice' is identified as invalid.
+     */
     void invalidVoteListIsNotValid () {
         List<String[]> testVotesInvalid = List.of(v1,v2,v3);
         ContestRequest testValidRequest
@@ -32,7 +37,12 @@ class ContestRequestTests {
     }
 
     @Test
-    // This DOES NOT detect the presence of an unexpected candidate name - that's left for raire-java.
+    /**
+     * Observe that an apparently-valid (i.e. without repeats) list of candidate choices passes validity checking,
+     * even if it does not contain valid candidates.
+     *
+     * This DOES NOT detect the presence of an unexpected candidate name - that's left for raire-java.
+     */
     void invalidCandidateNameIsNotNoticed () {
         List<String[]> testVotesInvalid = List.of(v1,v2,v4);
         ContestRequest testValidRequest
