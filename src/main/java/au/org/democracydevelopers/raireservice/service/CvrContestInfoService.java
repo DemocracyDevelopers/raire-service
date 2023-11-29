@@ -1,11 +1,11 @@
-package au.org.democracydevelopers.raireconnector.service;
+package au.org.democracydevelopers.raireservice.service;
 
 import au.org.democracydevelopers.raire.RaireProblem;
 import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMargin;
 import au.org.democracydevelopers.raire.pruning.TrimAlgorithm;
 import au.org.democracydevelopers.raire.util.VoteConsolidator;
-import au.org.democracydevelopers.raireconnector.request.ContestRequest;
+import au.org.democracydevelopers.raireservice.request.ContestRequest;
 
 import java.util.*;
 

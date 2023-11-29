@@ -1,4 +1,4 @@
-package au.org.democracydevelopers.raireconnector.request;
+package au.org.democracydevelopers.raireservice.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

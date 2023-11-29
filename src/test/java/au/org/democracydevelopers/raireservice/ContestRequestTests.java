@@ -1,12 +1,12 @@
-package au.org.democracydevelopers.raireconnector;
+package au.org.democracydevelopers.raireservice;
 
-import au.org.democracydevelopers.raireconnector.request.ContestRequest;
+import au.org.democracydevelopers.raireservice.request.ContestRequest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+// import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-@SpringBootTest
+// @SpringBootTest
 class ContestRequestTests {
 
     private String[] testCandidates = {"Alice", "Bob", "Chuan", "Diego"};

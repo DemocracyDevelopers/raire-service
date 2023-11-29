@@ -1,8 +1,8 @@
-package au.org.democracydevelopers.raireconnector.controller;
+package au.org.democracydevelopers.raireservice.controller;
 
 import au.org.democracydevelopers.raire.RaireSolution;
-import au.org.democracydevelopers.raireconnector.request.ContestRequest;
-import au.org.democracydevelopers.raireconnector.service.CvrContestInfoService;
+import au.org.democracydevelopers.raireservice.request.ContestRequest;
+import au.org.democracydevelopers.raireservice.service.CvrContestInfoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;

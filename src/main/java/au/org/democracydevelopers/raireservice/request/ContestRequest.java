@@ -1,4 +1,4 @@
-package au.org.democracydevelopers.raireconnector.request;
+package au.org.democracydevelopers.raireservice.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +18,9 @@ public class ContestRequest {
   private String[] candidates;
   private List<String[]> votes;
 
+  /*
+   * Makes the metadata structure required for use by riare
+   */
   public Map<String, Object> getMetadata() {
     var candidatesAndMetadata = new HashMap<String, Object>();
     candidatesAndMetadata.put("candidates", candidates);
