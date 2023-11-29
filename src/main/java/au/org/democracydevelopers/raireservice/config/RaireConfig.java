@@ -1,8 +1,6 @@
-package au.org.democracydevelopers.raireconnector.config;
+package au.org.democracydevelopers.raireservice.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;

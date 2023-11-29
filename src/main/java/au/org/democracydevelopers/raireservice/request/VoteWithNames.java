@@ -1,4 +1,4 @@
-package au.org.democracydevelopers.raireconnector.domain.raire;
+package au.org.democracydevelopers.raireservice.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Builder
-public class Vote {
+public class VoteWithNames {
   @JsonProperty("n")
   private Integer count;
   @JsonProperty("prefs")
-  private List<Integer> preference;
+  private List<String> vote;
 }

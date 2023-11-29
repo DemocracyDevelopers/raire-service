@@ -1,4 +1,4 @@
-package au.org.democracydevelopers.raireconnector;
+package au.org.democracydevelopers.raireservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
