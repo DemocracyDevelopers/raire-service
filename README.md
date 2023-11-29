@@ -1,7 +1,7 @@
 # raire-java
 Java implementation of RAIRE
 
-PreReq: Java, Maven. The main part of the code compiles with Java 11. However, the Springboot tests require at least Java 17.
+PreReq: Java, Maven. This requires Java at least version 11 and has been tested with Java 18.
 
 
 ## Running the raire service
