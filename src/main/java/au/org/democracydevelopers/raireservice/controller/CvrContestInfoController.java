@@ -21,8 +21,6 @@ public class CvrContestInfoController {
 
   @PostMapping(path = "audit", produces = MediaType.APPLICATION_JSON_VALUE)
   public RaireSolution serve(@RequestBody ContestRequest contest) {
-    //TODO: validate request
-    // Check that there are no repeated candidate names.
     log.info("Received request to audit contests with name: {}", contest.getContestName());
     return cvrContestInfoService.findCvrContestInfo(contest);
   }

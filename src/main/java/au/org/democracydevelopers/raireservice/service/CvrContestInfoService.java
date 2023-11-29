@@ -18,6 +18,17 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class CvrContestInfoService {
 
+    /**
+     * The main method that actually does the work of this service. It
+     * - inputs an election description in colorado-rla format, that is, with votes as lists of candidate names,
+     * - converts it into the format that raire expects, that is, with votes as lists of candidate indices and
+     *   slightly differently-structured metadata,
+     * - calls raire
+     * - converts raire's response back into the format that colorado-rla expects, that is, with candidate names,
+     * - returns the result (or error).
+     * @param request a ContestRequest - a collection of IRV votes for a single contest, with metadata
+     * @return a RaireSolution - the resulting collection of assertions, with metadata, or an error.
+     */
   public RaireSolution findCvrContestInfo(ContestRequest request) {
 
       List<String[]> votesByName = request.getVotes();
