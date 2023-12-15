@@ -3,6 +3,7 @@ Java implementation of RAIRE
 
 PreReq: Java, Maven. This requires Java at least version 11 and has been tested with Java 18.
 
+The Springboot tests in RAIREMicroserviceAPITests.java additionally require Java 17+ and libtcnative.
 
 ## Running the raire service
 
