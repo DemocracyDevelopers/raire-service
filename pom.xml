@@ -87,7 +87,7 @@
   </build>
 
   <modules>
-    <module>raire-java</module>
+    <module>raire-java/pom-raire-service.xml</module>
   </modules>
 
 </project>
