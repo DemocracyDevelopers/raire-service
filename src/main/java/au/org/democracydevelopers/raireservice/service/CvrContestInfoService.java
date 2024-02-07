@@ -5,7 +5,7 @@ import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMargin;
 import au.org.democracydevelopers.raire.pruning.TrimAlgorithm;
 import au.org.democracydevelopers.raire.util.VoteConsolidator;
-import au.org.democracydevelopers.raireservice.request.ContestRequest;
+import au.org.democracydevelopers.raireservice.request.OldContestRequest;
 
 import java.util.*;
 
@@ -29,7 +29,7 @@ public class CvrContestInfoService {
      * @param request a ContestRequest - a collection of IRV votes for a single contest, with metadata
      * @return a RaireSolution - the resulting collection of assertions, with metadata, or an error.
      */
-  public RaireSolution findCvrContestInfo(ContestRequest request) {
+  public RaireSolution findCvrContestInfo(OldContestRequest request) {
 
       List<String[]> votesByName = request.getVotes();
       VoteConsolidator consolidator = new VoteConsolidator(request.getCandidates());

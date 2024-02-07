@@ -11,7 +11,7 @@ import static java.util.Arrays.stream;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ContestRequest {
+public class OldContestRequest {
   private String contestName;
   private int totalAuditableBallots;
   private Integer timeProvisionForResult;
