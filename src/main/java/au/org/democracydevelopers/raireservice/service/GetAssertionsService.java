@@ -1,7 +1,5 @@
 package au.org.democracydevelopers.raireservice.service;
 
-import au.org.democracydevelopers.raire.RaireError;
-import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
@@ -18,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor

@@ -12,7 +12,6 @@
 
 package au.org.democracydevelopers.raireservice.response;
 
-import au.org.democracydevelopers.raire.RaireError;
 import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import com.fasterxml.jackson.annotation.JsonInclude;
 

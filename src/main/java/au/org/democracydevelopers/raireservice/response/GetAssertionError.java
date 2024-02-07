@@ -6,17 +6,11 @@
 package au.org.democracydevelopers.raireservice.response;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import java.io.IOException;
-import java.util.stream.StreamSupport;
 
 /**
  * Everything that could go wrong when retrieving assertions.
@@ -32,11 +26,6 @@ public abstract class GetAssertionError {
 
         public GetAssertionsErrorSerializer() { this(null); }
         public GetAssertionsErrorSerializer(Class<GetAssertionError> t) { super(t); }
-
-        private void writeIntArray(JsonGenerator jsonGenerator,String fieldName,int[]array) throws IOException {
-            jsonGenerator.writeFieldName(fieldName);
-            jsonGenerator.writeArray(array,0,array.length);
-        }
 
         @Override
         public void serialize(GetAssertionError getAssertionError, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
