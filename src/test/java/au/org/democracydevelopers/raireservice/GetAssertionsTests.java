@@ -1,7 +1,8 @@
 package au.org.democracydevelopers.raireservice;
 
 import au.org.democracydevelopers.raire.RaireSolution;
-import au.org.democracydevelopers.raire.algorithm.RaireResult;
+import au.org.democracydevelopers.raireservice.response.GetAssertionError;
+import au.org.democracydevelopers.raireservice.response.GetAssertionResponse;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,6 +97,31 @@ public class GetAssertionsTests {
         ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class );
 
         assertTrue(Objects.requireNonNull(response.getBody()).contains("solution"));
+    }
+
+    /*
+     * Test that the assertion list for a nonexistent contest is empty.
+     * Note: FIXME This test is deliberately buggy for now, because I want to test the new testing automation.
+     */
+    @Test
+    public void testExampleWithNoAssertions() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        String url = "http://localhost:" +port + auditEndpoint;
+
+        HttpEntity<String> request = new HttpEntity<>("{\"contestName\": \"ImpossibleCantBeRealContestName982389273428\", " +
+                "\"totalAuditableBallots\": 15, " +
+                " \"candidates\": [\"Alice\",\"Bob\"], " +
+                " \"winner\": \"Alice\" " +
+                "}", headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class );
+
+        Gson gson = new Gson();
+        String jsonString = response.getBody();
+        GetAssertionResponse result = gson.fromJson(jsonString, GetAssertionResponse.class);
+
+        // Actually this is the opposite of what should be true, just for testing the testing.
+        assertTrue(result.solutionOrError.Err instanceof GetAssertionError.NoAssertions);
     }
 
     /*
