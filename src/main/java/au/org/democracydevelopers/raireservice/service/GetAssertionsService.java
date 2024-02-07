@@ -11,6 +11,8 @@ import au.org.democracydevelopers.raireservice.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.repository.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.repository.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.request.ContestRequestByName;
+import au.org.democracydevelopers.raireservice.response.GetAssertionError;
+import au.org.democracydevelopers.raireservice.response.GetAssertionResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -34,7 +36,7 @@ public class GetAssertionsService {
      * @param request a ContestRequestByName - name of a single contest, with metadata
      * @return a RaireSolution - the resulting collection of assertions, with metadata, or an error.
      */
-  public RaireSolution getAssertions(ContestRequestByName request) {
+  public GetAssertionResponse getAssertions(ContestRequestByName request) {
 
       List<Assertion> assertions = assertionRepository.findByContestName(request.getContestName());
       List<String> candidates = request.getCandidates();
@@ -62,25 +64,22 @@ public class GetAssertionsService {
                   candidates.size());
           // TODO Make useful metadata from stored info about which assertions have been confirmed.
           Map<String, Object> metadata = Map.of("candidates", candidates);
-          return new RaireSolution(metadata, new RaireSolution.RaireResultOrError(result));
+          return new GetAssertionResponse(metadata, new GetAssertionResponse.GetAssertionResultOrError(result));
 
-          // TODO Improve error handling. We may not actually want a RAIRE error at this point, since it may be a
-          // database retrieval error.
-          // Indeed, it may not even be an error.  Distinguish empty assertion sets (which are not necessarily an error)
-          // from inconsistent ones (which certainly are an error).
-          // Build an empty RAIRE result to return.
-      } else  // if(assertionsWithDifficulty.length == 0) {
-      {
+      } else if(assertionsWithDifficulty.length == 0) {
+          // If there are no assertions in the database, return an error. Note that this doesn't necessarily indicate
+          // a serious problem - it might just be that no assertions have (yet) been generated for this contest.
           log.debug(String.format("No assertions present for contest %s.", request.getContestName()));
-          RaireResult result = new RaireResult(
-                  assertionsWithDifficulty,
-                  0,
-                  0,
-                  overallWinner,
-                  candidates.size());
-          // TODO Make useful metadata from stored info about which assertions have been confirmed.
-          Map<String, Object> metadata = Map.of("candidates", candidates);
-          return new RaireSolution(metadata, new RaireSolution.RaireResultOrError(result));
+          log.info(String.format("No assertions present for contest %s.", request.getContestName()));
+          return new GetAssertionResponse(new HashMap<>(),
+                  new GetAssertionResponse.GetAssertionResultOrError(new GetAssertionError.NoAssertions()));
+      } else {
+          // If there are some assertions, but the other data consistency checks failed, then this is a
+          // serious problem.
+          log.debug(String.format("Error retrieving assertions for contest %s.", request.getContestName()));
+          log.info(String.format("Error retrieving assertions for contest %s.", request.getContestName()));
+          return new GetAssertionResponse(new HashMap<>(),
+                  new GetAssertionResponse.GetAssertionResultOrError(new GetAssertionError.ErrorRetrievingAssertions()));
       }
   }
 

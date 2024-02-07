@@ -1,9 +1,7 @@
 package au.org.democracydevelopers.raireservice.controller;
 
-import au.org.democracydevelopers.raire.RaireSolution;
-import au.org.democracydevelopers.raireservice.request.ContestRequestByIDs;
 import au.org.democracydevelopers.raireservice.request.ContestRequestByName;
-import au.org.democracydevelopers.raireservice.service.CvrContestInfoService;
+import au.org.democracydevelopers.raireservice.response.GetAssertionResponse;
 import au.org.democracydevelopers.raireservice.service.GetAssertionsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +26,7 @@ public class AssertionController {
   */
 
   @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
-  public RaireSolution serve(@RequestBody ContestRequestByName contest) {
+  public GetAssertionResponse serve(@RequestBody ContestRequestByName contest) {
     log.info("Received request to get assertions for contest:  {}", contest.getContestName());
     return getAssertionsService.getAssertions(contest);
   }
