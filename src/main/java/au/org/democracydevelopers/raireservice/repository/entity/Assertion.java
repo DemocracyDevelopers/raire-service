@@ -209,4 +209,13 @@ public abstract class Assertion {
      * Construct an empty assertion (for persistence).
      */
   public Assertion(){}
+
+  /**
+   * Return the raire-java style of this assertion, for export as json. The main difference is that candidates are
+   * referred to by their index in the list of candidate names, rather than by name directly.
+   * @param candidates The list of candidate names as strings.
+   * @return A raire-java style Assertion - either NEN or NEB as appropriate - with the same data as this.
+   * @throws RuntimeException if the data retrieved from the database is not consistent with a valid NEN assertion.
+   */
+  public abstract au.org.democracydevelopers.raire.assertions.Assertion makeRaireAssertion(List<String> candidates) ;
 }

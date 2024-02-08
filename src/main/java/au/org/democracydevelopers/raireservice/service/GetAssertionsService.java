@@ -41,7 +41,7 @@ public class GetAssertionsService {
       // Convert assertions from database record into RAIRE export style with annotated difficulty.
       AssertionAndDifficulty[] assertionsWithDifficulty =
           assertions.stream().map(a ->
-              new AssertionAndDifficulty(makeRaireAssertion(a, candidates), a.getDifficulty(), a.getMargin())).toList()
+              new AssertionAndDifficulty(a.makeRaireAssertion(candidates), a.getDifficulty(), a.getMargin())).toList()
           .toArray(new AssertionAndDifficulty[0]);
 
       // Find overall data: difficulty, margin, winner.
@@ -79,27 +79,4 @@ public class GetAssertionsService {
                   new GetAssertionResponse.GetAssertionResultOrError(new GetAssertionError.ErrorRetrievingAssertions()));
       }
   }
-
-    private au.org.democracydevelopers.raire.assertions.Assertion makeRaireAssertion(Assertion a, List<String> candidates) {
-
-      // Find index of winner, loser and (if relevant) continuing candidates in candidate list.
-      int winner = candidates.indexOf(a.getWinner());
-      int loser = candidates.indexOf(a.getLoser());
-      int[] continuing =  a.getAssumedContinuing().stream().mapToInt(candidates::indexOf).toArray();
-
-      // If it's an NEB assertion, return a RAIRE NEB assertion.
-      if( a instanceof NEBAssertion && winner != -1 && loser != -1) {
-        return new NotEliminatedBefore(winner, loser);
-
-        // If it's an NEN assertion, convert the continuing candidates to indices, then return the RAIRE NEN assertion.
-      } else if (a instanceof NENAssertion && winner != -1 && loser != -1 && Arrays.stream(continuing).noneMatch(i -> i == -1)) {
-          return new NotEliminatedNext(winner, loser, continuing);
-
-      } else {
-          // This obviously should not happen if all the assertions in the database are valid NEN or NEB. The check is important
-          // in case future versions of the software introduce other types of assertion.
-          log.error(String.format("Invalid assertion retrieved from database: %s", a));
-          throw new RuntimeException(String.format("Invalid assertion retrieved from database: %s", a));
-      }
-    }
 }

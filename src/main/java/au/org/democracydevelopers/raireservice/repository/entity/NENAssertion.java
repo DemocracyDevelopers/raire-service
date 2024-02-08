@@ -8,14 +8,18 @@ package au.org.democracydevelopers.raireservice.repository.entity;
 
 import java.util.List;
 
+import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Generic assertion for an assertion-based audit.
  *
  */
 @Entity
 @DiscriminatorValue("NEN")
+@Slf4j
 public class NENAssertion extends Assertion {
 
   /**
@@ -32,4 +36,31 @@ public class NENAssertion extends Assertion {
                       double difficulty, List<String> assumedContinuing) {
     super(contestName, winner, loser, margin, universeSize, difficulty, assumedContinuing);
   }
+
+  /**
+   * Return the raire-java style of this assertion, for export as json. The main difference is that candidates are
+   * referred to by their index in the list of candidate names, rather than by name directly.
+   * @param candidates The list of candidate names as strings.
+   * @return A raire-java style NEN Assertion with the same data as this.
+   * @throws RuntimeException if the data retrieved from the database is not consistent with a valid NEN assertion.
+   */
+  @Override
+  public au.org.democracydevelopers.raire.assertions.Assertion makeRaireAssertion(List<String> candidates) {
+
+      // Find index of winner, loser, continuing candidates.
+      int winnerIndex = candidates.indexOf(winner);
+      int loserIndex = candidates.indexOf(loser);
+       int[] continuing =  assumedContinuing.stream().mapToInt(candidates::indexOf).toArray();
+
+      if (winnerIndex != -1 && loserIndex != -1 && continuing.length != 0) {
+         log.info(String.format("Valid NEN assertion retrieved from database: %s", this));
+         return new NotEliminatedNext(winnerIndex, loserIndex, continuing);
+      } else {
+         log.error(String.format("Invalid NEN assertion retrieved from database: %s", this));
+         throw new RuntimeException(String.format("Invalid NEN assertion retrieved from database: %s", this));
+      }
+
+
+  }
+
 }

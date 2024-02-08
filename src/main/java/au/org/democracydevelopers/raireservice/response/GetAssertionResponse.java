@@ -20,12 +20,12 @@ import java.util.Map;
 
 public class GetAssertionResponse {
     public final Map<String,Object> metadata;
-    public final GetAssertionResultOrError solutionOrError;
+    public final GetAssertionResultOrError solution;
 
     @ConstructorProperties({"metadata","solution"})
     public GetAssertionResponse(Map<String, Object> metadata, GetAssertionResultOrError solutionOrError) {
         this.metadata = metadata;
-        this.solutionOrError = solutionOrError;
+        this.solution = solutionOrError;
     }
 
 
