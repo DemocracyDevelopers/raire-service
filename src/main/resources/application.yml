@@ -3,7 +3,7 @@ spring:
     active: local #default active profile
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/corla
+    url: jdbc:postgresql://localhost:5432/scratch
     username: corlaadmin
     password: corlasecret
     # JPA properties

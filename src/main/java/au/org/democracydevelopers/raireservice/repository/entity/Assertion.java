@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.math.BigDecimal;
 
 @Slf4j
 @Data
@@ -116,7 +117,7 @@ public abstract class Assertion {
   /**
    * The number of samples to audit overall assuming no further overstatements.
    */
-  @Column(nullable = false)
+  @Column(nullable = false, name = "optimistic_samples_to_audit")
   private Integer my_optimistic_samples_to_audit = 0;
 
   /**
@@ -137,38 +138,45 @@ public abstract class Assertion {
    * The expected number of samples to audit overall assuming overstatements
    * continue at the current rate.
    */
-  @Column(nullable = false)
+  @Column(nullable = false, name = "estimated_samples_to_audit")
   private Integer my_estimated_samples_to_audit = 0;
 
   /**
    * The two-vote understatements recorded so far.
    */
-  @Column(nullable = false)
+  @Column(nullable = false, name = "two_vote_under_count")
   protected Integer my_two_vote_under_count = 0;
 
   /**
    * The one-vote understatements recorded so far.
    */
-  @Column(nullable = false)
+  @Column(nullable = false, name = "one_vote_under_count")
   protected Integer my_one_vote_under_count = 0;
 
   /**
    * The one-vote overstatements recorded so far.
    */
-  @Column(nullable = false)
+  @Column(nullable = false, name = "one_vote_over_count")
   protected Integer my_one_vote_over_count = 0;
 
   /**
    * The two-vote overstatements recorded so far.
    */
-  @Column(nullable = false)
+  @Column(nullable = false, name = "two_vote_over_count")
   protected Integer my_two_vote_over_count = 0;
 
   /**
    * Discrepancies recorded so far that are neither understatements nor overstatements.
    */
-  @Column(nullable = false)
+  @Column(nullable = false, name = "other_count")
   protected Integer my_other_count = 0;
+
+  /**
+   * Current risk measurement
+   * Initialize at 1 because, when we have no audit info, we assume maximum risk.
+   */
+  @Column(nullable = false, name = "current_risk")
+  private BigDecimal my_current_risk = BigDecimal.valueOf(1);
 
   /**
    * Creates an Assertion for a specific contest. The assertion has a given winner, loser,
