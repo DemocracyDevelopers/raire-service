@@ -23,8 +23,8 @@ public class GetAssertionResponse {
     public final GetAssertionResultOrError solution;
 
     @ConstructorProperties({"metadata","solution"})
-    public GetAssertionResponse(Map<String, Object> metadata, GetAssertionResultOrError solutionOrError) {
-        this.metadata = metadata;
+    public GetAssertionResponse(Metadata metadata, GetAssertionResultOrError solutionOrError) {
+        this.metadata = metadata.getMetadata();
         this.solution = solutionOrError;
     }
 
