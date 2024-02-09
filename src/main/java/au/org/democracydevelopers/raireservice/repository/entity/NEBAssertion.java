@@ -54,10 +54,12 @@ public class NEBAssertion extends Assertion  {
       int winnerIndex = candidates.indexOf(winner);
       int loserIndex = candidates.indexOf(loser);
 
+      // If the winner and loser were both valid, the assertion is valid.
       if (winnerIndex != -1 && loserIndex != -1 && assumedContinuing.isEmpty()) {
          log.info(String.format("Valid NEB assertion retrieved from database: %s", this));
          return new NotEliminatedBefore(winnerIndex, loserIndex);
       } else {
+         // Otherwise, there's an inconsistency between the candidate list and the assertion we retrieved.
          log.error(String.format("Invalid NEB assertion retrieved from database: %s", this));
          throw new GetAssertionException(new GetAssertionError.ErrorRetrievingAssertions()) ;
       }

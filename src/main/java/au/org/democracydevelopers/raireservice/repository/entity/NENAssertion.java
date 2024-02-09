@@ -6,6 +6,7 @@
 
 package au.org.democracydevelopers.raireservice.repository.entity;
 
+import java.util.Arrays;
 import java.util.List;
 
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
@@ -54,10 +55,12 @@ public class NENAssertion extends Assertion {
       int loserIndex = candidates.indexOf(loser);
        int[] continuing =  assumedContinuing.stream().mapToInt(candidates::indexOf).toArray();
 
-      if (winnerIndex != -1 && loserIndex != -1 && continuing.length != 0) {
+      // If the winner, loser, and all continuing candidates were all valid, the assertion is valid.
+      if (winnerIndex != -1 && loserIndex != -1 && !Arrays.stream(continuing).anyMatch(c -> c == -1)) {
          log.info(String.format("Valid NEN assertion retrieved from database: %s", this));
          return new NotEliminatedNext(winnerIndex, loserIndex, continuing);
       } else {
+         // Otherwise, there's an inconsistency between the candidate list and the assertion we retrieved.
          log.error(String.format("Invalid NEN assertion retrieved from database: %s", this));
          throw new GetAssertionException(new GetAssertionError.ErrorRetrievingAssertions());
       }
