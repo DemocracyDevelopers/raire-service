@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/*
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,3 +20,5 @@ public class VoteWithNames {
   @JsonProperty("prefs")
   private List<String> vote;
 }
+
+ */

@@ -50,36 +50,26 @@ public class GetAssertionsService {
             // Find overall data: difficulty, margin, winner.
             Optional<Assertion> maxDifficultyAssertion = assertions.stream().max(Comparator.comparingDouble(Assertion::getDifficulty));
             Optional<Assertion> minMarginAssertion = assertions.stream().min(Comparator.comparingInt(Assertion::getMargin));
-            int overallWinner = request.getCandidates().indexOf(request.getWinner());
 
             // Assertions present. Everything as expected. Build the RAIRE result to return.
-            if (assertionsWithDifficulty.length != 0 && overallWinner != -1) {
+            if (assertionsWithDifficulty.length != 0) {
                 log.debug(String.format("Assertions successfully retrieved from database for contest %s.", request.getContestName()));
 
                 RaireResult result = new RaireResult(
                         assertionsWithDifficulty,
                         maxDifficultyAssertion.get().getDifficulty(),
                         minMarginAssertion.get().getMargin(),
-                        overallWinner,
                         candidates.size());
 
                 return new GetAssertionResponse(metadata, new GetAssertionResponse.GetAssertionResultOrError(result));
 
-            } else if (assertionsWithDifficulty.length == 0) {
+            } else {
                 // If there are no assertions in the database, return an error. Note that this doesn't necessarily indicate
                 // a serious problem - it might just be that no assertions have (yet) been generated for this contest.
                 log.debug(String.format("No assertions present for contest %s.", request.getContestName()));
                 log.info(String.format("No assertions present for contest %s.", request.getContestName()));
                 return new GetAssertionResponse(metadata,
                         new GetAssertionResponse.GetAssertionResultOrError(new GetAssertionError.NoAssertions()));
-            } else {
-                // OverallWinner == -1 means that the given winner isn't present in the list of candidates.
-                // TODO Actually more of an input validation issue - consider whether we should be getting the winner
-                // from the database anyway.
-                log.debug(String.format("Error: winner not present in candidate list for contest %s.", request.getContestName()));
-                log.error(String.format("Error: winner not present in candidate list for contest %s.", request.getContestName()));
-                return new GetAssertionResponse(metadata,
-                        new GetAssertionResponse.GetAssertionResultOrError(new GetAssertionError.ErrorRetrievingAssertions()));
             }
 
             // Something wrong with format/consistency of retrieved assertions.

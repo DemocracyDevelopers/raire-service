@@ -16,7 +16,6 @@ public class ContestRequestByName {
   private String contestName;
   private int totalAuditableBallots;
   private List<String> candidates;
-  private String winner;
   private BigDecimal riskLimit;
 
 

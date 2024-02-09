@@ -35,7 +35,6 @@ public class Metadata {
             metadata.put("candidates", request.getCandidates());
             metadata.put("contest", request.getContestName());
             metadata.put("totalAuditableBallots", request.getTotalAuditableBallots());
-            metadata.put("winner", request.getWinner());
             metadata.put("riskLimit", request.getRiskLimit());
     }
 }
