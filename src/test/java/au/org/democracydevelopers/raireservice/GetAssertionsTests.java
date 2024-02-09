@@ -100,8 +100,7 @@ public class GetAssertionsTests {
     }
 
     /*
-     * Test that the assertion list for a nonexistent contest is empty.
-     * Note: FIXME This test is deliberately buggy for now, because I want to test the new testing automation.
+     * Test that the appropriate error is returned when the contest has no assertions in the database.
      */
     @Test
     public void testExampleWithNoAssertions() {
@@ -116,36 +115,6 @@ public class GetAssertionsTests {
                 "}", headers);
         ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class );
 
-        Gson gson = new Gson();
-        String jsonString = response.getBody();
-        GetAssertionResponse result = gson.fromJson(jsonString, GetAssertionResponse.class);
-
-        // Actually this is the opposite of what should be true, just for testing the testing.
-        assertTrue(result.solutionOrError.Err instanceof GetAssertionError.NoAssertions);
-    }
-
-    /*
-     * Test that the assertion list for a nonexistent contest is empty.
-     * Note: FIXME This test is deliberately buggy for now, because I want to test the new testing automation.
-     */
-    @Test
-    public void testNonexistentExample() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        String url = "http://localhost:" +port + auditEndpoint;
-
-        HttpEntity<String> request = new HttpEntity<>("{\"contestName\": \"ImpossibleCantBeRealContestName982389273428\", " +
-                "\"totalAuditableBallots\": 15, " +
-                " \"candidates\": [\"Alice\",\"Bob\"], " +
-                " \"winner\": \"Alice\" " +
-                "}", headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class );
-
-        Gson gson = new Gson();
-        String jsonString = response.getBody();
-        RaireSolution result = gson.fromJson(jsonString, RaireSolution.class);
-
-        // Actually this is the opposite of what should be true, just for testing the testing.
-        assertTrue(result.solution.Ok.assertions.length != 0);
+        assertTrue(Objects.requireNonNull(response.getBody()).contains("NoAssertionsForThisContest"));
     }
 }

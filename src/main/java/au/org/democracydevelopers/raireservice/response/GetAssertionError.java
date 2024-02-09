@@ -20,6 +20,7 @@ import java.io.IOException;
 public abstract class GetAssertionError {
     public static class NoAssertions extends GetAssertionError {}
     public static class ErrorRetrievingAssertions extends GetAssertionError {}
+    public static class InvalidRequest extends GetAssertionError {}
 
     /** Custom JSON serializer for Jackson */
     public static class GetAssertionsErrorSerializer extends StdSerializer<GetAssertionError> {
@@ -29,17 +30,19 @@ public abstract class GetAssertionError {
 
         @Override
         public void serialize(GetAssertionError getAssertionError, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-            // first consider the errors that are serialized as a simple string
+
             if (getAssertionError instanceof NoAssertions) {
                 jsonGenerator.writeString("NoAssertionsForThisContest");
             }
             else if (getAssertionError instanceof ErrorRetrievingAssertions) {
                 jsonGenerator.writeString("ErrorRetrievingAssertions");
             }
+            else if (getAssertionError instanceof InvalidRequest) {
+                jsonGenerator.writeString("InvalidGetAssertionRequest");
+            }
             else {
                 throw new IOException("Do not understand RaireError "+getAssertionError);
             }
-            jsonGenerator.writeEndObject();
         }
     }
 }

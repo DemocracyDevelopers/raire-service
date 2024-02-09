@@ -29,7 +29,7 @@ public class GetAssertionResponse {
     }
 
 
-    /// A wrapper around the Rust Error type. Exactly one of the fields will be null.
+    /// A wrapper around the raire-java Error type. Exactly one of the fields will be null.
     public static class GetAssertionResultOrError {
         @JsonInclude(JsonInclude.Include.NON_NULL)
         public final RaireResult Ok;

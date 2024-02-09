@@ -31,6 +31,7 @@ public class AssertionController {
   public GetAssertionResponse serve(@RequestBody ContestRequestByName contest) {
     log.info("Received request to get assertions for contest:  {}", contest.getContestName());
     // return new ResponseEntity<String>("TestThisWorks");
-    return getAssertionsService.getAssertions(contest);
+    GetAssertionResponse response = getAssertionsService.getAssertions(contest);
+    return response;
   }
 }

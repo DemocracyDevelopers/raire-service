@@ -10,6 +10,7 @@ import au.org.democracydevelopers.raireservice.repository.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.repository.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.request.ContestRequestByName;
 import au.org.democracydevelopers.raireservice.response.GetAssertionError;
+import au.org.democracydevelopers.raireservice.response.GetAssertionException;
 import au.org.democracydevelopers.raireservice.response.GetAssertionResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,53 +31,73 @@ public class GetAssertionsService {
      * - reads the relevant assertions from the database,
      * - converts it into the format that an assertion visualiser expects, that is, a RaireSolution,
      * - returns the result (or error).
+     *
      * @param request a ContestRequestByName - name of a single contest, with metadata
      * @return a RaireSolution - the resulting collection of assertions, with metadata, or an error.
      */
-  public GetAssertionResponse getAssertions(ContestRequestByName request) {
+    public GetAssertionResponse getAssertions(ContestRequestByName request) {
 
-      List<Assertion> assertions = assertionRepository.findByContestName(request.getContestName());
-      List<String> candidates = request.getCandidates();
+        // Get assertions from database
+        List<Assertion> assertions = assertionRepository.findByContestName(request.getContestName());
+        List<String> candidates = request.getCandidates();
 
-      // Convert assertions from database record into RAIRE export style with annotated difficulty.
-      AssertionAndDifficulty[] assertionsWithDifficulty =
-          assertions.stream().map(a ->
-              new AssertionAndDifficulty(a.makeRaireAssertion(candidates), a.getDifficulty(), a.getMargin())).toList()
-          .toArray(new AssertionAndDifficulty[0]);
+        try {
 
-      // Find overall data: difficulty, margin, winner.
-      Optional<Assertion> maxDifficultyAssertion = assertions.stream().max(Comparator.comparingDouble(Assertion::getDifficulty));
-      Optional<Assertion> minMarginAssertion = assertions.stream().min(Comparator.comparingInt(Assertion::getMargin));
-      int overallWinner = request.getCandidates().indexOf(request.getWinner());
+            // Turn the assertions from the database into the right format for returning
+            AssertionAndDifficulty[] assertionsWithDifficulty = convertToRaireAssertions(assertions, candidates);
 
-      // Assertions present. Everything as expected. Build the RAIRE result to return.
-      if (assertionsWithDifficulty.length != 0 && maxDifficultyAssertion.isPresent() && minMarginAssertion.isPresent() && overallWinner != -1) {
-          log.debug(String.format("Assertions successfully retrieved from database for contest %s.", request.getContestName()));
+            // Find overall data: difficulty, margin, winner.
+            Optional<Assertion> maxDifficultyAssertion = assertions.stream().max(Comparator.comparingDouble(Assertion::getDifficulty));
+            Optional<Assertion> minMarginAssertion = assertions.stream().min(Comparator.comparingInt(Assertion::getMargin));
+            int overallWinner = request.getCandidates().indexOf(request.getWinner());
 
-          RaireResult result = new RaireResult(
-                  assertionsWithDifficulty,
-                  maxDifficultyAssertion.get().getDifficulty(),
-                  minMarginAssertion.get().getMargin(),
-                  overallWinner,
-                  candidates.size());
-          // TODO Make useful metadata from stored info about which assertions have been confirmed.
-          Map<String, Object> metadata = Map.of("candidates", candidates);
-          return new GetAssertionResponse(metadata, new GetAssertionResponse.GetAssertionResultOrError(result));
+            // Assertions present. Everything as expected. Build the RAIRE result to return.
+            if (assertionsWithDifficulty.length != 0 && overallWinner != -1) {
+                log.debug(String.format("Assertions successfully retrieved from database for contest %s.", request.getContestName()));
 
-      } else if(assertionsWithDifficulty.length == 0) {
-          // If there are no assertions in the database, return an error. Note that this doesn't necessarily indicate
-          // a serious problem - it might just be that no assertions have (yet) been generated for this contest.
-          log.debug(String.format("No assertions present for contest %s.", request.getContestName()));
-          log.info(String.format("No assertions present for contest %s.", request.getContestName()));
-          return new GetAssertionResponse(new HashMap<>(),
-                  new GetAssertionResponse.GetAssertionResultOrError(new GetAssertionError.NoAssertions()));
-      } else {
-          // If there are some assertions, but the other data consistency checks failed, then this is a
-          // serious problem.
-          log.debug(String.format("Error retrieving assertions for contest %s.", request.getContestName()));
-          log.info(String.format("Error retrieving assertions for contest %s.", request.getContestName()));
-          return new GetAssertionResponse(new HashMap<>(),
-                  new GetAssertionResponse.GetAssertionResultOrError(new GetAssertionError.ErrorRetrievingAssertions()));
-      }
-  }
+                RaireResult result = new RaireResult(
+                        assertionsWithDifficulty,
+                        maxDifficultyAssertion.get().getDifficulty(),
+                        minMarginAssertion.get().getMargin(),
+                        overallWinner,
+                        candidates.size());
+                // TODO Make useful metadata from stored info about which assertions have been confirmed.
+                Map<String, Object> metadata = Map.of("candidates", candidates);
+                return new GetAssertionResponse(metadata, new GetAssertionResponse.GetAssertionResultOrError(result));
+
+            } else if (assertionsWithDifficulty.length == 0) {
+                // If there are no assertions in the database, return an error. Note that this doesn't necessarily indicate
+                // a serious problem - it might just be that no assertions have (yet) been generated for this contest.
+                log.debug(String.format("No assertions present for contest %s.", request.getContestName()));
+                log.info(String.format("No assertions present for contest %s.", request.getContestName()));
+                return new GetAssertionResponse(new HashMap<>(),
+                        new GetAssertionResponse.GetAssertionResultOrError(new GetAssertionError.NoAssertions()));
+            } else {
+                // OverallWinner == -1 means that the given winner isn't present in the list of candidates.
+                // TODO Actually more of an input validation issue - consider whether we should be getting the winner
+                // from the database anyway.
+                log.debug(String.format("Error: winner not present in candidate list for contest %s.", request.getContestName()));
+                log.error(String.format("Error: winner not present in candidate list for contest %s.", request.getContestName()));
+                return new GetAssertionResponse(new HashMap<>(),
+                        new GetAssertionResponse.GetAssertionResultOrError(new GetAssertionError.ErrorRetrievingAssertions()));
+            }
+
+            // Something wrong with format/consistency of retrieved assertions.
+        } catch (Exception e) {
+            log.debug(String.format("Error retrieving assertions for contest %s.", request.getContestName()));
+            log.error(String.format("Error retrieving assertions for contest %s.", request.getContestName()));
+            return new GetAssertionResponse(new HashMap<>(),
+                    new GetAssertionResponse.GetAssertionResultOrError(new GetAssertionError.ErrorRetrievingAssertions()));
+        }
+    }
+
+    private AssertionAndDifficulty[] convertToRaireAssertions(List<Assertion> assertions, List<String> candidates) throws GetAssertionException {
+        ArrayList<AssertionAndDifficulty> assertionsWithDifficulty = new ArrayList<AssertionAndDifficulty>();
+        for (int i=1; i < assertions.size() ; i++ ) {
+            Assertion a = assertions.get(i);
+            au.org.democracydevelopers.raire.assertions.Assertion raireAssertion = a.makeRaireAssertion(candidates);
+            assertionsWithDifficulty.add(new AssertionAndDifficulty(raireAssertion, a.getDifficulty(), a.getMargin()));
+        }
+        return assertionsWithDifficulty.toArray(new AssertionAndDifficulty[0]);
+    }
 }

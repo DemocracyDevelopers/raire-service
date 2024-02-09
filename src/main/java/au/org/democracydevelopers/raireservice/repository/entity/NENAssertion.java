@@ -9,6 +9,8 @@ package au.org.democracydevelopers.raireservice.repository.entity;
 import java.util.List;
 
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
+import au.org.democracydevelopers.raireservice.response.GetAssertionError;
+import au.org.democracydevelopers.raireservice.response.GetAssertionException;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +47,7 @@ public class NENAssertion extends Assertion {
    * @throws RuntimeException if the data retrieved from the database is not consistent with a valid NEN assertion.
    */
   @Override
-  public au.org.democracydevelopers.raire.assertions.Assertion makeRaireAssertion(List<String> candidates) {
+  public au.org.democracydevelopers.raire.assertions.Assertion makeRaireAssertion(List<String> candidates) throws GetAssertionException {
 
       // Find index of winner, loser, continuing candidates.
       int winnerIndex = candidates.indexOf(winner);
@@ -57,7 +59,7 @@ public class NENAssertion extends Assertion {
          return new NotEliminatedNext(winnerIndex, loserIndex, continuing);
       } else {
          log.error(String.format("Invalid NEN assertion retrieved from database: %s", this));
-         throw new RuntimeException(String.format("Invalid NEN assertion retrieved from database: %s", this));
+         throw new GetAssertionException(new GetAssertionError.ErrorRetrievingAssertions());
       }
 
 
