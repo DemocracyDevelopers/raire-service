@@ -2,12 +2,8 @@ package au.org.democracydevelopers.raireservice.service;
 
 import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
-import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
-import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import au.org.democracydevelopers.raireservice.repository.entity.Assertion;
 import au.org.democracydevelopers.raireservice.repository.AssertionRepository;
-import au.org.democracydevelopers.raireservice.repository.entity.NEBAssertion;
-import au.org.democracydevelopers.raireservice.repository.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.request.ContestRequestByName;
 import au.org.democracydevelopers.raireservice.response.GetAssertionError;
 import au.org.democracydevelopers.raireservice.response.GetAssertionException;
@@ -45,8 +41,11 @@ public class GetAssertionsService {
 
         try {
 
-            // Turn the assertions from the database into the right format for returning
+            // Turn the assertions from the database into the right format for returning.
             AssertionAndDifficulty[] assertionsWithDifficulty = convertToRaireAssertionsInOrder(assertions, candidates);
+
+            // Update metadata with risks
+            metadata.AddRisks(assertions);
 
             // Find overall data: difficulty, margin, winner.
             Optional<Assertion> maxDifficultyAssertion = assertions.stream().max(Comparator.comparingDouble(Assertion::getDifficulty));
@@ -64,7 +63,6 @@ public class GetAssertionsService {
                         overallWinner,
                         candidates.size());
 
-                metadata.AddRisks(assertions);
                 return new GetAssertionResponse(metadata, new GetAssertionResponse.GetAssertionResultOrError(result));
 
             } else if (assertionsWithDifficulty.length == 0) {
@@ -97,15 +95,16 @@ public class GetAssertionsService {
      * Convert from database-retrieved assertions to raire-assertions.
      * It's very important that this MAINTAINS ORDER because we'll include the risk assessments separately, from the
      * original assertion list.
+     *
      * @param assertions the assertions that were retrieved from the database
      * @param candidates the list of candidate names, as strings
      * @return an equivalent array of assertions, as raire-java structures.
      * @throws GetAssertionException if any of the assertions retrieved from the database have inconsistent data, e.g.
-     *         winners or losers who are not listed as candidates.
+     *                               winners or losers who are not listed as candidates.
      */
     private AssertionAndDifficulty[] convertToRaireAssertionsInOrder(List<Assertion> assertions, List<String> candidates) throws GetAssertionException {
         ArrayList<AssertionAndDifficulty> assertionsWithDifficulty = new ArrayList<AssertionAndDifficulty>();
-        for (int i=1; i < assertions.size() ; i++ ) {
+        for (int i=0; i < assertions.size() ; i++ ) {
             Assertion a = assertions.get(i);
             au.org.democracydevelopers.raire.assertions.Assertion raireAssertion = a.makeRaireAssertion(candidates);
             assertionsWithDifficulty.add(new AssertionAndDifficulty(raireAssertion, a.getDifficulty(), a.getMargin()));

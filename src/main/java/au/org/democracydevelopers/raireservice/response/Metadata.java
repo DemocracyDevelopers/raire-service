@@ -26,8 +26,10 @@ public class Metadata {
     }
 
     public void AddRisks(List<Assertion> assertions) {
-        List<BigDecimal> risks = assertions.stream().map(Assertion::getMy_current_risk).toList();
-        metadata.put("assertionRisks", risks);
+        if(!assertions.isEmpty()) {
+            List<BigDecimal> risks = assertions.stream().map(Assertion::getMy_current_risk).toList();
+            metadata.put("assertionRisks", risks);
+        }
     }
     public Metadata(ContestRequestByName request) {
             metadata.put("candidates", request.getCandidates());
