@@ -21,18 +21,21 @@ Run instructions:
 
 This will run the application on port 8080.  (If you want to change the port, reset `server` in `application.yml`.)
 
-### Generating assertions from the command line
-To test that the RAIRE service is running correctly, go to the `testAPI` directory an run
+### Generating assertions from the command line (endpoint: /cvr/audit)
+To test that the RAIRE service is running correctly, go to the `testAPI` directory and run
 ```agsl
 ./testScript.sh
 ```
 Your output should look like:
 ```
-File: GuideToRaireEx1.json
+File: GuideToRaireEx1.voteExample.json
 {"metadata":{"candidates":["Alice","Bob","Chuan","Diego"],"contest":"GuideToRAIREExample1","totalAuditableBallots":15},"solution":{"Ok":{"assertions":[{"assertion":{"type":"NEB","winner":0,"loser":1},"difficulty":5.0,"margin":3},{"assertion":{"type":"NEN","winner":3,"loser":0,"continuing":[0,3]},"difficulty":15.0,"margin":1},{"assertion":{"type":"NEN","winner":0,"loser":2,"continuing":[0,2,3]},"difficulty":7.5,"margin":2},{"assertion":{"type":"NEN","winner":3,"loser":1,"continuing":[0,1,3]},"difficulty":3.75,"margin":4},{"assertion":{"type":"NEN","winner":3,"loser":2,"continuing":[0,2,3]},"difficulty":15.0,"margin":1},{"assertion":{"type":"NEN","winner":3,"loser":1,"continuing":[0,1,2,3]},"difficulty":7.5,"margin":2}],"difficulty":15.0,"margin":1,"winner":3,"num_candidates":4,"time_to_determine_winners":{"work":4,"seconds":0.0},"time_to_find_assertions":{"work":13,"seconds":0.0},"time_to_trim_assertions":{"work":36,"seconds":0.001},"warning_trim_timed_out":false}}}
-File: TrivialExample.json
+File: GuideToRAIREExample3-raire-service.voteExample.json
+{"metadata":{"candidates":["A","B","C","D"],"contest":"GuideToRaireExample3","totalAuditableBallots":225},"solution":{"Ok":{"assertions":[{"assertion":{"type":"NEB","winner":2,"loser":3},"difficulty":5.0,"margin":45},{"assertion":{"type":"NEN","winner":2,"loser":0,"continuing":[0,2]},"difficulty":9.0,"margin":25},{"assertion":{"type":"NEN","winner":0,"loser":1,"continuing":[0,1,2]},"difficulty":3.75,"margin":60},{"assertion":{"type":"NEN","winner":2,"loser":1,"continuing":[0,1,2]},"difficulty":5.0,"margin":45},{"assertion":{"type":"NEN","winner":0,"loser":3,"continuing":[0,1,2,3]},"difficulty":2.25,"margin":100}],"difficulty":9.0,"margin":25,"winner":2,"num_candidates":4,"time_to_determine_winners":{"work":4,"seconds":0.0},"time_to_find_assertions":{"work":13,"seconds":0.0},"time_to_trim_assertions":{"work":32,"seconds":0.001},"warning_trim_timed_out":false}}}
+File: TrivialExample.voteExample.json
 {"metadata":{"candidates":["Alice","Bob"],"contest":"TrivialExample1","totalAuditableBallots":15},"solution":{"Ok":{"assertions":[{"assertion":{"type":"NEB","winner":0,"loser":1},"difficulty":7.5,"margin":2}],"difficulty":7.5,"margin":2,"winner":0,"num_candidates":2,"time_to_determine_winners":{"work":2,"seconds":0.0},"time_to_find_assertions":{"work":1,"seconds":0.001},"time_to_trim_assertions":{"work":2,"seconds":0.0},"warning_trim_timed_out":false}}}
 ```
+
 
 ## Configuring and running colorado-rla with the raire-service
 The prototype `colorado-rla` edits are on the **scratch** branch.
@@ -61,3 +64,25 @@ click the `Generate Assertions` button. This should save the assertions in the d
 It takes between 5 and 30 seconds, depending on how many votes are relevant.
 6. You can retrieve the json for the assertions by visiting [http://localhost:8888/generate-assertions](http://localhost:8888/generate-assertions).
 You might like to visualise each one using the [Assertion Explainer](https://democracydevelopers.github.io/raire-rs/WebContent/explain_assertions.html). (Make sure you enter each contest's raire response individually, not the whole list.)
+
+## Retrieving stored assertions from the command line (endpoint: /raire/get-assertions)
+You can also retrieve previously-generated assertions from the database. To test that this is working, go to the `testAPI` directory
+and run
+```agsl
+./testAssertionRetrievalScript.sh
+```
+
+You need to alter the examples to match some assertions that you have already generated (from corla). For example, if you 
+have already generated assertions for Boulder using the [Boulder test data](https://github.com/DemocracyDevelopers/colorado-rla/tree/scratch/test/IRV-test/Boulder2023Data)
+the output of your `testAssertionRetrievalScript.sh` should look like:
+
+```
+File: GetAssertionRequest.assertionRequest.json
+{"metadata":{"candidates":["Paul Tweedlie","Nicole Speer","Bob Yates","Aaron Brockett"],"contest":"City of Boulder Mayoral Candidates","riskLimit":0.03,"assertionRisks":[1.00,1.00,1.00]},"solution":{"Ok":{"assertions":[{"assertion":{"type":"NEB","winner":3,"loser":1},"difficulty":46.40923196276183,"margin":2578},{"assertion":{"type":"NEB","winner":3,"loser":0},"difficulty":14.260190703218116,"margin":8390},{"assertion":{"type":"NEN","winner":3,"loser":2,"continuing":[2,3]},"difficulty":97.42915309446254,"margin":1228}],"difficulty":97.42915309446254,"margin":1228,"num_candidates":4}}}
+```
+
+If you try to retrieve assertions for a contest with no matching assertions in the database, the output should look like:
+```
+File: NoAssertionRequest.assertionRequest.json
+{"metadata":{"candidates":["Alice","Bob","Chuan","Diego"],"contest":"NotARealContest98791841978","riskLimit":0.03},"solution":{"Err":"NoAssertionsForThisContest"}}
+```
