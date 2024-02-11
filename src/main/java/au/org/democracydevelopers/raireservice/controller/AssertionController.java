@@ -28,7 +28,6 @@ public class AssertionController {
   @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
   public GetAssertionResponse serve(@RequestBody RequestByContestName contest) {
     log.info("Received request to get assertions for contest:  {}", contest.getContestName());
-    // return new ResponseEntity<String>("TestThisWorks");
-      return getAssertionsService.getAssertions(contest);
+    return getAssertionsService.getAssertions(contest);
   }
 }
