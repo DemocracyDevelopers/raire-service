@@ -1,12 +1,10 @@
 package au.org.democracydevelopers.raireservice.controller;
 
-import au.org.democracydevelopers.raireservice.request.ContestRequestByName;
+import au.org.democracydevelopers.raireservice.request.RequestByContestName;
 import au.org.democracydevelopers.raireservice.response.GetAssertionResponse;
 import au.org.democracydevelopers.raireservice.service.GetAssertionsService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +26,7 @@ public class AssertionController {
   public AssertionController(GetAssertionsService getAssertionsService) {this.getAssertionsService = getAssertionsService;}
 
   @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
-  public GetAssertionResponse serve(@RequestBody ContestRequestByName contest) {
+  public GetAssertionResponse serve(@RequestBody RequestByContestName contest) {
     log.info("Received request to get assertions for contest:  {}", contest.getContestName());
     // return new ResponseEntity<String>("TestThisWorks");
     GetAssertionResponse response = getAssertionsService.getAssertions(contest);

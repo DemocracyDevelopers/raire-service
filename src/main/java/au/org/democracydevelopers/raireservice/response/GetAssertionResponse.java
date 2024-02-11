@@ -23,8 +23,8 @@ public class GetAssertionResponse {
     public final GetAssertionResultOrError solution;
 
     @ConstructorProperties({"metadata","solution"})
-    public GetAssertionResponse(Metadata metadata, GetAssertionResultOrError solutionOrError) {
-        this.metadata = metadata.getMetadata();
+    public GetAssertionResponse(Map<String, Object> metadata, GetAssertionResultOrError solutionOrError) {
+        this.metadata = metadata;
         this.solution = solutionOrError;
     }
 
@@ -32,14 +32,14 @@ public class GetAssertionResponse {
     /// A wrapper around the raire-java Error type. Exactly one of the fields will be null.
     public static class GetAssertionResultOrError {
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        public final RaireResult Ok;
+        public final RetrievedRaireResult Ok;
         @JsonInclude(JsonInclude.Include.NON_NULL)
         public final GetAssertionError Err;
 
         /** Only used by the Jackson serialization which can only have one constructor annotated :-( */
         @ConstructorProperties({"Ok","Err"})
-        public GetAssertionResultOrError(RaireResult Ok, GetAssertionError Err) { this.Ok=Ok; this.Err=Err;}
-        public GetAssertionResultOrError(RaireResult Ok) { this.Ok=Ok; this.Err=null;}
+        public GetAssertionResultOrError(RetrievedRaireResult Ok, GetAssertionError Err) { this.Ok=Ok; this.Err=Err;}
+        public GetAssertionResultOrError(RetrievedRaireResult Ok) { this.Ok=Ok; this.Err=null;}
         public GetAssertionResultOrError(GetAssertionError Err) { this.Ok=null; this.Err=Err;}
     }
 

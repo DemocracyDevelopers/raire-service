@@ -4,11 +4,8 @@ import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raireservice.repository.entity.Assertion;
 import au.org.democracydevelopers.raireservice.repository.AssertionRepository;
-import au.org.democracydevelopers.raireservice.request.ContestRequestByName;
-import au.org.democracydevelopers.raireservice.response.GetAssertionError;
-import au.org.democracydevelopers.raireservice.response.GetAssertionException;
-import au.org.democracydevelopers.raireservice.response.GetAssertionResponse;
-import au.org.democracydevelopers.raireservice.response.Metadata;
+import au.org.democracydevelopers.raireservice.request.RequestByContestName;
+import au.org.democracydevelopers.raireservice.response.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -32,7 +29,7 @@ public class GetAssertionsService {
      * @param request a ContestRequestByName - name of a single contest, with metadata
      * @return a RaireSolution - the resulting collection of assertions, with metadata, or an error.
      */
-    public GetAssertionResponse getAssertions(ContestRequestByName request) {
+    public GetAssertionResponse getAssertions(RequestByContestName request) {
 
         // Get assertions from database
         List<Assertion> assertions = assertionRepository.findByContestName(request.getContestName());
@@ -55,20 +52,20 @@ public class GetAssertionsService {
             if (assertionsWithDifficulty.length != 0) {
                 log.debug(String.format("Assertions successfully retrieved from database for contest %s.", request.getContestName()));
 
-                RaireResult result = new RaireResult(
+                RetrievedRaireResult result = new RetrievedRaireResult(
                         assertionsWithDifficulty,
                         maxDifficultyAssertion.get().getDifficulty(),
                         minMarginAssertion.get().getMargin(),
                         candidates.size());
 
-                return new GetAssertionResponse(metadata, new GetAssertionResponse.GetAssertionResultOrError(result));
+                return new GetAssertionResponse(metadata.getMetadata(), new GetAssertionResponse.GetAssertionResultOrError(result));
 
             } else {
                 // If there are no assertions in the database, return an error. Note that this doesn't necessarily indicate
                 // a serious problem - it might just be that no assertions have (yet) been generated for this contest.
                 log.debug(String.format("No assertions present for contest %s.", request.getContestName()));
                 log.info(String.format("No assertions present for contest %s.", request.getContestName()));
-                return new GetAssertionResponse(metadata,
+                return new GetAssertionResponse(metadata.getMetadata(),
                         new GetAssertionResponse.GetAssertionResultOrError(new GetAssertionError.NoAssertions()));
             }
 
@@ -76,7 +73,7 @@ public class GetAssertionsService {
         } catch (Exception e) {
             log.debug(String.format("Error retrieving assertions for contest %s.", request.getContestName()));
             log.error(String.format("Error retrieving assertions for contest %s.", request.getContestName()));
-            return new GetAssertionResponse(metadata,
+            return new GetAssertionResponse(metadata.getMetadata(),
                     new GetAssertionResponse.GetAssertionResultOrError(new GetAssertionError.ErrorRetrievingAssertions()));
         }
     }

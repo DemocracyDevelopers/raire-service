@@ -1,13 +1,12 @@
 package au.org.democracydevelopers.raireservice.response;
 
 import au.org.democracydevelopers.raireservice.repository.entity.Assertion;
-import au.org.democracydevelopers.raireservice.request.ContestRequestByName;
+import au.org.democracydevelopers.raireservice.request.RequestByContestName;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Makes the metadata structure required for use by raire
@@ -31,10 +30,9 @@ public class Metadata {
             metadata.put("assertionRisks", risks);
         }
     }
-    public Metadata(ContestRequestByName request) {
+    public Metadata(RequestByContestName request) {
             metadata.put("candidates", request.getCandidates());
             metadata.put("contest", request.getContestName());
-            metadata.put("totalAuditableBallots", request.getTotalAuditableBallots());
             metadata.put("riskLimit", request.getRiskLimit());
     }
 }
