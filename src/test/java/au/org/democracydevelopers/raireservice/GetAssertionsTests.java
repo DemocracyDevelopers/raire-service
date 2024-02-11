@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class GetAssertionsTests {
 
+    private final static String host = "http://localhost:";
     private final static String auditEndpoint = "/raire/get-assertions";
 
     @LocalServerPort
@@ -49,7 +50,7 @@ public class GetAssertionsTests {
      */
     @Test
     public void testErrorForNonFunctioningEndpoint() {
-        assertTrue((restTemplate.getForObject("http://localhost:" + port + "/",
+        assertTrue((restTemplate.getForObject(host + port + "/",
                 String.class)).contains("404"));
     }
 
@@ -58,9 +59,9 @@ public class GetAssertionsTests {
      */
     @Test
     public void testMethodNotAllowed() {
-        assertTrue((restTemplate.getForObject("http://localhost:" + port + auditEndpoint,
+        assertTrue((restTemplate.getForObject(host + port + auditEndpoint,
                 String.class)).contains("405"));
-        assertTrue((restTemplate.getForObject("http://localhost:" + port + auditEndpoint,
+        assertTrue((restTemplate.getForObject(host + port + auditEndpoint,
                 String.class)).contains("Method Not Allowed"));
     }
 
@@ -71,7 +72,7 @@ public class GetAssertionsTests {
     public void testBadRequest() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        String url = "http://localhost:" + port + auditEndpoint;
+        String url = host + port + auditEndpoint;
 
         HttpEntity<String> request = new HttpEntity<>("", headers);
         ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -81,37 +82,17 @@ public class GetAssertionsTests {
     }
 
     /*
-     * At this stage, we are only testing that we get a solution.
-     */
-    @Test
-    public void testTrivialExample() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        String url = "http://localhost:" +port + auditEndpoint;
-
-        HttpEntity<String> request = new HttpEntity<>("{\"contestName\": \"TrivialExample1\", " +
-                "\"totalAuditableBallots\": 15, " +
-                " \"candidates\": [\"Alice\",\"Bob\"], " +
-                " \"winner\": \"Alice\" " +
-                "}", headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class );
-
-        assertTrue(Objects.requireNonNull(response.getBody()).contains("solution"));
-    }
-
-    /*
      * Test that the appropriate error is returned when the contest has no assertions in the database.
      */
     @Test
     public void testExampleWithNoAssertions() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        String url = "http://localhost:" +port + auditEndpoint;
+        String url = host +port + auditEndpoint;
 
         HttpEntity<String> request = new HttpEntity<>("{\"contestName\": \"ImpossibleCantBeRealContestName982389273428\", " +
-                "\"totalAuditableBallots\": 15, " +
                 " \"candidates\": [\"Alice\",\"Bob\"], " +
-                " \"winner\": \"Alice\" " +
+                " \"riskLimit\": 0.03 " +
                 "}", headers);
         ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class );
 
