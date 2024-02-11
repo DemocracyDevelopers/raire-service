@@ -1,6 +1,5 @@
 package au.org.democracydevelopers.raireservice.service;
 
-import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raireservice.repository.entity.Assertion;
 import au.org.democracydevelopers.raireservice.repository.AssertionRepository;
@@ -91,8 +90,7 @@ public class GetAssertionsService {
      */
     private AssertionAndDifficulty[] convertToRaireAssertionsInOrder(List<Assertion> assertions, List<String> candidates) throws GetAssertionException {
         ArrayList<AssertionAndDifficulty> assertionsWithDifficulty = new ArrayList<AssertionAndDifficulty>();
-        for (int i=0; i < assertions.size() ; i++ ) {
-            Assertion a = assertions.get(i);
+        for (Assertion a : assertions) {
             au.org.democracydevelopers.raire.assertions.Assertion raireAssertion = a.makeRaireAssertion(candidates);
             assertionsWithDifficulty.add(new AssertionAndDifficulty(raireAssertion, a.getDifficulty(), a.getMargin()));
         }

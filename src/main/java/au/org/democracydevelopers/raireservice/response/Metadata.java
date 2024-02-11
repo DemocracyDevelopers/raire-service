@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  * Makes the metadata structure required for use by raire
- * @returns a map from string to data which includes the relevant election metadata input to raire:
+ * metadata: a map from string to data which includes the relevant election metadata input to raire:
  *  - candidates - a list of strings describing the candidate names
  *  - contest - the name of the contest
  *  - totalAuditableBallots - which allows for correct difficulty computations if the universe size is larger than
@@ -18,7 +18,7 @@ import java.util.Map;
  */
 
 public class Metadata {
-    private Map<String,Object> metadata = new HashMap<>();
+    private final Map<String,Object> metadata = new HashMap<>();
 
     public Map<String,Object> getMetadata() {
         return metadata;
