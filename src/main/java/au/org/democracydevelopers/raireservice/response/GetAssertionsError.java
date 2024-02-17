@@ -16,20 +16,20 @@ import java.io.IOException;
  * Everything that could go wrong when retrieving assertions.
  *
  **/
-@JsonSerialize(using= GetAssertionError.GetAssertionsErrorSerializer.class)
-public abstract class GetAssertionError {
-    public static class NoAssertions extends GetAssertionError {}
-    public static class ErrorRetrievingAssertions extends GetAssertionError {}
-    public static class InvalidRequest extends GetAssertionError {}
+@JsonSerialize(using= GetAssertionsError.GetAssertionsErrorSerializer.class)
+public abstract class GetAssertionsError {
+    public static class NoAssertions extends GetAssertionsError {}
+    public static class ErrorRetrievingAssertions extends GetAssertionsError {}
+    public static class InvalidRequest extends GetAssertionsError {}
 
     /** Custom JSON serializer for Jackson */
-    public static class GetAssertionsErrorSerializer extends StdSerializer<GetAssertionError> {
+    public static class GetAssertionsErrorSerializer extends StdSerializer<GetAssertionsError> {
 
         public GetAssertionsErrorSerializer() { this(null); }
-        public GetAssertionsErrorSerializer(Class<GetAssertionError> t) { super(t); }
+        public GetAssertionsErrorSerializer(Class<GetAssertionsError> t) { super(t); }
 
         @Override
-        public void serialize(GetAssertionError getAssertionError, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+        public void serialize(GetAssertionsError getAssertionError, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
 
             if (getAssertionError instanceof NoAssertions) {
                 jsonGenerator.writeString("NoAssertionsForThisContest");

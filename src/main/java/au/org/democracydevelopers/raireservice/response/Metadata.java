@@ -1,6 +1,7 @@
 package au.org.democracydevelopers.raireservice.response;
 
 import au.org.democracydevelopers.raireservice.repository.entity.Assertion;
+import au.org.democracydevelopers.raireservice.request.ContestRequestByIDs;
 import au.org.democracydevelopers.raireservice.request.RequestByContestName;
 
 import java.math.BigDecimal;
@@ -34,5 +35,11 @@ public class Metadata {
             metadata.put("candidates", request.getCandidates());
             metadata.put("contest", request.getContestName());
             metadata.put("riskLimit", request.getRiskLimit());
+    }
+
+    public Metadata(ContestRequestByIDs request) {
+        metadata.put("candidates", request.getCandidates());
+        metadata.put("contest", request.getContestName());
+        metadata.put("totalAuditableBallots", request.getTotalAuditableBallots());
     }
 }

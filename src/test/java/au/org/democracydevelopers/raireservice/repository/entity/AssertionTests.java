@@ -1,9 +1,8 @@
 package au.org.democracydevelopers.raireservice.repository.entity;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
-import au.org.democracydevelopers.raireservice.response.GetAssertionException;
+import au.org.democracydevelopers.raireservice.response.GetAssertionsException;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,7 +17,7 @@ public class AssertionTests {
     private final List<String> everyone = List.of("Alice", "Bob", "Chuan", "Diego");
     private final List<String> aliceAndBob = List.of("Alice", "Bob");
     @Test
-    public void testNENValidConversion() throws GetAssertionException {
+    public void testNENValidConversion() throws GetAssertionsException {
 
         Assertion a = new NENAssertion("TestContest","Alice", "Bob", 100,
                 10000, 15.0, aliceAndBob);
@@ -37,64 +36,64 @@ public class AssertionTests {
      * Test that when a winner that's not one of the candidates is included, it throws an exception
      */
     @Test
-    public void testNENInvalidWinnerConversion() throws GetAssertionException {
-        Exception e = assertThrows(GetAssertionException.class, () -> {
+    public void testNENInvalidWinnerConversion() throws GetAssertionsException {
+        Exception e = assertThrows(GetAssertionsException.class, () -> {
             Assertion a = new NENAssertion("TestContest","NotARealCandidate", "Bob", 100,
                     10000, 15.0, aliceAndBob);
             au.org.democracydevelopers.raire.assertions.Assertion raireAssertion = a.makeRaireAssertion(everyone);
 
         });
 
-        assertTrue(e instanceof GetAssertionException);
+        assertTrue(e instanceof GetAssertionsException);
     }
     /*
      * Test that when a loser that's not one of the candidates is included, it throws an exception
      */
     @Test
-    public void testNENInvalidLoserConversion() throws GetAssertionException {
-        Exception e = assertThrows(GetAssertionException.class, () -> {
+    public void testNENInvalidLoserConversion() throws GetAssertionsException {
+        Exception e = assertThrows(GetAssertionsException.class, () -> {
             Assertion a = new NENAssertion("TestContest","Alice", "NotARealCandidate", 100,
                     10000, 15.0, aliceAndBob);
             au.org.democracydevelopers.raire.assertions.Assertion raireAssertion = a.makeRaireAssertion(everyone);
 
         });
 
-        assertTrue(e instanceof GetAssertionException);
+        assertTrue(e instanceof GetAssertionsException);
     }
 
     /*
      * Test that when invalid continuing candidates are included, it throws an exception
      */
     @Test
-    public void testNENInvalidContinuingCandidates() throws GetAssertionException {
+    public void testNENInvalidContinuingCandidates() throws GetAssertionsException {
 
         final List<String> invalidCandidates = List.of("NotACandidate", "AnotherNonCandidate");
 
-        Exception e = assertThrows(GetAssertionException.class, () -> {
+        Exception e = assertThrows(GetAssertionsException.class, () -> {
             Assertion a = new NENAssertion("TestContest","Alice", "Bob", 100,
                     10000, 15.0, invalidCandidates);
             au.org.democracydevelopers.raire.assertions.Assertion raireAssertion = a.makeRaireAssertion(everyone);
 
         });
 
-        assertTrue(e instanceof GetAssertionException);
+        assertTrue(e instanceof GetAssertionsException);
     }
 
     /*
      * Test that when a mix of valid and invalid continuing candidates are included, it throws an exception
      */
     @Test
-    public void testNENInvalidAndValidContinuingCandidates() throws GetAssertionException {
+    public void testNENInvalidAndValidContinuingCandidates() throws GetAssertionsException {
 
         final List<String> invalidAndValidCandidates = List.of("Alice", "AnotherNonCandidate");
 
-        Exception e = assertThrows(GetAssertionException.class, () -> {
+        Exception e = assertThrows(GetAssertionsException.class, () -> {
             Assertion a = new NENAssertion("TestContest","Alice", "Bob", 100,
                     10000, 15.0, invalidAndValidCandidates);
             au.org.democracydevelopers.raire.assertions.Assertion raireAssertion = a.makeRaireAssertion(everyone);
 
         });
 
-        assertTrue(e instanceof GetAssertionException);
+        assertTrue(e instanceof GetAssertionsException);
     }
 }

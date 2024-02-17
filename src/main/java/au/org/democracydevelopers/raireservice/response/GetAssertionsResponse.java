@@ -17,12 +17,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import java.beans.ConstructorProperties;
 import java.util.Map;
 
-public class GetAssertionResponse {
+public class GetAssertionsResponse {
     public final Map<String,Object> metadata;
     public final GetAssertionResultOrError solution;
 
     @ConstructorProperties({"metadata","solution"})
-    public GetAssertionResponse(Map<String, Object> metadata, GetAssertionResultOrError solutionOrError) {
+    public GetAssertionsResponse(Map<String, Object> metadata, GetAssertionResultOrError solutionOrError) {
         this.metadata = metadata;
         this.solution = solutionOrError;
     }
@@ -33,13 +33,13 @@ public class GetAssertionResponse {
         @JsonInclude(JsonInclude.Include.NON_NULL)
         public final RetrievedRaireResult Ok;
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        public final GetAssertionError Err;
+        public final GetAssertionsError Err;
 
         /** Only used by the Jackson serialization which can only have one constructor annotated :-( */
         @ConstructorProperties({"Ok","Err"})
-        public GetAssertionResultOrError(RetrievedRaireResult Ok, GetAssertionError Err) { this.Ok=Ok; this.Err=Err;}
+        public GetAssertionResultOrError(RetrievedRaireResult Ok, GetAssertionsError Err) { this.Ok=Ok; this.Err=Err;}
         public GetAssertionResultOrError(RetrievedRaireResult Ok) { this.Ok=Ok; this.Err=null;}
-        public GetAssertionResultOrError(GetAssertionError Err) { this.Ok=null; this.Err=Err;}
+        public GetAssertionResultOrError(GetAssertionsError Err) { this.Ok=null; this.Err=Err;}
     }
 
 }

@@ -1,10 +1,5 @@
 package au.org.democracydevelopers.raireservice;
 
-import au.org.democracydevelopers.raire.RaireSolution;
-import au.org.democracydevelopers.raireservice.response.GetAssertionError;
-import au.org.democracydevelopers.raireservice.response.GetAssertionResponse;
-import com.google.gson.Gson;
-import jakarta.persistence.Persistence;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,9 +9,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.event.annotation.BeforeTestMethod;
 
-import java.util.List;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

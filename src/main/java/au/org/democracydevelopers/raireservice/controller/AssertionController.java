@@ -1,7 +1,8 @@
 package au.org.democracydevelopers.raireservice.controller;
 
+import au.org.democracydevelopers.raireservice.request.ContestRequestByIDs;
 import au.org.democracydevelopers.raireservice.request.RequestByContestName;
-import au.org.democracydevelopers.raireservice.response.GetAssertionResponse;
+import au.org.democracydevelopers.raireservice.response.GetAssertionsResponse;
 import au.org.democracydevelopers.raireservice.service.GetAssertionsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -19,14 +20,16 @@ public class AssertionController {
   private final GetAssertionsService getAssertionsService;
 
 
-  /*
-  @PostMapping(path = "generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
-  TODO
-   */
+  @PostMapping(path = "/generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
+  public GenerateAssertionResponse serve(@RequestBody ContestRequestByIDs contests) {
+    log.info("Received request to get assertions for contest:  {}", contests.getContestName());
+    return generateAssertionsService.generateAssertions(contest);
+  }
+
   public AssertionController(GetAssertionsService getAssertionsService) {this.getAssertionsService = getAssertionsService;}
 
   @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
-  public GetAssertionResponse serve(@RequestBody RequestByContestName contest) {
+  public GetAssertionsResponse serve(@RequestBody RequestByContestName contest) {
     log.info("Received request to get assertions for contest:  {}", contest.getContestName());
     return getAssertionsService.getAssertions(contest);
   }

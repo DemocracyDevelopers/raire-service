@@ -28,7 +28,7 @@ public class GetAssertionsService {
      * @param request a ContestRequestByName - name of a single contest, with metadata
      * @return a RaireSolution - the resulting collection of assertions, with metadata, or an error.
      */
-    public GetAssertionResponse getAssertions(RequestByContestName request) {
+    public GetAssertionsResponse getAssertions(RequestByContestName request) {
 
         // Get assertions from database
         List<Assertion> assertions = assertionRepository.findByContestName(request.getContestName());
@@ -57,23 +57,23 @@ public class GetAssertionsService {
                         minMarginAssertion.get().getMargin(),
                         candidates.size());
 
-                return new GetAssertionResponse(metadata.getMetadata(), new GetAssertionResponse.GetAssertionResultOrError(result));
+                return new GetAssertionsResponse(metadata.getMetadata(), new GetAssertionsResponse.GetAssertionResultOrError(result));
 
             } else {
                 // If there are no assertions in the database, return an error. Note that this doesn't necessarily indicate
                 // a serious problem - it might just be that no assertions have (yet) been generated for this contest.
                 log.debug(String.format("No assertions present for contest %s.", request.getContestName()));
                 log.info(String.format("No assertions present for contest %s.", request.getContestName()));
-                return new GetAssertionResponse(metadata.getMetadata(),
-                        new GetAssertionResponse.GetAssertionResultOrError(new GetAssertionError.NoAssertions()));
+                return new GetAssertionsResponse(metadata.getMetadata(),
+                        new GetAssertionsResponse.GetAssertionResultOrError(new GetAssertionsError.NoAssertions()));
             }
 
             // Something wrong with format/consistency of retrieved assertions.
         } catch (Exception e) {
             log.debug(String.format("Error retrieving assertions for contest %s.", request.getContestName()));
             log.error(String.format("Error retrieving assertions for contest %s.", request.getContestName()));
-            return new GetAssertionResponse(metadata.getMetadata(),
-                    new GetAssertionResponse.GetAssertionResultOrError(new GetAssertionError.ErrorRetrievingAssertions()));
+            return new GetAssertionsResponse(metadata.getMetadata(),
+                    new GetAssertionsResponse.GetAssertionResultOrError(new GetAssertionsError.ErrorRetrievingAssertions()));
         }
     }
 
@@ -85,10 +85,10 @@ public class GetAssertionsService {
      * @param assertions the assertions that were retrieved from the database
      * @param candidates the list of candidate names, as strings
      * @return an equivalent array of assertions, as raire-java structures.
-     * @throws GetAssertionException if any of the assertions retrieved from the database have inconsistent data, e.g.
+     * @throws GetAssertionsException if any of the assertions retrieved from the database have inconsistent data, e.g.
      *                               winners or losers who are not listed as candidates.
      */
-    private AssertionAndDifficulty[] convertToRaireAssertionsInOrder(List<Assertion> assertions, List<String> candidates) throws GetAssertionException {
+    private AssertionAndDifficulty[] convertToRaireAssertionsInOrder(List<Assertion> assertions, List<String> candidates) throws GetAssertionsException {
         ArrayList<AssertionAndDifficulty> assertionsWithDifficulty = new ArrayList<AssertionAndDifficulty>();
         for (Assertion a : assertions) {
             au.org.democracydevelopers.raire.assertions.Assertion raireAssertion = a.makeRaireAssertion(candidates);
