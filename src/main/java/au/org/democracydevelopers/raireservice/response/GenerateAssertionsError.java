@@ -19,9 +19,7 @@ import java.io.IOException;
  **/
 @JsonSerialize(using= GenerateAssertionsError.GetAssertionsErrorSerializer.class)
 public abstract class GenerateAssertionsError {
-    public static class NoAssertions extends GenerateAssertionsError {}
-    public static class ErrorRetrievingAssertions extends GenerateAssertionsError {}
-    public static class InvalidRequest extends GenerateAssertionsError {}
+    public static class PlaceholderError extends GenerateAssertionsError {}
 
     /** Custom JSON serializer for Jackson */
     public static class GetAssertionsErrorSerializer extends StdSerializer<GenerateAssertionsError> {
@@ -32,14 +30,8 @@ public abstract class GenerateAssertionsError {
         @Override
         public void serialize(GenerateAssertionsError getAssertionError, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
 
-            if (getAssertionError instanceof NoAssertions) {
-                jsonGenerator.writeString("NoAssertionsForThisContest");
-            }
-            else if (getAssertionError instanceof ErrorRetrievingAssertions) {
-                jsonGenerator.writeString("ErrorRetrievingAssertions");
-            }
-            else if (getAssertionError instanceof InvalidRequest) {
-                jsonGenerator.writeString("InvalidGetAssertionRequest");
+            if (getAssertionError instanceof PlaceholderError) {
+                jsonGenerator.writeString("PlaceholderError");
             }
             else {
                 throw new IOException("Do not understand RaireError "+getAssertionError);
