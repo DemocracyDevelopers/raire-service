@@ -1,6 +1,6 @@
 package au.org.democracydevelopers.raireservice;
 
-import au.org.democracydevelopers.raireservice.request.OldContestRequest;
+import au.org.democracydevelopers.raireservice.request.DirectContestRequest;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -18,8 +18,8 @@ class ContestRequestTests {
      */
     void validVoteListIsValid () {
         List<String[]> testVotes = List.of(v1,v2);
-        OldContestRequest testValidRequest
-                = new OldContestRequest("TestContest", 10, 10, testCandidates, testVotes );
+        DirectContestRequest testValidRequest
+                = new DirectContestRequest("TestContest", 10, 10, testCandidates, testVotes );
         assert testValidRequest.votesAreValid();
     }
 
@@ -29,8 +29,8 @@ class ContestRequestTests {
      */
     void invalidVoteListIsNotValid () {
         List<String[]> testVotesInvalid = List.of(v1,v2,v3);
-        OldContestRequest testValidRequest
-                = new OldContestRequest("TestContest", 10, 10, testCandidates, testVotesInvalid );
+        DirectContestRequest testValidRequest
+                = new DirectContestRequest("TestContest", 10, 10, testCandidates, testVotesInvalid );
         assert !testValidRequest.votesAreValid();
     }
 
@@ -43,8 +43,8 @@ class ContestRequestTests {
      */
     void invalidCandidateNameIsNotNoticed () {
         List<String[]> testVotesInvalid = List.of(v1,v2,v4);
-        OldContestRequest testValidRequest
-                = new OldContestRequest("TestContest", 10, 10, testCandidates, testVotesInvalid );
+        DirectContestRequest testValidRequest
+                = new DirectContestRequest("TestContest", 10, 10, testCandidates, testVotesInvalid );
         assert testValidRequest.votesAreValid();
     }
 

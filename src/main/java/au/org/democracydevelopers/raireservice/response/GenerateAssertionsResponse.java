@@ -12,7 +12,6 @@
 
 package au.org.democracydevelopers.raireservice.response;
 
-import au.org.democracydevelopers.raire.RaireSolution;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.beans.ConstructorProperties;

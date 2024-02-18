@@ -7,18 +7,15 @@ import au.org.democracydevelopers.raire.pruning.TrimAlgorithm;
 import au.org.democracydevelopers.raire.util.VoteConsolidator;
 import au.org.democracydevelopers.raireservice.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.repository.CVRRepository;
-import au.org.democracydevelopers.raireservice.repository.converters.StringListConverter;
-import au.org.democracydevelopers.raireservice.repository.entity.CVRContestInfo;
+import au.org.democracydevelopers.raireservice.repository.converters.StringArrayConverter;
 import au.org.democracydevelopers.raireservice.request.ContestRequestByIDs;
-import au.org.democracydevelopers.raireservice.request.OldContestRequest;
+import au.org.democracydevelopers.raireservice.request.DirectContestRequest;
 import au.org.democracydevelopers.raireservice.response.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-
-import static java.util.Arrays.stream;
 
 @Component
 @RequiredArgsConstructor
@@ -28,16 +25,21 @@ public class GenerateAssertionsService {
     private final AssertionRepository assertionRepository;
     private final CVRRepository cvrRepository;
 
-    public OldContestRequest getVotesFromDatabase(ContestRequestByIDs request) {
-        StringListConverter conv = new StringListConverter();
+    /**
+     * Retrieve the votes from the database
+     * @param request A ContestRequestByIDs, which includes a list of <countyID, contestID> pairs that identify
+     *                the relevant CVRs.
+     * @return        The vote data for the requested contest.
+     */
+    public DirectContestRequest getVotesFromDatabase(ContestRequestByIDs request) {
+        StringArrayConverter conv = new StringArrayConverter();
 
         List<String[]> votesByName = request.getCountyAndContestIDs()
                 .stream().flatMap(
                         iDs -> cvrRepository.getCVRs(iDs.getCountyID(), iDs.getContestID()).stream()
-                ).map(l -> conv.convertToEntityAttribute(l).toArray(new String[0])).toList();
+                ).map(conv::convertToEntityAttribute).toList();
 
-        return new OldContestRequest(request.getContestName(), request.getTotalAuditableBallots(),
-                request.getTimeProvisionForResult(), request.getCandidates().toArray(new String[0]), votesByName);
+        return new DirectContestRequest(request, votesByName);
     }
 
     /**
@@ -52,7 +54,7 @@ public class GenerateAssertionsService {
      * @param request a ContestRequest - a collection of IRV votes for a single contest, with metadata
      * @return a GenerateAssertionsResponse - either OK with a winner, or an error.
      */
-    public RaireSolution.RaireResultOrError generateAssertions(OldContestRequest request) {
+    public RaireSolution.RaireResultOrError generateAssertions(DirectContestRequest request) {
 
         List<String[]> votesByName = request.getVotes();
         VoteConsolidator consolidator = new VoteConsolidator(request.getCandidates());
@@ -87,9 +89,16 @@ public class GenerateAssertionsService {
         return raireProblem.solve().solution;
     }
 
-    public GenerateAssertionsResponse storeAssertions(RaireSolution.RaireResultOrError solution, OldContestRequest request) {
+    /**
+     *
+     * @param solution The RaireSolution (possibly an error) to be dealt with. If it contains assertions, it is stored;
+     *                 if it contains an error, nothing is stored.
+     * @param request  The ContestRequest, used for metadata (including candidate names) used for storage.
+     * @return A GenerateAssertionsResponse, summarizing either success (with a winner) or the error.
+     */
+    public GenerateAssertionsResponse storeAssertions(RaireSolution.RaireResultOrError solution, DirectContestRequest request) {
             if( solution.Ok != null) {
-                // Assertions successfully generated. Save them and report the winner.
+                // Assertions are present. Save them and report the winner.
                 log.info("Assertions successfully generated for contest "+request.getContestName());
                 assertionRepository.saveRaireAssertions(solution.Ok.assertions, request.getContestName(), request.getTotalAuditableBallots(), request.getCandidates());
                 String winnerName = request.getCandidates()[solution.Ok.winner];

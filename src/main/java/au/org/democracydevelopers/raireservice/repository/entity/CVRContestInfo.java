@@ -13,21 +13,9 @@
 
 package au.org.democracydevelopers.raireservice.repository.entity;
 
-import au.org.democracydevelopers.raireservice.repository.converters.LongIntegerMapConverter;
-import au.org.democracydevelopers.raireservice.repository.converters.StringListConverter;
-import au.org.democracydevelopers.raireservice.response.GetAssertionsException;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.google.gson.annotations.JsonAdapter;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Data
