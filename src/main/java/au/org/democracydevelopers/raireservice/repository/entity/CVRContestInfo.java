@@ -33,8 +33,6 @@ import java.util.Map;
 @Data
 @Entity
 @Table(name = "cvr_contest_info")
-// @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-// @JsonAdapter(CVRContestInfoJsonAdapter.class)
 public abstract class CVRContestInfo {
 
   /**
@@ -61,8 +59,7 @@ public abstract class CVRContestInfo {
    * The choices for this contest.
    */
   @Column(name = "choices", columnDefinition = "character varying (1024)")
-  @Convert(converter = StringListConverter.class)
-  private List<String> my_choices = new ArrayList<>();
+  private String my_choices;
 
   /**
    * Construct an empty CVRContestInfo (for persistence).

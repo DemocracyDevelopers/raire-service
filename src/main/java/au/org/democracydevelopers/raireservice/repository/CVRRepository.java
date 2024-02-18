@@ -9,6 +9,7 @@ import au.org.democracydevelopers.raireservice.repository.entity.CVRContestInfo;
 import au.org.democracydevelopers.raireservice.repository.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.repository.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.request.ContestRequestByIDs;
+import au.org.democracydevelopers.raireservice.request.CountyAndContestID;
 import com.opencsv.bean.CsvToBean;
 import org.hibernate.Session;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -24,8 +25,15 @@ import java.util.stream.Collectors;
 @Repository
 public interface CVRRepository extends JpaRepository<CVRContestInfo, Long> {
 
-    @Query(value = "select ci.choices  from cvr_contest_info ci " +
+    /**
+     *
+     * @param countyID The ID of the county
+     * @param contestID The ID of the contest, in this county
+     * @return The choices, as a single (unprocessed) string.
+     */
+    @Query(value = "select ci.choices from cvr_contest_info ci " +
             " where ci.county_id = :county_id " +
             " and ci.contest_id = :contest_id", nativeQuery = true)
-    List<List<String>> getCVRs(@Param("county_id") Long countyID, @Param("contest_id") Long contestID);
+    List<String> getCVRs(@Param("county_id") Long countyID, @Param("contest_id") Long contestID);
+
 }

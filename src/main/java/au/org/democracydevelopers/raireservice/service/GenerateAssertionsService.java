@@ -7,6 +7,8 @@ import au.org.democracydevelopers.raire.pruning.TrimAlgorithm;
 import au.org.democracydevelopers.raire.util.VoteConsolidator;
 import au.org.democracydevelopers.raireservice.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.repository.CVRRepository;
+import au.org.democracydevelopers.raireservice.repository.converters.StringListConverter;
+import au.org.democracydevelopers.raireservice.repository.entity.CVRContestInfo;
 import au.org.democracydevelopers.raireservice.request.ContestRequestByIDs;
 import au.org.democracydevelopers.raireservice.request.OldContestRequest;
 import au.org.democracydevelopers.raireservice.response.*;
@@ -27,10 +29,12 @@ public class GenerateAssertionsService {
     private final CVRRepository cvrRepository;
 
     public OldContestRequest getVotesFromDatabase(ContestRequestByIDs request) {
+        StringListConverter conv = new StringListConverter();
+
         List<String[]> votesByName = request.getCountyAndContestIDs()
                 .stream().flatMap(
                         iDs -> cvrRepository.getCVRs(iDs.getCountyID(), iDs.getContestID()).stream()
-                ).map(l -> l.toArray(new String[0])).toList();
+                ).map(l -> conv.convertToEntityAttribute(l).toArray(new String[0])).toList();
 
         return new OldContestRequest(request.getContestName(), request.getTotalAuditableBallots(),
                 request.getTimeProvisionForResult(), request.getCandidates().toArray(new String[0]), votesByName);

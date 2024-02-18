@@ -34,7 +34,7 @@ import java.util.List;
  * @author Daniel M. Zimmerman <dmz@freeandfair.us>
  * @version 1.0.0
  */
-@Converter
+@Converter(autoApply = true)
 @SuppressWarnings("PMD.AtLeastOneConstructor")
 public class StringListConverter implements AttributeConverter<List<String>, String> {
   /**
@@ -69,6 +69,7 @@ public class StringListConverter implements AttributeConverter<List<String>, Str
    */
   @Override
   public List<String> convertToEntityAttribute(final String the_column) {
+    System.out.println("Converting "+the_column);
     return GSON.fromJson(the_column, STRING_LIST);
   }
 }
