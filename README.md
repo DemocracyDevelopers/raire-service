@@ -21,10 +21,10 @@ Run instructions:
 
 This will run the application on port 8080.  (If you want to change the port, reset `server` in `application.yml`.)
 
-### Generating assertions from the command line (endpoint: /cvr/audit)
+## Generating assertions from the command line (endpoint: /raire/generate-and-get-assertions)
 To test that the RAIRE service is running correctly, go to the `testAPI` directory and run
 ```agsl
-./testScript.sh
+./testGenerateAndGet.sh
 ```
 Your output should look like:
 ```
@@ -62,19 +62,36 @@ You can request assertions for any IRV contest already present in the colorado-r
 5. When you reach the `Generate Assertions` page,
 click the `Generate Assertions` button. This should save the assertions in the database. 
 It takes between 5 and 30 seconds, depending on how many votes are relevant.
-6. You can retrieve the json for the assertions by visiting [http://localhost:8888/generate-assertions](http://localhost:8888/generate-assertions).
-You might like to visualise each one using the [Assertion Explainer](https://democracydevelopers.github.io/raire-rs/WebContent/explain_assertions.html). (Make sure you enter each contest's raire response individually, not the whole list.)
+6. You can retrieve the assertions as a zip file by clicking the `Export Assertions` button.
+You might like to unzip them and visualise each one using the [Assertion Explainer](https://democracydevelopers.github.io/raire-rs/WebContent/explain_assertions.html). 
+
+## Generating and storing assertions from the command line (endpoint: /raire/generate-assertions)
+You can generate and store assertions from the command line, if the relevant CVRs are already in the database. To test 
+that this is working, go to the `testAPI` directory and run
+```
+./testGenerateAssertions.sh
+```
+
+You need to alter the examples to match some CVRs already in your database. For example, if you already have CVRs with
+a countyID of 7, a contestID of 3962159, and a contest called `City of Boulder Mayoral`, the output of
+`./testGenerateAssertions.sh` should look like:
+```
+File: EmptyRequest.generateAssertionRequest.json
+{"contestName":"City of Boulder Mayoral","response":{"Err":"PlaceholderError"}}
+File: GenerateAssertionRequest.generateAssertionRequest.json
+{"contestName":"City of Boulder Mayoral","response":{"Ok":"Aaron Brockett"}}
+```
 
 ## Retrieving stored assertions from the command line (endpoint: /raire/get-assertions)
 You can also retrieve previously-generated assertions from the database. To test that this is working, go to the `testAPI` directory
 and run
 ```agsl
-./testAssertionRetrievalScript.sh
+./testGetAssertions.sh
 ```
 
 You need to alter the examples to match some assertions that you have already generated (from corla). For example, if you 
 have already generated assertions for Boulder using the [Boulder test data](https://github.com/DemocracyDevelopers/colorado-rla/tree/scratch/test/IRV-test/Boulder2023Data)
-the output of your `testAssertionRetrievalScript.sh` should look like:
+the output of your `testGetAssertions.sh` should look like:
 
 ```
 File: GetAssertionRequest.assertionRequest.json
@@ -86,3 +103,4 @@ If you try to retrieve assertions for a contest with no matching assertions in t
 File: NoAssertionRequest.assertionRequest.json
 {"metadata":{"candidates":["Alice","Bob","Chuan","Diego"],"contest":"NotARealContest98791841978","riskLimit":0.03},"solution":{"Err":"NoAssertionsForThisContest"}}
 ```
+
