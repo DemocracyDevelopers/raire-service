@@ -12,6 +12,7 @@
 
 package au.org.democracydevelopers.raireservice.response;
 
+import au.org.democracydevelopers.raire.RaireSolution;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.beans.ConstructorProperties;
@@ -41,6 +42,7 @@ public class GenerateAssertionsResponse {
         public GenerateAssertionsResultOrError(String Ok, GenerateAssertionsError Err) { this.Ok=Ok; this.Err=Err;}
         public GenerateAssertionsResultOrError(String Ok) { this.Ok=Ok; this.Err=null;}
         public GenerateAssertionsResultOrError(GenerateAssertionsError Err) { this.Ok=null; this.Err=Err;}
+
     }
 
 }

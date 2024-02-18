@@ -47,7 +47,7 @@ public class OldContestRequest {
 
   /**
    * Checks that there are no repeated strings.
-   * @param v - an array of strings
+   * @param v - a list of strings
    * @returns true if there are no repeated strings.
    */
   private boolean noRepeats(String[] v) {

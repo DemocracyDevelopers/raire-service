@@ -12,6 +12,7 @@
 
 package au.org.democracydevelopers.raireservice.response;
 
+import au.org.democracydevelopers.raire.RaireSolution;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.beans.ConstructorProperties;
@@ -40,6 +41,19 @@ public class GetAssertionsResponse {
         public GetAssertionResultOrError(RetrievedRaireResult Ok, GetAssertionsError Err) { this.Ok=Ok; this.Err=Err;}
         public GetAssertionResultOrError(RetrievedRaireResult Ok) { this.Ok=Ok; this.Err=null;}
         public GetAssertionResultOrError(GetAssertionsError Err) { this.Ok=null; this.Err=Err;}
+
+        public GetAssertionResultOrError(RaireSolution.RaireResultOrError solution) {
+            if (solution.Ok != null) {
+                Ok = new RetrievedRaireResult(solution.Ok.assertions, solution.Ok.difficulty,
+                        solution.Ok.margin, solution.Ok.num_candidates);
+                Err = null;
+            } else {
+                // FIXME At the moment, this is not properly translating the Raire Error.
+                assert (solution.Err != null);
+                Err = new GetAssertionsError.ErrorRetrievingAssertions();
+                Ok = null;
+            }
+        }
     }
 
 }

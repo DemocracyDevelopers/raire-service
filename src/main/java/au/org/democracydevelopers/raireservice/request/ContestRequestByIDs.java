@@ -1,6 +1,5 @@
 package au.org.democracydevelopers.raireservice.request;
 
-import au.org.democracydevelopers.raireservice.response.Metadata;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,10 +16,5 @@ public class ContestRequestByIDs {
   private int totalAuditableBallots;
   private Integer timeProvisionForResult;
   private List<String> candidates;
-  private List<CountyAndContestIDs> iDs;
-
-  private class CountyAndContestIDs {
-    Long countyID;
-    Long contestID;
-  }
+  private List<CountyAndContestID> countyAndContestIDs;
 }
