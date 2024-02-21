@@ -23,14 +23,11 @@ import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 import java.lang.reflect.Type;
-import java.util.List;
 
 /**
  * Note this is copied from Free & Fair's converter of the same name for colorado-rla.
- *
  * A converter between lists of Strings and JSON representations of such lists,
  * for database efficiency.
- * 
  * @author Daniel M. Zimmerman <dmz@freeandfair.us>
  * @version 1.0.0
  */

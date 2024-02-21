@@ -68,8 +68,8 @@ public class GetAssertionsService {
                         new GetAssertionsResponse.GetAssertionResultOrError(new GetAssertionsError.NoAssertions()));
             }
 
-            // Something wrong with format/consistency of retrieved assertions.
         } catch (Exception e) {
+            // Something wrong with format/consistency of retrieved assertions.
             log.debug(String.format("Error retrieving assertions for contest %s.", request.getContestName()));
             log.error(String.format("Error retrieving assertions for contest %s.", request.getContestName()));
             return new GetAssertionsResponse(metadata.getMetadata(),

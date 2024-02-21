@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
     @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
     public class RAIREMicroserviceAPITests {
 
-        private final static String auditEndpoint = "/cvr/audit";
+        private final static String auditEndpoint = "/raire/generate-and-get-assertions";
 
         @LocalServerPort
         private int port;
