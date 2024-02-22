@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql://localhost:5432/scratch
+    username: corlaadmin
+    password: corlasecret
+  jpa:
+    hibernate:
+      ddl-auto: create
