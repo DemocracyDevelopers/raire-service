@@ -27,6 +27,7 @@ public class GetAssertionsService {
      *
      * @param request a ContestRequestByName - name of a single contest, with metadata
      * @return a RaireSolution - the resulting collection of assertions, with metadata, or an error.
+     * Database interactions: retrieves assertions from the database.
      */
     public GetAssertionsResponse getAssertions(RequestByContestName request) {
 

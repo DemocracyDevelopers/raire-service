@@ -14,6 +14,7 @@ import au.org.democracydevelopers.raireservice.response.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -95,11 +96,20 @@ public class GenerateAssertionsService {
      *                 if it contains an error, nothing is stored.
      * @param request  The ContestRequest, used for metadata (including candidate names) used for storage.
      * @return A GenerateAssertionsResponse, summarizing either success (with a winner) or the error.
+     * Database interactions: if assertions are successfully generated, it deletes prior assertions for this contest
+     * and stores new ones in the database.
      */
+    @Transactional
     public GenerateAssertionsResponse storeAssertions(RaireSolution.RaireResultOrError solution, DirectContestRequest request) {
             if( solution.Ok != null) {
-                // Assertions are present. Save them and report the winner.
+                // Assertions are present.
                 log.info("Assertions successfully generated for contest "+request.getContestName());
+
+                // Delete any existing assertions for this contest.
+                assertionRepository.deleteByContestName(request.getContestName());
+                log.info("deleting old assertions for contest "+request.getContestName()+" and saving new ones.");
+
+                // Save them and report the winner.
                 assertionRepository.saveRaireAssertions(solution.Ok.assertions, request.getContestName(), request.getTotalAuditableBallots(), request.getCandidates());
                 String winnerName = request.getCandidates()[solution.Ok.winner];
                 return new GenerateAssertionsResponse(request.getContestName(),

@@ -7,6 +7,7 @@ import au.org.democracydevelopers.raireservice.repository.entity.Assertion;
 import au.org.democracydevelopers.raireservice.repository.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.repository.entity.NENAssertion;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -17,15 +18,35 @@ import java.util.List;
 @Repository
 public interface AssertionRepository extends JpaRepository<Assertion, Long> {
 
+    /**
+     * Select assertions by contest name.
+     * @param contestName - the name of the contest.
+     * @return - the assertions for that contest, as retrieved from the database.
+     */
     @Query(value="select a from Assertion a where a.contestName = :contestName")
     List<Assertion> findByContestName(@Param("contestName") String contestName);
 
+    /**
+     * Store assertions from raire into the database.
+     * @param assertions - the assertions to be stored, in the form they are returned from raire.
+     * @param contestName - the contest name.
+     * @param ballotCount - the total auditable ballots for the audit, which may not be the same as the number of ballots in the contest.
+     * @param candidates - the names of the candidates.
+     */
      default void saveRaireAssertions(AssertionAndDifficulty[] assertions, String contestName, Integer ballotCount, String[] candidates) {
         List<Assertion> storeableAssertions = Arrays.stream(assertions).map(a ->
                 makeStoreable(a, contestName, ballotCount, candidates)).toList();
 
         this.saveAll(storeableAssertions);
     }
+
+
+    /**
+     * Spring syntactic sugar for database delete query.
+     * @param contestName - the name of the contest whose assertions are to be deleted
+     * @return the number of deleted rows (not used)
+     */
+     long deleteByContestName(String contestName);
 
     /**
      * Convert the type of assertion received from RAIRE into the form colorado-rla needs
