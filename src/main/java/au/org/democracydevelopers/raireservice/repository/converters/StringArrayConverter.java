@@ -66,7 +66,6 @@ public class StringArrayConverter implements AttributeConverter<String[], String
    */
   @Override
   public String[] convertToEntityAttribute(final String the_column) {
-    System.out.println("Converting "+the_column);
     return GSON.fromJson(the_column, STRING_ARRAY);
   }
 }
