@@ -65,11 +65,11 @@ File: TrivialExample.voteExample.json
 
 
 ## Configuring and running colorado-rla with the raire-service
-The prototype `colorado-rla` edits are on the **scratch** branch.
+The prototype `colorado-rla` edits are on the **prototype** branch.
 
-1. Clone [https://github.com/DemocracyDevelopers/colorado-rla/tree/scratch](https://github.com/DemocracyDevelopers/colorado-rla/tree/scratch)
+1. Clone [https://github.com/DemocracyDevelopers/colorado-rla/tree/prototype](https://github.com/DemocracyDevelopers/colorado-rla/tree/prototype)
 2. Follow the dev installation instructions at 
-[https://github.com/DemocracyDevelopers/colorado-rla/blob/scratch/docs/25_developer.md](https://github.com/DemocracyDevelopers/colorado-rla/blob/scratch/docs/25_developer.md)
+[https://github.com/DemocracyDevelopers/colorado-rla/blob/prototype/docs/25_developer.md](https://github.com/DemocracyDevelopers/colorado-rla/blob/prototype/docs/25_developer.md)
 particularly `Install and Setup.`
 4. If you are running the `raire-service` on a different computer, update the `raire_url` in
 `server/eclipse-project/src/test/resources/test.properties` and 
@@ -85,7 +85,7 @@ You can request assertions for any IRV contest already present in the colorado-r
    or [the Colorado-rla example data directory](https://github.com/DemocracyDevelopers/colorado-rla/tree/main/test/IRV-test) or make your own.
 3. Log in to colorado-rla as a stateadmin.
 4. Go through the steps of defining an audit. You may need a canonical list file - use either
-[the NSW test one](https://github.com/DemocracyDevelopers/colorado-rla/tree/scratch/test/NSW2021Data) or [the Colorado-rla example one](https://github.com/DemocracyDevelopers/colorado-rla/blob/main/test/IRV-test/IRV_Test_Canonical_List.csv) or make your own. 
+[the NSW test one](https://github.com/DemocracyDevelopers/colorado-rla/tree/prototype/test/NSW2021Data) or [the Colorado-rla example one](https://github.com/DemocracyDevelopers/colorado-rla/blob/main/test/IRV-test/IRV_Test_Canonical_List.csv) or make your own. 
 5. When you reach the `Generate Assertions` page,
 click the `Generate Assertions` button. This should save the assertions in the database. 
 It takes between 5 and 30 seconds, depending on how many votes are relevant.
@@ -117,7 +117,7 @@ and run
 ```
 
 You need to alter the examples to match some assertions that you have already generated (from corla). For example, if you 
-have already generated assertions for Boulder using the [Boulder test data](https://github.com/DemocracyDevelopers/colorado-rla/tree/scratch/test/IRV-test/Boulder2023Data)
+have already generated assertions for Boulder using the [Boulder test data](https://github.com/DemocracyDevelopers/colorado-rla/tree/prototype/test/IRV-test/Boulder2023Data)
 the output of your `testGetAssertions.sh` should look like:
 
 ```
@@ -131,3 +131,7 @@ File: NoAssertionRequest.assertionRequest.json
 {"metadata":{"candidates":["Alice","Bob","Chuan","Diego"],"contest":"NotARealContest98791841978","riskLimit":0.03},"solution":{"Err":"NoAssertionsForThisContest"}}
 ```
 
+## Running the tests
+The tests in src/test/java require Docker. You will need to [Install Docker](https://docs.docker.com/get-docker/) if you haven't got it already. 
+
+On Linux platforms, you need to [add yourself to the docker group](https://docs.docker.com/engine/install/linux-postinstall/). This effectively grants root-level privileges to the user. If that's not what you want (and it's probably not) you can [run docker without root privileges](https://docs.docker.com/engine/security/rootless/).

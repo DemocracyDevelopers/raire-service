@@ -9,6 +9,7 @@ import au.org.democracydevelopers.raireservice.response.GetAssertionsResponse;
 import au.org.democracydevelopers.raireservice.response.Metadata;
 import au.org.democracydevelopers.raireservice.service.GenerateAssertionsService;
 import au.org.democracydevelopers.raireservice.service.GetAssertionsService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,17 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @Slf4j
 @RequestMapping("/raire")
-// @RequiredArgsConstructor
+@RequiredArgsConstructor
 public class AssertionController {
 
   private final GetAssertionsService getAssertionsService;
   private final GenerateAssertionsService generateAssertionsService;
-
-
-
-  public AssertionController(GetAssertionsService getAssertionsService, GenerateAssertionsService generateAssertionsService) {this.getAssertionsService = getAssertionsService;
-      this.generateAssertionsService = generateAssertionsService;
-  }
 
   @PostMapping(path = "/generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
   public GenerateAssertionsResponse serve(@RequestBody ContestRequestByIDs request) {

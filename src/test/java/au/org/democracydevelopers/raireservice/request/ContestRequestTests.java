@@ -1,4 +1,4 @@
-package au.org.democracydevelopers.raireservice;
+package au.org.democracydevelopers.raireservice.request;
 
 import au.org.democracydevelopers.raireservice.request.DirectContestRequest;
 import org.junit.jupiter.api.Test;
