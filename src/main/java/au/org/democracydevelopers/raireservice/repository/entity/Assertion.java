@@ -119,7 +119,7 @@ public abstract class Assertion {
    */
   @Convert(converter = LongIntegerMapConverter.class)
   @Column(columnDefinition = "text")
-  protected Map<Long,Integer> cvrDiscrepancy = new HashMap<>();
+  protected Map<Long, Integer> cvrDiscrepancy = new HashMap<>();
 
   /**
    * The expected number of samples to audit overall assuming overstatements
@@ -164,6 +164,13 @@ public abstract class Assertion {
    */
   @Column(nullable = false, name = "current_risk")
   private BigDecimal my_current_risk = BigDecimal.valueOf(1);
+
+  // The winner. Used for testing only.
+  public String getWinner() { return winner; }
+
+  // The loser. Used for testing only.
+  public String getLoser() { return loser; }
+
 
   /**
    * Creates an Assertion for a specific contest. The assertion has a given winner, loser,

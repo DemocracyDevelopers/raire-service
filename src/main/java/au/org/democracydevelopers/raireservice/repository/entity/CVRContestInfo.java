@@ -16,12 +16,15 @@ package au.org.democracydevelopers.raireservice.repository.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import au.org.democracydevelopers.raireservice.repository.converters.StringArrayConverter;
+
+import java.util.List;
 
 @Slf4j
 @Data
 @Entity
 @Table(name = "cvr_contest_info")
-public abstract class CVRContestInfo {
+public class CVRContestInfo {
 
   /**
    * CVR Contest Info ID.
@@ -53,4 +56,22 @@ public abstract class CVRContestInfo {
    * Construct an empty CVRContestInfo (for persistence).
    */
   public CVRContestInfo(){}
+
+  /**
+   * Construct a minimal CVR with just the info we need for basic testing.
+   * This constructor is used only for testing.
+   * @param id  the ID
+   * @param contestID  the ID of the test contest
+   * @param countyID the ID of the test county
+   * @param choices an array of candidate names
+   */
+  public CVRContestInfo(Long id, Long contestID, Long countyID, String[] choices) {
+    StringArrayConverter conv = new StringArrayConverter();
+
+    this.id = id;
+    this.contestID = contestID;
+    this.countyID = countyID;
+    this.my_choices = conv.convertToDatabaseColumn(choices);
+
+  }
 }

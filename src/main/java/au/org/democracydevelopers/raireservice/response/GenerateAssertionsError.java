@@ -20,6 +20,7 @@ import java.io.IOException;
 @JsonSerialize(using= GenerateAssertionsError.GetAssertionsErrorSerializer.class)
 public abstract class GenerateAssertionsError {
     public static class PlaceholderError extends GenerateAssertionsError {}
+    public static class TiedWinners extends  GenerateAssertionsError {}
 
     /** Custom JSON serializer for Jackson */
     public static class GetAssertionsErrorSerializer extends StdSerializer<GenerateAssertionsError> {
@@ -30,7 +31,10 @@ public abstract class GenerateAssertionsError {
         @Override
         public void serialize(GenerateAssertionsError getAssertionError, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
 
-            if (getAssertionError instanceof PlaceholderError) {
+            if (getAssertionError instanceof TiedWinners) {
+                jsonGenerator.writeString("TiedWinners");
+            }
+            else if (getAssertionError instanceof PlaceholderError) {
                 jsonGenerator.writeString("PlaceholderError");
             }
             else {

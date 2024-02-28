@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -16,14 +17,12 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ActiveProfiles("test-containers")
-@DataJpaTest
+// @DataJpaTest
+@SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class AssertionsTestsWithDatabase {
     @Autowired
     AssertionRepository assertionRepository;
-
-    @Autowired
-    TestEntityManager entityManager;
 
     @Test
     void retrieveZeroAssertions() {
@@ -40,7 +39,6 @@ public class AssertionsTestsWithDatabase {
                 new NEBAssertion(testContestName, "Alice", "Chuan", 15, 10000, 150)
         );
 
-        // entityManager.persist(exampleAssertions);
         assertionRepository.saveAll(exampleAssertions);
 
         List<Assertion> retrieved = assertionRepository.findByContestName(testContestName);

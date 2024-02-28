@@ -12,6 +12,7 @@
 
 package au.org.democracydevelopers.raireservice.response;
 
+import au.org.democracydevelopers.raire.RaireError;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.beans.ConstructorProperties;
@@ -25,6 +26,20 @@ public class GenerateAssertionsResponse {
     public GenerateAssertionsResponse(String contestName, GenerateAssertionsResultOrError winnerOrError) {
         this.contestName = contestName;
         this.response = winnerOrError;
+    }
+
+    /**
+     * Generates a new GenerateAssertionsError that appropriately interprets the RAIRE error.
+     * TODO Add further intelligent handling of more errors.
+     * @param err the RAIRE error to be interpreted.
+     */
+    public GenerateAssertionsResponse(String contestName, RaireError err) {
+        this.contestName = contestName;
+        if(err instanceof RaireError.TiedWinners) {
+            this.response = new GenerateAssertionsResultOrError(new GenerateAssertionsError.TiedWinners());
+        } else {
+            this.response = new GenerateAssertionsResultOrError(new GenerateAssertionsError.PlaceholderError());
+        }
     }
 
 

@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:tc:postgresql://localhost:5432/scratch
-    username: corlaadmin
-    password: corlasecret
+    url: jdbc:tc:postgresql://localhost:5432/corlaTest
+    username: corlatestadmin
+    password: corlatestsecret
   jpa:
     hibernate:
       ddl-auto: create

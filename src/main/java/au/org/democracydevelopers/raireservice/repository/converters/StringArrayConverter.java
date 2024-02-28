@@ -50,7 +50,7 @@ public class StringArrayConverter implements AttributeConverter<String[], String
       new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
 
   /**
-   * Converts the specified list of Strings to a database column entry.
+   * Converts the specified array of Strings to a database column entry.
    * 
    * @param the_list The list of Strings.
    */
@@ -60,7 +60,7 @@ public class StringArrayConverter implements AttributeConverter<String[], String
   }
 
   /**
-   * Converts the specified database column entry to a list of strings.
+   * Converts the specified database column entry to an array of strings.
    * 
    * @param the_column The column entry.
    */

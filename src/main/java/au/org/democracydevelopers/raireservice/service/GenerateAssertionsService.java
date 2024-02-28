@@ -14,12 +14,14 @@ import au.org.democracydevelopers.raireservice.response.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @Component
 @RequiredArgsConstructor
+@Service
 @Slf4j
 public class GenerateAssertionsService {
 
@@ -74,6 +76,8 @@ public class GenerateAssertionsService {
             throw new RuntimeException("Error: vote with repeated names sent to raire-service.");
         }
 
+
+
         // If it's valid, get RAIRE to solve it.
         // BallotComparisonOneOnDilutedMargin is the appropriate audit type for Colorado, which uses ballot-level
         // Comparison audits.
@@ -119,13 +123,7 @@ public class GenerateAssertionsService {
                 // Something went wrong. Return the error. Note this error may reflect something about
                 // the contest, e.g. that it is tied or that assertion generation ran out of time.
                 log.error(solution.Err.toString());
-                return new GenerateAssertionsResponse(request.getContestName(),
-                        new GenerateAssertionsResponse.GenerateAssertionsResultOrError(
-                                new GenerateAssertionsError.PlaceholderError()
-                        ));
+                return new GenerateAssertionsResponse(request.getContestName(), solution.Err);
             }
         }
-
-
-
 }
