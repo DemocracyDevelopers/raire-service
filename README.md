@@ -102,7 +102,7 @@ a countyID of 7, a contestID of 3962159, and a contest called `City of Boulder M
 `./testGenerateAssertions.sh` should look like:
 ```
 File: EmptyRequest.generateAssertionRequest.json
-{"contestName":"City of Boulder Mayoral","response":{"Err":"PlaceholderError"}}
+{"contestName":"City of Boulder Mayoral","response":{"Err":"Invalid request: No IDs"}}
 File: GenerateAssertionRequest.generateAssertionRequest.json
 {"contestName":"City of Boulder Mayoral","response":{"Ok":"Aaron Brockett"}}
 ```
