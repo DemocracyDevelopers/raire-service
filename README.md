@@ -1,9 +1,9 @@
 # raire-service
 Java implementation of RAIRE
 
-PreReq: Java, Maven. This requires Java at least version 17 and has been tested with Java 18.
+PreReq: Java, Maven. This requires Java at least version 21.
 
-The Springboot tests in RAIREMicroserviceAPITests.java additionally require Java 17+ and libtcnative.
+The Springboot tests in RAIREMicroserviceAPITests.java additionally require libtcnative.
 
 ## Compiling 
 
@@ -13,8 +13,6 @@ first have to compile _raire-java_.
 ```bash
 git clone https://github.com/DemocracyDevelopers/raire-java.git
 cd raire-java
-git checkout dev
-# TODO remove above line once it is merged into main.
 mvn install
 cd ..
 ```
@@ -25,7 +23,7 @@ Now you can compile raire-service:
 ```bash
 git clone https://github.com/DemocracyDevelopers/raire-service.git
 cd raire-service
-git checkout DatabaseAccessForAssertions
+git checkout prototype
 # TODO remove above line once it is merged into main.
 mvn compile
 cd ..

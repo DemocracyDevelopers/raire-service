@@ -14,6 +14,7 @@ import au.org.democracydevelopers.raireservice.request.CountyAndContestID;
 import au.org.democracydevelopers.raireservice.request.DirectContestRequest;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsError;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
+import au.org.democracydevelopers.raireservice.response.RaireServiceError;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -228,6 +229,6 @@ public class GenerateAssertionsServiceTests {
         // And it should be properly interpreted by the generateAssertionsService as a tied winner error.
         GenerateAssertionsResponse outcome = generateAssertionsService.storeAssertions(solution, contest);
         assertNotNull(outcome.response.Err);
-        assertInstanceOf(GenerateAssertionsError.TiedWinners.class, outcome.response.Err);
+        assertInstanceOf(RaireServiceError.TiedWinners.class, outcome.response.Err);
     }
 }

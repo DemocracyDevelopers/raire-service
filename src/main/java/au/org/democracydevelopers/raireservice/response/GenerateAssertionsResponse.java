@@ -16,7 +16,9 @@ import au.org.democracydevelopers.raire.RaireError;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.beans.ConstructorProperties;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class GenerateAssertionsResponse {
     public final String contestName;
@@ -29,16 +31,47 @@ public class GenerateAssertionsResponse {
     }
 
     /**
-     * Generates a new GenerateAssertionsError that appropriately interprets the RAIRE error.
-     * TODO Add further intelligent handling of more errors.
-     * @param err the RAIRE error to be interpreted.
+     * Generates a new GenerateAssertionsResponse that appropriately interprets the RAIRE error.
+     * The tied winners indicate an inherent problem with the election.
+     * TimeoutFindingAssertions and TimeoutTrimmingAssertions both indicate that raire ran out of time.
+     * The other kinds of errors should not happen.
+     *
+     * @param candidates The list of candidate names.
+     * @param err        The RAIRE error to be interpreted.
      */
-    public GenerateAssertionsResponse(String contestName, RaireError err) {
+    public GenerateAssertionsResponse(String contestName, String[] candidates, RaireError err) {
         this.contestName = contestName;
-        if(err instanceof RaireError.TiedWinners) {
-            this.response = new GenerateAssertionsResultOrError(new GenerateAssertionsError.TiedWinners());
-        } else {
-            this.response = new GenerateAssertionsResultOrError(new GenerateAssertionsError.PlaceholderError());
+        GenerateAssertionsResultOrError internalError = new GenerateAssertionsResultOrError(new RaireServiceError.InternalError());
+        GenerateAssertionsResultOrError placeholderError = new GenerateAssertionsResultOrError(new RaireServiceError.PlaceholderError());
+
+        switch (err) {
+            // Tied candidates - convert their indices to names (strings)
+            case RaireError.TiedWinners e ->  {
+                List<String> tiedCandidateNames = Arrays.stream(e.expected).mapToObj(i -> candidates[i]).toList();
+                this.response = new GenerateAssertionsResultOrError(new RaireServiceError.TiedWinners(tiedCandidateNames));
+            }
+
+            // Time out finding assertions - return difficulty at time of stopping.
+            case RaireError.TimeoutFindingAssertions e -> this.response
+                    = new GenerateAssertionsResultOrError(new RaireServiceError.TimeoutFindingAssertions(e.difficultyAtTimeOfStopping));
+
+            // Time out trimming - return as is.
+            case RaireError.TimeoutTrimmingAssertions e -> this.response
+                    = new GenerateAssertionsResultOrError(new RaireServiceError.TimeoutTrimmingAssertions());
+
+            // These errors shouldn't happen - they indicate either that raire-service sent the wrong information to
+            // raire-java, or that raire-java had an internal error.
+            // In the case of Invalid timeout, we should catch it and return an error before we send it to RAIRE.
+            case RaireError.WrongWinner e -> this.response = internalError;
+            case RaireError.CouldNotRuleOut e -> this.response = internalError;
+            case RaireError.InternalErrorDidntRuleOutLoser e -> this.response = internalError;
+            case RaireError.InternalErrorRuledOutWinner e -> this.response = internalError;
+            case RaireError.InternalErrorTrimming e -> this.response = internalError;
+            case RaireError.InvalidCandidateNumber e ->  this.response = internalError;
+            case RaireError.InvalidTimeout e -> this.response = internalError;
+            case RaireError.TimeoutCheckingWinner e -> this.response = internalError;
+            case RaireError e -> this.response = internalError;
+            // default ->  this.response = new GenerateAssertionsResultOrError(new RaireServiceError.PlaceholderError());
         }
     }
 
@@ -49,13 +82,13 @@ public class GenerateAssertionsResponse {
         @JsonInclude(JsonInclude.Include.NON_NULL)
         public final String Ok;
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        public final GenerateAssertionsError Err;
+        public final RaireServiceError Err;
 
         /** Only used by the Jackson serialization which can only have one constructor annotated :-( */
         @ConstructorProperties({"Ok","Err"})
-        public GenerateAssertionsResultOrError(String Ok, GenerateAssertionsError Err) { this.Ok=Ok; this.Err=Err;}
+        public GenerateAssertionsResultOrError(String Ok, RaireServiceError Err) { this.Ok=Ok; this.Err=Err;}
         public GenerateAssertionsResultOrError(String Ok) { this.Ok=Ok; this.Err=null;}
-        public GenerateAssertionsResultOrError(GenerateAssertionsError Err) { this.Ok=null; this.Err=Err;}
+        public GenerateAssertionsResultOrError(RaireServiceError Err) { this.Ok=null; this.Err=Err;}
 
     }
 

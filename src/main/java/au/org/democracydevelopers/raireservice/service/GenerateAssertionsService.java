@@ -123,7 +123,7 @@ public class GenerateAssertionsService {
                 // Something went wrong. Return the error. Note this error may reflect something about
                 // the contest, e.g. that it is tied or that assertion generation ran out of time.
                 log.error(solution.Err.toString());
-                return new GenerateAssertionsResponse(request.getContestName(), solution.Err);
+                return new GenerateAssertionsResponse(request.getContestName(), request.getCandidates(), solution.Err);
             }
         }
 }
