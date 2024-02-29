@@ -62,15 +62,15 @@ public class GenerateAssertionsResponse {
             // These errors shouldn't happen - they indicate either that raire-service sent the wrong information to
             // raire-java, or that raire-java had an internal error.
             // In the case of Invalid timeout, we should catch it and return an error before we send it to RAIRE.
-            case RaireError.WrongWinner e -> this.response = internalError;
-            case RaireError.CouldNotRuleOut e -> this.response = internalError;
-            case RaireError.InternalErrorDidntRuleOutLoser e -> this.response = internalError;
-            case RaireError.InternalErrorRuledOutWinner e -> this.response = internalError;
-            case RaireError.InternalErrorTrimming e -> this.response = internalError;
-            case RaireError.InvalidCandidateNumber e ->  this.response = internalError;
-            case RaireError.InvalidTimeout e -> this.response = internalError;
-            case RaireError.TimeoutCheckingWinner e -> this.response = internalError;
-            case RaireError e -> this.response = internalError;
+            case RaireError.WrongWinner                      e -> this.response = internalError;
+            case RaireError.CouldNotRuleOut                  e -> this.response = internalError;
+            case RaireError.InternalErrorDidntRuleOutLoser   e -> this.response = internalError;
+            case RaireError.InternalErrorRuledOutWinner      e -> this.response = internalError;
+            case RaireError.InternalErrorTrimming            e -> this.response = internalError;
+            case RaireError.InvalidCandidateNumber           e -> this.response = internalError;
+            case RaireError.InvalidTimeout                   e -> this.response = internalError;
+            case RaireError.TimeoutCheckingWinner            e -> this.response = internalError;
+            case RaireError                                  e -> this.response = internalError;
             // default ->  this.response = new GenerateAssertionsResultOrError(new RaireServiceError.PlaceholderError());
         }
     }
