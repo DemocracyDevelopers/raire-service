@@ -42,6 +42,16 @@ public abstract class RaireServiceError {
     public static class PlaceholderError extends RaireServiceError {}
 
     /**
+     * The initial request was invalid.
+     */
+    public static class InvalidInput extends RaireServiceError  {
+        final String message;
+        public InvalidInput(String message) {
+            this.message = message;
+        }
+    }
+
+    /**
      * And internal error caused by a coding error. These indicate things that are not supposed to happen,
      * either because they are irrelevant to the Colorado case or because they are not supposed to happen
      * inside raire-java either.
@@ -82,7 +92,6 @@ public abstract class RaireServiceError {
             this.expected = expected;
         }
     }
-
 
     /** Custom JSON serializer for Jackson */
     public static class RaireServiceErrorSerializer extends StdSerializer<RaireServiceError> {

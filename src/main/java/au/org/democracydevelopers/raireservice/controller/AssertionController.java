@@ -4,9 +4,7 @@ import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raireservice.request.ContestRequestByIDs;
 import au.org.democracydevelopers.raireservice.request.DirectContestRequest;
 import au.org.democracydevelopers.raireservice.request.RequestByContestName;
-import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
-import au.org.democracydevelopers.raireservice.response.GetAssertionsResponse;
-import au.org.democracydevelopers.raireservice.response.Metadata;
+import au.org.democracydevelopers.raireservice.response.*;
 import au.org.democracydevelopers.raireservice.service.GenerateAssertionsService;
 import au.org.democracydevelopers.raireservice.service.GetAssertionsService;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +27,13 @@ public class AssertionController {
   @PostMapping(path = "/generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
   public GenerateAssertionsResponse serve(@RequestBody ContestRequestByIDs request) {
     log.info("Received request to get assertions for contest:  {}", request.getContestName());
-    DirectContestRequest contest = generateAssertionsService.getVotesFromDatabase(request);
-    RaireSolution.RaireResultOrError solution = generateAssertionsService.generateAssertions(contest);
-    return generateAssertionsService.storeAssertions(solution, contest);
+    try {
+      DirectContestRequest contest = generateAssertionsService.getVotesFromDatabase(request);
+      RaireSolution.RaireResultOrError solution = generateAssertionsService.generateAssertions(contest);
+      return generateAssertionsService.storeAssertions(solution, contest);
+    } catch (RaireServiceException e) {
+      return new GenerateAssertionsResponse(request.getContestName(), new GenerateAssertionsResponse.GenerateAssertionsResultOrError(e.error));
+    }
   }
 
 

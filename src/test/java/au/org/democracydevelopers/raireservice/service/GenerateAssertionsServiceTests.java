@@ -12,9 +12,9 @@ import au.org.democracydevelopers.raireservice.repository.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.request.ContestRequestByIDs;
 import au.org.democracydevelopers.raireservice.request.CountyAndContestID;
 import au.org.democracydevelopers.raireservice.request.DirectContestRequest;
-import au.org.democracydevelopers.raireservice.response.GenerateAssertionsError;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
 import au.org.democracydevelopers.raireservice.response.RaireServiceError;
+import au.org.democracydevelopers.raireservice.response.RaireServiceException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -173,7 +173,7 @@ public class GenerateAssertionsServiceTests {
      * to get the single vote out of the database first, then generate the (one) assertion.
      */
     @Test
-    void generateTrivialAssertionFromDatabase() {
+    void generateTrivialAssertionFromDatabase() throws RaireServiceException {
 
         CVRContestInfo cvr1 = new CVRContestInfo(1L,1L,1L,aliceOnly);
         cvrRepository.save(cvr1);
@@ -204,6 +204,22 @@ public class GenerateAssertionsServiceTests {
 
         // And Bob should still be the loser.
         assertEquals(BOB, retrieved.get(0).getLoser());
+    }
+
+    @Test
+    void emtpyIDsInContestRequestThrowsException() {
+
+        List<CountyAndContestID> nothing = new ArrayList<>();
+
+        ContestRequestByIDs request = new ContestRequestByIDs("testContestName5", 1,
+                100, List.of(aliceBeforeBob), nothing);
+
+        Exception e = assertThrows(RaireServiceException.class, () -> {
+            generateAssertionsService.getVotesFromDatabase(request);
+        });
+
+        assertInstanceOf(RaireServiceException.class, e);
+        assertTrue(e.getMessage().contains("NoIDs"));
     }
 
     /*

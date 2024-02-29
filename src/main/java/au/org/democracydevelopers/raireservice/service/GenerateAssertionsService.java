@@ -34,8 +34,10 @@ public class GenerateAssertionsService {
      *                the relevant CVRs.
      * @return        The vote data for the requested contest.
      */
-    public DirectContestRequest getVotesFromDatabase(ContestRequestByIDs request) {
+    public DirectContestRequest getVotesFromDatabase(ContestRequestByIDs request) throws RaireServiceException {
         StringArrayConverter conv = new StringArrayConverter();
+
+        validateContestRequestByIDs(request);
 
         List<String[]> votesByName = request.getCountyAndContestIDs()
                 .stream().flatMap(
@@ -44,6 +46,7 @@ public class GenerateAssertionsService {
 
         return new DirectContestRequest(request, votesByName);
     }
+
 
     /**
      * The main method that actually does the work of this service. It
@@ -126,4 +129,24 @@ public class GenerateAssertionsService {
                 return new GenerateAssertionsResponse(request.getContestName(), request.getCandidates(), solution.Err);
             }
         }
+
+
+    /**
+     * A prototype-placeholder for more careful input validation. The idea is that the production version of this
+     * function should check for invalid requests, including
+     * - if the County & Contest IDs don't all correspond to the same contest name
+     * - if the contest is not IRV
+     * - if the County & Contest IDs don't exist
+     * - if the list of candidates is empty
+     *
+     * @param request
+     * TODO Implement all necessary checks. This will require some database interaction.
+     */
+    private void validateContestRequestByIDs(ContestRequestByIDs request) throws RaireServiceException {
+        if (request.getCountyAndContestIDs().isEmpty() || request.getCandidates().isEmpty()) {
+            throw new RaireServiceException(new RaireServiceError.InvalidInput("No IDs"));
+        } else if (request.getCandidates().isEmpty()) {
+            throw new RaireServiceException(new RaireServiceError.InvalidInput("No candidates"));
+        }
+    }
 }
