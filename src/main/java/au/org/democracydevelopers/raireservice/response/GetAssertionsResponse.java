@@ -34,13 +34,13 @@ public class GetAssertionsResponse {
         @JsonInclude(JsonInclude.Include.NON_NULL)
         public final RetrievedRaireResult Ok;
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        public final GetAssertionsError Err;
+        public final RaireServiceError Err;
 
         /** Only used by the Jackson serialization which can only have one constructor annotated :-( */
         @ConstructorProperties({"Ok","Err"})
-        public GetAssertionResultOrError(RetrievedRaireResult Ok, GetAssertionsError Err) { this.Ok=Ok; this.Err=Err;}
+        public GetAssertionResultOrError(RetrievedRaireResult Ok, RaireServiceError Err) { this.Ok=Ok; this.Err=Err;}
         public GetAssertionResultOrError(RetrievedRaireResult Ok) { this.Ok=Ok; this.Err=null;}
-        public GetAssertionResultOrError(GetAssertionsError Err) { this.Ok=null; this.Err=Err;}
+        public GetAssertionResultOrError(RaireServiceError Err) { this.Ok=null; this.Err=Err;}
 
         public GetAssertionResultOrError(RaireSolution.RaireResultOrError solution) {
             if (solution.Ok != null) {
@@ -50,7 +50,7 @@ public class GetAssertionsResponse {
             } else {
                 // FIXME At the moment, this is not properly translating the Raire Error.
                 assert (solution.Err != null);
-                Err = new GetAssertionsError.ErrorRetrievingAssertions();
+                Err = new RaireServiceError.ErrorRetrievingAssertions();
                 Ok = null;
             }
         }

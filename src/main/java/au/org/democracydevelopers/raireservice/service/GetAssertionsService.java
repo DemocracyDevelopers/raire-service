@@ -66,7 +66,7 @@ public class GetAssertionsService {
                 log.debug(String.format("No assertions present for contest %s.", request.getContestName()));
                 log.info(String.format("No assertions present for contest %s.", request.getContestName()));
                 return new GetAssertionsResponse(metadata.getMetadata(),
-                        new GetAssertionsResponse.GetAssertionResultOrError(new GetAssertionsError.NoAssertions()));
+                        new GetAssertionsResponse.GetAssertionResultOrError(new RaireServiceError.NoAssertions()));
             }
 
         } catch (Exception e) {
@@ -74,7 +74,7 @@ public class GetAssertionsService {
             log.debug(String.format("Error retrieving assertions for contest %s.", request.getContestName()));
             log.error(String.format("Error retrieving assertions for contest %s.", request.getContestName()));
             return new GetAssertionsResponse(metadata.getMetadata(),
-                    new GetAssertionsResponse.GetAssertionResultOrError(new GetAssertionsError.ErrorRetrievingAssertions()));
+                    new GetAssertionsResponse.GetAssertionResultOrError(new RaireServiceError.ErrorRetrievingAssertions()));
         }
     }
 
@@ -86,10 +86,10 @@ public class GetAssertionsService {
      * @param assertions the assertions that were retrieved from the database
      * @param candidates the list of candidate names, as strings
      * @return an equivalent array of assertions, as raire-java structures.
-     * @throws GetAssertionsException if any of the assertions retrieved from the database have inconsistent data, e.g.
+     * @throws RaireServiceException if any of the assertions retrieved from the database have inconsistent data, e.g.
      *                               winners or losers who are not listed as candidates.
      */
-    private AssertionAndDifficulty[] convertToRaireAssertionsInOrder(List<Assertion> assertions, List<String> candidates) throws GetAssertionsException {
+    private AssertionAndDifficulty[] convertToRaireAssertionsInOrder(List<Assertion> assertions, List<String> candidates) throws RaireServiceException {
         ArrayList<AssertionAndDifficulty> assertionsWithDifficulty = new ArrayList<AssertionAndDifficulty>();
         for (Assertion a : assertions) {
             au.org.democracydevelopers.raire.assertions.Assertion raireAssertion = a.makeRaireAssertion(candidates);

@@ -44,9 +44,9 @@ public abstract class RaireServiceError {
     /**
      * The initial request was invalid.
      */
-    public static class InvalidInput extends RaireServiceError  {
+    public static class InvalidRequest extends RaireServiceError  {
         final String message;
-        public InvalidInput(String message) {
+        public InvalidRequest(String message) {
             this.message = message;
         }
     }
@@ -92,6 +92,8 @@ public abstract class RaireServiceError {
             this.expected = expected;
         }
     }
+    public static class NoAssertions extends RaireServiceError {}
+    public static class ErrorRetrievingAssertions extends RaireServiceError {}
 
     /** Custom JSON serializer for Jackson */
     public static class RaireServiceErrorSerializer extends StdSerializer<RaireServiceError> {
@@ -104,11 +106,21 @@ public abstract class RaireServiceError {
             jsonGenerator.writeArray(array,0,array.length);
         }
 
+        /**
+         * TODO. Include all types.
+         * @param raireServiceError
+         * @param jsonGenerator
+         * @param serializerProvider
+         * @throws IOException
+         */
         @Override
         public void serialize(RaireServiceError raireServiceError, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
             switch(raireServiceError) {
                 case InvalidTimeout e -> jsonGenerator.writeString("This is a test"+e.toString());
                 case TiedWinners e ->jsonGenerator.writeString("TiedWinners: "+ e.expected);
+                case NoAssertions e -> jsonGenerator.writeString("NoAssertionsForThisContest");
+                case ErrorRetrievingAssertions e -> jsonGenerator.writeString("Error retrieving assertions");
+                case InvalidRequest e -> jsonGenerator.writeString("Invalid request: "+e.message);
                 default -> jsonGenerator.writeString("test");
             }
         }

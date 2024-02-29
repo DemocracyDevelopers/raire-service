@@ -14,7 +14,7 @@
 package au.org.democracydevelopers.raireservice.repository.entity;
 
 import au.org.democracydevelopers.raireservice.repository.converters.LongIntegerMapConverter;
-import au.org.democracydevelopers.raireservice.response.GetAssertionsException;
+import au.org.democracydevelopers.raireservice.response.RaireServiceException;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.persistence.*;
@@ -211,5 +211,5 @@ public abstract class Assertion {
    * @return A raire-java style Assertion - either NEN or NEB as appropriate - with the same data as this.
    * @throws RuntimeException if the data retrieved from the database is not consistent with a valid NEN assertion.
    */
-  public abstract au.org.democracydevelopers.raire.assertions.Assertion makeRaireAssertion(List<String> candidates) throws GetAssertionsException;
+  public abstract au.org.democracydevelopers.raire.assertions.Assertion makeRaireAssertion(List<String> candidates) throws RaireServiceException;
 }

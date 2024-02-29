@@ -144,9 +144,9 @@ public class GenerateAssertionsService {
      */
     private void validateContestRequestByIDs(ContestRequestByIDs request) throws RaireServiceException {
         if (request.getCountyAndContestIDs().isEmpty() || request.getCandidates().isEmpty()) {
-            throw new RaireServiceException(new RaireServiceError.InvalidInput("No IDs"));
+            throw new RaireServiceException(new RaireServiceError.InvalidRequest("No IDs"));
         } else if (request.getCandidates().isEmpty()) {
-            throw new RaireServiceException(new RaireServiceError.InvalidInput("No candidates"));
+            throw new RaireServiceException(new RaireServiceError.InvalidRequest("No candidates"));
         }
     }
 }
