@@ -143,7 +143,7 @@ public class GenerateAssertionsService {
      * TODO Implement all necessary checks. This will require some database interaction.
      */
     private void validateContestRequestByIDs(ContestRequestByIDs request) throws RaireServiceException {
-        if (request.getCountyAndContestIDs().isEmpty() || request.getCandidates().isEmpty()) {
+        if (request.getCountyAndContestIDs().isEmpty()) {
             throw new RaireServiceException(new RaireServiceError.InvalidRequest("No IDs"));
         } else if (request.getCandidates().isEmpty()) {
             throw new RaireServiceException(new RaireServiceError.InvalidRequest("No candidates"));

@@ -206,6 +206,26 @@ public class GenerateAssertionsServiceTests {
         assertEquals(BOB, retrieved.get(0).getLoser());
     }
 
+    /**
+     * Test that an exception is thrown when the contest request contains an empty candidate list.
+     */
+    @Test
+    void emptyCandidatesInContestRequestThrowsException() {
+
+        ContestRequestByIDs request = new ContestRequestByIDs("testContestName5", 1,
+                100, new ArrayList<String>(), List.of(new CountyAndContestID(1L,1L)) );
+
+        Exception e = assertThrows(RaireServiceException.class, () -> {
+            generateAssertionsService.getVotesFromDatabase(request);
+        });
+
+        assertInstanceOf(RaireServiceException.class, e);
+        RaireServiceError serviceError = ((RaireServiceException) e).error;
+        assertInstanceOf(RaireServiceError.InvalidRequest.class, serviceError);
+        String message = ((RaireServiceError.InvalidRequest) serviceError).message;
+        assertTrue(message.contains("No candidates"));
+    }
+
     @Test
     void emtpyIDsInContestRequestThrowsException() {
 
@@ -219,7 +239,10 @@ public class GenerateAssertionsServiceTests {
         });
 
         assertInstanceOf(RaireServiceException.class, e);
-        assertTrue(e.getMessage().contains("NoIDs"));
+        RaireServiceError serviceError = ((RaireServiceException) e).error;
+        assertInstanceOf(RaireServiceError.InvalidRequest.class, serviceError);
+        String message = ((RaireServiceError.InvalidRequest) serviceError).message;
+        assertTrue(message.contains("No IDs"));
     }
 
     /*

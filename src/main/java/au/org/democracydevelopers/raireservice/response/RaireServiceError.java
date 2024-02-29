@@ -45,7 +45,7 @@ public abstract class RaireServiceError {
      * The initial request was invalid.
      */
     public static class InvalidRequest extends RaireServiceError  {
-        final String message;
+        final public String message;
         public InvalidRequest(String message) {
             this.message = message;
         }
