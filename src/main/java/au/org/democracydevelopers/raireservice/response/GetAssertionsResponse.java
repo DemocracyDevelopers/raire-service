@@ -44,11 +44,18 @@ public class GetAssertionsResponse {
 
         public GetAssertionResultOrError(RaireSolution.RaireResultOrError solution) {
             if (solution.Ok != null) {
-                Ok = new RetrievedRaireResult(solution.Ok.assertions, solution.Ok.difficulty,
-                        solution.Ok.margin, solution.Ok.num_candidates);
-                Err = null;
+                if(solution.Ok.assertions.length != 0) {
+                    // Everything is good. We got some assertions. Return them.
+                    Ok = new RetrievedRaireResult(solution.Ok.assertions, solution.Ok.difficulty,
+                            solution.Ok.margin, solution.Ok.num_candidates);
+                    Err = null;
+                } else {
+                    // Database interaction succeeded but there were no assertions.
+                    Err = new RaireServiceError.NoAssertions();
+                    Ok = null;
+                }
             } else {
-                // FIXME At the moment, this is not properly translating the Raire Error.
+                // There was an error retrieving the assertions from the database.
                 assert (solution.Err != null);
                 Err = new RaireServiceError.ErrorRetrievingAssertions();
                 Ok = null;

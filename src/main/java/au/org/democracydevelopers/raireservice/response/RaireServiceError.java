@@ -35,16 +35,12 @@ import java.util.stream.StreamSupport;
  **/
 @JsonSerialize(using= RaireServiceError.RaireServiceErrorSerializer.class)
 @JsonDeserialize(using = RaireServiceError.RaireServiceErrorDeserializer.class)
-public abstract class RaireServiceError {
-    /**
-     * Temporary, for the prototype to deal generically with errors we haven't dealt with properly yet.
-     */
-    public static class PlaceholderError extends RaireServiceError {}
+public abstract sealed class RaireServiceError {
 
     /**
      * The initial request was invalid.
      */
-    public static class InvalidRequest extends RaireServiceError  {
+    public static final class InvalidRequest extends RaireServiceError  {
         final public String message;
         public InvalidRequest(String message) {
             this.message = message;
@@ -56,14 +52,14 @@ public abstract class RaireServiceError {
      * either because they are irrelevant to the Colorado case or because they are not supposed to happen
      * inside raire-java either.
      */
-    public static class InternalError extends RaireServiceError {}
+    public static final class InternalError extends RaireServiceError {}
 
     /** Carry-over of raire-java error.
      * If assertion generation (usually the slowest of the three stages of computation)
      * does not complete within the specified time limit, the TimeoutFindingAssertions error
      * will be generated. All three stages must be completed within the specified time limit
      * or a relevant timeout error will be generated. */
-    public static class TimeoutFindingAssertions extends RaireServiceError { final double difficultyAtTimeOfStopping;
+    public static final class TimeoutFindingAssertions extends RaireServiceError { final double difficultyAtTimeOfStopping;
         public TimeoutFindingAssertions(double difficultyAtTimeOfStopping) {
             this.difficultyAtTimeOfStopping = difficultyAtTimeOfStopping;
         }
@@ -75,19 +71,19 @@ public abstract class RaireServiceError {
      * However, if this stage does not complete within the specified time limit, the
      * TimeoutTrimmingAssertions error will be generated. All three stages must be completed
      * within the specified time limit or a relevant timeout error will be generated.*/
-    public static class TimeoutTrimmingAssertions extends RaireServiceError {}
+    public static final class TimeoutTrimmingAssertions extends RaireServiceError {}
 
     /** Carry-over of raire-java error, which should happen only if the candidate list
      * is empty.
      */
-    public static class InvalidCandidateList extends RaireServiceError {}
+    public static final class InvalidCandidateList extends RaireServiceError {}
 
     /** If RAIRE determines that the contest has multiple possible winners consistent with
      * the rules of IRV (i.e. there is a tie) then the TiedWinners error will be generated.
      * While the particular legislation governing the contest may have unambiguous tie
      * resolution rules, there is no way that an RLA could be helpful if the contest comes
      * down to a tie resolution. */
-    public static class TiedWinners extends RaireServiceError { final List<String> expected;
+    public static final class TiedWinners extends RaireServiceError { final List<String> expected;
         public TiedWinners(List<String> expected) {
             this.expected = expected;
         }
@@ -97,49 +93,48 @@ public abstract class RaireServiceError {
      * but also couldn't be certain how to analyze the winners. This will only happen, if
      * if ever happens, for extremely weird and very close elections.
      */
-    public static class CouldNotAnalyzeElection extends RaireServiceError {}
+    public static final class CouldNotAnalyzeElection extends RaireServiceError {}
 
     /** There are no assertions for this contest in the database.
      */
-    public static class NoAssertions extends RaireServiceError {}
+    public static final class NoAssertions extends RaireServiceError {}
 
     /**
      * There was an error interacting with the database to retrieve the assertions.
      */
-    public static class ErrorRetrievingAssertions extends RaireServiceError {}
+    public static final class ErrorRetrievingAssertions extends RaireServiceError {}
 
     /**
      * There was an error interacting with the database to store the assertions.
      */
-    public static class ErrorStoringAssertions extends RaireServiceError {}
+    public static final class ErrorStoringAssertions extends RaireServiceError {}
 
     /** Custom JSON serializer for Jackson */
-    public static class RaireServiceErrorSerializer extends StdSerializer<RaireServiceError> {
+    public static final class RaireServiceErrorSerializer extends StdSerializer<RaireServiceError> {
 
         public RaireServiceErrorSerializer() { this(null); }
         public RaireServiceErrorSerializer(Class<RaireServiceError> t) { super(t); }
 
-        private void writeIntArray(JsonGenerator jsonGenerator,String fieldName,int[]array) throws IOException {
-            jsonGenerator.writeFieldName(fieldName);
-            jsonGenerator.writeArray(array,0,array.length);
-        }
-
         /**
-         * TODO. Include all types.
+         * Serialize Raire service errors
          * @param raireServiceError
          * @param jsonGenerator
          * @param serializerProvider
-         * @throws IOException
+         * @throws IOException, IllegalStateException
          */
         @Override
         public void serialize(RaireServiceError raireServiceError, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
             switch(raireServiceError) {
-                // case InvalidTimeout e -> jsonGenerator.writeString("This is a test"+e.toString());
-                case TiedWinners e ->jsonGenerator.writeString("TiedWinners: "+ e.expected);
-                case NoAssertions e -> jsonGenerator.writeString("NoAssertionsForThisContest");
+                case InvalidRequest            e -> jsonGenerator.writeString("Invalid request: "+e.message);
+                case TiedWinners               e -> jsonGenerator.writeString("Tied Winners: "+ e.expected);
+                case TimeoutFindingAssertions  e -> jsonGenerator.writeString("Timeout Finding Assertions");
+                case TimeoutTrimmingAssertions e -> jsonGenerator.writeString("Timeout Trimming Assertions");
+                case InternalError             e -> jsonGenerator.writeString("Internal Error");
+                case InvalidCandidateList      e -> jsonGenerator.writeString("Invalid (empty) candidate list");
+                case CouldNotAnalyzeElection   e -> jsonGenerator.writeString("Could not analyze election");
+                case NoAssertions              e -> jsonGenerator.writeString("No Assertions For This Contest");
                 case ErrorRetrievingAssertions e -> jsonGenerator.writeString("Error retrieving assertions");
-                case InvalidRequest e -> jsonGenerator.writeString("Invalid request: "+e.message);
-                default -> jsonGenerator.writeString("test");
+                case ErrorStoringAssertions    e -> jsonGenerator.writeString("Error storing assertions");
             }
         }
     }
@@ -170,7 +165,6 @@ public abstract class RaireServiceError {
                 switch (text) {
                     case "TimeoutTrimmingAssertions" : return new RaireServiceError.TimeoutTrimmingAssertions();
                     case "InternalError" : return new RaireServiceError.InternalError();
-                    case "PlaceholderError" : return new RaireServiceError.PlaceholderError();
                 }
             } else if (node.isObject()) {
                 if (node.has("TimeoutFindingAssertions")) return new RaireServiceError.TimeoutFindingAssertions(node.get("TimeoutFindingAssertions").doubleValue());

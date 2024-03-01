@@ -31,6 +31,9 @@ public class GetAssertionsService {
      */
     public GetAssertionsResponse getAssertions(RequestByContestName request) {
 
+        // TODO: Validate the request, e.g. check that the contest name exists.
+        // Return INVALID_REQUEST error if not.
+
         // Get assertions from database
         List<Assertion> assertions = assertionRepository.findByContestName(request.getContestName());
         List<String> candidates = request.getCandidates();

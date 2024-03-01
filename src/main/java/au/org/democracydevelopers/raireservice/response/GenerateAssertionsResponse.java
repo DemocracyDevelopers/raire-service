@@ -36,6 +36,8 @@ public class GenerateAssertionsResponse {
      * TimeoutFindingAssertions and TimeoutTrimmingAssertions both indicate that raire ran out of time.
      * The other kinds of errors should not happen.
      *
+     * See Design doc V1.1, Sec 4.1.2.
+     *
      * @param candidates The list of candidate names.
      * @param err        The RAIRE error to be interpreted.
      */
@@ -51,13 +53,6 @@ public class GenerateAssertionsResponse {
                 this.response = new GenerateAssertionsResultOrError(new RaireServiceError.TiedWinners(tiedCandidateNames));
             }
 
-            // These errors are indications of a weird and complex election. It's unclear that either of these
-            // ever happen unless there's a tie, but it's possible that it might happen in very strange elections
-            // that are almost tied, or are actually tied but are so complicated that comprehensively analyzing the
-            // tie is not feasible.
-            case RaireError.TimeoutCheckingWinner            e -> this.response = couldNotAnalyzeError;
-            case RaireError.CouldNotRuleOut                  e -> this.response = couldNotAnalyzeError;
-
             // Time out finding assertions - return difficulty at time of stopping.
             case RaireError.TimeoutFindingAssertions e -> this.response
                     = new GenerateAssertionsResultOrError(new RaireServiceError.TimeoutFindingAssertions(e.difficultyAtTimeOfStopping));
@@ -66,20 +61,25 @@ public class GenerateAssertionsResponse {
             case RaireError.TimeoutTrimmingAssertions e -> this.response
                     = new GenerateAssertionsResultOrError(new RaireServiceError.TimeoutTrimmingAssertions());
 
-            // Invalid number of candidates, which should only happen when the entered candidate list is empty.
-            case RaireError.InvalidNumberOfCandidates e -> this.response
-                    = new GenerateAssertionsResultOrError(new RaireServiceError.InvalidCandidateList());
-
+            // These errors are indications of a weird and complex election. It's unclear that either of these
+            // ever happen unless there's a tie, but it's possible that it might happen in very strange elections
+            // that are almost tied, or are actually tied but are so complicated that comprehensively analyzing the
+            // tie is not feasible.
+            case RaireError.TimeoutCheckingWinner            e -> this.response = couldNotAnalyzeError;
+            case RaireError.CouldNotRuleOut                  e -> this.response = couldNotAnalyzeError;
 
             // These errors shouldn't happen - they indicate either that raire-service sent the wrong information to
             // raire-java, or that raire-java had an internal error.
             // In the case of Invalid timeout, we should catch it and return an error before we send it to RAIRE.
-            case RaireError.WrongWinner                      e -> this.response = internalError;
+            // Similarly, an InvalidNumberOfCandidates should never happen because a request with empty candidate list
+            // should be rejected.
             case RaireError.InternalErrorDidntRuleOutLoser   e -> this.response = internalError;
             case RaireError.InternalErrorRuledOutWinner      e -> this.response = internalError;
             case RaireError.InternalErrorTrimming            e -> this.response = internalError;
-            case RaireError.InvalidCandidateNumber           e -> this.response = internalError;
             case RaireError.InvalidTimeout                   e -> this.response = internalError;
+            case RaireError.InvalidCandidateNumber           e -> this.response = internalError;
+            case RaireError.InvalidNumberOfCandidates        e -> this.response = internalError;
+            case RaireError.WrongWinner                      e -> this.response = internalError;
             case RaireError                                  e -> this.response = internalError;
             // default ->  this.response = new GenerateAssertionsResultOrError(new RaireServiceError.PlaceholderError());
         }
