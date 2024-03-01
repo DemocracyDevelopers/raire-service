@@ -42,7 +42,7 @@ public class GenerateAssertionsResponse {
     public GenerateAssertionsResponse(String contestName, String[] candidates, RaireError err) {
         this.contestName = contestName;
         GenerateAssertionsResultOrError internalError = new GenerateAssertionsResultOrError(new RaireServiceError.InternalError());
-        GenerateAssertionsResultOrError placeholderError = new GenerateAssertionsResultOrError(new RaireServiceError.PlaceholderError());
+        GenerateAssertionsResultOrError couldNotAnalyzeError = new GenerateAssertionsResultOrError(new RaireServiceError.CouldNotAnalyzeElection());
 
         switch (err) {
             // Tied candidates - convert their indices to names (strings)
@@ -50,6 +50,13 @@ public class GenerateAssertionsResponse {
                 List<String> tiedCandidateNames = Arrays.stream(e.expected).mapToObj(i -> candidates[i]).toList();
                 this.response = new GenerateAssertionsResultOrError(new RaireServiceError.TiedWinners(tiedCandidateNames));
             }
+
+            // These errors are indications of a weird and complex election. It's unclear that either of these
+            // ever happen unless there's a tie, but it's possible that it might happen in very strange elections
+            // that are almost tied, or are actually tied but are so complicated that comprehensively analyzing the
+            // tie is not feasible.
+            case RaireError.TimeoutCheckingWinner            e -> this.response = couldNotAnalyzeError;
+            case RaireError.CouldNotRuleOut                  e -> this.response = couldNotAnalyzeError;
 
             // Time out finding assertions - return difficulty at time of stopping.
             case RaireError.TimeoutFindingAssertions e -> this.response
@@ -59,17 +66,20 @@ public class GenerateAssertionsResponse {
             case RaireError.TimeoutTrimmingAssertions e -> this.response
                     = new GenerateAssertionsResultOrError(new RaireServiceError.TimeoutTrimmingAssertions());
 
+            // Invalid number of candidates, which should only happen when the entered candidate list is empty.
+            case RaireError.InvalidNumberOfCandidates e -> this.response
+                    = new GenerateAssertionsResultOrError(new RaireServiceError.InvalidCandidateList());
+
+
             // These errors shouldn't happen - they indicate either that raire-service sent the wrong information to
             // raire-java, or that raire-java had an internal error.
             // In the case of Invalid timeout, we should catch it and return an error before we send it to RAIRE.
             case RaireError.WrongWinner                      e -> this.response = internalError;
-            case RaireError.CouldNotRuleOut                  e -> this.response = internalError;
             case RaireError.InternalErrorDidntRuleOutLoser   e -> this.response = internalError;
             case RaireError.InternalErrorRuledOutWinner      e -> this.response = internalError;
             case RaireError.InternalErrorTrimming            e -> this.response = internalError;
             case RaireError.InvalidCandidateNumber           e -> this.response = internalError;
             case RaireError.InvalidTimeout                   e -> this.response = internalError;
-            case RaireError.TimeoutCheckingWinner            e -> this.response = internalError;
             case RaireError                                  e -> this.response = internalError;
             // default ->  this.response = new GenerateAssertionsResultOrError(new RaireServiceError.PlaceholderError());
         }

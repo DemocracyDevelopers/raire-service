@@ -58,11 +58,6 @@ public abstract class RaireServiceError {
      */
     public static class InternalError extends RaireServiceError {}
 
-    /** The RAIRE algorithm is given a time limit in seconds to limit its runtime.
-     * If a negative or NaN value is provided as the time limit, then the InvalidTimout
-     * error is generated. */
-    public static class InvalidTimeout extends RaireServiceError {}
-
     /** Carry-over of raire-java error.
      * If assertion generation (usually the slowest of the three stages of computation)
      * does not complete within the specified time limit, the TimeoutFindingAssertions error
@@ -82,6 +77,11 @@ public abstract class RaireServiceError {
      * within the specified time limit or a relevant timeout error will be generated.*/
     public static class TimeoutTrimmingAssertions extends RaireServiceError {}
 
+    /** Carry-over of raire-java error, which should happen only if the candidate list
+     * is empty.
+     */
+    public static class InvalidCandidateList extends RaireServiceError {}
+
     /** If RAIRE determines that the contest has multiple possible winners consistent with
      * the rules of IRV (i.e. there is a tie) then the TiedWinners error will be generated.
      * While the particular legislation governing the contest may have unambiguous tie
@@ -92,8 +92,26 @@ public abstract class RaireServiceError {
             this.expected = expected;
         }
     }
+
+    /** A catch-all for cases in which raire couldn't definitively prove there was a tie,
+     * but also couldn't be certain how to analyze the winners. This will only happen, if
+     * if ever happens, for extremely weird and very close elections.
+     */
+    public static class CouldNotAnalyzeElection extends RaireServiceError {}
+
+    /** There are no assertions for this contest in the database.
+     */
     public static class NoAssertions extends RaireServiceError {}
+
+    /**
+     * There was an error interacting with the database to retrieve the assertions.
+     */
     public static class ErrorRetrievingAssertions extends RaireServiceError {}
+
+    /**
+     * There was an error interacting with the database to store the assertions.
+     */
+    public static class ErrorStoringAssertions extends RaireServiceError {}
 
     /** Custom JSON serializer for Jackson */
     public static class RaireServiceErrorSerializer extends StdSerializer<RaireServiceError> {
@@ -116,7 +134,7 @@ public abstract class RaireServiceError {
         @Override
         public void serialize(RaireServiceError raireServiceError, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
             switch(raireServiceError) {
-                case InvalidTimeout e -> jsonGenerator.writeString("This is a test"+e.toString());
+                // case InvalidTimeout e -> jsonGenerator.writeString("This is a test"+e.toString());
                 case TiedWinners e ->jsonGenerator.writeString("TiedWinners: "+ e.expected);
                 case NoAssertions e -> jsonGenerator.writeString("NoAssertionsForThisContest");
                 case ErrorRetrievingAssertions e -> jsonGenerator.writeString("Error retrieving assertions");
