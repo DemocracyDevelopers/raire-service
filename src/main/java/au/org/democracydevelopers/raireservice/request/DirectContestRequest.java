@@ -58,7 +58,7 @@ public class DirectContestRequest {
    * @param request A slightly different form of contest request, for which we want to keep the metadata
    * @param votesByName Votes in colorado-rla style, as ordered lists of candidate names.
    */
-  public DirectContestRequest(ContestRequestByIDs request, List<String[]> votesByName) {
+  public DirectContestRequest(GenerateAssertionsRequest request, List<String[]> votesByName) {
     candidates = request.getCandidates().toArray(new String[0]);
     contestName = request.getContestName();
     totalAuditableBallots = request.getTotalAuditableBallots();

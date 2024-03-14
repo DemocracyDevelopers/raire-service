@@ -8,7 +8,7 @@ import au.org.democracydevelopers.raire.util.VoteConsolidator;
 import au.org.democracydevelopers.raireservice.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.repository.CVRRepository;
 import au.org.democracydevelopers.raireservice.repository.converters.StringArrayConverter;
-import au.org.democracydevelopers.raireservice.request.ContestRequestByIDs;
+import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.DirectContestRequest;
 import au.org.democracydevelopers.raireservice.response.*;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class GenerateAssertionsService {
      *                the relevant CVRs.
      * @return        The vote data for the requested contest.
      */
-    public DirectContestRequest getVotesFromDatabase(ContestRequestByIDs request) throws RaireServiceException {
+    public DirectContestRequest getVotesFromDatabase(GenerateAssertionsRequest request) throws RaireServiceException {
         StringArrayConverter conv = new StringArrayConverter();
 
         validateContestRequestByIDs(request);
@@ -142,7 +142,7 @@ public class GenerateAssertionsService {
      * @param request
      * TODO Implement all necessary checks. This will require some database interaction.
      */
-    private void validateContestRequestByIDs(ContestRequestByIDs request) throws RaireServiceException {
+    private void validateContestRequestByIDs(GenerateAssertionsRequest request) throws RaireServiceException {
         if (request.getCountyAndContestIDs().isEmpty()) {
             throw new RaireServiceException(new RaireServiceError.InvalidRequest("No IDs"));
         } else if (request.getCandidates().isEmpty()) {

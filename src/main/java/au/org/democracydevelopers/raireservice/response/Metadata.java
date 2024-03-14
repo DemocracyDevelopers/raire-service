@@ -1,9 +1,9 @@
 package au.org.democracydevelopers.raireservice.response;
 
 import au.org.democracydevelopers.raireservice.repository.entity.Assertion;
-import au.org.democracydevelopers.raireservice.request.ContestRequestByIDs;
+import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.DirectContestRequest;
-import au.org.democracydevelopers.raireservice.request.RequestByContestName;
+import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -33,13 +33,13 @@ public class Metadata {
             metadata.put("assertionRisks", risks);
         }
     }
-    public Metadata(RequestByContestName request) {
+    public Metadata(GetAssertionsRequest request) {
             metadata.put("candidates", request.getCandidates());
             metadata.put("contest", request.getContestName());
             metadata.put("riskLimit", request.getRiskLimit());
     }
 
-    public Metadata(ContestRequestByIDs request) {
+    public Metadata(GenerateAssertionsRequest request) {
         metadata.put("candidates", request.getCandidates());
         metadata.put("contest", request.getContestName());
         metadata.put("totalAuditableBallots", request.getTotalAuditableBallots());

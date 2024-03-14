@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.stream.StreamSupport;
 
 /**
- * Everything that could go wrong in RaireService. Typically this will be returned as a thrown RaireServiceException with this as its argument.
- *
+ * Everything that could go wrong in RaireService. Typically this will be returned as a thrown RaireServiceException
+ * with this as its argument.
  * It is implemented as a class rather than an Exception hierarchy to facilitate detailed error serialization.
  **/
 @JsonSerialize(using= RaireServiceError.RaireServiceErrorSerializer.class)

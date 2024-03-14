@@ -7,9 +7,7 @@ import au.org.democracydevelopers.raireservice.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.repository.CVRRepository;
 import au.org.democracydevelopers.raireservice.repository.entity.Assertion;
 import au.org.democracydevelopers.raireservice.repository.entity.CVRContestInfo;
-import au.org.democracydevelopers.raireservice.repository.entity.NEBAssertion;
-import au.org.democracydevelopers.raireservice.repository.entity.NENAssertion;
-import au.org.democracydevelopers.raireservice.request.ContestRequestByIDs;
+import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.CountyAndContestID;
 import au.org.democracydevelopers.raireservice.request.DirectContestRequest;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
@@ -178,7 +176,7 @@ public class GenerateAssertionsServiceTests {
         CVRContestInfo cvr1 = new CVRContestInfo(1L,1L,1L,aliceOnly);
         cvrRepository.save(cvr1);
 
-        ContestRequestByIDs request = new ContestRequestByIDs("testContestName5", 1,
+        GenerateAssertionsRequest request = new GenerateAssertionsRequest("testContestName5", 1,
                 100, List.of(aliceBeforeBob), List.of(new CountyAndContestID(1L,1L)) );
 
         DirectContestRequest contestRequest = generateAssertionsService.getVotesFromDatabase(request);
@@ -212,7 +210,7 @@ public class GenerateAssertionsServiceTests {
     @Test
     void emptyCandidatesInContestRequestThrowsException() {
 
-        ContestRequestByIDs request = new ContestRequestByIDs("testContestName5", 1,
+        GenerateAssertionsRequest request = new GenerateAssertionsRequest("testContestName5", 1,
                 100, new ArrayList<String>(), List.of(new CountyAndContestID(1L,1L)) );
 
         Exception e = assertThrows(RaireServiceException.class, () -> {
@@ -231,7 +229,7 @@ public class GenerateAssertionsServiceTests {
 
         List<CountyAndContestID> nothing = new ArrayList<>();
 
-        ContestRequestByIDs request = new ContestRequestByIDs("testContestName5", 1,
+        GenerateAssertionsRequest request = new GenerateAssertionsRequest("testContestName5", 1,
                 100, List.of(aliceBeforeBob), nothing);
 
         Exception e = assertThrows(RaireServiceException.class, () -> {

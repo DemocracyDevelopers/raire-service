@@ -1,9 +1,9 @@
 package au.org.democracydevelopers.raireservice.controller;
 
 import au.org.democracydevelopers.raire.RaireSolution;
-import au.org.democracydevelopers.raireservice.request.ContestRequestByIDs;
+import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.DirectContestRequest;
-import au.org.democracydevelopers.raireservice.request.RequestByContestName;
+import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.response.*;
 import au.org.democracydevelopers.raireservice.service.GenerateAssertionsService;
 import au.org.democracydevelopers.raireservice.service.GetAssertionsService;
@@ -25,7 +25,7 @@ public class AssertionController {
   private final GenerateAssertionsService generateAssertionsService;
 
   @PostMapping(path = "/generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
-  public GenerateAssertionsResponse serve(@RequestBody ContestRequestByIDs request) {
+  public GenerateAssertionsResponse serve(@RequestBody GenerateAssertionsRequest request) {
     log.info("Received request to get assertions for contest:  {}", request.getContestName());
     try {
       DirectContestRequest contest = generateAssertionsService.getVotesFromDatabase(request);
@@ -38,7 +38,7 @@ public class AssertionController {
 
 
   @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
-  public GetAssertionsResponse serve(@RequestBody RequestByContestName contest) {
+  public GetAssertionsResponse serve(@RequestBody GetAssertionsRequest contest) {
     log.info("Received request to get assertions for contest:  {}", contest.getContestName());
     return getAssertionsService.getAssertions(contest);
   }

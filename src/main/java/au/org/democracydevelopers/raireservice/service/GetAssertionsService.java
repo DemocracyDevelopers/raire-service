@@ -3,7 +3,7 @@ package au.org.democracydevelopers.raireservice.service;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raireservice.repository.entity.Assertion;
 import au.org.democracydevelopers.raireservice.repository.AssertionRepository;
-import au.org.democracydevelopers.raireservice.request.RequestByContestName;
+import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.response.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class GetAssertionsService {
      * @return a RaireSolution - the resulting collection of assertions, with metadata, or an error.
      * Database interactions: retrieves assertions from the database.
      */
-    public GetAssertionsResponse getAssertions(RequestByContestName request) {
+    public GetAssertionsResponse getAssertions(GetAssertionsRequest request) {
 
         // TODO: Validate the request, e.g. check that the contest name exists.
         // Return INVALID_REQUEST error if not.

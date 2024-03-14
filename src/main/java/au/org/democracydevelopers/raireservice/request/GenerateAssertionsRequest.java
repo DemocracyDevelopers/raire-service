@@ -4,16 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.util.List;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RequestByContestName {
+public class GenerateAssertionsRequest {
   private String contestName;
+  private int totalAuditableBallots;
+  private Integer timeProvisionForResult;
   private List<String> candidates;
-  private BigDecimal riskLimit;
-
-
+  private List<CountyAndContestID> countyAndContestIDs;
 }
