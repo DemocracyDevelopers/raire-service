@@ -1,9 +1,0 @@
-{"contestName": "TrivialExample1", 
-"totalAuditableBallots": 15, 
-"timeProvisionForResult": 10, 
- "candidates": ["Alice","Bob"], 
-"votes":[["Alice","Bob"],["Alice","Bob"]]
-}
-
-
-
