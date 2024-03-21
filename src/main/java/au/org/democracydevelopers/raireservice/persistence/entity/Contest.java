@@ -28,7 +28,8 @@ public class Contest {
    */
   @Id
   @Column(updatable = false, nullable = false)
-  // @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  // Generation is only used for testing.
+  @GeneratedValue(strategy = GenerationType.SEQUENCE)
   private Long id;
 
   /**
