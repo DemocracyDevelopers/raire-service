@@ -1,9 +1,6 @@
-package au.org.democracydevelopers.raireservice.repository;
+package au.org.democracydevelopers.raireservice.persistence.repository;
 
-import au.org.democracydevelopers.raireservice.repository.AssertionRepository;
-import au.org.democracydevelopers.raireservice.repository.entity.Assertion;
-import au.org.democracydevelopers.raireservice.repository.entity.NEBAssertion;
-import au.org.democracydevelopers.raireservice.repository.entity.NENAssertion;
+import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
