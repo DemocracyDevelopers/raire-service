@@ -31,6 +31,7 @@ public interface AssertionRepository extends JpaRepository<Assertion, Long> {
      * @param contestName - the contest name.
      * @param ballotCount - the total auditable ballots for the audit, which may not be the same as the number of ballots in the contest.
      * @param candidates - the names of the candidates.
+     * Note: possibly @PrePersist would give us a slicker way of doing makeStoreable.
      */
      default void saveRaireAssertions(AssertionAndDifficulty[] assertions, String contestName, Integer ballotCount, String[] candidates) {
         List<Assertion> storeableAssertions = Arrays.stream(assertions).map(a ->
