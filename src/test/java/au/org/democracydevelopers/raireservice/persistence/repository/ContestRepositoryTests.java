@@ -1,5 +1,6 @@
 package au.org.democracydevelopers.raireservice.persistence.repository;
 
+import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,36 +12,32 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ActiveProfiles("test-containers")
-// @DataJpaTest
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class AssertionsTestsWithDatabase {
+public class ContestRepositoryTests {
   @Autowired
   ContestRepository contestRepository;
 
   @Test
   void retrieveZeroContests() {
-    List<Contest> retrieved = contestRepository.findByContestName("nonExistentContest");
+    List<Contest> retrieved = contestRepository.findByName("nonExistentContest");
     assertEquals(0, retrieved.size());
   }
 
-  /*
+  // Scratch test which, obviously, only works when this contest is already in the database.
   @Test
-  void WhenAssertionsAreSavedTheRightNumberAreRetrieved() {
-    List<String> continuing = List.of("Alice", "Bob");
-    String testContestName = "testContest";
-    List<Assertion> exampleAssertions = List.of(
-        new NENAssertion(testContestName, "Alice", "Bob", 10, 10000, 200, continuing),
-        new NEBAssertion(testContestName, "Alice", "Chuan", 15, 10000, 150)
-    );
-
-    assertionRepository.saveAll(exampleAssertions);
-
-    List<Assertion> retrieved = assertionRepository.findByContestName(testContestName);
-    assertEquals(2, retrieved.size());
+  void retrieveBallinaMayoral() {
+    List<Contest> ballina = contestRepository.findByName("Ballina Mayoral");
+    assertEquals(1, ballina.size());
   }
-  */
+
+  @Test
+  void retrieveByCountyAndContestID() {
+    List<Contest> bellingen = contestRepository.findByContestAndCountyID(3856102L, 2L);
+    assertEquals(1, bellingen.size());
+  }
 }
