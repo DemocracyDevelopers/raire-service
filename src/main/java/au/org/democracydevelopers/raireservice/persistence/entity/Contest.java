@@ -14,11 +14,11 @@
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
 import jakarta.persistence.*;
-// import lombok.Data;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-// @Data
+@Data
 @Entity
 @Table(name = "contest")
 public class Contest {

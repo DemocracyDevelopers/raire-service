@@ -12,7 +12,8 @@ import java.util.List;
 public interface ContestRepository extends JpaRepository<Contest, Long> {
 
   /**
-   * Select contests by contest name.
+   * Select contests by contest name
+   * Spring syntactic sugar for the obvious SELECT query.
    * @param contestName - the name of the contest.
    * @return - the contests with that name, as retrieved from the database.
    * Note: we may not actually want to find them all - it might suffice just to check whether
