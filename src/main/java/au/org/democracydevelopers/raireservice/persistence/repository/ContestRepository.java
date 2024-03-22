@@ -42,7 +42,7 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
    * @return the (singleton or empty) list of matching contests.
    */
   @Query(value = "select c from Contest c where c.id = :contestID and c.countyID = :countyID")
-  List<Contest> findByContestAndCountyID(@Param("contestID") Long contestID,
-      @Param("countyID") Long countyID);
+  List<Contest> findByContestAndCountyID(@Param("contestID") long contestID,
+      @Param("countyID") long countyID);
 
 }
