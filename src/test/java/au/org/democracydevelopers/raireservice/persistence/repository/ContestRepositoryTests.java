@@ -45,12 +45,14 @@ public class ContestRepositoryTests {
     ballinaCouncillorContest = new Contest("IRV","Ballina Councillor", 2L, 0L);
   }
 
+  // Test that retrieval of a non-existent contest name retrieves nothing
   @Test
   void retrieveZeroContests() {
     List<Contest> retrieved = contestRepository.findByName("nonExistentContest");
     assertEquals(0, retrieved.size());
   }
 
+  // Test that retrieving Ballina Mayoral works as expected
   @Test
   void retrieveBallinaMayoral() {
     contestRepository.save(ballinaMayoralContest);
@@ -73,13 +75,15 @@ public class ContestRepositoryTests {
   }
   */
 
+  // Test that retrieving Ballina Councillor by county and contestID works as expected.
+  // We don't know what order the contests will be inserted, so it might be either 0th or 1st ID.
   @Test
   void retrieveByCountyAndContestID() {
     contestRepository.save(ballinaCouncillorContest);
     List<Contest> byIDs = contestRepository.findByContestAndCountyID(1L, 2L);
     List<Contest> byIDs2 = contestRepository.findByContestAndCountyID(2L, 2L);
 
-    // We don't know what order the contests will be inserted, so it might be either 0th or 1st ID.
     assertEquals(1, byIDs.size()+byIDs2.size());
+
   }
 }
