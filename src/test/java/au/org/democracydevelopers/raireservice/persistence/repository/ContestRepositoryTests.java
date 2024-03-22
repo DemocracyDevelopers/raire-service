@@ -1,3 +1,14 @@
+/*
+Copyright 2024 Democracy Developers
+The Raire Service is designed to connect colorado-rla and its associated database to
+the raire assertion generation engine (https://github.com/DemocracyDevelopers/raire-java).
+
+This file is part of raire-service.
+raire-service is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+raire-service is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+You should have received a copy of the GNU Affero General Public License along with ConcreteSTV. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 package au.org.democracydevelopers.raireservice.persistence.repository;
 
 import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
@@ -13,6 +24,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/*
+ * tests on contest retrieval - currently very basic.
+ */
 @ActiveProfiles("test-containers")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
@@ -22,7 +36,7 @@ public class ContestRepositoryTests {
 
   private static Contest ballinaMayoralContest;
   private static Contest ballinaCouncillorContest;
-  private static String ballinaMayoral = "Ballina Mayoral";
+  private static final String ballinaMayoral = "Ballina Mayoral";
 
   @BeforeAll
   public static void setup() {
@@ -43,10 +57,10 @@ public class ContestRepositoryTests {
     List<Contest> ballina = contestRepository.findByName(ballinaMayoral);
 
     assertEquals(1, ballina.size());
-    assertEquals(ballinaMayoral, ballina.get(0).name);
-    assertEquals("IRV", ballina.get(0).description);
-    assertEquals(1L, ballina.get(0).countyID);
-    assertEquals(0L, ballina.get(0).version);
+    assertEquals(ballinaMayoral, ballina.getFirst().name);
+    assertEquals("IRV", ballina.getFirst().description);
+    assertEquals(1L, ballina.getFirst().countyID);
+    assertEquals(0L, ballina.getFirst().version);
   }
 
   /*

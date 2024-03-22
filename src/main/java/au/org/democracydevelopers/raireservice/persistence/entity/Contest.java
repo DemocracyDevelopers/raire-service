@@ -1,24 +1,23 @@
 /*
- * Sketch of abstract Assertion class (following conventions of other CORLA classes).
- *
- * Will need to implement PersistentEntity and Serializable interfaces, as shown.
- *
- * JPA hibernate annotations are speculative.
- */
+Copyright 2024 Democracy Developers
+The Raire Service is designed to connect colorado-rla and its associated database to
+the raire assertion generation engine (https://github.com/DemocracyDevelopers/raire-java).
 
-/* This is very similar to the Assertion.java class in colorado-rla, with the Springboot upgrades copied from
- * CDOS's SampleSizeDemoApplication.
- * Function calls are not needed and have been removed.
- */
+This file is part of raire-service.
+raire-service is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+raire-service is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+You should have received a copy of the GNU Affero General Public License along with ConcreteSTV. If not, see <https://www.gnu.org/licenses/>.
+*/
 
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
 import jakarta.persistence.*;
-// import lombok.Data;
-// import lombok.extern.slf4j.Slf4j;
 
-// @Slf4j
-// @Data
+/*
+ * A contest class used for reading contest data out of the corla database.
+ * This class omits the fields that are not relevant to input validation - we only care about
+ * checking whether the request we received makes sense for IRV assertion generation or retrieval.
+ */
 @Entity
 @Table(name = "contest")
 public class Contest {
@@ -62,7 +61,7 @@ public class Contest {
   public Contest(){}
 
   /**
-   * Construct a CVRContestInfo with specific data (for testing).
+   * Construct a CVRContestInfo with specific data (used only for testing).
    */
   public Contest(String description, String name, Long countyID, Long version) {
     if(description == null || name == null ) {
