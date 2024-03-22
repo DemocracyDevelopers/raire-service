@@ -29,7 +29,7 @@ public class Contest {
   @Column(updatable = false, nullable = false)
   // Generation is only used for testing.
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  private Long id;
+  private long id;
 
   /**
    * Description - should be either IRV or PLURALITY
@@ -47,13 +47,13 @@ public class Contest {
    * ID of contest for which this Assertion was generated.
    */
   @Column(name = "county_id", nullable = false)
-  public Long countyID;
+  public long countyID;
 
   /**
    * Version. Currently not used.
    */
   @Column(name = "version")
-  public Long version;
+  public long version;
 
   /**
    * Construct an empty CVRContestInfo (for persistence).
@@ -63,7 +63,7 @@ public class Contest {
   /**
    * Construct a CVRContestInfo with specific data (used only for testing).
    */
-  public Contest(String description, String name, Long countyID, Long version) {
+  public Contest(String description, String name, long countyID, long version) {
     if(description == null || name == null ) {
       throw new RuntimeException("Contest initialized with null values: "
           + "description = "+description+" name = "+name);
