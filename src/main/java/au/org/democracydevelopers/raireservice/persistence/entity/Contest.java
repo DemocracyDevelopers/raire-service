@@ -36,25 +36,25 @@ public class Contest {
    * Description - should be either IRV or PLURALITY
    */
   @Column(name = "description", nullable = false)
-  private String description;
+  public String description;
 
   /**
    * The name of the contest
    */
   @Column(name = "name", nullable = false)
-  private String name;
+  public String name;
 
   /**
    * ID of contest for which this Assertion was generated.
    */
   @Column(name = "county_id", nullable = false)
-  private Long countyID;
+  public Long countyID;
 
   /**
    * Version. Currently not used.
    */
   @Column(name = "version")
-  private Long version;
+  public Long version;
 
   /**
    * Construct an empty CVRContestInfo (for persistence).
