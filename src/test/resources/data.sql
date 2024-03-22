@@ -1,0 +1,1 @@
+INSERT INTO contest values(1, 'IRV', 'Byron', 1, 0);
