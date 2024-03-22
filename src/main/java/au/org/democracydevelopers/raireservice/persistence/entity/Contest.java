@@ -14,11 +14,11 @@
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
+// import lombok.Data;
+// import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
-@Data
+// @Slf4j
+// @Data
 @Entity
 @Table(name = "contest")
 public class Contest {
@@ -60,4 +60,19 @@ public class Contest {
    * Construct an empty CVRContestInfo (for persistence).
    */
   public Contest(){}
+
+  /**
+   * Construct a CVRContestInfo with specific data (for testing).
+   */
+  public Contest(String description, String name, Long countyID, Long version) {
+    if(description == null || name == null ) {
+      throw new RuntimeException("Contest initialized with null values: "
+          + "description = "+description+" name = "+name);
+    }
+
+    this.description = description;
+    this.name = name;
+    this.countyID = countyID;
+    this.version = version;
+  }
 }

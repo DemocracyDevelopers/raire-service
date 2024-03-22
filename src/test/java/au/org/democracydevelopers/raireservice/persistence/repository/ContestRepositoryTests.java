@@ -26,17 +26,9 @@ public class ContestRepositoryTests {
 
   @BeforeAll
   public static void setup() {
-    ballinaMayoralContest = new Contest();
-    ballinaMayoralContest.setName(ballinaMayoral);
-    ballinaMayoralContest.setDescription("IRV");
-    ballinaMayoralContest.setVersion(0L);
-    ballinaMayoralContest.setCountyID(1L);
+    ballinaMayoralContest = new Contest("IRV",ballinaMayoral, 1L, 0L);
 
-    ballinaCouncillorContest = new Contest();
-    ballinaCouncillorContest.setName("Ballina Councillor");
-    ballinaCouncillorContest.setDescription("IRV");
-    ballinaCouncillorContest.setVersion(0L);
-    ballinaCouncillorContest.setCountyID(2L);
+    ballinaCouncillorContest = new Contest("IRV","Ballina Councillor", 2L, 0L);
   }
 
   @Test
@@ -51,10 +43,10 @@ public class ContestRepositoryTests {
     List<Contest> ballina = contestRepository.findByName(ballinaMayoral);
 
     assertEquals(1, ballina.size());
-    assertEquals(ballinaMayoral, ballina.get(0).getName());
-    assertEquals("IRV", ballina.get(0).getDescription());
-    assertEquals(1L, ballina.get(0).getCountyID());
-    assertEquals(0L, ballina.get(0).getVersion());
+    assertEquals(ballinaMayoral, ballina.get(0).name);
+    assertEquals("IRV", ballina.get(0).description);
+    assertEquals(1L, ballina.get(0).countyID);
+    assertEquals(0L, ballina.get(0).version);
   }
 
   /*
