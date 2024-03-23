@@ -12,6 +12,7 @@ You should have received a copy of the GNU Affero General Public License along w
 package au.org.democracydevelopers.raireservice.persistence.repository;
 
 import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -23,6 +24,7 @@ import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /*
  * tests on contest retrieval - currently very basic.
@@ -41,8 +43,8 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void retrieveZeroContests() {
-    List<Contest> retrieved = contestRepository.findByName("nonExistentContest");
-    assertEquals(0, retrieved.size());
+    Optional<Contest> retrieved = contestRepository.findFirstByName("nonExistentContest");
+    assertTrue(retrieved.isEmpty());
   }
 
   // Test that retrieving Ballina Mayoral works as expected
@@ -50,13 +52,13 @@ public class ContestRepositoryTests {
   @Transactional
   void retrieveBallinaMayoral() {
     contestRepository.saveAndFlush(ballinaMayoralContest);
-    List<Contest> ballina = contestRepository.findByName(ballinaMayoral);
+    Optional<Contest> ballina = contestRepository.findFirstByName(ballinaMayoral);
 
-    assertEquals(1, ballina.size());
-    assertEquals(ballinaMayoral, ballina.getFirst().name);
-    assertEquals("IRV", ballina.getFirst().description);
-    assertEquals(1L, ballina.getFirst().countyID);
-    assertEquals(0L, ballina.getFirst().version);
+    assertTrue(ballina.isPresent());
+    assertEquals(ballinaMayoral, ballina.get().name);
+    assertEquals("IRV", ballina.get().description);
+    assertEquals(1L, ballina.get().countyID);
+    assertEquals(0L, ballina.get().version);
   }
 
   /*
@@ -64,8 +66,8 @@ public class ContestRepositoryTests {
   *   it does not seem able to find it.
   @Test
   void retrieveByron() {
-    List<Contest> byron = contestRepository.findByName("Byron");
-    assertEquals(1,byron.size());
+    List<Contest> byron = contestRepository.findFirstByName("Byron");
+    assertTrue(byron.isPresent());
   }
   */
 
@@ -77,9 +79,9 @@ public class ContestRepositoryTests {
   void retrieveByCountyAndContestID() {
     contestRepository.deleteAll();
     contestRepository.saveAndFlush(ballinaMayoralContest);
-    List<Contest> byName = contestRepository.findByName(ballinaMayoral);
-    assertEquals(1, byName.size());
-    Contest contest = byName.getFirst();
+    Optional<Contest> byName = contestRepository.findFirstByName(ballinaMayoral);
+    assertTrue(byName.isPresent());
+    Contest contest = byName.get();
 
     List<Contest> byIDs = contestRepository.findByContestAndCountyID(contest.id, contest.countyID);
 
