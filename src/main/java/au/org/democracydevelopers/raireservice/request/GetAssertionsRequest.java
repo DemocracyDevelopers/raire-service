@@ -11,6 +11,8 @@
 
 package au.org.democracydevelopers.raireservice.request;
 
+import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
+import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -19,29 +21,48 @@ public class GetAssertionsRequest {
   private List<String> candidates;
   private BigDecimal riskLimit;
 
+  // All args constructor.
+  public GetAssertionsRequest() {
+
+  }
+
+  // No args constructor. Needed for serialization.
+  public GetAssertionsRequest(String contestName, List<String> candidates, BigDecimal riskLimit) {
+    this.contestName = contestName;
+    this.candidates = candidates;
+    this.riskLimit = riskLimit;
+  }
+
   /**
    * Validates the request, checking that the contest exists and is an IRV contest,
    * that the risk limit has a sensible value, and that there are candidates.
    * Note it does _not_ check whether the candidates are present in the CVRs.
-   * @throws RequestValidationException
+   * @param contestRepository the respository for getting Contest objects from the database.
+   * @throws RequestValidationException if the request is invalid.
    */
-  public void Validate() throws RequestValidationException {
-    if(contestName == null || contestName.isBlank()) {
+  public void Validate(ContestRepository contestRepository) throws RequestValidationException {
+    if (contestName == null || contestName.isBlank()) {
       throw new RequestValidationException("No contest name.");
     }
 
-    if(candidates.isEmpty() || candidates.stream().anyMatch(String::isBlank)) {
+    if (candidates == null || candidates.isEmpty() || candidates.stream().anyMatch(String::isBlank)) {
       throw new RequestValidationException("Bad candidate list.");
     }
 
     // Check for a negative risk limit. Risk limits >1 are vacuous but not illegal.
     // Risk limits of exactly zero are unattainable but will not cause a problem.
-    if(riskLimit.compareTo(BigDecimal.ZERO) < 0) {
-      throw new RequestValidationException("Negative risk limit.");
+    if (riskLimit == null || riskLimit.compareTo(BigDecimal.ZERO) < 0) {
+      throw new RequestValidationException("Null or negative risk limit.");
     }
 
+    List<Contest> contests = contestRepository.findByName(contestName);
+    if (contests == null || contests.isEmpty()) {
+      throw new RequestValidationException("No such contest.");
+    }
 
-
+    if (contests.stream().anyMatch(c -> !c.description.equals("IRV"))) {
+      throw new RequestValidationException("Contest " + contestName + " are not all IRV contests.");
+    }
+  }
 }
 
-}

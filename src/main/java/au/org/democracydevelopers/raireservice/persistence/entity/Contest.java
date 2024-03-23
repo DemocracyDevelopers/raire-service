@@ -29,7 +29,7 @@ public class Contest {
   @Column(updatable = false, nullable = false)
   // Generation is only used for testing.
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  private long id;
+  public long id;
 
   /**
    * Description - should be either IRV or PLURALITY

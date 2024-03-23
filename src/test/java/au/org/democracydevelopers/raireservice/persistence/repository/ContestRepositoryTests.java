@@ -12,7 +12,6 @@ You should have received a copy of the GNU Affero General Public License along w
 package au.org.democracydevelopers.raireservice.persistence.repository;
 
 import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -21,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -34,19 +34,12 @@ public class ContestRepositoryTests {
   @Autowired
   ContestRepository contestRepository;
 
-  private static Contest ballinaMayoralContest;
-  private static Contest ballinaCouncillorContest;
   private static final String ballinaMayoral = "Ballina Mayoral";
-
-  @BeforeAll
-  public static void setup() {
-    ballinaMayoralContest = new Contest("IRV",ballinaMayoral, 1L, 0L);
-
-    ballinaCouncillorContest = new Contest("IRV","Ballina Councillor", 2L, 0L);
-  }
+  private static final Contest ballinaMayoralContest = new Contest("IRV",ballinaMayoral, 1L, 0L);
 
   // Test that retrieval of a non-existent contest name retrieves nothing
   @Test
+  @Transactional
   void retrieveZeroContests() {
     List<Contest> retrieved = contestRepository.findByName("nonExistentContest");
     assertEquals(0, retrieved.size());
@@ -54,8 +47,9 @@ public class ContestRepositoryTests {
 
   // Test that retrieving Ballina Mayoral works as expected
   @Test
+  @Transactional
   void retrieveBallinaMayoral() {
-    contestRepository.save(ballinaMayoralContest);
+    contestRepository.saveAndFlush(ballinaMayoralContest);
     List<Contest> ballina = contestRepository.findByName(ballinaMayoral);
 
     assertEquals(1, ballina.size());
@@ -76,14 +70,21 @@ public class ContestRepositoryTests {
   */
 
   // Test that retrieving Ballina Councillor by county and contestID works as expected.
-  // We don't know what order the contests will be inserted, so it might be either 0th or 1st ID.
+  // We don't know what order the contests will be inserted, so this test retrieves it by name and
+  // then checks that the same thing is retrieved by IDs.
   @Test
+  @Transactional
   void retrieveByCountyAndContestID() {
-    contestRepository.save(ballinaCouncillorContest);
-    List<Contest> byIDs = contestRepository.findByContestAndCountyID(1L, 2L);
-    List<Contest> byIDs2 = contestRepository.findByContestAndCountyID(2L, 2L);
+    contestRepository.deleteAll();
+    contestRepository.saveAndFlush(ballinaMayoralContest);
+    List<Contest> byName = contestRepository.findByName(ballinaMayoral);
+    assertEquals(1, byName.size());
+    Contest contest = byName.getFirst();
 
-    assertEquals(1, byIDs.size()+byIDs2.size());
+    List<Contest> byIDs = contestRepository.findByContestAndCountyID(contest.id, contest.countyID);
 
+    assertEquals(1, byIDs.size());
+    Contest retrievedContest = byIDs.getFirst();
+    assertEquals(retrievedContest.name, contest.name);
   }
 }
