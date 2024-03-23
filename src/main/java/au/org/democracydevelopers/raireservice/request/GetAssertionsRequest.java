@@ -15,15 +15,18 @@ import au.org.democracydevelopers.raireservice.persistence.repository.ContestRep
 import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
 import java.math.BigDecimal;
 import java.util.List;
+import org.springframework.data.annotation.ReadOnlyProperty;
 
 public class GetAssertionsRequest {
-  private String contestName;
+  @ReadOnlyProperty
+  public String contestName;
+  @ReadOnlyProperty
   private List<String> candidates;
+  @ReadOnlyProperty
   private BigDecimal riskLimit;
 
   // No args constructor. Needed for serialization.
   public GetAssertionsRequest() {
-
   }
 
   // All args constructor.
@@ -55,13 +58,12 @@ public class GetAssertionsRequest {
       throw new RequestValidationException("Null or negative risk limit.");
     }
 
-    List<Contest> contests = contestRepository.findByName(contestName);
-    if (contests == null || contests.isEmpty()) {
-      throw new RequestValidationException("No such contest.");
+    if(contestRepository.findFirstByName(contestName).isEmpty()) {
+      throw new RequestValidationException("No such contest: "+contestName);
     }
 
-    if (contests.stream().anyMatch(c -> !c.description.equals("IRV"))) {
-      throw new RequestValidationException("Contest " + contestName + " are not all IRV contests.");
+    if(!contestRepository.isAllIRV(contestName)) {
+      throw new RequestValidationException("Not all IRV: "+contestName);
     }
   }
 }

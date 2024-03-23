@@ -12,6 +12,8 @@ You should have received a copy of the GNU Affero General Public License along w
 package au.org.democracydevelopers.raireservice.persistence.repository;
 
 import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
+import au.org.democracydevelopers.raireservice.request.RequestValidationException;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -36,6 +38,14 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
   List<Contest> findByName(String contestName);
 
   /**
+   * Find the first element by contest name
+   * @param contestName - the name of the contest.
+   * @return - the first of that name,
+   */
+  Optional<Contest> findFirstByName(String contestName);
+
+
+  /**
    * Select contests by contest ID and county ID.
    * @param contestID the ID of the contest
    * @param countyID the ID of the county
@@ -45,4 +55,9 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
   List<Contest> findByContestAndCountyID(@Param("contestID") long contestID,
       @Param("countyID") long countyID);
 
+  public default boolean isAllIRV(String contestName) {
+    List<Contest> contests = findByName(contestName);
+
+    return contests.stream().anyMatch(c -> !c.description.equals("IRV"));
+  }
 }

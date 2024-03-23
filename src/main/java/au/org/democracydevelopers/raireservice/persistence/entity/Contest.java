@@ -12,6 +12,7 @@ You should have received a copy of the GNU Affero General Public License along w
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
 import jakarta.persistence.*;
+import org.springframework.data.annotation.ReadOnlyProperty;
 
 /*
  * A contest class used for reading contest data out of the corla database.
@@ -27,6 +28,7 @@ public class Contest {
    */
   @Id
   @Column(updatable = false, nullable = false)
+  @ReadOnlyProperty
   // Generation is only used for testing.
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   public long id;
@@ -34,24 +36,28 @@ public class Contest {
   /**
    * Description - should be either IRV or PLURALITY
    */
+  @ReadOnlyProperty
   @Column(name = "description", nullable = false)
   public String description;
 
   /**
    * The name of the contest
    */
+  @ReadOnlyProperty
   @Column(name = "name", nullable = false)
   public String name;
 
   /**
    * ID of contest for which this Assertion was generated.
    */
+  @ReadOnlyProperty
   @Column(name = "county_id", nullable = false)
   public long countyID;
 
   /**
    * Version. Currently not used.
    */
+  @ReadOnlyProperty
   @Column(name = "version")
   public long version;
 

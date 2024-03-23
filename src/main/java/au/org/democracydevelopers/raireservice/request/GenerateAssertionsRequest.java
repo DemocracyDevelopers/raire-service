@@ -11,13 +11,77 @@
 
 package au.org.democracydevelopers.raireservice.request;
 
+import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
+import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
+import java.math.BigDecimal;
 import java.util.List;
 import jdk.jfr.DataAmount;
+import org.springframework.data.annotation.ReadOnlyProperty;
 
 public class GenerateAssertionsRequest {
-  private String contestName;
-  private int totalAuditableBallots;
-  private int timeProvisionForResult;
-  private List<String> candidates;
-  private List<CountyAndContestID> countyAndContestIDs;
+
+  @ReadOnlyProperty
+  public String contestName;
+  @ReadOnlyProperty
+  public int totalAuditableBallots;
+  @ReadOnlyProperty
+  public int timeProvisionForResult;
+  @ReadOnlyProperty
+  public List<String> candidates;
+  @ReadOnlyProperty
+  public List<CountyAndContestID> countyAndContestIDs;
+
+  // No args constructor. Used for serialization.
+  public GenerateAssertionsRequest() {
+  }
+
+  // All args constructor.
+  public GenerateAssertionsRequest(String contestName, int totalAuditableBallots,
+      int timeProvisionForResult,
+      List<String> candidates, List<CountyAndContestID> countyAndContestIDs) {
+    this.contestName = contestName;
+    this.totalAuditableBallots = totalAuditableBallots;
+    this.timeProvisionForResult = timeProvisionForResult;
+    this.candidates = candidates;
+    this.countyAndContestIDs = countyAndContestIDs;
+  }
+
+  /**
+   * Validates the request, checking that the contest exists and is an IRV contest, that the risk
+   * limit has a sensible value, and that there are candidates. Note it does _not_ check whether the
+   * candidates are present in the CVRs.
+   *
+   * @param contestRepository the respository for getting Contest objects from the database.
+   * @throws RequestValidationException if the request is invalid.
+   */
+  public void Validate(ContestRepository contestRepository) throws RequestValidationException {
+    {
+      if(contestName == null || contestName.isBlank()) {
+        throw new RequestValidationException("No contest name.");
+      }
+
+      if(candidates == null || candidates.isEmpty() || candidates.stream().anyMatch(String::isBlank)) {
+        throw new RequestValidationException("Bad candidate list.");
+      }
+
+      if(totalAuditableBallots <= 0) {
+        throw new RequestValidationException("Non-positive total auditable ballots.");
+      }
+
+      if(timeProvisionForResult <= 0) {
+        throw new RequestValidationException("Non-positive time provision for result.");
+      }
+
+      if(contestRepository.findFirstByName(contestName).isEmpty()) {
+        throw new RequestValidationException("No such contest: "+contestName);
+      }
+
+      if(!contestRepository.isAllIRV(contestName)) {
+        throw new RequestValidationException("Not all IRV: "+contestName);
+      }
+    }
+
+
+  }
+
 }

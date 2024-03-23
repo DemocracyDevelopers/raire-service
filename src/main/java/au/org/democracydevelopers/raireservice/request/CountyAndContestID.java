@@ -11,7 +11,13 @@
 
 package au.org.democracydevelopers.raireservice.request;
 
+import org.springframework.data.annotation.Immutable;
+import org.springframework.data.annotation.ReadOnlyProperty;
+
+@Immutable
 public class CountyAndContestID {
-    long countyID;
-    long contestID;
+    @ReadOnlyProperty
+    public long countyID;
+    @ReadOnlyProperty
+    public long contestID;
 }
