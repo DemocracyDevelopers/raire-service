@@ -21,12 +21,12 @@ public class GetAssertionsRequest {
   private List<String> candidates;
   private BigDecimal riskLimit;
 
-  // All args constructor.
+  // No args constructor. Needed for serialization.
   public GetAssertionsRequest() {
 
   }
 
-  // No args constructor. Needed for serialization.
+  // All args constructor.
   public GetAssertionsRequest(String contestName, List<String> candidates, BigDecimal riskLimit) {
     this.contestName = contestName;
     this.candidates = candidates;
