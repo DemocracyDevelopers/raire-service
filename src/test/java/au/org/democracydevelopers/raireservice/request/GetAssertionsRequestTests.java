@@ -39,11 +39,10 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void validRequestForIRVContestIsValid() {
-    Contest contestForValidRequest = new Contest("IRV", "IRVContest", 2L, 0L);
     GetAssertionsRequest validRequest = new GetAssertionsRequest("IRVContest", List.of("Alice"), BigDecimal.valueOf(0.03));
-    contestRepository.saveAndFlush(contestForValidRequest);
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
   }
+
   /*
    * Test that a request for a contest that doesn't exist is invalid.
    */

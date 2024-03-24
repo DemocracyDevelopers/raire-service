@@ -20,4 +20,13 @@ public class CountyAndContestID {
     public long countyID;
     @ReadOnlyProperty
     public long contestID;
+
+    // No args constructor.
+    public CountyAndContestID() {}
+
+    // All args constructor.
+    public CountyAndContestID(long countyID, long contestID) {
+        this.countyID = countyID;
+        this.contestID = contestID;
+    }
 }

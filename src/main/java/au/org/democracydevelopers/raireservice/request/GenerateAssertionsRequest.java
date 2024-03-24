@@ -23,6 +23,8 @@ public class GenerateAssertionsRequest {
   @ReadOnlyProperty
   public String contestName;
   @ReadOnlyProperty
+  // This may not be the same as the number of ballots or CVRs in the contest, if the contest
+  // is available only to a subset of voters in the universe.
   public int totalAuditableBallots;
   @ReadOnlyProperty
   public int timeProvisionForResult;
@@ -47,9 +49,9 @@ public class GenerateAssertionsRequest {
   }
 
   /**
-   * Validates the request, checking that the contest exists and is an IRV contest, that the risk
-   * limit has a sensible value, and that there are candidates. Note it does _not_ check whether the
-   * candidates are present in the CVRs.
+   * Validates the request, checking that the contest exists and is an IRV contest, that the total
+   * ballots and time limit have sensible values, and that there are candidates. Note it does _not_
+   * check whether the candidates are present in the CVRs.
    *
    * @param contestRepository the respository for getting Contest objects from the database.
    * @throws RequestValidationException if the request is invalid.
@@ -79,6 +81,10 @@ public class GenerateAssertionsRequest {
       if(!contestRepository.isAllIRV(contestName)) {
         throw new RequestValidationException("Not all IRV: "+contestName);
       }
+
+      // TODO Add validation to check whether the contest name matches all the (countyID, contestID)
+      // pairs in the database.
+      // Unnecessary if we change to request by contest name.
     }
 
 
