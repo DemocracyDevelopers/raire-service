@@ -51,25 +51,28 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void retrieveBallinaMayoral() {
-    contestRepository.saveAndFlush(ballinaMayoralContest);
+    // contestRepository.saveAndFlush(ballinaMayoralContest);
     Optional<Contest> ballina = contestRepository.findFirstByName(ballinaMayoral);
 
     assertTrue(ballina.isPresent());
     assertEquals(ballinaMayoral, ballina.get().name);
     assertEquals("IRV", ballina.get().description);
-    assertEquals(1L, ballina.get().countyID);
+    assertEquals(8L, ballina.get().countyID);
     assertEquals(0L, ballina.get().version);
   }
 
   /*
   ** FIXME This ought to work, because the relevant record has been loaded in via data.sql. However,
   *   it does not seem able to find it.
+   */
   @Test
+  @Transactional
   void retrieveByron() {
-    List<Contest> byron = contestRepository.findFirstByName("Byron");
+    List<Contest> allContests = contestRepository.findAll();
+    System.out.println("All contests: "+allContests);
+    Optional<Contest> byron = contestRepository.findFirstByName("Byron");
     assertTrue(byron.isPresent());
   }
-  */
 
   // Test that retrieving Ballina Councillor by county and contestID works as expected.
   // We don't know what order the contests will be inserted, so this test retrieves it by name and
