@@ -31,8 +31,7 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
    * Spring syntactic sugar for the obvious SELECT query.
    * @param contestName - the name of the contest.
    * @return - the contests with that name, as retrieved from the database.
-   * Note: we may not actually want to find them all - it might suffice just to check whether
-   * any exist.
+   * Not used except in isAllIRV.
    */
   List<Contest> findByName(String contestName);
 
@@ -45,13 +44,13 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
 
 
   /**
-   * Select contests by contest ID and county ID.
+   * Select contests by contest ID and county ID. id is unique, so at most one result is possible.
    * @param contestID the ID of the contest
    * @param countyID the ID of the county
-   * @return the (singleton or empty) list of matching contests.
+   * @return the (singleton or empty) matching contest.
    */
   @Query(value = "select c from Contest c where c.id = :contestID and c.countyID = :countyID")
-  List<Contest> findByContestAndCountyID(@Param("contestID") long contestID,
+  Optional<Contest> findByContestAndCountyID(@Param("contestID") long contestID,
       @Param("countyID") long countyID);
 
   /**

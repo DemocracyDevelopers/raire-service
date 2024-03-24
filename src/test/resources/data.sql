@@ -5,11 +5,12 @@
 --
 -- Simple contests to test basic functioning.
 INSERT INTO contest values(8, 999990, 0, 'IRV', 'Byron');
-INSERT INTO contest values(8, 999991, 0, 'IRV', 'Ballina Mayoral');
+INSERT INTO contest values(9, 999991, 0, 'IRV', 'Byron');
+INSERT INTO contest values(8, 999992, 0, 'IRV', 'Ballina Mayoral');
 -- Deliberately mixed IRV/Plurality contest (which should not happen) to check that this is rejected.
-INSERT INTO contest values(9, 999992, 0, 'IRV', 'Invalid Mixed Contest');
-INSERT INTO contest values(10, 999993, 0, 'Plurality', 'Invalid Mixed Contest');
+INSERT INTO contest values(9, 999993, 0, 'IRV', 'Invalid Mixed Contest');
+INSERT INTO contest values(10, 999994, 0, 'Plurality', 'Invalid Mixed Contest');
 -- Plurality contest
-INSERT INTO contest values(10, 999994, 0, 'Plurality', 'Valid Plurality Contest');
+INSERT INTO contest values(10, 999995, 0, 'Plurality', 'Valid Plurality Contest');
 
 

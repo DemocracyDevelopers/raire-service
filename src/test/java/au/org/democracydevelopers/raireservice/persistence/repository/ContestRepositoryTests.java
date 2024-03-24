@@ -24,6 +24,7 @@ import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /*
@@ -47,6 +48,14 @@ public class ContestRepositoryTests {
     assertTrue(retrieved.isEmpty());
   }
 
+  // Retrieval of all of a non-existent contest name retrieves nothing
+  @Test
+  @Transactional
+  void retrieveAllZeroContests() {
+    List<Contest> retrieved = contestRepository.findByName("nonExistentContest");
+    assertTrue(retrieved.isEmpty());
+  }
+
   // Retrieving Ballina Mayoral by name works as expected
   @Test
   @Transactional
@@ -58,6 +67,22 @@ public class ContestRepositoryTests {
     assertEquals("IRV", ballina.get().description);
     assertEquals(8L, ballina.get().countyID);
     assertEquals(0L, ballina.get().version);
+  }
+
+  // Retrieving all matching Ballina Mayoral by name returns one item
+  @Test
+  @Transactional
+  void retrieveAllBallinaMayoral() {
+    List<Contest> ballina = contestRepository.findByName(ballinaMayoral);
+    assertEquals(1, ballina.size());
+  }
+
+  // Retrieving all matching "Invalid Mixed Contest" by name returns both items
+  @Test
+  @Transactional
+  void retrieveAllInvalidMixed() {
+    List<Contest> mixed = contestRepository.findByName("Invalid Mixed Contest");
+    assertEquals(2, mixed.size());
   }
 
   // Retrieving "Valid Plurality Contest" by name works as expected.
@@ -72,15 +97,66 @@ public class ContestRepositoryTests {
     assertEquals(0L, plurality.get().version);
   }
 
+  // Retrieving all of "Valid Plurality Contest" by name works as expected.
+  @Test
+  @Transactional
+  void retrieveAllPlurality() {
+    List<Contest> plurality = contestRepository.findByName("Valid Plurality Contest");
+    assertEquals(1, plurality.size());
+  }
+
   // Retrieving Ballina Mayor by contestID and countyID works as expected.
   @Test
   @Transactional
   void retrieveByCountyAndContestID() {
-    List<Contest> byIDs = contestRepository.findByContestAndCountyID(999991L, 8L);
-    assertEquals(1, byIDs.size());
-    Contest retrievedContest = byIDs.getFirst();
+    Optional<Contest> byIDs = contestRepository.findByContestAndCountyID(999992L, 8L);
+    assertTrue(byIDs.isPresent());
+    Contest retrievedContest = byIDs.get();
     assertEquals(ballinaMayoral, retrievedContest.name);
   }
 
-  //
+  // Retrieving Byron by the right contestID but wrong countyID returns nothing.
+  @Test
+  @Transactional
+  void retrieveWronglyByCountyAndContestID() {
+    Optional<Contest> byIDs = contestRepository.findByContestAndCountyID(999992L, 1L);
+    assertTrue(byIDs.isEmpty());
+  }
+
+  // Retrieving Byron by the wrong contestID but right countyID returns nothing.
+  @Test
+  @Transactional
+  void retrieveWronglyByCountyAndContestID2() {
+    Optional<Contest> byIDs = contestRepository.findByContestAndCountyID(888881L, 8L);
+    assertTrue(byIDs.isEmpty());
+  }
+
+  // A single IRV contest is correctly identified as all IRV
+  @Test
+  @Transactional
+  void singleIRVIsAllIRV() {
+    assertTrue(contestRepository.isAllIRV(ballinaMayoral));
+  }
+
+  // A non-existent contest is all IRV
+  @Test
+  @Transactional
+  void multiCountyIRVIsAllIRV() {
+    assertTrue(contestRepository.isAllIRV("Non-existent Contest"));
+  }
+
+  // A single Plurality contest is not all IRV
+  @Test
+  @Transactional
+  void SinglePluralityIsNotAllIRV() {
+    assertFalse(contestRepository.isAllIRV("Valid Plurality Contest"));
+  }
+
+
+  // A (invalid) mixed contest is not all IRV
+  @Test
+  @Transactional
+  void MixedDescriptionIsNotAllIRV() {
+    assertFalse(contestRepository.isAllIRV("Invalid Mixed Contest"));
+  }
 }
