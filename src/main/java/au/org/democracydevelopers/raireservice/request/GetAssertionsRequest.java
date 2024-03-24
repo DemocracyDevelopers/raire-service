@@ -12,12 +12,16 @@
 package au.org.democracydevelopers.raireservice.request;
 
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
-import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
 import java.math.BigDecimal;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.ReadOnlyProperty;
 
 public class GetAssertionsRequest {
+
+  Logger logger = LoggerFactory.getLogger(GenerateAssertionsRequest.class);
+
   @ReadOnlyProperty
   public String contestName;
   @ReadOnlyProperty
@@ -45,24 +49,31 @@ public class GetAssertionsRequest {
    */
   public void Validate(ContestRepository contestRepository) throws RequestValidationException {
     if (contestName == null || contestName.isBlank()) {
+      logger.error("No contest name.");
       throw new RequestValidationException("No contest name.");
     }
 
     if (candidates == null || candidates.isEmpty() || candidates.stream().anyMatch(String::isBlank)) {
+      logger.error("Request for contest "+contestName+
+          ". Bad candidate list: "+(candidates==null ? "" : candidates));
       throw new RequestValidationException("Bad candidate list.");
     }
 
     // Check for a negative risk limit. Risk limits >1 are vacuous but not illegal.
     // Risk limits of exactly zero are unattainable but will not cause a problem.
     if (riskLimit == null || riskLimit.compareTo(BigDecimal.ZERO) < 0) {
+      logger.error("Request for contest "+contestName+
+          ". Null or negative risk limit: "+(riskLimit==null ? "" : riskLimit));
       throw new RequestValidationException("Null or negative risk limit.");
     }
 
     if(contestRepository.findFirstByName(contestName).isEmpty()) {
+      logger.error("Request for contest "+contestName+ ". No such contest in database.");
       throw new RequestValidationException("No such contest: "+contestName);
     }
 
     if(!contestRepository.isAllIRV(contestName)) {
+      logger.error("Request for contest "+contestName+ ". Not all IRV contests.");
       throw new RequestValidationException("Not all IRV: "+contestName);
     }
   }

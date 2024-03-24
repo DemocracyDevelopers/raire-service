@@ -11,14 +11,15 @@
 
 package au.org.democracydevelopers.raireservice.request;
 
-import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
-import java.math.BigDecimal;
 import java.util.List;
-import jdk.jfr.DataAmount;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.ReadOnlyProperty;
 
 public class GenerateAssertionsRequest {
+
+  Logger logger = LoggerFactory.getLogger(GenerateAssertionsRequest.class);
 
   @ReadOnlyProperty
   public String contestName;
@@ -59,26 +60,35 @@ public class GenerateAssertionsRequest {
   public void Validate(ContestRepository contestRepository) throws RequestValidationException {
     {
       if(contestName == null || contestName.isBlank()) {
+        logger.error("No contest name.");
         throw new RequestValidationException("No contest name.");
       }
 
       if(candidates == null || candidates.isEmpty() || candidates.stream().anyMatch(String::isBlank)) {
+        logger.error("Request for contest "+contestName+
+            ". Bad candidate list: "+(candidates==null ? "" : candidates));
         throw new RequestValidationException("Bad candidate list.");
       }
 
       if(totalAuditableBallots <= 0) {
+        logger.error("Request for contest "+contestName+
+          ". Non-positive total auditable ballots: "+totalAuditableBallots);
         throw new RequestValidationException("Non-positive total auditable ballots.");
       }
 
       if(timeProvisionForResult <= 0) {
+        logger.error("Request for contest "+contestName+
+            ". Non-positive time provision for result: "+timeProvisionForResult);
         throw new RequestValidationException("Non-positive time provision for result.");
       }
 
       if(contestRepository.findFirstByName(contestName).isEmpty()) {
+        logger.error("Request for contest "+contestName+ ". No such contest in database.");
         throw new RequestValidationException("No such contest: "+contestName);
       }
 
       if(!contestRepository.isAllIRV(contestName)) {
+        logger.error("Request for contest "+contestName+ ". Not all IRV contests.");
         throw new RequestValidationException("Not all IRV: "+contestName);
       }
 

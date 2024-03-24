@@ -59,23 +59,4 @@ public class Contest {
   @Column(name = "version")
   public long version;
 
-  /**
-   * Construct an empty CVRContestInfo (for persistence).
-   */
-  public Contest(){}
-
-  /**
-   * Construct a CVRContestInfo with specific data (used only for testing).
-   */
-  public Contest(String description, String name, long countyID, long version) {
-    if(description == null || name == null ) {
-      throw new RuntimeException("Contest initialized with null values: "
-          + "description = "+description+" name = "+name);
-    }
-
-    this.description = description;
-    this.name = name;
-    this.countyID = countyID;
-    this.version = version;
-  }
 }

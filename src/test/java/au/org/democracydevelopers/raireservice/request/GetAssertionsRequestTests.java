@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import java.math.BigDecimal;
 import java.util.List;
@@ -34,18 +33,14 @@ public class GetAssertionsRequestTests {
   @Autowired
   ContestRepository contestRepository;
 
-  /*
-   * Test that a valid request for an IRV contest is valid.
-   */
+   // A valid request for an IRV contest is valid.
   @Test
   public void validRequestForIRVContestIsValid() {
-    GetAssertionsRequest validRequest = new GetAssertionsRequest("IRVContest", List.of("Alice"), BigDecimal.valueOf(0.03));
+    GetAssertionsRequest validRequest = new GetAssertionsRequest("Byron", List.of("Alice"), BigDecimal.valueOf(0.03));
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
   }
 
-  /*
-   * Test that a request for a contest that doesn't exist is invalid.
-   */
+  // A request for a contest that doesn't exist is invalid.
   @Test
   public void requestForNonexistentContestIsInvalid() {
     GetAssertionsRequest invalidRequest
@@ -54,9 +49,7 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().toLowerCase().contains("No such contest".toLowerCase()));
   }
 
-  /*
-   * Test that a request for an existent plurality contest is invalid.
-   */
+  // A request for an existent plurality contest is invalid.
   @Test
   public void validRequestForPluralityContestIsInvalid() {
     String pluralityContestName = "Valid Plurality Contest";
@@ -79,9 +72,7 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().toLowerCase().contains("not all IRV".toLowerCase()));
   }
 
-  /*
-   * Test that a request with null contest name is invalid.
-   */
+  // A request with null contest name is invalid.
   @Test
   public void requestWithNullNameIsInvalid() {
     GetAssertionsRequest request
@@ -90,9 +81,7 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().contains("No contest name"));
   }
 
-  /*
-   * Test that a request with empty contest name is invalid.
-   */
+  // A request with empty contest name is invalid.
   @Test
   public void requestWithEmptyNameIsInvalid() {
     GetAssertionsRequest request
@@ -101,9 +90,7 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().contains("No contest name"));
   }
 
-  /*
-   * Test that a request with all-whitespace contest name is invalid.
-   */
+  // A request with all-whitespace contest name is invalid.
   @Test
   public void requestWithWhitespaceNameIsInvalid() {
     GetAssertionsRequest request
@@ -112,9 +99,7 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().contains("No contest name"));
   }
 
-  /*
-   * Test that a request with null candidate list is invalid.
-   */
+  // A request with null candidate list is invalid.
   @Test
   public void requestWithNullCandidateListIsInvalid() {
     GetAssertionsRequest request
@@ -123,9 +108,7 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().contains("Bad candidate list"));
   }
 
-  /*
-   * Test that a request with empty candidate list is invalid.
-   */
+  // A request with empty candidate list is invalid.
   @Test
   public void requestWithEmptyCandidateListIsInvalid() {
     GetAssertionsRequest request
@@ -134,9 +117,7 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().contains("Bad candidate list"));
   }
 
-  /*
-   * Test that a request with an all-whitespace candidate name is invalid.
-   */
+  // A request with an all-whitespace candidate name is invalid.
   @Test
   public void requestWithWhitespaceCandidateNameIsInvalid() {
     GetAssertionsRequest request
@@ -145,9 +126,7 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().contains("Bad candidate list"));
   }
 
-  /*
-   * Test that a request with a null risk limit is invalid.
-   */
+  // A request with a null risk limit is invalid.
   @Test
   public void requestWithNullRiskLimitIsInvalid() {
     GetAssertionsRequest request
@@ -156,9 +135,7 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().contains("risk limit"));
   }
 
-    /*
-   * Test that a request with a negative risk limit is invalid.
-   */
+  // A request with a negative risk limit is invalid.
   @Test
   public void requestWithNegativeRiskLimitIsInvalid() {
     GetAssertionsRequest request
