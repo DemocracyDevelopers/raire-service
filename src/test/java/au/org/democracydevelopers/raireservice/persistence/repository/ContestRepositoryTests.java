@@ -27,7 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /*
- * tests on contest retrieval - currently very basic.
+ * Tests on contest retrieval.
+ * Contests are pre-loaded into the database using data.sql.
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest
@@ -38,7 +39,7 @@ public class ContestRepositoryTests {
 
   private static final String ballinaMayoral = "Ballina Mayoral";
 
-  // Test that retrieval of a non-existent contest name retrieves nothing
+  // Retrieval of a non-existent contest name retrieves nothing
   @Test
   @Transactional
   void retrieveZeroContests() {
@@ -46,7 +47,7 @@ public class ContestRepositoryTests {
     assertTrue(retrieved.isEmpty());
   }
 
-  // Test that retrieving Ballina Mayoral works as expected
+  // Retrieving Ballina Mayoral by name works as expected
   @Test
   @Transactional
   void retrieveBallinaMayoral() {
@@ -59,15 +60,19 @@ public class ContestRepositoryTests {
     assertEquals(0L, ballina.get().version);
   }
 
-  // Test that retrieving Byron by name works as expected.
+  // Retrieving "Valid Plurality Contest" by name works as expected.
   @Test
   @Transactional
-  void retrieveByron() {
-    Optional<Contest> byron = contestRepository.findFirstByName("Byron");
-    assertTrue(byron.isPresent());
+  void retrievePlurality() {
+    Optional<Contest> plurality = contestRepository.findFirstByName("Valid Plurality Contest");
+    assertTrue(plurality.isPresent());
+    assertEquals("Valid Plurality Contest",plurality.get().name);
+    assertEquals("Plurality", plurality.get().description);
+    assertEquals(10L, plurality.get().countyID);
+    assertEquals(0L, plurality.get().version);
   }
 
-  // Test that retrieving Ballina Mayor by county and contestID works as expected.
+  // Retrieving Ballina Mayor by contestID and countyID works as expected.
   @Test
   @Transactional
   void retrieveByCountyAndContestID() {
@@ -76,4 +81,6 @@ public class ContestRepositoryTests {
     Contest retrievedContest = byIDs.getFirst();
     assertEquals(ballinaMayoral, retrievedContest.name);
   }
+
+  //
 }
