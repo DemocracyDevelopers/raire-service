@@ -37,7 +37,6 @@ public class ContestRepositoryTests {
   ContestRepository contestRepository;
 
   private static final String ballinaMayoral = "Ballina Mayoral";
-  private static final Contest ballinaMayoralContest = new Contest("IRV",ballinaMayoral, 1L, 0L);
 
   // Test that retrieval of a non-existent contest name retrieves nothing
   @Test
@@ -51,7 +50,6 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void retrieveBallinaMayoral() {
-    // contestRepository.saveAndFlush(ballinaMayoralContest);
     Optional<Contest> ballina = contestRepository.findFirstByName(ballinaMayoral);
 
     assertTrue(ballina.isPresent());
@@ -61,35 +59,21 @@ public class ContestRepositoryTests {
     assertEquals(0L, ballina.get().version);
   }
 
-  /*
-  ** FIXME This ought to work, because the relevant record has been loaded in via data.sql. However,
-  *   it does not seem able to find it.
-   */
+  // Test that retrieving Byron by name works as expected.
   @Test
   @Transactional
   void retrieveByron() {
-    List<Contest> allContests = contestRepository.findAll();
-    System.out.println("All contests: "+allContests);
     Optional<Contest> byron = contestRepository.findFirstByName("Byron");
     assertTrue(byron.isPresent());
   }
 
-  // Test that retrieving Ballina Councillor by county and contestID works as expected.
-  // We don't know what order the contests will be inserted, so this test retrieves it by name and
-  // then checks that the same thing is retrieved by IDs.
+  // Test that retrieving Ballina Mayor by county and contestID works as expected.
   @Test
   @Transactional
   void retrieveByCountyAndContestID() {
-    contestRepository.deleteAll();
-    contestRepository.saveAndFlush(ballinaMayoralContest);
-    Optional<Contest> byName = contestRepository.findFirstByName(ballinaMayoral);
-    assertTrue(byName.isPresent());
-    Contest contest = byName.get();
-
-    List<Contest> byIDs = contestRepository.findByContestAndCountyID(contest.id, contest.countyID);
-
+    List<Contest> byIDs = contestRepository.findByContestAndCountyID(999991L, 8L);
     assertEquals(1, byIDs.size());
     Contest retrievedContest = byIDs.getFirst();
-    assertEquals(retrievedContest.name, contest.name);
+    assertEquals(ballinaMayoral, retrievedContest.name);
   }
 }

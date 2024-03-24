@@ -29,8 +29,6 @@ public class Contest {
   @Id
   @Column(updatable = false, nullable = false)
   @ReadOnlyProperty
-  // Generation is only used for testing.
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
   public long id;
 
   /**

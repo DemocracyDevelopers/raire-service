@@ -60,9 +60,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void validRequestForPluralityContestIsInvalid() {
-    String pluralityContestName = "Plurality Contest";
-    Contest pluralityContest = new Contest("Plurality", pluralityContestName, 2L,0L);
-    contestRepository.saveAndFlush(pluralityContest);
+    String pluralityContestName = "Valid Plurality Contest";
     GetAssertionsRequest request
         = new GetAssertionsRequest(pluralityContestName, List.of("Alice"), BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
@@ -75,11 +73,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void validRequestForMixedContestTypesIsInvalid() {
-    String mixedContestName = "Mixed Contest";
-    Contest mixedContest1 = new Contest("Plurality", mixedContestName, 2L,0L);
-    Contest mixedContest2 = new Contest("IRV", mixedContestName, 2L,0L);
-    contestRepository.saveAll(List.of(mixedContest1, mixedContest2));
-    contestRepository.flush();
+    String mixedContestName = "Invalid Mixed Contest";
     GetAssertionsRequest request
         = new GetAssertionsRequest(mixedContestName, List.of("Alice"), BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
