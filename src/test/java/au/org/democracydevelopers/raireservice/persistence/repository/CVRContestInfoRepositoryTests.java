@@ -20,11 +20,18 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.repository;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Tests to validate the behaviour of CVRContestInfo retrieval.
@@ -36,4 +43,26 @@ public class CVRContestInfoRepositoryTests {
 
   @Autowired
   CVRContestInfoRepository cvrContestInfoRepository;
+
+  /**
+   * Test that an empty list of vote data is returned when we try to retrieve vote information
+   * for a non-existent contest (non existent county AND contest ID).
+   */
+  @Test
+  @Transactional
+  void retrieveCVRsNonExistentContestCounty() {
+    List<List<String>> retrieved = cvrContestInfoRepository.getCVRs(0, 0);
+    assertTrue(retrieved.isEmpty());
+  }
+
+  /**
+   * Test that an empty list of vote data is returned when we try to retrieve vote information
+   * for a contest that exists but has no associated CVRs.
+   */
+  @Test
+  @Transactional
+  void retrieveCVRsExistentContestNoCVRs() {
+    List<List<String>> retrieved = cvrContestInfoRepository.getCVRs(999996, 10);
+    assertTrue(retrieved.isEmpty());
+  }
 }

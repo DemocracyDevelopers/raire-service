@@ -24,6 +24,8 @@ import au.org.democracydevelopers.raireservice.persistence.converters.StringList
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.Collections;
@@ -41,12 +43,19 @@ import org.springframework.data.annotation.ReadOnlyProperty;
 public class CVRContestInfo {
 
   /**
-   * Unique ID for this cvr_contest_info entry in the database.
+   * Unique identifier for instance CVRContestInfo instance.
    */
   @Id
   @Column(updatable = false, nullable = false)
-  @ReadOnlyProperty
+  @GeneratedValue(strategy = GenerationType.SEQUENCE)
   private long id;
+
+  /**
+   * ID of the CVR for this cvr_contest_info entry in the database.
+   */
+  @Column(name = "cvr_id", updatable = false, nullable = false)
+  @ReadOnlyProperty
+  private long cvrID;
 
   /**
    * Ranked order of choices on the CVR for the relevant contest (in order of most preferred
@@ -102,5 +111,13 @@ public class CVRContestInfo {
    */
   public List<String> getChoices(){
     return Collections.unmodifiableList(choices);
+  }
+
+  /**
+   * Get the ID of the CVR associated with this vote data,
+   * @return the ID of the CVR associated with this CVRContestInfo instance.
+   */
+  public long getCVRID() {
+    return cvrID;
   }
 }
