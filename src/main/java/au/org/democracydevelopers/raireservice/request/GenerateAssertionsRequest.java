@@ -77,9 +77,10 @@ public class GenerateAssertionsRequest {
   }
 
   /**
-   * Validates the request, checking that the contest exists and is an IRV contest, that the total
-   * ballots and time limit have sensible values, and that there are candidates. Note it does _not_
-   * check whether the candidates are present in the CVRs.
+   * Validates the generate assertions request, checking that the contest exists and is an
+   * IRV contest, that the total ballots and time limit have sensible values, and that
+   * the contest has candidates. Note it does _not_ check whether the candidates are present in
+   * the CVRs.
    *
    * @param contestRepository the respository for getting Contest objects from the database.
    * @throws RequestValidationException if the request is invalid.
