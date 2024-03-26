@@ -28,23 +28,24 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
 
   /**
    * Select contests by contest name
-   * Spring syntactic sugar for the obvious SELECT query.
-   * @param contestName - the name of the contest.
-   * @return - the contests with that name, as retrieved from the database.
    * Not used except in isAllIRV.
+   * Spring syntactic sugar for the obvious SELECT query.
+   * @param contestName the name of the contest.
+   * @return the contests with that name, as retrieved from the database.
    */
   List<Contest> findByName(String contestName);
 
   /**
-   * Find the first element by contest name
-   * @param contestName - the name of the contest.
-   * @return - the first of that name,
+   * Find the first contest by name
+   * @param contestName the name of the contest.
+   * @return the first of that name,
    */
   Optional<Contest> findFirstByName(String contestName);
 
 
   /**
-   * Select contests by contest ID and county ID. id is unique, so at most one result is possible.
+   * Select contests by contest ID and county ID.
+   * Contest ID is unique, so at most one result is possible.
    * @param contestID the ID of the contest
    * @param countyID the ID of the county
    * @return the (singleton or empty) matching contest.
@@ -54,6 +55,7 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
       @Param("countyID") long countyID);
 
   /**
+   * Check whether all the contests of the given name have description 'IRV'.
    * @param contestName the name of the contest
    * @return false if there are any non-IRV descriptions for a contest of that name.
    * Note it does _not_ test for existence - use findFirstByName for that.

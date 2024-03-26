@@ -24,7 +24,7 @@ import org.springframework.data.annotation.ReadOnlyProperty;
 public class Contest {
 
   /**
-   * CVR Contest Info ID.
+   * Contest ID.
    */
   @Id
   @Column(nullable = false, updatable = false)
@@ -32,7 +32,7 @@ public class Contest {
   private long id;
 
   /**
-   * The name of the contest
+   * The name of the contest.
    */
   @ReadOnlyProperty
   @Column(name = "name", nullable = false, updatable = false)
@@ -43,7 +43,7 @@ public class Contest {
   }
 
   /**
-   * Description - should be either IRV or PLURALITY
+   * Description - should be either IRV or PLURALITY.
    */
   @ReadOnlyProperty
   @Column(name = "description", nullable = false, updatable = false)

@@ -17,34 +17,61 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.ReadOnlyProperty;
 
+/**
+ * Request (expected to be json) describing the contest for which assertions should be generated.
+ */
 public class GenerateAssertionsRequest {
 
   Logger logger = LoggerFactory.getLogger(GenerateAssertionsRequest.class);
 
+  /**
+   * The name of the contest
+   */
   @ReadOnlyProperty
-  public String contestName;
-  @ReadOnlyProperty
-  // This may not be the same as the number of ballots or CVRs in the contest, if the contest
-  // is available only to a subset of voters in the universe.
-  public int totalAuditableBallots;
-  @ReadOnlyProperty
-  public int timeProvisionForResult;
-  @ReadOnlyProperty
-  public List<String> candidates;
-  @ReadOnlyProperty
-  public List<CountyAndContestID> countyAndContestIDs;
+  private String contestName;
 
-  // No args constructor. Used for serialization.
+  /**
+   * The total number of ballots in the universe under audit.
+   * This may not be the same as the number of ballots or CVRs in the contest, if the contest
+   * is available only to a subset of voters in the universe.
+   */
+  @ReadOnlyProperty
+  private int totalAuditableBallots;
+
+  /**
+   * The elapsed time allowed to raire to generate the assertions, in seconds.
+   */
+  @ReadOnlyProperty
+  private float timeLimitSeconds;
+
+  /**
+   * List of candidate names.
+   */
+  @ReadOnlyProperty
+  private List<String> candidates;
+
+  /**
+   * List of pairs of (CountyID, contestID) that define this contest.
+   * TODO will not be necessary after switching to contest name-based queries.
+   */
+  @ReadOnlyProperty
+  private List<CountyAndContestID> countyAndContestIDs;
+
+  /**
+   * No args constructor. Used for serialization.
+   */
   public GenerateAssertionsRequest() {
   }
 
-  // All args constructor.
+  /**
+   * All args constructor.
+   */
   public GenerateAssertionsRequest(String contestName, int totalAuditableBallots,
-      int timeProvisionForResult,
-      List<String> candidates, List<CountyAndContestID> countyAndContestIDs) {
+      float time_limit_seconds, List<String> candidates,
+      List<CountyAndContestID> countyAndContestIDs) {
     this.contestName = contestName;
     this.totalAuditableBallots = totalAuditableBallots;
-    this.timeProvisionForResult = timeProvisionForResult;
+    this.timeLimitSeconds = time_limit_seconds;
     this.candidates = candidates;
     this.countyAndContestIDs = countyAndContestIDs;
   }
@@ -76,9 +103,9 @@ public class GenerateAssertionsRequest {
         throw new RequestValidationException("Non-positive total auditable ballots.");
       }
 
-      if(timeProvisionForResult <= 0) {
+      if(timeLimitSeconds <= 0) {
         logger.error("Request for contest "+contestName+
-            ". Non-positive time provision for result: "+timeProvisionForResult);
+            ". Non-positive time provision for result: "+ timeLimitSeconds);
         throw new RequestValidationException("Non-positive time provision for result.");
       }
 
