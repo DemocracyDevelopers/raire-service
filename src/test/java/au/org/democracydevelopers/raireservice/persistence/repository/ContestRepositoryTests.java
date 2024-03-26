@@ -63,10 +63,10 @@ public class ContestRepositoryTests {
     Optional<Contest> ballina = contestRepository.findFirstByName(ballinaMayoral);
 
     assertTrue(ballina.isPresent());
-    assertEquals(ballinaMayoral, ballina.get().name);
-    assertEquals("IRV", ballina.get().description);
-    assertEquals(8L, ballina.get().countyID);
-    assertEquals(0L, ballina.get().version);
+    assertEquals(ballinaMayoral, ballina.get().getName());
+    assertEquals("IRV", ballina.get().getDescription());
+    assertEquals(8L, ballina.get().getCountyID());
+    assertEquals(0L, ballina.get().getVersion());
   }
 
   // Retrieving all matching Ballina Mayoral by name returns one item
@@ -91,10 +91,10 @@ public class ContestRepositoryTests {
   void retrievePlurality() {
     Optional<Contest> plurality = contestRepository.findFirstByName("Valid Plurality Contest");
     assertTrue(plurality.isPresent());
-    assertEquals("Valid Plurality Contest",plurality.get().name);
-    assertEquals("Plurality", plurality.get().description);
-    assertEquals(10L, plurality.get().countyID);
-    assertEquals(0L, plurality.get().version);
+    assertEquals("Valid Plurality Contest",plurality.get().getName());
+    assertEquals("Plurality", plurality.get().getDescription());
+    assertEquals(10L, plurality.get().getCountyID());
+    assertEquals(0L, plurality.get().getVersion());
   }
 
   // Retrieving all of "Valid Plurality Contest" by name works as expected.
@@ -112,7 +112,7 @@ public class ContestRepositoryTests {
     Optional<Contest> byIDs = contestRepository.findByContestAndCountyID(999992L, 8L);
     assertTrue(byIDs.isPresent());
     Contest retrievedContest = byIDs.get();
-    assertEquals(ballinaMayoral, retrievedContest.name);
+    assertEquals(ballinaMayoral, retrievedContest.getName());
   }
 
   // Retrieving Byron by the right contestID but wrong countyID returns nothing.

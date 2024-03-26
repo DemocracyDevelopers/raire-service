@@ -61,6 +61,6 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
   default boolean isAllIRV(String contestName) {
     List<Contest> contests = findByName(contestName);
 
-    return contests.stream().allMatch(contest -> contest.description.equals("IRV"));
+    return contests.stream().allMatch(contest -> contest.getDescription().equals("IRV"));
   }
 }

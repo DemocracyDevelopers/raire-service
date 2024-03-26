@@ -27,36 +27,51 @@ public class Contest {
    * CVR Contest Info ID.
    */
   @Id
-  @Column(updatable = false, nullable = false)
+  @Column(nullable = false, updatable = false)
   @ReadOnlyProperty
-  public long id;
-
-  /**
-   * Description - should be either IRV or PLURALITY
-   */
-  @ReadOnlyProperty
-  @Column(name = "description", nullable = false)
-  public String description;
+  private long id;
 
   /**
    * The name of the contest
    */
   @ReadOnlyProperty
-  @Column(name = "name", nullable = false)
-  public String name;
+  @Column(name = "name", nullable = false, updatable = false)
+  private String name;
+
+  public String getName() {
+    return name;
+  }
 
   /**
-   * ID of contest for which this Assertion was generated.
+   * Description - should be either IRV or PLURALITY
    */
   @ReadOnlyProperty
-  @Column(name = "county_id", nullable = false)
-  public long countyID;
+  @Column(name = "description", nullable = false, updatable = false)
+  private String description;
+
+  public String getDescription() {
+    return description;
+  }
 
   /**
-   * Version. Currently not used.
+   * ID of county.
    */
   @ReadOnlyProperty
-  @Column(name = "version")
-  public long version;
+  @Column(name = "county_id", nullable = false, updatable = false)
+  private long countyID;
 
+  public long getCountyID() {
+    return countyID;
+  }
+
+  /**
+   * Version. Used for optimistic locking.
+   */
+  @ReadOnlyProperty
+  @Column(name = "version", nullable = false)
+  private long version;
+
+  public long getVersion() {
+    return version;
+  }
 }
