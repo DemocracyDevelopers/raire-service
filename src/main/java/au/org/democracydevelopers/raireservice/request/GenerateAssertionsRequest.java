@@ -51,13 +51,6 @@ public class GenerateAssertionsRequest {
   private List<String> candidates;
 
   /**
-   * List of pairs of (CountyID, contestID) that define this contest.
-   * TODO will not be necessary after switching to contest name-based queries.
-   */
-  @ReadOnlyProperty
-  private List<CountyAndContestID> countyAndContestIDs;
-
-  /**
    * No args constructor. Used for serialization.
    */
   public GenerateAssertionsRequest() {
@@ -78,7 +71,6 @@ public class GenerateAssertionsRequest {
     this.totalAuditableBallots = totalAuditableBallots;
     this.timeLimitSeconds = timeLimitSeconds;
     this.candidates = candidates;
-    this.countyAndContestIDs = countyAndContestIDs;
   }
 
   /**
@@ -91,7 +83,7 @@ public class GenerateAssertionsRequest {
    * @throws RequestValidationException if the request is invalid.
    */
   public void Validate(ContestRepository contestRepository) throws RequestValidationException {
-    {
+
       if(contestName == null || contestName.isBlank()) {
         logger.error("No contest name.");
         throw new RequestValidationException("No contest name.");
@@ -124,13 +116,5 @@ public class GenerateAssertionsRequest {
         logger.error("Request for contest "+contestName+ ". Not all IRV contests.");
         throw new RequestValidationException("Not all IRV: "+contestName);
       }
-
-      // TODO Add validation to check whether the contest name matches all the (countyID, contestID)
-      // pairs in the database.
-      // Unnecessary if we change to request by contest name.
     }
-
-
-  }
-
 }

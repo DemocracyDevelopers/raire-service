@@ -113,12 +113,6 @@ public class GenerateAssertionsRequestTests {
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
   }
 
-  // A request with a contest name that doesn't match the database is invalid.
-  // TODO. Note unnecessary if we get requests by contestname.
-
-  // A request with a contest name that is inconsistent across (countyID, contestID) pairs is invalid.
-  // TODO. Note unnecessary if we get requests by contestname.
-
   /**
    * A request for a contest that doesn't exist is invalid.
    */
