@@ -16,7 +16,7 @@ import java.util.List;
 import org.springframework.data.annotation.ReadOnlyProperty;
 
 /**
- * Request (expected to be json) describing the contest for which assertions should be generated.
+ * Request (expected to be json) identifying the contest for which assertions should be generated.
  * This extends ContestRequest and uses the contest name and candidate list, plus validations, from there.
  */
 public class GenerateAssertionsRequest extends ContestRequest {
