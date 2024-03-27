@@ -24,7 +24,7 @@ import org.springframework.data.annotation.ReadOnlyProperty;
  */
 public class GetAssertionsRequest {
 
-  Logger logger = LoggerFactory.getLogger(GenerateAssertionsRequest.class);
+  final Logger logger = LoggerFactory.getLogger(GenerateAssertionsRequest.class);
 
   /**
    * The name of the contest

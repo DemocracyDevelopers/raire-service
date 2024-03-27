@@ -22,7 +22,7 @@ import org.springframework.data.annotation.ReadOnlyProperty;
  */
 public class GenerateAssertionsRequest {
 
-  Logger logger = LoggerFactory.getLogger(GenerateAssertionsRequest.class);
+  final Logger logger = LoggerFactory.getLogger(GenerateAssertionsRequest.class);
 
   /**
    * The name of the contest
@@ -62,11 +62,9 @@ public class GenerateAssertionsRequest {
    * @param totalAuditableBallots the total auditable ballots in the universe under audit.
    * @param timeLimitSeconds the elapsed time allowed for RAIRE to generate assertions, in seconds.
    * @param candidates the list of candidates by name
-   * @param countyAndContestIDs the pairs of (CountyID, contestID) that define this contest.
    */
   public GenerateAssertionsRequest(String contestName, int totalAuditableBallots,
-      float timeLimitSeconds, List<String> candidates,
-      List<CountyAndContestID> countyAndContestIDs) {
+      float timeLimitSeconds, List<String> candidates) {
     this.contestName = contestName;
     this.totalAuditableBallots = totalAuditableBallots;
     this.timeLimitSeconds = timeLimitSeconds;

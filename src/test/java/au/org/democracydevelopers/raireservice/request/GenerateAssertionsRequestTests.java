@@ -15,9 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
-import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,58 +38,11 @@ public class GenerateAssertionsRequestTests {
   ContestRepository contestRepository;
 
   /**
-   * A valid IRV contest spread over two contestIDs.
+   * Example candidate and contest names.
    */
-  private List<CountyAndContestID> byronCountyAndContestIDs
-      = List.of(
-      new CountyAndContestID(8L, 999990L),
-      new CountyAndContestID(9L, 999991L)
-  );
-
-  /**
-   * A valid single-ID IRV contest.
-   */
-  private List<CountyAndContestID> ballinaCountyAndContestIDs
-      = List.of(
-      new CountyAndContestID(8L, 999992L)
-  );
-
-  /**
-   * An invalid contest, with inconsistent contest names.
-   * One is 'Byron' and one is 'Ballina Mayoral'
-   */
-  private List<CountyAndContestID> mixedIRVNamesCountyAndContestIDs
-      = List.of(
-      new CountyAndContestID(8L, 999992L),
-      new CountyAndContestID(9L, 999991L)
-  );
-
-  /**
-   * An invalid contest, with inconsistent descriptions.
-   * One is 'IRV' and one is 'Plurality'.
-   */
-  private List<CountyAndContestID> invalidMixedDescriptionCountyAndContestIDs
-      = List.of(
-          new CountyAndContestID(9L, 999993L),
-          new CountyAndContestID(10L, 999994L)
-      );
-
-  /**
-   * A valid single-ID plurality contest.
-   */
-  private List<CountyAndContestID> pluralityCountyAndContestIDs
-      = List.of(
-      new CountyAndContestID(10L, 999995L)
-  );
-
-  /**
-   * Standard candidate and contest names.
-   */
-  private List<String> candidates = List.of("Alice");
-  private String ballina = "Ballina Mayoral";
-  private String byron = "Byron";
-  private String invalidMixed = "Invalid Mixed Contest";
-  private String validPlurality = "Valid Plurality Contest";
+  private final List<String> candidates = List.of("Alice");
+  private final String ballina = "Ballina Mayoral";
+  private final String byron = "Byron";
 
   /**
    * A valid request for an IRV contest is valid.
@@ -99,7 +50,7 @@ public class GenerateAssertionsRequestTests {
   @Test
   public void validRequestForSingleIRVContestIsValid() {
     GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(ballina, 100, 100,
-        candidates, ballinaCountyAndContestIDs);
+        candidates);
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
   }
 
@@ -109,7 +60,7 @@ public class GenerateAssertionsRequestTests {
   @Test
   public void validRequestForCrossCountyIRVContestIsValid() {
     GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(byron, 100, 100,
-          candidates, byronCountyAndContestIDs);
+          candidates);
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
   }
 
@@ -120,7 +71,7 @@ public class GenerateAssertionsRequestTests {
   public void requestForNonexistentContestIsInvalid() {
     GenerateAssertionsRequest invalidRequest
         = new GenerateAssertionsRequest("NonExistentContest", 100,
-          100, candidates, ballinaCountyAndContestIDs);
+          100, candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> invalidRequest.Validate(contestRepository));
     assertTrue(ex.getMessage().toLowerCase().contains("No such contest".toLowerCase()));
   }
@@ -131,9 +82,10 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void validRequestForPluralityContestIsInvalid() {
+    String validPlurality = "Valid Plurality Contest";
     GenerateAssertionsRequest request
         = new GenerateAssertionsRequest(validPlurality, 100,
-        100, candidates, pluralityCountyAndContestIDs);
+        100, candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
     assertTrue(ex.getMessage().toLowerCase().contains("not all IRV".toLowerCase()));
   }
@@ -144,9 +96,10 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void validRequestForMixedContestTypesIsInvalid() {
+    String invalidMixed = "Invalid Mixed Contest";
     GenerateAssertionsRequest request
         = new GenerateAssertionsRequest(invalidMixed, 100,
-        100,  candidates, invalidMixedDescriptionCountyAndContestIDs);
+        100,  candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
     assertTrue(ex.getMessage().toLowerCase().contains("not all IRV".toLowerCase()));
   }
@@ -158,7 +111,7 @@ public class GenerateAssertionsRequestTests {
   public void requestWithNullNameIsInvalid() {
     GenerateAssertionsRequest request
         = new GenerateAssertionsRequest(null, 100,
-          100, candidates, byronCountyAndContestIDs);
+          100, candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("No contest name"));
   }
@@ -170,7 +123,7 @@ public class GenerateAssertionsRequestTests {
   public void requestWithEmptyNameIsInvalid() {
     GenerateAssertionsRequest request
         = new GenerateAssertionsRequest("", 100,
-        100, candidates, byronCountyAndContestIDs);
+        100, candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("No contest name"));
   }
@@ -181,8 +134,8 @@ public class GenerateAssertionsRequestTests {
   @Test
   public void requestWithWhitespaceNameIsInvalid() {
     GenerateAssertionsRequest request
-        = new GenerateAssertionsRequest("   ",  100,
-        100, candidates, byronCountyAndContestIDs);
+        = new GenerateAssertionsRequest("   ",  100, 100,
+          candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("No contest name"));
   }
@@ -193,8 +146,7 @@ public class GenerateAssertionsRequestTests {
   @Test
   public void requestWithNullCandidateListIsInvalid() {
     GenerateAssertionsRequest request
-        = new GenerateAssertionsRequest(ballina, 100, 100,
-          null, byronCountyAndContestIDs);
+        = new GenerateAssertionsRequest(ballina, 100, 100, null);
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("Bad candidate list"));
   }
@@ -205,8 +157,7 @@ public class GenerateAssertionsRequestTests {
   @Test
   public void requestWithEmptyCandidateListIsInvalid() {
     GenerateAssertionsRequest request
-        = new GenerateAssertionsRequest(ballina, 100, 100,
-          List.of(), byronCountyAndContestIDs);
+        = new GenerateAssertionsRequest(ballina, 100, 100, List.of());
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("Bad candidate list"));
   }
@@ -217,8 +168,7 @@ public class GenerateAssertionsRequestTests {
   @Test
   public void requestWithWhitespaceCandidateNameIsInvalid() {
     GenerateAssertionsRequest request
-        = new GenerateAssertionsRequest(ballina, 50, 50,
-          List.of("Alice","    "), ballinaCountyAndContestIDs);
+        = new GenerateAssertionsRequest(ballina, 50, 50, List.of("Alice","    "));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("Bad candidate list"));
   }
@@ -228,8 +178,8 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void ZeroTotalAuditableBallotsIsInvalid() {
-    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(byron,
-        0, 100, candidates, byronCountyAndContestIDs);
+    GenerateAssertionsRequest validRequest
+        = new GenerateAssertionsRequest(byron, 0, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> validRequest.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("Non-positive total auditable ballots"));
   }
@@ -241,8 +191,7 @@ public class GenerateAssertionsRequestTests {
   @Test
   public void negativeTotalAuditableBallotsIsInvalid() {
     GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(byron,
-        -10, 100,
-        candidates, byronCountyAndContestIDs);
+        -10, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> validRequest.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("Non-positive total auditable ballots"));
   }
@@ -253,7 +202,7 @@ public class GenerateAssertionsRequestTests {
   @Test
   public void ZeroTimeProvisionForResultIsInvalid() {
     GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(byron,
-          100, 0, candidates, byronCountyAndContestIDs);
+          100, 0, candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> validRequest.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("Non-positive time provision for result."));
   }
@@ -265,7 +214,7 @@ public class GenerateAssertionsRequestTests {
   @Test
   public void negativeTimeProvisionForResultIsInvalid() {
     GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(byron, 100, -100,
-        candidates, byronCountyAndContestIDs);
+        candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> validRequest.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("Non-positive time provision for result."));
   }
