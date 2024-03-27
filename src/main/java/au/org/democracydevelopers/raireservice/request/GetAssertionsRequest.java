@@ -14,29 +14,14 @@ package au.org.democracydevelopers.raireservice.request;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import java.math.BigDecimal;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.ReadOnlyProperty;
 
 /**
  * Request (expected to be json) describing the contest for which assertions should be retrieved
  * from the database (expected to be exported as json).
+ * This extends ContestRequest and uses the contest name and candidate list, plus validations, from there.
  */
-public class GetAssertionsRequest {
-
-  final Logger logger = LoggerFactory.getLogger(GenerateAssertionsRequest.class);
-
-  /**
-   * The name of the contest
-   */
-  @ReadOnlyProperty
-  public String contestName;
-
-  /**
-   * List of candidate names.
-   */
-  @ReadOnlyProperty
-  private List<String> candidates;
+public class GetAssertionsRequest extends ContestRequest {
 
   /**
    * The risk limit for the audit, expected to be in the range [0,1].
@@ -57,8 +42,8 @@ public class GetAssertionsRequest {
    * @param riskLimit the risk limit for the audit, expected to be in the range [0,1].
    */
   public GetAssertionsRequest(String contestName, List<String> candidates, BigDecimal riskLimit) {
-    this.contestName = contestName;
-    this.candidates = candidates;
+
+    super(contestName, candidates);
     this.riskLimit = riskLimit;
   }
 
@@ -70,16 +55,8 @@ public class GetAssertionsRequest {
    * @throws RequestValidationException if the request is invalid.
    */
   public void Validate(ContestRepository contestRepository) throws RequestValidationException {
-    if (contestName == null || contestName.isBlank()) {
-      logger.error("No contest name.");
-      throw new RequestValidationException("No contest name.");
-    }
 
-    if (candidates == null || candidates.isEmpty() || candidates.stream().anyMatch(String::isBlank)) {
-      logger.error("Request for contest "+contestName+
-          ". Bad candidate list: "+(candidates==null ? "" : candidates));
-      throw new RequestValidationException("Bad candidate list.");
-    }
+    super.Validate(contestRepository);
 
     // Check for a negative risk limit. Risk limits >1 are vacuous but not illegal.
     // Risk limits of exactly zero are unattainable but will not cause a problem.
@@ -87,16 +64,6 @@ public class GetAssertionsRequest {
       logger.error("Request for contest "+contestName+
           ". Null or negative risk limit: "+(riskLimit==null ? "" : riskLimit));
       throw new RequestValidationException("Null or negative risk limit.");
-    }
-
-    if(contestRepository.findFirstByName(contestName).isEmpty()) {
-      logger.error("Request for contest "+contestName+ ". No such contest in database.");
-      throw new RequestValidationException("No such contest: "+contestName);
-    }
-
-    if(!contestRepository.isAllIRV(contestName)) {
-      logger.error("Request for contest "+contestName+ ". Not all IRV contests.");
-      throw new RequestValidationException("Not all IRV: "+contestName);
     }
   }
 }
