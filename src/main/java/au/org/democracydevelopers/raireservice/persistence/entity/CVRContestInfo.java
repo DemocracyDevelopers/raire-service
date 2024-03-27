@@ -20,7 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
-import au.org.democracydevelopers.raireservice.persistence.converters.StringListConverter;
+import au.org.democracydevelopers.raireservice.persistence.converters.StringArrayConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -63,7 +63,7 @@ public class CVRContestInfo {
    * into an array of String for later processing.
    */
   @Column(name="choices", updatable = false, nullable = false)
-  @Convert(converter = StringListConverter.class)
+  @Convert(converter = StringArrayConverter.class)
   @ReadOnlyProperty
   private List<String> choices;
 

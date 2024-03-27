@@ -22,9 +22,7 @@ package au.org.democracydevelopers.raireservice.persistence.repository;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -51,7 +49,7 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void retrieveCVRsNonExistentContestCounty() {
-    List<List<String>> retrieved = cvrContestInfoRepository.getCVRs(0, 0);
+    List<String[]> retrieved = cvrContestInfoRepository.getCVRs(0, 0);
     assertTrue(retrieved.isEmpty());
   }
 
@@ -62,7 +60,7 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void retrieveCVRsExistentContestNoCVRs() {
-    List<List<String>> retrieved = cvrContestInfoRepository.getCVRs(999996, 10);
+    List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999996, 10);
     assertTrue(retrieved.isEmpty());
   }
 }

@@ -40,6 +40,6 @@ public interface CVRContestInfoRepository extends JpaRepository<CVRContestInfo, 
    */
   @Query(value = "select ci.choices from CVRContestInfo ci " +
       " where ci.id = :contestID and ci.countyID = :countyID")
-  List<List<String>> getCVRs(@Param("contestID") long contestID, @Param("countyID") long countyID);
+  List<String[]> getCVRs(@Param("contestID") long contestID, @Param("countyID") long countyID);
 
 }
