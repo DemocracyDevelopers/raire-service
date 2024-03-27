@@ -65,13 +65,18 @@ public class GenerateAssertionsRequest {
 
   /**
    * All args constructor.
+   * @param contestName the name of the contest
+   * @param totalAuditableBallots the total auditable ballots in the universe under audit.
+   * @param timeLimitSeconds the elapsed time allowed for RAIRE to generate assertions, in seconds.
+   * @param candidates the list of candidates by name
+   * @param countyAndContestIDs the pairs of (CountyID, contestID) that define this contest.
    */
   public GenerateAssertionsRequest(String contestName, int totalAuditableBallots,
-      float time_limit_seconds, List<String> candidates,
+      float timeLimitSeconds, List<String> candidates,
       List<CountyAndContestID> countyAndContestIDs) {
     this.contestName = contestName;
     this.totalAuditableBallots = totalAuditableBallots;
-    this.timeLimitSeconds = time_limit_seconds;
+    this.timeLimitSeconds = timeLimitSeconds;
     this.candidates = candidates;
     this.countyAndContestIDs = countyAndContestIDs;
   }

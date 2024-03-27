@@ -25,6 +25,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+/*
+ * Tests on GetAssertionsRequests, particularly focusing on the validation step.
+ * Contests which will be used to test the validity of the GenerateAssertionsRequest are
+ * pre-loaded into the database using src/test/resources/data.sql.
+ */
 @ActiveProfiles("test-containers")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
@@ -33,14 +38,18 @@ public class GetAssertionsRequestTests {
   @Autowired
   ContestRepository contestRepository;
 
-   // A valid request for an IRV contest is valid.
+  /**
+   * A valid request for an IRV contest is valid.
+   */
   @Test
   public void validRequestForIRVContestIsValid() {
     GetAssertionsRequest validRequest = new GetAssertionsRequest("Byron", List.of("Alice"), BigDecimal.valueOf(0.03));
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
   }
 
-  // A request for a contest that doesn't exist is invalid.
+  /**
+   * A request for a contest that doesn't exist is invalid.
+   */
   @Test
   public void requestForNonexistentContestIsInvalid() {
     GetAssertionsRequest invalidRequest
@@ -49,7 +58,10 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().toLowerCase().contains("No such contest".toLowerCase()));
   }
 
-  // A request for an existent plurality contest is invalid.
+  /**
+   * A request for an existent plurality contest is invalid, because we have assertions only for
+   * IRV contests.
+   */
   @Test
   public void validRequestForPluralityContestIsInvalid() {
     String pluralityContestName = "Valid Plurality Contest";
@@ -59,8 +71,8 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().toLowerCase().contains("not all IRV".toLowerCase()));
   }
 
-  /*
-   * Test that a request for mixed IRV-plurality contests is invalid.
+  /**
+   * A request for mixed IRV-plurality contests is invalid.
    * Note that this is a data problem - contests should have a consistent description.
    */
   @Test
@@ -72,7 +84,9 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().toLowerCase().contains("not all IRV".toLowerCase()));
   }
 
-  // A request with null contest name is invalid.
+  /**
+   * A request with null contest name is invalid.
+   */
   @Test
   public void requestWithNullNameIsInvalid() {
     GetAssertionsRequest request
@@ -81,7 +95,9 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().contains("No contest name"));
   }
 
-  // A request with empty contest name is invalid.
+  /**
+   * A request with empty contest name is invalid.
+   */
   @Test
   public void requestWithEmptyNameIsInvalid() {
     GetAssertionsRequest request
@@ -90,7 +106,9 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().contains("No contest name"));
   }
 
-  // A request with all-whitespace contest name is invalid.
+  /**
+   * A request with all-whitespace contest name is invalid.
+   */
   @Test
   public void requestWithWhitespaceNameIsInvalid() {
     GetAssertionsRequest request
@@ -99,7 +117,9 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().contains("No contest name"));
   }
 
-  // A request with null candidate list is invalid.
+  /**
+   * A request with null candidate list is invalid.
+   */
   @Test
   public void requestWithNullCandidateListIsInvalid() {
     GetAssertionsRequest request
@@ -108,7 +128,9 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().contains("Bad candidate list"));
   }
 
-  // A request with empty candidate list is invalid.
+  /**
+   * A request with empty candidate list is invalid.
+   */
   @Test
   public void requestWithEmptyCandidateListIsInvalid() {
     GetAssertionsRequest request
@@ -117,7 +139,9 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().contains("Bad candidate list"));
   }
 
-  // A request with an all-whitespace candidate name is invalid.
+  /**
+   * A request with an all-whitespace candidate name is invalid.
+   */
   @Test
   public void requestWithWhitespaceCandidateNameIsInvalid() {
     GetAssertionsRequest request
@@ -126,7 +150,9 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().contains("Bad candidate list"));
   }
 
-  // A request with a null risk limit is invalid.
+  /**
+   * A request with a null risk limit is invalid.
+   */
   @Test
   public void requestWithNullRiskLimitIsInvalid() {
     GetAssertionsRequest request
@@ -135,7 +161,9 @@ public class GetAssertionsRequestTests {
     assertTrue(ex.getMessage().contains("risk limit"));
   }
 
-  // A request with a negative risk limit is invalid.
+  /**
+   * A request with a negative risk limit is invalid.
+   */
   @Test
   public void requestWithNegativeRiskLimitIsInvalid() {
     GetAssertionsRequest request

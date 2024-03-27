@@ -18,22 +18,44 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.ReadOnlyProperty;
 
+/**
+ * Request (expected to be json) describing the contest for which assertions should be retrieved
+ * from the database (expected to be exported as json).
+ */
 public class GetAssertionsRequest {
 
   Logger logger = LoggerFactory.getLogger(GenerateAssertionsRequest.class);
 
+  /**
+   * The name of the contest
+   */
   @ReadOnlyProperty
   public String contestName;
+
+  /**
+   * List of candidate names.
+   */
   @ReadOnlyProperty
   private List<String> candidates;
+
+  /**
+   * The risk limit for the audit, expected to be in the range [0,1].
+   */
   @ReadOnlyProperty
   private BigDecimal riskLimit;
 
-  // No args constructor. Needed for serialization.
+  /**
+   * No args constructor. Needed for serialization.
+   */
   public GetAssertionsRequest() {
   }
 
-  // All args constructor.
+  /**
+   * All args constructor.
+   * @param contestName the name of the contest
+   * @param candidates a list of candidates by name
+   * @param riskLimit the risk limit for the audit, expected to be in the range [0,1].
+   */
   public GetAssertionsRequest(String contestName, List<String> candidates, BigDecimal riskLimit) {
     this.contestName = contestName;
     this.candidates = candidates;
@@ -41,8 +63,8 @@ public class GetAssertionsRequest {
   }
 
   /**
-   * Validates the request, checking that the contest exists and is an IRV contest,
-   * that the risk limit has a sensible value, and that there are candidates.
+   * Validates the request to retrieve assertions for the contest, checking that the contest exists
+   * and is an IRV contest, that the risk limit has a sensible value, and that there are candidates.
    * Note it does _not_ check whether the candidates are present in the CVRs.
    * @param contestRepository the respository for getting Contest objects from the database.
    * @throws RequestValidationException if the request is invalid.
