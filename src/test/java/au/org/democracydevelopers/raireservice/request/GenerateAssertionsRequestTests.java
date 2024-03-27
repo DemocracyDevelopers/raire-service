@@ -204,7 +204,7 @@ public class GenerateAssertionsRequestTests {
     GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(byron,
           100, 0, candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> validRequest.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Non-positive time provision for result."));
+    assertTrue(ex.getMessage().contains("Non-positive time limit"));
   }
 
 
@@ -216,6 +216,6 @@ public class GenerateAssertionsRequestTests {
     GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(byron, 100, -100,
         candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> validRequest.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Non-positive time provision for result."));
+    assertTrue(ex.getMessage().contains("Non-positive time limit"));
   }
 }

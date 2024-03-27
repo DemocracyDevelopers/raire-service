@@ -156,7 +156,7 @@ public class GetAssertionsRequestTests {
   @Test
   public void requestWithNullRiskLimitIsInvalid() {
     GetAssertionsRequest request
-        = new GetAssertionsRequest("IRVContest", List.of("Alice"), null);
+        = new GetAssertionsRequest("Ballina Mayoral", List.of("Alice"), null);
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("risk limit"));
   }
@@ -167,7 +167,7 @@ public class GetAssertionsRequestTests {
   @Test
   public void requestWithNegativeRiskLimitIsInvalid() {
     GetAssertionsRequest request
-        = new GetAssertionsRequest("IRVContest", List.of("Alice"), BigDecimal.valueOf(-0.03));
+        = new GetAssertionsRequest("Ballina Mayoral", List.of("Alice"), BigDecimal.valueOf(-0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("risk limit"));
   }
