@@ -18,23 +18,20 @@ You should have received a copy of the GNU Affero General Public License along w
 raire-service. If not, see <https://www.gnu.org/licenses/>.
 */
 
-package au.org.democracydevelopers.raireservice.config;
+package au.org.democracydevelopers.raireservice.request;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
+/**
+ * Exception indicating that a request failed validation. For a ContestRequest (including
+ * GenerateAssertionsRequest and GetAssertionRequest) this may be because:
+ * - the contest name is blank, or the candidate list is empty,
+ * - there is no contest of the requested name in the database,
+ * - the contest is not an IRV contest,
+ * - one of the numbers in the request (such as a time limit, risk limit, ballot count) is outside
+ *   the required range.
+ */
+public class RequestValidationException extends Exception {
 
-@Configuration
-public class RaireConfig {
-  @Bean
-  public RestTemplate restTemplate() {
-    return new RestTemplate();
+  public RequestValidationException(String s) {
+    super(s);
   }
-
-  @Bean
-  public ObjectMapper objectMapper() {
-    return new ObjectMapper();
-  }
-
 }
