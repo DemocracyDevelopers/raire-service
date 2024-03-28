@@ -24,12 +24,9 @@ import au.org.democracydevelopers.raireservice.persistence.converters.StringArra
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
-import java.util.Collections;
-import java.util.List;
 import org.springframework.data.annotation.ReadOnlyProperty;
 
 /**
@@ -40,22 +37,26 @@ import org.springframework.data.annotation.ReadOnlyProperty;
  */
 @Entity
 @Table(name = "cvr_contest_info")
+@IdClass(CVRContestInfoId.class)
 public class CVRContestInfo {
 
   /**
-   * Unique identifier for instance CVRContestInfo instance.
+   * Unique identifier for instance CVRContestInfo instance. It is comprised of a
+   * CVR ID and a contest ID. These two together form a unique key.
    */
   @Id
-  @Column(updatable = false, nullable = false)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
-  private long id;
-
-  /**
-   * ID of the CVR for this cvr_contest_info entry in the database.
-   */
   @Column(name = "cvr_id", updatable = false, nullable = false)
   @ReadOnlyProperty
-  private long cvrID;
+  private long cvrId;
+
+  /**
+   * Unique identifier for instance CVRContestInfo instance. It is comprised of a
+   * CVR ID and a contest ID. These two together form a unique key.
+   */
+  @Id
+  @Column(name = "contest_id", updatable = false, nullable = false)
+  @ReadOnlyProperty
+  private long contestId;
 
   /**
    * Ranked order of choices on the CVR for the relevant contest (in order of most preferred
@@ -65,59 +66,38 @@ public class CVRContestInfo {
   @Column(name="choices", updatable = false, nullable = false)
   @Convert(converter = StringArrayConverter.class)
   @ReadOnlyProperty
-  private List<String> choices;
+  private String[] choices;
 
   /**
    * ID for the county associated with the contest associated with this CVRContestInfo.
    */
   @Column(name = "county_id", updatable = false, nullable = false)
   @ReadOnlyProperty
-  private long countyID;
-
-  /**
-   * ID for the contest associated with this CVRContestInfo.
-   */
-  @Column(name = "contest_id", updatable = false, nullable = false)
-  @ReadOnlyProperty
-  private long contestID;
-
-  /**
-   * Version; for optimistic locking.
-   */
-  @Column(name = "version", updatable = false, nullable = false)
-  @ReadOnlyProperty
-  private long version;
+  private long countyId;
 
   /**
    * Get the ID of the county to which the contest belongs.
    * @return the county ID for the contest associated with this CVRContestInfo.
    */
-  public long getCountyID(){
-    return countyID;
+  public long getCountyId(){
+    return countyId;
   }
 
   /**
    * Get the ID of the contest for which this CVRContestInfo is capturing vote data for.
    * @return the ID of the contest associated with this CVRContestInfo.
    */
-  public long getContestID(){
-    return contestID;
-  }
+  public long getContestId(){ return contestId; }
 
   /**
-   * Get the ranked choices associated with this CVRContestInfo (as an unmodifiable list).
-   * @return the ranked choices, as a list of choice names, for this CVRContestInfo as an
-   * unmodifiable list.
+   * Get the ranked choices associated with this CVRContestInfo.
+   * @return the ranked choices, as a list of choice names, for this CVRContestInfo.
    */
-  public List<String> getChoices(){
-    return Collections.unmodifiableList(choices);
-  }
+  public String[] getChoices(){ return choices; }
 
   /**
    * Get the ID of the CVR associated with this vote data,
    * @return the ID of the CVR associated with this CVRContestInfo instance.
    */
-  public long getCVRID() {
-    return cvrID;
-  }
+  public long getCVRId() { return cvrId; }
 }
