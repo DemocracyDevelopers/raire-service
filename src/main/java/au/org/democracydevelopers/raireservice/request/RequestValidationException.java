@@ -20,6 +20,15 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.request;
 
+/**
+ * Exception indicating that a request failed validation. For a ContestRequest (including
+ * GenerateAssertionsRequest and GetAssertionRequest) this may be because:
+ * - the contest name is blank, or the candidate list is empty,
+ * - there is no contest of the requested name in the database,
+ * - the contest is not an IRV contest,
+ * - one of the numbers in the request (such as a time limit, risk limit, ballot count) is outside
+ *   the required range.
+ */
 public class RequestValidationException extends Exception {
 
   public RequestValidationException(String s) {

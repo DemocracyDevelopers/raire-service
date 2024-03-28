@@ -27,6 +27,15 @@ import org.springframework.data.annotation.ReadOnlyProperty;
 /**
  * Request (expected to be json) identifying the contest for which assertions should be generated.
  * This extends ContestRequest and uses the contest name and candidate list, plus validations, from there.
+ * A GenerateAssertionsRequest identifies a contest by name along with the candidate list (which
+ * is necessary for producing the metadata for later visualization).
+ * TotalAuditableBallots states the total number of ballots in the universe, which may _not_ be the
+ * same as the number of CVRs that mention the contest.
+ * TimeLimitSeconds is a limit on the elapsed time that RAIRE has to do assertion generation.
+ * Validation consists only of checking that the request is reasonable, including calling
+ * ContestRequest.Validate to check that the contest exists and is all IRV, and that the candidate
+ * names are reasonable. GenerateAssertionsRequest.Validate then checks that the two numbers,
+ * totalAuditableBallots and timeLimitSeconds are positive.
  */
 public class GenerateAssertionsRequest extends ContestRequest {
 

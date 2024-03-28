@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.ReadOnlyProperty;
 
 /**
- * Request (expected to be json) idenitfying a contest and listing its candidates.
+ * Request (expected to be json) identifying a contest by name and listing its candidates.
  * This is an abstract class containing only the core input & validation for contests -
  * just the contest name and list of candidates, plus basic methods to check that they are
  * present, non-null and IRV.
@@ -66,7 +66,7 @@ public abstract class ContestRequest {
   }
 
   /**
-   * Validates the contest request, checking that the contest exists and is an * IRV contest, and
+   * Validates the contest request, checking that the contest exists and is an IRV contest, and
    * that the contest request has candidates. Note it does _not_ check whether the candidates are
    * present in the CVRs.
    * @param contestRepository the respository for getting Contest objects from the database.

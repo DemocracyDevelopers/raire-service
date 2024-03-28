@@ -36,7 +36,7 @@ import java.util.List;
 public interface ContestRepository extends JpaRepository<Contest, Long> {
 
   /**
-   * Select contests by contest name
+   * Find and return all contests with a given name from the corla database.
    * Not used except in isAllIRV.
    * Spring syntactic sugar for the obvious SELECT query.
    * @param contestName the name of the contest.
@@ -45,7 +45,7 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
   List<Contest> findByName(String contestName);
 
   /**
-   * Find the first contest by name
+   * Find and return the first contest with a given name from the corla database.
    * @param contestName the name of the contest.
    * @return the first of that name,
    */
@@ -53,7 +53,7 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
 
 
   /**
-   * Select contests by contest ID and county ID.
+   * Find and return contests by contest ID and county ID.
    * Contest ID is unique, so at most one result is possible.
    * @param contestID the ID of the contest
    * @param countyID the ID of the county
@@ -65,9 +65,9 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
 
   /**
    * Check whether all the contests of the given name have description 'IRV'.
+   * Note it does _not_ test for existence - use findFirstByName for that.
    * @param contestName the name of the contest
    * @return false if there are any non-IRV descriptions for a contest of that name.
-   * Note it does _not_ test for existence - use findFirstByName for that.
    */
   default boolean isAllIRV(String contestName) {
     List<Contest> contests = findByName(contestName);

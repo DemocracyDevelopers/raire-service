@@ -26,7 +26,8 @@ import org.springframework.data.annotation.ReadOnlyProperty;
 /*
  * A contest class used for reading contest data out of the corla database.
  * This class omits the fields that are not relevant to input validation - we only care about
- * checking whether the request we received makes sense for IRV assertion generation or retrieval.
+ * checking whether any requests raire-service receives for assertion generation or retrieval make
+ * sense and are valid.
  */
 @Entity
 @Table(name = "contest")
@@ -47,20 +48,12 @@ public class Contest {
   @Column(name = "name", nullable = false, updatable = false)
   private String name;
 
-  public String getName() {
-    return name;
-  }
-
   /**
    * Description - should be either IRV or PLURALITY.
    */
   @ReadOnlyProperty
   @Column(name = "description", nullable = false, updatable = false)
   private String description;
-
-  public String getDescription() {
-    return description;
-  }
 
   /**
    * ID of county.
@@ -69,10 +62,6 @@ public class Contest {
   @Column(name = "county_id", nullable = false, updatable = false)
   private long countyID;
 
-  public long getCountyID() {
-    return countyID;
-  }
-
   /**
    * Version. Used for optimistic locking.
    */
@@ -80,7 +69,23 @@ public class Contest {
   @Column(name = "version", nullable = false)
   private long version;
 
-  public long getVersion() {
-    return version;
+  /**
+   * Get the name of the contest.
+   * @return the name of the contest.
+   */
+  public String getName() {
+    return name;
+  }
+
+  /**
+   * Get the description, either "IRV" or "Plurality".
+   * @return the description.
+   */
+  public String getDescription() {
+    return description;
+  }
+
+  public long getCountyID() {
+    return countyID;
   }
 }

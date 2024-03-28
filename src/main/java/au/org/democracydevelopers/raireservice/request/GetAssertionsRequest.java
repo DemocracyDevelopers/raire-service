@@ -29,6 +29,13 @@ import org.springframework.data.annotation.ReadOnlyProperty;
  * Request (expected to be json) identifying the contest for which assertions should be retrieved
  * from the database (expected to be exported as json).
  * This extends ContestRequest and uses the contest name and candidate list, plus validations, from there.
+ * A GetAssertionsRequest identifies a contest by name along with the candidate list (which
+ * is necessary for producing the metadata for later visualization).
+ * riskLimit states the risk limit for the audit. This is not actually used in raire-service computations,
+ * but will be output later with the assertion export, so that it can be used in the assertion visualizer.
+ * Validation consists only of checking that the request is reasonable, including calling
+ * ContestRequest.Validate to check that the contest exists and is all IRV, and that the candidate
+ * names are reasonable. GetAssertionsRequest.Validate then checks that the risk limit is non-negative.
  */
 public class GetAssertionsRequest extends ContestRequest {
 
@@ -60,7 +67,7 @@ public class GetAssertionsRequest extends ContestRequest {
    * Validates the request to retrieve assertions for the contest, checking that the contest exists
    * and is an IRV contest, that the risk limit has a sensible value, and that there are candidates.
    * Note it does _not_ check whether the candidates are present in the CVRs.
-   * @param contestRepository the respository for getting Contest objects from the database.
+   * @param contestRepository the repository for getting Contest objects from the database.
    * @throws RequestValidationException if the request is invalid.
    */
   public void Validate(ContestRepository contestRepository) throws RequestValidationException {

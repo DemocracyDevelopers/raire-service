@@ -51,7 +51,7 @@ public class ContestRepositoryTests {
   private static final String ballinaMayoral = "Ballina Mayoral";
 
   /**
-   * Retrieval of a non-existent contest name retrieves nothing
+   * Retrieval of a non-existent contest name retrieves nothing.
    */
   @Test
   @Transactional
@@ -61,7 +61,7 @@ public class ContestRepositoryTests {
   }
 
   /**
-   * Retrieval of all of a non-existent contest name retrieves nothing
+   * Retrieval of all of a non-existent contest name retrieves nothing.
    */
   @Test
   @Transactional
@@ -71,7 +71,7 @@ public class ContestRepositoryTests {
   }
 
   /**
-   * Retrieving Ballina Mayoral by name works as expected
+   * Retrieving Ballina Mayoral by name works as expected.
    */
   @Test
   @Transactional
@@ -82,11 +82,10 @@ public class ContestRepositoryTests {
     assertEquals(ballinaMayoral, ballina.get().getName());
     assertEquals("IRV", ballina.get().getDescription());
     assertEquals(8L, ballina.get().getCountyID());
-    assertEquals(0L, ballina.get().getVersion());
   }
 
   /**
-   * Retrieving all matching Ballina Mayoral by name returns one item
+   * Retrieving all matching Ballina Mayoral by name returns one item.
    */
   @Test
   @Transactional
@@ -96,7 +95,7 @@ public class ContestRepositoryTests {
   }
 
   /**
-   * Retrieving all matching "Invalid Mixed Contest" by name returns both items
+   * Retrieving all matching "Invalid Mixed Contest" by name returns both items.
    */
   @Test
   @Transactional
@@ -116,7 +115,6 @@ public class ContestRepositoryTests {
     assertEquals("Valid Plurality Contest",plurality.get().getName());
     assertEquals("Plurality", plurality.get().getDescription());
     assertEquals(10L, plurality.get().getCountyID());
-    assertEquals(0L, plurality.get().getVersion());
   }
 
   /**
@@ -162,7 +160,7 @@ public class ContestRepositoryTests {
   }
 
   /**
-   * A single IRV contest is correctly identified as all IRV
+   * A single IRV contest is correctly identified as all IRV.
    */
   @Test
   @Transactional
@@ -171,7 +169,7 @@ public class ContestRepositoryTests {
   }
 
   /**
-   * A non-existent contest is all IRV
+   * A non-existent contest is all IRV.
    */
   @Test
   @Transactional
@@ -180,7 +178,7 @@ public class ContestRepositoryTests {
   }
 
   /**
-   * A single Plurality contest is not all IRV
+   * A single Plurality contest is not all IRV.
    */
   @Test
   @Transactional
@@ -190,7 +188,7 @@ public class ContestRepositoryTests {
 
 
   /**
-   * A (invalid) mixed contest is not all IRV
+   * A (invalid) mixed contest is not all IRV.
    */
   @Test
   @Transactional
