@@ -85,6 +85,10 @@ public class Contest {
     return description;
   }
 
+  /**
+   * Get the ID of the county to which the contest belongs.
+   * @return county ID for the contest.
+   */
   public long getCountyID() {
     return countyID;
   }
