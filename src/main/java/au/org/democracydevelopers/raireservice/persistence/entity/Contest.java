@@ -1,12 +1,21 @@
 /*
 Copyright 2024 Democracy Developers
+
 The Raire Service is designed to connect colorado-rla and its associated database to
 the raire assertion generation engine (https://github.com/DemocracyDevelopers/raire-java).
 
 This file is part of raire-service.
-raire-service is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-raire-service is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
-You should have received a copy of the GNU Affero General Public License along with ConcreteSTV. If not, see <https://www.gnu.org/licenses/>.
+
+raire-service is free software: you can redistribute it and/or modify it under the terms
+of the GNU Affero General Public License as published by the Free Software Foundation, either
+version 3 of the License, or (at your option) any later version.
+
+raire-service is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License along with
+raire-service. If not, see <https://www.gnu.org/licenses/>.
 */
 
 package au.org.democracydevelopers.raireservice.persistence.entity;
@@ -17,46 +26,66 @@ import org.springframework.data.annotation.ReadOnlyProperty;
 /*
  * A contest class used for reading contest data out of the corla database.
  * This class omits the fields that are not relevant to input validation - we only care about
- * checking whether the request we received makes sense for IRV assertion generation or retrieval.
+ * checking whether any requests raire-service receives for assertion generation or retrieval make
+ * sense and are valid.
  */
 @Entity
 @Table(name = "contest")
 public class Contest {
 
   /**
-   * CVR Contest Info ID.
+   * Contest ID.
    */
   @Id
-  @Column(updatable = false, nullable = false)
+  @Column(nullable = false, updatable = false)
   @ReadOnlyProperty
-  public long id;
+  private long id;
 
   /**
-   * Description - should be either IRV or PLURALITY
+   * The name of the contest.
    */
   @ReadOnlyProperty
-  @Column(name = "description", nullable = false)
-  public String description;
+  @Column(name = "name", nullable = false, updatable = false)
+  private String name;
 
   /**
-   * The name of the contest
+   * Description - should be either IRV or PLURALITY.
    */
   @ReadOnlyProperty
-  @Column(name = "name", nullable = false)
-  public String name;
+  @Column(name = "description", nullable = false, updatable = false)
+  private String description;
 
   /**
-   * ID of contest for which this Assertion was generated.
+   * ID of county.
    */
   @ReadOnlyProperty
-  @Column(name = "county_id", nullable = false)
-  public long countyID;
+  @Column(name = "county_id", nullable = false, updatable = false)
+  private long countyID;
 
   /**
-   * Version. Currently not used.
+   * Version. Used for optimistic locking.
    */
   @ReadOnlyProperty
-  @Column(name = "version")
-  public long version;
+  @Column(name = "version", nullable = false)
+  private long version;
 
+  /**
+   * Get the name of the contest.
+   * @return the name of the contest.
+   */
+  public String getName() {
+    return name;
+  }
+
+  /**
+   * Get the description, either "IRV" or "Plurality".
+   * @return the description.
+   */
+  public String getDescription() {
+    return description;
+  }
+
+  public long getCountyID() {
+    return countyID;
+  }
 }
