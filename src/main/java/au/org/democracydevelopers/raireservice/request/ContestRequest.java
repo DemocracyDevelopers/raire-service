@@ -64,6 +64,12 @@ public abstract class ContestRequest {
     this.contestName = contestName;
     this.candidates = candidates;
   }
+  /**
+   * Return the contest Name.
+   */
+  public String getContestName() {
+    return contestName;
+  }
 
   /**
    * Validates the contest request, checking that the contest exists and is an IRV contest, and
