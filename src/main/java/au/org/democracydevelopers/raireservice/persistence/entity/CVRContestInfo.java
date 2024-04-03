@@ -41,7 +41,7 @@ import org.springframework.data.annotation.ReadOnlyProperty;
 public class CVRContestInfo {
 
   /**
-   * Unique identifier for instance CVRContestInfo instance. It is comprised of a
+   * Unique identifier for a CVRContestInfo instance. It is comprised of a
    * CVR ID and a contest ID. These two together form a unique key.
    */
   @Id
@@ -50,7 +50,7 @@ public class CVRContestInfo {
   private long cvrId;
 
   /**
-   * Unique identifier for instance CVRContestInfo instance. It is comprised of a
+   * Unique identifier for a CVRContestInfo instance. It is comprised of a
    * CVR ID and a contest ID. These two together form a unique key.
    */
   @Id
