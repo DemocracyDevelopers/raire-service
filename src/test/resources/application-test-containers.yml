@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:tc:postgresql://localhost:5432/corlaTest
+    url: jdbc:tc:postgresql://localhost:5432/corlaTest?TC_INITSCRIPT=file:src/test/resources/corla.sql
     username: corlatestadmin
     password: corlatestsecret
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
