@@ -34,10 +34,16 @@ public interface CVRContestInfoRepository extends JpaRepository<CVRContestInfo, 
 
   /**
    * Retrieve the ranked choice data associated with a specific contest in a specific county
-   * across all CVRS in the database.
+   * across all CVRS in the database. If a record in cvr_contest_info has a malformed choices
+   * entry (ie. a non-empty string that is not a Json representation for a list), then a
+   * JPASystemException will be thrown indicating that an error has occurred in attribute
+   * conversion. If the choices columns has nulls, then null elements may be present in the
+   * return list of vote data.
    * @param contestId the ID of the contest
    * @param countyId the ID of the county
    * @return a List of List<String> where each List<String> is a list of ranked choices.
+   * @throws org.springframework.orm.jpa.JpaSystemException
+   * @throws org.springframework.dao.DataAccessException
    */
   @Query(value = "select ci.choices from CVRContestInfo ci " +
       " where ci.contestId = :contestId and ci.countyId = :countyId")
