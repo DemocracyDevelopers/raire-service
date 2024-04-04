@@ -31,7 +31,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 /**
  * Exception handler for the bad request types common to all Contest Requests,
  * including GenerateAssertionsRequest and GetAssertionsRequest.
- * Based on Solution 3 in https://www.baeldung.com/exception-handling-for-rest-with-spring
+ * Based on Solution 3 in <a href="https://www.baeldung.com/exception-handling-for-rest-with-spring">...</a>
  * Other errors (the ones specific to particular tasks) will be dealt with using
  * ResponseStatusException.
  */
