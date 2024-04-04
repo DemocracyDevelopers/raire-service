@@ -54,6 +54,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/raire")
 public class AssertionController {
 
+  private final ContestRepository contestRepository;
+
+
   @PostMapping(path = "/generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
   public GenerateAssertionsResponse serve(@RequestBody GenerateAssertionsRequest request) {
     try {
@@ -75,5 +78,13 @@ public class AssertionController {
     } catch (RequestValidationException e) {
       return new GetAssertionsResponse(request.getContestName(), e);
     }
+  }
+
+  /**
+   * Constructor
+   * @param contestRepository the contestRespository, used for validating requests.
+   */
+  public AssertionController(ContestRepository contestRepository) {
+    this.contestRepository = contestRepository;
   }
 }
