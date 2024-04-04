@@ -22,4 +22,10 @@ package au.org.democracydevelopers.raireservice.response;
 
 public class GetAssertionsResponse extends ContestResponse {
 
+  private String assertions;
+
+  public GetAssertionsResponse(String contestName, String assertions) {
+    super(contestName);
+    this.assertions = assertions;
+  }
 }

@@ -23,11 +23,12 @@ package au.org.democracydevelopers.raireservice.response;
 public class GenerateAssertionsResponse extends ContestResponse {
 
   private String winner;
+
   /**
    * Constructor for the happy case in which there is a winner found.
    */
-  public GetAssertionsResponse(String contestName, String winner) {
-    this.contestName = contestName;
+  public GenerateAssertionsResponse(String contestName, String winner) {
+    super(contestName);
     this.winner = winner;
   }
 }

@@ -39,9 +39,17 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class RequestValidationExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = { RequestValidationException.class })
     protected ResponseEntity<Object> handleConflict(
-        RuntimeException ex, WebRequest request) {
+        RequestValidationException ex, WebRequest request) {
       String bodyOfResponse = "Invalid request";
       return handleExceptionInternal(ex, bodyOfResponse,
           new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
+
+    /* Note some simply have very simple bodies, e.g.
+        @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<String> handleInvalidRequestException(InvalidRequestException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+    which looks better.
+     */
 }

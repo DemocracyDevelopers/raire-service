@@ -32,8 +32,7 @@ public abstract class ContestResponse {
   protected String contestName;
   private Exception e;
 
-  public ContestResponse(String contestName, Exception e) {
+  public ContestResponse(String contestName) {
     this.contestName = contestName;
-    this.e = e;
   }
 }

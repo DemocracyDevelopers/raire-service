@@ -25,6 +25,8 @@ import au.org.democracydevelopers.raireservice.persistence.repository.ContestRep
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.RequestValidationException;
+import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
+import au.org.democracydevelopers.raireservice.response.GetAssertionsResponse;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -33,7 +35,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.FluentQuery.FetchableFluentQuery;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,26 +62,35 @@ public class AssertionController {
 
 
   @PostMapping(path = "/generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
-  public GenerateAssertionsResponse serve(@RequestBody GenerateAssertionsRequest request) {
-    try {
+  public ResponseEntity<String> serve(@RequestBody GenerateAssertionsRequest request)
+      throws RequestValidationException {
+    // try {
       request.Validate(contestRepository);
       // For the moment, this is just a dummy "OK" response. Later, it will contain the winner.
-      return new GenerateAssertionsResponse(request.getContestName(), "OK");
-    } catch (RequestValidationException e) {
-      return new GenerateAssertionsResponse(request.getContestName(), e);
-    }
+      return new ResponseEntity<String>("Placeholder winner", HttpStatus.OK);
+      // return new GenerateAssertionsResponse(request.getContestName(), "OK");
+    // } catch (RequestValidationException e) {
+    //   return new GenerateAssertionsResponse(request.getContestName(), e);
+    //}
   }
 
 
+  /**
+   * Find and return assertions, by contest name.
+   * @param request
+   * @return the assertions, as JSON. TODO String is just a placeholder for now.
+   */
   @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
-  public GetAssertionsResponse serve(@RequestBody GetAssertionsRequest request) {
-    try {
+  public ResponseEntity<String> serve(@RequestBody GetAssertionsRequest request)
+      throws RequestValidationException {
+    // try {
       request.Validate(contestRepository);
       // For the moment, this is just a dummy "OK" response. Later, it will contain the winner.
-      return new GetAssertionsResponse(request.getContestName(), "OK");
-    } catch (RequestValidationException e) {
-      return new GetAssertionsResponse(request.getContestName(), e);
-    }
+      return new ResponseEntity<String>("Placeholder assertions", HttpStatus.OK);
+      // return new GetAssertionsResponse(request.getContestName(), "OK");
+    // } catch (RequestValidationException e) {
+    //  return new GetAssertionsResponse(request.getContestName(), e);
+    //}
   }
 
   /**
