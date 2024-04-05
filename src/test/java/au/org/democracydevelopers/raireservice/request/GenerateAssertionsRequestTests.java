@@ -51,7 +51,7 @@ public class GenerateAssertionsRequestTests {
    */
   private final List<String> candidates = List.of("Alice");
   private final String ballina = "Ballina Mayoral";
-  private final String byron = "Byron";
+  private final String multiCounty = "Multi-County Contest 1";
 
   /**
    * A valid request for an IRV contest is valid.
@@ -68,7 +68,7 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void validRequestForCrossCountyIRVContestIsValid() {
-    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(byron, 100, 100,
+    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(multiCounty, 100, 100,
           candidates);
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
   }
@@ -188,7 +188,7 @@ public class GenerateAssertionsRequestTests {
   @Test
   public void ZeroTotalAuditableBallotsIsInvalid() {
     GenerateAssertionsRequest validRequest
-        = new GenerateAssertionsRequest(byron, 0, 100, candidates);
+        = new GenerateAssertionsRequest(multiCounty, 0, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> validRequest.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("Non-positive total auditable ballots"));
   }
@@ -199,7 +199,7 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void negativeTotalAuditableBallotsIsInvalid() {
-    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(byron,
+    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(ballina,
         -10, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> validRequest.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("Non-positive total auditable ballots"));
@@ -210,7 +210,7 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void ZeroTimeProvisionForResultIsInvalid() {
-    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(byron,
+    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(ballina,
           100, 0, candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> validRequest.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("Non-positive time limit"));
@@ -222,7 +222,7 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void negativeTimeProvisionForResultIsInvalid() {
-    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(byron, 100, -100,
+    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(ballina, 100, -100,
         candidates);
     Exception ex = assertThrows(RequestValidationException.class, () -> validRequest.Validate(contestRepository));
     assertTrue(ex.getMessage().contains("Non-positive time limit"));
