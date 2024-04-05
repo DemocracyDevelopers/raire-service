@@ -22,6 +22,7 @@ package au.org.democracydevelopers.raireservice.persistence.repository;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
@@ -31,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,7 +50,7 @@ public class CVRContestInfoRepositoryTests {
 
   /**
    * Test that an empty list of vote data is returned when we try to retrieve vote information
-   * for a non-existent contest (non existent county AND contest ID).
+   * for a non-existent contest (non-existent county AND contest ID).
    */
   @Test
   @Transactional
@@ -59,7 +61,7 @@ public class CVRContestInfoRepositoryTests {
 
   /**
    * Test that an empty list of vote data is returned when we try to retrieve vote information
-   * for a non-existent contest (existent county ID and non existent contest ID).
+   * for a non-existent contest (existent county ID and non-existent contest ID).
    */
   @Test
   @Transactional
@@ -187,5 +189,73 @@ public class CVRContestInfoRepositoryTests {
     assertTrue(retrieved.stream().anyMatch(c -> Arrays.equals(c, choice2)));
     assertTrue(retrieved.stream().anyMatch(c -> Arrays.equals(c, choice3)));
     assertTrue(retrieved.stream().anyMatch(c -> Arrays.equals(c, choice4)));
+  }
+
+  /**
+   * Test retrieval of CVRContestInfo's for a contest where at least one of the matching
+   * cvr_contest_info table records has malformed data for its choice string. For this test,
+   * the single matching cvr_contest_info row has null as its choice string.
+   */
+  @Test
+  @Transactional
+  void malformedChoiceStringIsNull1() {
+    Exception ex = assertThrows(JpaSystemException.class, () ->
+        cvrContestInfoRepository.getCVRs(999987, 11));
+    assertTrue(ex.getMessage().toLowerCase().
+        contains("Error attempting to apply AttributeConverter".toLowerCase()));
+  }
+
+  /**
+   * Test retrieval of CVRContestInfo's for a contest where at least one of the matching
+   * cvr_contest_info table records has malformed data for its choice string. For this test,
+   * the single matching cvr_contest_info row has NULL as its choice string.
+   */
+  @Test
+  @Transactional
+  void malformedChoiceStringIsNull2() {
+    Exception ex = assertThrows(JpaSystemException.class, () ->
+        cvrContestInfoRepository.getCVRs(999986, 11));
+    assertTrue(ex.getMessage().toLowerCase().
+        contains("Error attempting to apply AttributeConverter".toLowerCase()));
+  }
+
+  /**
+   * Test retrieval of CVRContestInfo's for a contest where at least one of the matching
+   * cvr_contest_info table records has a blank vote for its choice string. This choice string
+   * is still a valid JSON list (ie. '[]').
+   */
+  @Test
+  @Transactional
+  void blankVoteChoiceString() {
+    List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999985, 11);
+    assertEquals(1, retrieved.size());
+    assertEquals(0, retrieved.get(0).length);
+  }
+
+  /**
+   * Test retrieval of CVRContestInfo's for a contest where at least one of the matching
+   * cvr_contest_info table records has some text that isn't a list for its choice string.
+   */
+  @Test
+  @Transactional
+  void nonChoiceListVote1() {
+    Exception ex = assertThrows(JpaSystemException.class, () ->
+        cvrContestInfoRepository.getCVRs(999984, 11));
+    assertTrue(ex.getMessage().toLowerCase().
+        contains("Error attempting to apply AttributeConverter".toLowerCase()));
+  }
+
+  /**
+   * Test retrieval of CVRContestInfo's for a contest where at least one of the matching
+   * cvr_contest_info table records has some text that isn't a list for its choice string.
+   * In this case the string is empty ('').
+   */
+  @Test
+  @Transactional
+  void nonChoiceListVote2() {
+    Exception ex = assertThrows(JpaSystemException.class, () ->
+        cvrContestInfoRepository.getCVRs(999983, 11));
+    assertTrue(ex.getMessage().toLowerCase().
+        contains("Error attempting to apply AttributeConverter".toLowerCase()));
   }
 }

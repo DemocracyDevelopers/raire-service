@@ -2,6 +2,7 @@
 INSERT INTO county (id, name) values (8, 'Ballina');
 INSERT INTO county (id, name) values (9, 'Byron');
 INSERT INTO county (id, name) values (10, 'Westgarth');
+INSERT INTO county (id, name) values (11, 'Malformed');
 -- Contest
 -- Simple contests to test basic functioning.
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (8, 999990, 0, 'IRV', 'Multi-County Contest 1', 0, 7, 1);
@@ -19,7 +20,12 @@ INSERT INTO contest (county_id, id, version, description, name, sequence_number,
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (10, 999996, 0, 'IRV', 'No CVR Mayoral', 8, 7, 1);
 -- Single CVR Contest
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (10, 999988, 0, 'IRV', 'Multi-County Contest 1', 10, 4, 1);
-
+-- Contest with malformed CVR contest infos.
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (11, 999987, 0, 'IRV', 'Malformed Contest 1', 11, 4, 1);
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (11, 999986, 0, 'IRV', 'Malformed Contest 2', 12, 4, 1);
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (11, 999985, 0, 'IRV', 'Malformed Contest 3', 13, 4, 1);
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (11, 999984, 0, 'IRV', 'Malformed Contest 4', 14, 4, 1);
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (11, 999983, 0, 'IRV', 'Malformed Contest 5', 15, 4, 1);
 --CVRs
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (1, 1, 'Type 1', 1, 8, '1-1-1', 1, 'UPLOADED', 1);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (1, 8, '["Alice","Bob","Charlie"]', 999998, 0);
@@ -56,3 +62,11 @@ INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) val
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (11, 11, 'Type 1', 11, 10, '11-11-11', 11, 'UPLOADED', 1);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (11, 10, '["CC","A","B"]', 999999, 12);
 
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (12, 12, 'Type 1', 12, 11, '12-12-12', 12, 'UPLOADED', 1);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, null, 999987, 13);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, NULL, 999986, 14);
+-- This entry is not an error, just a blank vote.
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, '[]', 999985, 15);
+-- A vote where the choice string is not a list.
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, 'NotAList', 999984, 16);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, '', 999983, 17);

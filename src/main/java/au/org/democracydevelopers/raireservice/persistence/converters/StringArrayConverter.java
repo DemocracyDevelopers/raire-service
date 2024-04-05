@@ -22,6 +22,8 @@ package au.org.democracydevelopers.raireservice.persistence.converters;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
@@ -47,7 +49,11 @@ public class StringArrayConverter implements AttributeConverter<String[], String
   /**
    * A GSON instance used to convert an array of String to a JSON representation (a single String)
    * and vice versa. The colorado-rla convention is to retain HTML characters when serialising and
-   * to serialise null fields.
+   * to serialise null fields. Note, however, that we throw an exception when the converter is
+   * trying to convert a null/blank entry to a JSON string, or a null/blank entry to an array of
+   * strings. In the context with which this converter is being used by raire-service, the first
+   * would add invalid data to the database, and the second would indicate that invalid data is
+   * present in the database.
    */
   private static final Gson GSON =
       new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
@@ -56,19 +62,35 @@ public class StringArrayConverter implements AttributeConverter<String[], String
    * Converts the specified array of String to a single String database column entry.
    *
    * @param arrayOfString The list of String to be converted into a single String.
+   * @throws JsonSyntaxException when a null/blank field would be stored in place of a JSON
+   * representation of a list.
    */
   @Override
   public String convertToDatabaseColumn(final String[] arrayOfString) {
+    if(arrayOfString == null){
+      throw new JsonSyntaxException("Attempt to store a null value in place of a JSON list.");
+    }
     return GSON.toJson(arrayOfString);
   }
 
   /**
-   * Converts the specified single-String database column entry to an array of String.
+   * Converts the specified single-String database column entry to an array of String. If the
+   * column entry is null or an empty string, this method will return 'null'. If the column
+   * entry is a non-empty string, and not in the JSON format of a list, this method will throw a
+   * Json Parse/Syntax Exception. We also throw this exception if the caller is trying to
+   * convert a null string, or an empty string, to an array of strings. This indicates a problem
+   * in the data present in the database.
    *
    * @param arrayAsString The column entry.
+   * @throws JsonSyntaxException when the database column entry being converted to an array of
+   * strings is not in the correct JSON format, or is blank.
    */
   @Override
   public String[] convertToEntityAttribute(final String arrayAsString) {
-    return GSON.fromJson(arrayAsString, STRING_ARRAY);
+      if(arrayAsString.isBlank()){
+        throw new JsonSyntaxException("A null/blank entry is present in the database in place of a "
+          + "JSON list.");
+      }
+      return GSON.fromJson(arrayAsString, STRING_ARRAY);
   }
 }
