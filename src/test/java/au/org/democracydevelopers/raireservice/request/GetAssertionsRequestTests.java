@@ -52,7 +52,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void validRequestForIRVContestIsValid() {
-    GetAssertionsRequest validRequest = new GetAssertionsRequest("Byron", List.of("Alice"), BigDecimal.valueOf(0.03));
+    GetAssertionsRequest validRequest = new GetAssertionsRequest("Ballina Mayoral", List.of("Alice"), BigDecimal.valueOf(0.03));
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
   }
 
