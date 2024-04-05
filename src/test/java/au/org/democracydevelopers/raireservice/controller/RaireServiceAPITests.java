@@ -22,6 +22,11 @@ package au.org.democracydevelopers.raireservice.controller;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
+import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
+import com.google.gson.Gson;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,9 +53,11 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class RaireServiceAPITests {
 
+  private final Gson gson = new Gson();
 
   private final static String getAssertionsEndpoint = "/raire/get-assertions";
-  private final static String generateAssertionsEndpoint = "/raire/get-assertions";
+  private final static String generateAssertionsEndpoint = "/raire/generate-assertions";
+  private final static String ballina = "Ballina Mayoral";
 
   @LocalServerPort
   private int port;
@@ -101,7 +108,7 @@ public class RaireServiceAPITests {
     HttpEntity<String> request = new HttpEntity<>("", headers);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
-    assertTrue(Objects.requireNonNull(response.getBody()).contains("400"));
+    assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(response.getBody().contains("Bad Request"));
   }
 
@@ -117,27 +124,44 @@ public class RaireServiceAPITests {
     HttpEntity<String> request = new HttpEntity<>("", headers);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
-    assertTrue(Objects.requireNonNull(response.getBody()).contains("400"));
+    assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(response.getBody().contains("Bad Request"));
   }
 
-  /*
-   * At this stage, we are only testing that we get a solution.
-   */
   @Test
-  public void testTrivialExample() {
+  public void testTrivialGetAssertionsExample() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    String url = "http://localhost:" +port + getAssertionsEndpoint;
+
+    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
+        ballina,
+        List.of("Alice","Bob"),
+        new BigDecimal(0.05)
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), headers);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class );
+
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+  }
+
+  @Test
+  public void testTrivialGenerateAssertionsExample() {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     String url = "http://localhost:" +port + generateAssertionsEndpoint;
 
-    HttpEntity<String> request = new HttpEntity<>("{\"contestName\": \"TrivialExample1\", " +
-        "\"totalAuditableBallots\": 15, " +
-        "\"timeProvisionForResult\": 10, " +
-        " \"candidates\": [\"Alice\",\"Bob\"], " +
-        "\"votes\":[[\"Alice\",\"Bob\"],[\"Alice\",\"Bob\"]]" +
-        "}", headers);
+    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
+        ballina,
+        100,
+        5,
+        List.of("Alice","Bob")
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), headers);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class );
 
-    assertTrue(Objects.requireNonNull(response.getBody()).contains("solution"));
+    assertTrue(response.getStatusCode().is2xxSuccessful());
   }
 }

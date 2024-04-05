@@ -21,6 +21,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.request;
 
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
+import io.swagger.v3.oas.annotations.Hidden;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,8 @@ import org.springframework.data.annotation.ReadOnlyProperty;
  */
 public abstract class ContestRequest {
 
-  protected final Logger logger = LoggerFactory.getLogger(ContestRequest.class);
+  // Transient hides it for json serialization used for testing.
+  protected final transient Logger logger = LoggerFactory.getLogger(ContestRequest.class);
 
   /**
    * The name of the contest
@@ -64,11 +66,28 @@ public abstract class ContestRequest {
     this.contestName = contestName;
     this.candidates = candidates;
   }
+
   /**
    * Return the contest Name.
+   * @return the name of the contest.
    */
   public String getContestName() {
     return contestName;
+  }
+
+  /**
+   * Set the contest name. Used for deserialization.
+   * @param contestName the name of the contest.
+   */
+  public void setContestName(String contestName) {
+    this.contestName = contestName;
+  }
+  /**
+   * Set the candidate list. Used for deserialization.
+   * @param candidates the list of candidate names as strings.
+   */
+  public void setCandidates(List<String> candidates) {
+    this.candidates = candidates;
   }
 
   /**
