@@ -22,13 +22,14 @@ package au.org.democracydevelopers.raireservice.persistence.converters;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
 import java.lang.reflect.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class converts between an array of String and a JSON representation of that
@@ -40,6 +41,8 @@ import java.lang.reflect.Type;
  */
 @Converter(autoApply = true)
 public class StringArrayConverter implements AttributeConverter<String[], String> {
+
+  protected final Logger logger = LoggerFactory.getLogger(StringArrayConverter.class);
 
   /**
    * The type information for an array of String.
@@ -68,7 +71,9 @@ public class StringArrayConverter implements AttributeConverter<String[], String
   @Override
   public String convertToDatabaseColumn(final String[] arrayOfString) {
     if(arrayOfString == null){
-      throw new JsonSyntaxException("Attempt to store a null value in place of a JSON list.");
+      final String msg = "Attempt to store a null value in place of a JSON list.";
+      logger.error(msg);
+      throw new JsonSyntaxException(msg);
     }
     return GSON.toJson(arrayOfString);
   }
@@ -88,8 +93,9 @@ public class StringArrayConverter implements AttributeConverter<String[], String
   @Override
   public String[] convertToEntityAttribute(final String arrayAsString) {
       if(arrayAsString.isBlank()){
-        throw new JsonSyntaxException("A null/blank entry is present in the database in place of a "
-          + "JSON list.");
+        final String msg = "A null/blank entry is present in the database in place of a JSON list.";
+        logger.error(msg);
+        throw new JsonSyntaxException(msg);
       }
       return GSON.fromJson(arrayAsString, STRING_ARRAY);
   }
