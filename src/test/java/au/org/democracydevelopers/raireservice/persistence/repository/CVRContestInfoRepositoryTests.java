@@ -22,11 +22,9 @@ package au.org.democracydevelopers.raireservice.persistence.repository;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.request.RequestValidationException;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -52,7 +50,7 @@ public class CVRContestInfoRepositoryTests {
 
   /**
    * Test that an empty list of vote data is returned when we try to retrieve vote information
-   * for a non-existent contest (non existent county AND contest ID).
+   * for a non-existent contest (non-existent county AND contest ID).
    */
   @Test
   @Transactional
@@ -63,7 +61,7 @@ public class CVRContestInfoRepositoryTests {
 
   /**
    * Test that an empty list of vote data is returned when we try to retrieve vote information
-   * for a non-existent contest (existent county ID and non existent contest ID).
+   * for a non-existent contest (existent county ID and non-existent contest ID).
    */
   @Test
   @Transactional
@@ -201,9 +199,10 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void malformedChoiceStringIsNull1() {
-    List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999987, 11);
-    assertEquals(1, retrieved.size());
-    assertNull(retrieved.get(0));
+    Exception ex = assertThrows(JpaSystemException.class, () ->
+        cvrContestInfoRepository.getCVRs(999987, 11));
+    assertTrue(ex.getMessage().toLowerCase().
+        contains("Error attempting to apply AttributeConverter".toLowerCase()));
   }
 
   /**
@@ -214,14 +213,16 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void malformedChoiceStringIsNull2() {
-    List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999986, 11);
-    assertEquals(1, retrieved.size());
-    assertNull(retrieved.get(0));
+    Exception ex = assertThrows(JpaSystemException.class, () ->
+        cvrContestInfoRepository.getCVRs(999986, 11));
+    assertTrue(ex.getMessage().toLowerCase().
+        contains("Error attempting to apply AttributeConverter".toLowerCase()));
   }
 
   /**
    * Test retrieval of CVRContestInfo's for a contest where at least one of the matching
-   * cvr_contest_info table records has a blank vote for its choice string.
+   * cvr_contest_info table records has a blank vote for its choice string. This choice string
+   * is still a valid JSON list (ie. '[]').
    */
   @Test
   @Transactional
@@ -252,8 +253,9 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void nonChoiceListVote2() {
-    List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999983, 11);
-    assertEquals(1, retrieved.size());
-    assertNull(retrieved.get(0));
+    Exception ex = assertThrows(JpaSystemException.class, () ->
+        cvrContestInfoRepository.getCVRs(999983, 11));
+    assertTrue(ex.getMessage().toLowerCase().
+        contains("Error attempting to apply AttributeConverter".toLowerCase()));
   }
 }
