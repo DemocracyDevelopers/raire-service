@@ -28,6 +28,7 @@ import com.google.gson.Gson;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,121 +36,113 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 
-/*
-  * Tests for Springboot functioning. This class automatically fires up the RAIRE Microservice on a random port, then runs
-  * a series of (at this stage) very basic tests.
-  * Note that you have to run the *whole class*. Individual tests do not work separately because they don't initiate the
-  * microservice on their own.
-  */
-
-
+/**
+ * Tests for generate-assertions endpoint. This class automatically fires up the RAIRE Microservice on a random port, then runs
+ * a series of (at this stage) very basic tests. Currently we check for proper input validation, and
+ * check that one valid trivial request succeeds for each endpoint.
+ * Note that you have to run the *whole class*. Individual tests do not work separately because they don't initiate the
+ * microservice on their own.
+ */
 
 @ActiveProfiles("test-containers")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class RaireServiceAPITests {
+public class GenerateAssertionsAPITests {
 
   private final Gson gson = new Gson();
+  private final static HttpHeaders httpHeaders = new HttpHeaders();
 
-  private final static String getAssertionsEndpoint = "/raire/get-assertions";
+  private final static String baseURL = "http://localhost:";
   private final static String generateAssertionsEndpoint = "/raire/generate-assertions";
   private final static String ballina = "Ballina Mayoral";
+  private final static String invalidMixed = "Invalid Mixed Contest";
+  private final static String validPlurality = "Valid Plurality Contest";
 
   @LocalServerPort
   private int port;
 
 
+
   @Autowired
   private TestRestTemplate restTemplate;
+
+  @BeforeAll
+  public static void before() {
+    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+  }
 
   @Test
   void contextLoads() {
   }
 
-  /*
+  /**
    * This is really just a test that the testing is working.
    * There's no mapping for the plain localhost response, so when the microservice is running it just returns
-   * a default error. We check for 404 because that appears in the default error text.
+   * a default error. We check for 404.
    */
   @Test
   public void testErrorForNonFunctioningEndpoint() {
-    assertTrue((restTemplate.getForObject("http://localhost:" + port + "/",
-        String.class)).contains("404"));
+    ResponseEntity<String> response = restTemplate.postForEntity(baseURL + port + "/",
+        new HttpEntity<>("", httpHeaders), String.class);
+    assertTrue(response.getStatusCode().isSameCodeAs(HttpStatusCode.valueOf(404)));
   }
 
-  /*
-   * Check that calling the right endpoint with no header and no data produces a sensible error message.
+  /**
+   * Calling the generateAssertions endpoint with no header and no data produces an error.
    */
   @Test
-  public void testMethodNotAllowed() {
-    assertTrue((restTemplate.getForObject("http://localhost:" + port + getAssertionsEndpoint,
-        String.class)).contains("405"));
-    assertTrue((restTemplate.getForObject("http://localhost:" + port + getAssertionsEndpoint,
-        String.class)).contains("Method Not Allowed"));
-    assertTrue((restTemplate.getForObject("http://localhost:" + port + generateAssertionsEndpoint,
-        String.class)).contains("405"));
-    assertTrue((restTemplate.getForObject("http://localhost:" + port + generateAssertionsEndpoint,
-        String.class)).contains("Method Not Allowed"));
-  }
-
-  /*
-   * The right endpoint, with correct headers but no data, should produce "Bad Request".
-   */
-  @Test
-  public void testGetAssertionsBadRequest() {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    String url = "http://localhost:" + port + generateAssertionsEndpoint;
-
-    HttpEntity<String> request = new HttpEntity<>("", headers);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
+  public void generateAssertionsNoBodyError() {
+    ResponseEntity<String> response = restTemplate.postForEntity(baseURL + port + generateAssertionsEndpoint,
+                new HttpEntity<>("", new HttpHeaders()), String.class);
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(response.getBody().contains("Bad Request"));
   }
 
-  /*
-   * The right endpoint, with correct headers but no data, should produce "Bad Request".
+  /**
+   * The generateAssertions endpoint, with correct headers but no data, should produce "Bad Request".
    */
   @Test
   public void testGenerateAssertionsBadRequest() {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    String url = "http://localhost:" + port + getAssertionsEndpoint;
+    String url = baseURL + port + generateAssertionsEndpoint;
 
-    HttpEntity<String> request = new HttpEntity<>("", headers);
+    HttpEntity<String> request = new HttpEntity<>("", httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(response.getBody().contains("Bad Request"));
+    assertTrue(Objects.requireNonNull(response.getBody()).contains("Bad Request"));
   }
 
+  /**
+   * The generateAssertions endpoint, called with a non-IRV contest, returns a meaningful error message.
+   */
   @Test
-  public void testTrivialGetAssertionsExample() {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    String url = "http://localhost:" +port + getAssertionsEndpoint;
+  public void generateAssertionsWithNonIRVContestIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
 
-    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
-        ballina,
-        List.of("Alice","Bob"),
-        new BigDecimal(0.05)
+    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
+        invalidMixed,
+        100,
+        5,
+        List.of("Alice","Bob")
     );
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), headers);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class );
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
-    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(Objects.requireNonNull(response.getBody()).contains("Not all IRV"));
   }
 
+  /**
+   * A trivial example of a valid generate assertions request. Simply tests that it returns an HTTP
+   * success status.
+   */
   @Test
   public void testTrivialGenerateAssertionsExample() {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
     String url = "http://localhost:" +port + generateAssertionsEndpoint;
 
     GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
@@ -159,7 +152,7 @@ public class RaireServiceAPITests {
         List.of("Alice","Bob")
     );
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), headers);
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class );
 
     assertTrue(response.getStatusCode().is2xxSuccessful());

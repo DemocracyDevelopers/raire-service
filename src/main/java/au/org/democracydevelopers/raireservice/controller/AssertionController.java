@@ -61,36 +61,45 @@ public class AssertionController {
   private final ContestRepository contestRepository;
 
 
+  /**
+   * The API endpoint for generating assertions, by contest name, and returning the IRV winner.
+   * @param request a GenerateAssertionsRequest, specifying an IRV contest name for which to generate
+   *                the assertions.
+   * @return the winner (in the case of success) or an error. The winner, together with the contest,
+   * is a GenerateAssertionsResponse. TODO the String is just a placeholder for now.
+   * In the case of success, it also stores the assertions that were derived for the specified contest
+   * in the database.
+   * @throws RequestValidationException which is handled by RequestValidationExceptionHandler.
+   * This tests for invalid requests, such as non-existent, null, or non-IRV contest names.
+   * Other exceptions that are specific to assertion generation are caught and translated into the
+   * appropriate http error. TODO add these when assertion generation is implemented.
+   */
   @PostMapping(path = "/generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<String> serve(@RequestBody GenerateAssertionsRequest request)
       throws RequestValidationException {
-    // try {
       request.Validate(contestRepository);
-      // For the moment, this is just a dummy "OK" response. Later, it will contain the winner.
+      // For the moment, this is just a dummy "OK" response. Later, it will contain the winner
+      // as a ResponseEntity<GenerateAssertionsRequest>.
       return new ResponseEntity<String>("Placeholder winner", HttpStatus.OK);
-      // return new GenerateAssertionsResponse(request.getContestName(), "OK");
-    // } catch (RequestValidationException e) {
-    //   return new GenerateAssertionsResponse(request.getContestName(), e);
-    //}
   }
 
 
   /**
-   * Find and return assertions, by contest name.
-   * @param request
-   * @return the assertions, as JSON. TODO String is just a placeholder for now.
+   * The API endpoint for finding and return assertions, by contest name.
+   * @param request a GetAssertionsRequest, specifying an IRV contest name for which to retrieve the
+   *                assertions.
+   * @return the assertions, as JSON (in the case of success) or an error. TODO the String is just a placeholder for now.
+   * @throws RequestValidationException which is handled by RequestValidationExceptionHandler.
+   * This tests for invalid requests, such as non-existent, null, or non-IRV contest names.
+   * Other exceptions that are specific to assertion generation are caught and translated into the
+   * appropriate http error. TODO add these when assertion retrieval is implemented.
    */
   @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<String> serve(@RequestBody GetAssertionsRequest request)
       throws RequestValidationException {
-    // try {
       request.Validate(contestRepository);
       // For the moment, this is just a dummy "OK" response. Later, it will contain the winner.
       return new ResponseEntity<String>("Placeholder assertions", HttpStatus.OK);
-      // return new GetAssertionsResponse(request.getContestName(), "OK");
-    // } catch (RequestValidationException e) {
-    //  return new GetAssertionsResponse(request.getContestName(), e);
-    //}
   }
 
   /**

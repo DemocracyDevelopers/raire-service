@@ -31,25 +31,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 /**
  * Exception handler for the bad request types common to all Contest Requests,
  * including GenerateAssertionsRequest and GetAssertionsRequest.
- * Based on Solution 3 in <a href="https://www.baeldung.com/exception-handling-for-rest-with-spring">...</a>
  * Other errors (the ones specific to particular tasks) will be dealt with using
  * ResponseStatusException.
  */
 @ControllerAdvice
 public class RequestValidationExceptionHandler extends ResponseEntityExceptionHandler {
-    @ExceptionHandler(value = { RequestValidationException.class })
-    protected ResponseEntity<Object> handleConflict(
-        RequestValidationException ex, WebRequest request) {
-      String bodyOfResponse = "Invalid request";
-      return handleExceptionInternal(ex, bodyOfResponse,
-          new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
-    }
 
-    /* Note some simply have very simple bodies, e.g.
-        @ExceptionHandler(InvalidRequestException.class)
-    public ResponseEntity<String> handleInvalidRequestException(InvalidRequestException ex) {
+    @ExceptionHandler(RequestValidationException.class)
+    public ResponseEntity<String> handleInvalidRequestException(RequestValidationException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
-    which looks better.
-     */
 }
