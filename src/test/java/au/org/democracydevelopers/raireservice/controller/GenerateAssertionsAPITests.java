@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static au.org.democracydevelopers.raireservice.util.StringUtils.containsIgnoreCase;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
@@ -43,11 +44,13 @@ import org.springframework.test.context.ActiveProfiles;
 
 
 /**
- * Tests for generate-assertions endpoint. This class automatically fires up the RAIRE Microservice on a random port, then runs
- * a series of (at this stage) very basic tests. Currently we check for proper input validation, and
- * check that one valid trivial request succeeds for each endpoint.
- * Note that you have to run the *whole class*. Individual tests do not work separately because they don't initiate the
- * microservice on their own.
+ * Tests for generate-assertions endpoint. This class automatically fires up the RAIRE Microservice on a
+ * random port, then runs a series of (at this stage) very basic tests. Currently we check for proper
+ * input validation, and check that one valid trivial request succeeds.
+ * The list of tests is similar to GenerateAssertionsRequestTests.java, and also to GetAssertionsAPITests.java
+ * when the same test is relevant to both endpoints.
+ * Note that you have to run the *whole class*. Individual tests do not work separately because they don't
+ * initiate the microservice on their own.
  */
 
 @ActiveProfiles("test-containers")
@@ -78,6 +81,27 @@ public class GenerateAssertionsAPITests {
 
   @Test
   void contextLoads() {
+  }
+
+  /**
+   * A trivial example of a valid generate assertions request. Simply tests that it returns an HTTP
+   * success status.
+   */
+  @Test
+  public void testTrivialGenerateAssertionsExample() {
+    String url = "http://localhost:" +port + generateAssertionsEndpoint;
+
+    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
+        ballina,
+        100,
+        5,
+        List.of("Alice","Bob")
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class );
+
+    assertTrue(response.getStatusCode().is2xxSuccessful());
   }
 
   /**
@@ -114,17 +138,106 @@ public class GenerateAssertionsAPITests {
 
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(Objects.requireNonNull(response.getBody()).contains("Bad Request"));
+    assertTrue(containsIgnoreCase(response.getBody(), "Bad request"));
+  }
+
+
+  /**
+   * The generateAssertions endpoint, called with a nonexistent contest, returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithNonExistentContestIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
+        "NonExistentContest",
+        100,
+        5,
+        List.of("Alice", "Bob")
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(Objects.requireNonNull(response.getBody()).contains("No such contest"));
+    assertTrue(containsIgnoreCase(response.getBody(), "No such contest"));
+  }
+  /**
+   * The generateAssertions endpoint, called with a valid plurality contest, returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithPluralityContestIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
+        validPlurality,
+        100,
+        5,
+        List.of("Alice", "Bob")
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(Objects.requireNonNull(response.getBody()).contains("Not all IRV"));
+    assertTrue(containsIgnoreCase(response.getBody(), "Not all IRV"));
   }
 
   /**
-   * The generateAssertions endpoint, called with a non-IRV contest, returns a meaningful error message.
+   * The generateAssertions endpoint, called with a mixed IRV and non-IRV contest, returns a meaningful error.
    */
   @Test
-  public void generateAssertionsWithNonIRVContestIsAnError() {
+  public void generateAssertionsWithMixedIRVPluralityContestIsAnError() {
     String url = baseURL + port + generateAssertionsEndpoint;
 
     GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
         invalidMixed,
+        100,
+        5,
+        List.of("Alice", "Bob")
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(Objects.requireNonNull(response.getBody()).toLowerCase()
+        .contains("Not all IRV".toLowerCase()));
+    assertTrue(containsIgnoreCase(response.getBody(), "Not all IRV"));
+  }
+
+  /**
+   * The generateAssertions endpoint, called with an empty contest name, returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithEmptyContestNameIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
+        "",
+        100,
+        5,
+        List.of("Alice", "Bob")
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(), "No contest name"));
+  }
+
+  /**
+   * The generateAssertions endpoint, called with an all-whitespace contest name, returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithWhitespaceContestNameIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
+        "       ",
         100,
         5,
         List.of("Alice","Bob")
@@ -134,27 +247,69 @@ public class GenerateAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(Objects.requireNonNull(response.getBody()).contains("Not all IRV"));
+    assertTrue(containsIgnoreCase(response.getBody(), "No contest name"));
   }
 
   /**
-   * A trivial example of a valid generate assertions request. Simply tests that it returns an HTTP
-   * success status.
+   * The generateAssertions endpoint, called with a null candidate list, returns a meaningful error.
    */
   @Test
-  public void testTrivialGenerateAssertionsExample() {
-    String url = "http://localhost:" +port + generateAssertionsEndpoint;
+  public void generateAssertionsWithNullCandidateListIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
 
     GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
         ballina,
         100,
         5,
-        List.of("Alice","Bob")
+        null
     );
 
     HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class );
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
-    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(), "Bad candidate list"));
+  }
+
+  /**
+   * The generateAssertions endpoint, called with an empty candidate list, returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithEmptyCandidateListIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
+        ballina,
+        100,
+        5,
+        List.of()
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(), "Bad candidate list"));
+  }
+
+  /**
+   * The generateAssertions endpoint, called with a whitespace candidate name, returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithWhiteSpaceCandidateNameIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
+        ballina,
+        100,
+        5,
+        List.of("Alice", "    ")
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(), "Bad candidate list"));
   }
 }
