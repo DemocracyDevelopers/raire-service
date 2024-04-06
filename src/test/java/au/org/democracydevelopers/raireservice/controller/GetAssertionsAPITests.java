@@ -31,6 +31,8 @@ import java.util.Objects;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -50,10 +52,13 @@ import org.springframework.test.context.ActiveProfiles;
  * when the same test is relevant to both endpoints.
  * Note that you have to run the *whole class*. Individual tests do not work separately because they don't
  * initiate the microservice on their own.
+ * Contests which will be used for validity testing are pre-loaded into the database using
+ * src/test/resources/data.sql.
  */
 
 @ActiveProfiles("test-containers")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureTestDatabase(replace = Replace.NONE)
 public class GetAssertionsAPITests {
 
   private final Gson gson = new Gson();
