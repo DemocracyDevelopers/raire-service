@@ -21,7 +21,6 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.request;
 
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
-import io.swagger.v3.oas.annotations.Hidden;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,14 +64,6 @@ public abstract class ContestRequest {
   public ContestRequest(String contestName, List<String> candidates) {
     this.contestName = contestName;
     this.candidates = candidates;
-  }
-
-  /**
-   * Return the contest Name.
-   * @return the name of the contest.
-   */
-  public String getContestName() {
-    return contestName;
   }
 
   /**

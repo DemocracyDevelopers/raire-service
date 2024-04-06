@@ -20,21 +20,10 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
-import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.RequestValidationException;
-import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
-import au.org.democracydevelopers.raireservice.response.GetAssertionsResponse;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.FluentQuery.FetchableFluentQuery;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -80,7 +69,7 @@ public class AssertionController {
       request.Validate(contestRepository);
       // For the moment, this is just a dummy "OK" response. Later, it will contain the winner
       // as a ResponseEntity<GenerateAssertionsRequest>.
-      return new ResponseEntity<String>("Placeholder winner", HttpStatus.OK);
+      return new ResponseEntity<>("Placeholder winner", HttpStatus.OK);
   }
 
 
@@ -99,7 +88,7 @@ public class AssertionController {
       throws RequestValidationException {
       request.Validate(contestRepository);
       // For the moment, this is just a dummy "OK" response. Later, it will contain the winner.
-      return new ResponseEntity<String>("Placeholder assertions", HttpStatus.OK);
+      return new ResponseEntity<>("Placeholder assertions", HttpStatus.OK);
   }
 
   /**

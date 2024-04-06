@@ -23,7 +23,6 @@ package au.org.democracydevelopers.raireservice.controller;
 import static au.org.democracydevelopers.raireservice.util.StringUtils.containsIgnoreCase;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import com.google.gson.Gson;
 import java.math.BigDecimal;
@@ -303,5 +302,46 @@ public class GetAssertionsAPITests {
 
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(containsIgnoreCase(response.getBody(), "Bad candidate list"));
+  }
+
+  /**
+   * The getAssertions endpoint, called with a null risk limit, returns a meaningful error.
+   */
+  @Test
+  public void getAssertionsWithNullRiskLimitIsAnError() {
+    String url = baseURL + port + getAssertionsEndpoint;
+
+    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
+        ballina,
+        List.of("Alice", "Bob"),
+        null
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(), "Null or negative risk limit"));
+  }
+
+  /**
+   * The getAssertions endpoint, called with a negative risk limit, returns a meaningful error.
+   * (Note that a value >=1 is vacuously met but not invalid.)
+   */
+  @Test
+  public void getAssertionsWithNegativeRiskLimitIsAnError() {
+    String url = baseURL + port + getAssertionsEndpoint;
+
+    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
+        ballina,
+        List.of("Alice", "Bob"),
+        BigDecimal.valueOf(-0.03)
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(), "Null or negative risk limit"));
   }
 }

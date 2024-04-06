@@ -69,7 +69,6 @@ public class GenerateAssertionsRequest extends ContestRequest {
     this.timeLimitSeconds = timeLimitSeconds;
   }
 
-
   /**
    * No args constructor. Used for serialization.
    */

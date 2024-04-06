@@ -24,9 +24,7 @@ import static au.org.democracydevelopers.raireservice.util.StringUtils.containsI
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
-import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import com.google.gson.Gson;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeAll;
@@ -311,5 +309,126 @@ public class GenerateAssertionsAPITests {
 
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(containsIgnoreCase(response.getBody(), "Bad candidate list"));
+  }
+
+  /**
+   * The generateAssertions endpoint, called with null/missing total auditable ballots, returns a
+   * meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithNullAuditableBallotsIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    String requestAsJson =
+        "{\"timeLimitSeconds\":10.0,\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(),"Non-positive total auditable ballots"));
+  }
+
+  /**
+   * The generateAssertions endpoint, called with zero total auditable ballots, returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithZeroAuditableBallotsIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
+        ballina,
+        0,
+        5,
+        List.of("Alice", "Bob")
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(),"Non-positive total auditable ballots"));
+  }
+
+  /**
+   * The generateAssertions endpoint, called with negative total auditable ballots, returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithNegativeAuditableBallotsIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
+        ballina,
+        -10,
+        5,
+        List.of("Alice", "Bob")
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(),"Non-positive total auditable ballots"));
+  }
+
+
+
+  /**
+   * The generateAssertions endpoint, called with null/missing time limit, returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithNullTimeLimitIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    String requestAsJson =
+        "{\"totalAuditableBallots\":100,\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(),"Non-positive time limit"));
+  }
+
+  /**
+   * The generateAssertions endpoint, called with zero time limit, returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithZeroTimeLimitIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
+        ballina,
+        100,
+        0,
+        List.of("Alice", "Bob")
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(),"Non-positive time limit"));
+  }
+
+  /**
+   * The generateAssertions endpoint, called with negative time limit, returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithNegativeTimeLimitIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
+        ballina,
+        100,
+        -5,
+        List.of("Alice", "Bob")
+    );
+
+    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(),"Non-positive time limit"));
   }
 }
