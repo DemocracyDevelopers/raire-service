@@ -23,10 +23,6 @@ package au.org.democracydevelopers.raireservice.controller;
 import static au.org.democracydevelopers.raireservice.util.StringUtils.containsIgnoreCase;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
-import com.google.gson.Gson;
-import java.util.List;
-import java.util.Objects;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,19 +59,12 @@ import org.springframework.test.context.ActiveProfiles;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GenerateAssertionsAPITests {
 
-  private final Gson gson = new Gson();
   private final static HttpHeaders httpHeaders = new HttpHeaders();
-
   private final static String baseURL = "http://localhost:";
   private final static String generateAssertionsEndpoint = "/raire/generate-assertions";
-  private final static String ballina = "Ballina Mayoral";
-  private final static String invalidMixed = "Invalid Mixed Contest";
-  private final static String validPlurality = "Valid Plurality Contest";
 
   @LocalServerPort
   private int port;
-
-
 
   @Autowired
   private TestRestTemplate restTemplate;
@@ -97,15 +86,12 @@ public class GenerateAssertionsAPITests {
   public void testTrivialGenerateAssertionsExample() {
     String url = "http://localhost:" +port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
-        ballina,
-        100,
-        5,
-        List.of("Alice","Bob")
-    );
+    String requestAsJson =
+        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
+            +"\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class );
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is2xxSuccessful());
   }
@@ -143,10 +129,8 @@ public class GenerateAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(Objects.requireNonNull(response.getBody()).contains("Bad Request"));
     assertTrue(containsIgnoreCase(response.getBody(), "Bad request"));
   }
-
 
   /**
    * The generateAssertions endpoint, called with a nonexistent contest, returns a meaningful error.
@@ -155,20 +139,17 @@ public class GenerateAssertionsAPITests {
   public void generateAssertionsWithNonExistentContestIsAnError() {
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
-        "NonExistentContest",
-        100,
-        5,
-        List.of("Alice", "Bob")
-    );
+    String requestAsJson =
+        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
+            +"\"contestName\":\"NonExistentContest\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(Objects.requireNonNull(response.getBody()).contains("No such contest"));
     assertTrue(containsIgnoreCase(response.getBody(), "No such contest"));
   }
+
   /**
    * The generateAssertions endpoint, called with a valid plurality contest, returns a meaningful error.
    */
@@ -176,18 +157,14 @@ public class GenerateAssertionsAPITests {
   public void generateAssertionsWithPluralityContestIsAnError() {
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
-        validPlurality,
-        100,
-        5,
-        List.of("Alice", "Bob")
-    );
+    String requestAsJson =
+        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
+            +"\"contestName\":\"Valid Plurality Contest\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(Objects.requireNonNull(response.getBody()).contains("Not all IRV"));
     assertTrue(containsIgnoreCase(response.getBody(), "Not all IRV"));
   }
 
@@ -198,20 +175,51 @@ public class GenerateAssertionsAPITests {
   public void generateAssertionsWithMixedIRVPluralityContestIsAnError() {
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
-        invalidMixed,
-        100,
-        5,
-        List.of("Alice", "Bob")
-    );
+    String requestAsJson =
+        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
+            +"\"contestName\":\"Invalid Mixed Contest\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(Objects.requireNonNull(response.getBody()).toLowerCase()
-        .contains("Not all IRV".toLowerCase()));
     assertTrue(containsIgnoreCase(response.getBody(), "Not all IRV"));
+  }
+
+  /**
+   * The generateAssertions endpoint, called with a missing contest name, returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithMissingContestNameIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    String requestAsJson =
+        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
+            +"\"candidates\":[\"Alice\",\"Bob\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(), "No contest name"));
+  }
+
+  /**
+   * The generateAssertions endpoint, called with a null contest name, returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithNullContestNameIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    String requestAsJson =
+        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
+            +"\"contestName\":null,\"candidates\":[\"Alice\",\"Bob\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(), "No contest name"));
   }
 
   /**
@@ -221,14 +229,11 @@ public class GenerateAssertionsAPITests {
   public void generateAssertionsWithEmptyContestNameIsAnError() {
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
-        "",
-        100,
-        5,
-        List.of("Alice", "Bob")
-    );
+    String requestAsJson =
+        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
+            +"\"contestName\":\"\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -242,14 +247,11 @@ public class GenerateAssertionsAPITests {
   public void generateAssertionsWithWhitespaceContestNameIsAnError() {
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
-        "       ",
-        100,
-        5,
-        List.of("Alice","Bob")
-    );
+    String requestAsJson =
+        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
+            +"\"contestName\":\"     \",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -263,14 +265,29 @@ public class GenerateAssertionsAPITests {
   public void generateAssertionsWithNullCandidateListIsAnError() {
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
-        ballina,
-        100,
-        5,
-        null
-    );
+    String requestAsJson =
+        "{\"timeLimitSeconds\":5.0,\"totalAuditableBallots\":100,"
+            +"\"candidates\":null,\"contestName\":\"Ballina Mayoral\"}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(), "Bad candidate list"));
+  }
+
+  /**
+   * The generateAssertions endpoint, called with a missing candidate list, returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsWithMissingCandidateListIsAnError() {
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    String requestAsJson =
+        "{\"timeLimitSeconds\":5.0,\"totalAuditableBallots\":100,"
+            +"\"contestName\":\"Ballina Mayoral\"}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -284,14 +301,11 @@ public class GenerateAssertionsAPITests {
   public void generateAssertionsWithEmptyCandidateListIsAnError() {
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
-        ballina,
-        100,
-        5,
-        List.of()
-    );
+    String requestAsJson =
+        "{\"timeLimitSeconds\":5.0,\"totalAuditableBallots\":100,"
+            +"\"contestName\":\"Ballina Mayoral\",\"candidates\":[]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -305,14 +319,11 @@ public class GenerateAssertionsAPITests {
   public void generateAssertionsWithWhiteSpaceCandidateNameIsAnError() {
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
-        ballina,
-        100,
-        5,
-        List.of("Alice", "    ")
-    );
+    String requestAsJson =
+        "{\"timeLimitSeconds\":5.0,\"totalAuditableBallots\":100,"
+            +"\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"     \"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -328,7 +339,8 @@ public class GenerateAssertionsAPITests {
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
-        "{\"timeLimitSeconds\":10.0,\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
+        "{\"timeLimitSeconds\":10.0,\"contestName\":\"Ballina Mayoral\","
+            +"\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -344,14 +356,11 @@ public class GenerateAssertionsAPITests {
   public void generateAssertionsWithZeroAuditableBallotsIsAnError() {
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
-        ballina,
-        0,
-        5,
-        List.of("Alice", "Bob")
-    );
+    String requestAsJson =
+        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":0,"
+            +"\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -365,14 +374,11 @@ public class GenerateAssertionsAPITests {
   public void generateAssertionsWithNegativeAuditableBallotsIsAnError() {
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
-        ballina,
-        -10,
-        5,
-        List.of("Alice", "Bob")
-    );
+    String requestAsJson =
+        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":-10,"
+            +"\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -389,7 +395,8 @@ public class GenerateAssertionsAPITests {
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
-        "{\"totalAuditableBallots\":100,\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
+        "{\"totalAuditableBallots\":100,\"contestName\":\"Ballina Mayoral\","
+            +"\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -405,14 +412,11 @@ public class GenerateAssertionsAPITests {
   public void generateAssertionsWithZeroTimeLimitIsAnError() {
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
-        ballina,
-        100,
-        0,
-        List.of("Alice", "Bob")
-    );
+    String requestAsJson =
+        "{\"timeLimitSeconds\":0.0,\"totalAuditableBallots\":100,"
+            +"\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -426,14 +430,11 @@ public class GenerateAssertionsAPITests {
   public void generateAssertionsWithNegativeTimeLimitIsAnError() {
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest generateAssertions = new GenerateAssertionsRequest(
-        ballina,
-        100,
-        -5,
-        List.of("Alice", "Bob")
-    );
+    String requestAsJson =
+        "{\"timeLimitSeconds\":-50.0,\"totalAuditableBallots\":100,"
+            +"\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(generateAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());

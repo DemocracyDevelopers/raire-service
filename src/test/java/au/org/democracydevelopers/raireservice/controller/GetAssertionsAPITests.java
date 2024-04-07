@@ -23,10 +23,6 @@ package au.org.democracydevelopers.raireservice.controller;
 import static au.org.democracydevelopers.raireservice.util.StringUtils.containsIgnoreCase;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
-import com.google.gson.Gson;
-import java.math.BigDecimal;
-import java.util.List;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -64,14 +60,10 @@ import org.springframework.test.context.ActiveProfiles;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GetAssertionsAPITests {
 
-  private final Gson gson = new Gson();
   private final static HttpHeaders httpHeaders = new HttpHeaders();
 
   private final static String baseURL = "http://localhost:";
   private final static String getAssertionsEndpoint = "/raire/get-assertions";
-  private final static String ballina = "Ballina Mayoral";
-  private final static String invalidMixed = "Invalid Mixed Contest";
-  private final static String validPlurality = "Valid Plurality Contest";
 
   @LocalServerPort
   private int port;
@@ -95,17 +87,12 @@ public class GetAssertionsAPITests {
    */
   @Test
   public void testTrivialGetAssertionsExample() {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
     String url = "http://localhost:" + port + getAssertionsEndpoint;
 
-    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
-        ballina,
-        List.of("Alice", "Bob"),
-        new BigDecimal("0.05")
-    );
+    String requestAsJson =
+        "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), headers);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is2xxSuccessful());
@@ -154,17 +141,13 @@ public class GetAssertionsAPITests {
   public void getAssertionsWithNonExistentContestIsAnError() {
     String url = baseURL + port + getAssertionsEndpoint;
 
-    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
-        "NonExistentContest",
-        List.of("Alice", "Bob"),
-        BigDecimal.valueOf(0.03)
-    );
+    String requestAsJson =
+        "{\"riskLimit\":0.05,\"contestName\":\"Nonexistent Contest\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(Objects.requireNonNull(response.getBody()).contains("No such contest"));
     assertTrue(containsIgnoreCase(response.getBody(), "No such contest"));
 
   }
@@ -176,20 +159,17 @@ public class GetAssertionsAPITests {
   public void getAssertionsWithPluralityContestIsAnError() {
     String url = baseURL + port + getAssertionsEndpoint;
 
-    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
-        validPlurality,
-        List.of("Alice", "Bob"),
-        BigDecimal.valueOf(0.03)
-    );
+    String requestAsJson =
+        "{\"riskLimit\":0.05,\"contestName\":\"Valid Plurality Contest\","
+            +"\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(Objects.requireNonNull(response.getBody()).contains("Not all IRV"));
     assertTrue(containsIgnoreCase(response.getBody(), "Not all IRV"));
-
   }
+
   /**
    * The getAssertions endpoint, called with a mixed IRV and non-IRV contest, returns a meaningful error.
    */
@@ -197,19 +177,48 @@ public class GetAssertionsAPITests {
   public void getAssertionsWithMixedIRVPluralityContestIsAnError() {
     String url = baseURL + port + getAssertionsEndpoint;
 
-    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
-        invalidMixed,
-        List.of("Alice", "Bob"),
-        BigDecimal.valueOf(0.03)
-    );
+    String requestAsJson =
+        "{\"riskLimit\":0.05,\"contestName\":\"Invalid Mixed Contest\","
+            +"\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(Objects.requireNonNull(response.getBody()).contains("Not all IRV"));
     assertTrue(containsIgnoreCase(response.getBody(), "Not all IRV"));
 
+  }
+
+  /**
+   * The getAssertions endpoint, called with a missing contest name, returns a meaningful error.
+   */
+  @Test
+  public void getAssertionsWithMissingContestNameIsAnError() {
+    String url = baseURL + port + getAssertionsEndpoint;
+
+    String requestAsJson = "{\"riskLimit\":0.05,\"candidates\":[\"Alice\",\"Bob\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(), "No contest name"));
+  }
+
+  /**
+   * The getAssertions endpoint, called with a null contest name, returns a meaningful error.
+   */
+  @Test
+  public void getAssertionsWithNullContestNameIsAnError() {
+    String url = baseURL + port + getAssertionsEndpoint;
+
+    String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":null,\"candidates\":[\"Alice\",\"Bob\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(), "No contest name"));
   }
 
   /**
@@ -219,13 +228,9 @@ public class GetAssertionsAPITests {
   public void getAssertionsWithEmptyContestNameIsAnError() {
     String url = baseURL + port + getAssertionsEndpoint;
 
-    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
-        "",
-        List.of("Alice", "Bob"),
-        BigDecimal.valueOf(0.03)
-    );
+    String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -239,17 +244,30 @@ public class GetAssertionsAPITests {
   public void getAssertionsWithWhitespaceContestNameIsAnError() {
     String url = baseURL + port + getAssertionsEndpoint;
 
-    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
-        "       ",
-        List.of("Alice", "Bob"),
-        BigDecimal.valueOf(0.03)
-    );
+    String requestAsJson =
+        "{\"riskLimit\":0.05,\"contestName\":\"    \",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(containsIgnoreCase(response.getBody(), "No contest name"));
+  }
+
+  /**
+   * The getAssertions endpoint, called with a missing candidate list, returns a meaningful error.
+   */
+  @Test
+  public void getAssertionsWithMissingCandidateListIsAnError() {
+    String url = baseURL + port + getAssertionsEndpoint;
+
+    String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\"}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(), "Bad candidate list"));
   }
 
   /**
@@ -259,13 +277,10 @@ public class GetAssertionsAPITests {
   public void getAssertionsWithNullCandidateListIsAnError() {
     String url = baseURL + port + getAssertionsEndpoint;
 
-    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
-        ballina,
-        null,
-        BigDecimal.valueOf(0.03)
-    );
+    String requestAsJson =
+        "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\",\"candidates\":null}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -279,13 +294,10 @@ public class GetAssertionsAPITests {
   public void getAssertionsWithEmptyCandidateListIsAnError() {
     String url = baseURL + port + getAssertionsEndpoint;
 
-    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
-        ballina,
-        List.of(),
-        BigDecimal.valueOf(0.05)
-    );
+    String requestAsJson =
+        "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\",\"candidates\":[]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -299,17 +311,32 @@ public class GetAssertionsAPITests {
   public void getAssertionsWithWhitespaceCandidateNameIsAnError() {
     String url = baseURL + port + getAssertionsEndpoint;
 
-    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
-        ballina,
-        List.of("Alice", "    "),
-        BigDecimal.valueOf(0.05)
-    );
+    String requestAsJson =
+        "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\","
+            +"\"candidates\":[\"Alice\",\"    \"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(containsIgnoreCase(response.getBody(), "Bad candidate list"));
+  }
+
+  /**
+   * The getAssertions endpoint, called with a missing risk limit, returns a meaningful error.
+   */
+  @Test
+  public void getAssertionsWithMissingRiskLimitIsAnError() {
+    String url = baseURL + port + getAssertionsEndpoint;
+
+    String requestAsJson =
+        "{\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(containsIgnoreCase(response.getBody(), "Null or negative risk limit"));
   }
 
   /**
@@ -319,13 +346,10 @@ public class GetAssertionsAPITests {
   public void getAssertionsWithNullRiskLimitIsAnError() {
     String url = baseURL + port + getAssertionsEndpoint;
 
-    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
-        ballina,
-        List.of("Alice", "Bob"),
-        null
-    );
+    String requestAsJson =
+        "{\"riskLimit\":null,\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -340,13 +364,10 @@ public class GetAssertionsAPITests {
   public void getAssertionsWithNegativeRiskLimitIsAnError() {
     String url = baseURL + port + getAssertionsEndpoint;
 
-    GetAssertionsRequest getAssertions = new GetAssertionsRequest(
-        ballina,
-        List.of("Alice", "Bob"),
-        BigDecimal.valueOf(-0.03)
-    );
+    String requestAsJson =
+        "{\"riskLimit\":-0.05,\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
-    HttpEntity<String> request = new HttpEntity<>(gson.toJson(getAssertions), httpHeaders);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());

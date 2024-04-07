@@ -67,9 +67,9 @@ public class GetAssertionsRequest extends ContestRequest {
    * Set the risk limit. Used for deserialization.
    * @param riskLimit the risk limit as a BigDecimal.
    */
-  public void setRiskLimit(BigDecimal riskLimit) {
-    this.riskLimit = riskLimit;
-  }
+   public void setRiskLimit(BigDecimal riskLimit) {
+     this.riskLimit = riskLimit;
+   }
 
   /**
    * Validates the request to retrieve assertions for the contest, checking that the contest exists
