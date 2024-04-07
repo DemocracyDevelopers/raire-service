@@ -33,6 +33,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 @ActiveProfiles("test-containers")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class CVRContestInfoRepositoryTests {
 
   @Autowired

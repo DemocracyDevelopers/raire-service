@@ -54,6 +54,22 @@ public class GenerateAssertionsRequest extends ContestRequest {
   private float timeLimitSeconds;
 
   /**
+   * Set the total auditable ballots. Used for serialization, in testing.
+   * @param totalAuditableBallots the total number of ballots in the universe.
+   */
+  public void setTotalAuditableBallots(int totalAuditableBallots) {
+    this.totalAuditableBallots = totalAuditableBallots;
+  }
+
+  /**
+   * Set the time limit. Used for serialization, in testing.
+   * @param timeLimitSeconds the time limit for RAIRE.
+   */
+  public void setTimeLimitSeconds(float timeLimitSeconds) {
+    this.timeLimitSeconds = timeLimitSeconds;
+  }
+
+  /**
    * No args constructor. Used for serialization.
    */
   public GenerateAssertionsRequest() {
