@@ -21,6 +21,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.request;
 
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
+import java.beans.ConstructorProperties;
 import java.util.List;
 import org.springframework.data.annotation.ReadOnlyProperty;
 
@@ -45,35 +46,13 @@ public class GenerateAssertionsRequest extends ContestRequest {
    * is available only to a subset of voters in the universe.
    */
   @ReadOnlyProperty
-  private int totalAuditableBallots;
+  public final int totalAuditableBallots;
 
   /**
    * The elapsed time allowed to raire to generate the assertions, in seconds.
    */
   @ReadOnlyProperty
-  private float timeLimitSeconds;
-
-  /**
-   * Set the total auditable ballots. Used for serialization, in testing.
-   * @param totalAuditableBallots the total number of ballots in the universe.
-   */
-  public void setTotalAuditableBallots(int totalAuditableBallots) {
-    this.totalAuditableBallots = totalAuditableBallots;
-  }
-
-  /**
-   * Set the time limit. Used for serialization, in testing.
-   * @param timeLimitSeconds the time limit for RAIRE.
-   */
-  public void setTimeLimitSeconds(float timeLimitSeconds) {
-    this.timeLimitSeconds = timeLimitSeconds;
-  }
-
-  /**
-   * No args constructor. Used for serialization.
-   */
-  public GenerateAssertionsRequest() {
-  }
+  public final float timeLimitSeconds;
 
   /**
    * All args constructor.
@@ -82,6 +61,7 @@ public class GenerateAssertionsRequest extends ContestRequest {
    * @param timeLimitSeconds the elapsed time allowed for RAIRE to generate assertions, in seconds.
    * @param candidates the list of candidates by name
    */
+  @ConstructorProperties({"contestName", "totalAuditableBallots", "timeLimitSeconds"})
   public GenerateAssertionsRequest(String contestName, int totalAuditableBallots, float timeLimitSeconds,
       List<String> candidates) {
     super(contestName, candidates);
