@@ -20,7 +20,6 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
-import static au.org.democracydevelopers.raireservice.util.StringUtils.containsIgnoreCase;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Objects;
@@ -40,7 +39,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Tests for get-assertions endpoint. This class automatically fires up the RAIRE Microservice on a random
@@ -148,7 +147,7 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(containsIgnoreCase(response.getBody(), "No such contest"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No such contest"));
 
   }
 
@@ -167,7 +166,7 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(containsIgnoreCase(response.getBody(), "Not all IRV"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not all IRV"));
   }
 
   /**
@@ -185,7 +184,7 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(containsIgnoreCase(response.getBody(), "Not all IRV"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not all IRV"));
 
   }
 
@@ -202,7 +201,7 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(containsIgnoreCase(response.getBody(), "No contest name"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No contest name"));
   }
 
   /**
@@ -218,7 +217,7 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(containsIgnoreCase(response.getBody(), "No contest name"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No contest name"));
   }
 
   /**
@@ -234,7 +233,7 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(containsIgnoreCase(response.getBody(), "No contest name"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No contest name"));
   }
 
   /**
@@ -251,7 +250,7 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(containsIgnoreCase(response.getBody(), "No contest name"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No contest name"));
   }
 
   /**
@@ -267,7 +266,7 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(containsIgnoreCase(response.getBody(), "Bad candidate list"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Bad candidate list"));
   }
 
   /**
@@ -284,7 +283,7 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(containsIgnoreCase(response.getBody(), "Bad candidate list"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Bad candidate list"));
   }
 
   /**
@@ -301,7 +300,7 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(containsIgnoreCase(response.getBody(), "Bad candidate list"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Bad candidate list"));
   }
 
   /**
@@ -319,7 +318,7 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(containsIgnoreCase(response.getBody(), "Bad candidate list"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Bad candidate list"));
   }
 
   /**
@@ -336,7 +335,7 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(containsIgnoreCase(response.getBody(), "Null or negative risk limit"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Null or negative risk limit"));
   }
 
   /**
@@ -353,7 +352,7 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(containsIgnoreCase(response.getBody(), "Null or negative risk limit"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Null or negative risk limit"));
   }
 
   /**
@@ -371,6 +370,6 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(containsIgnoreCase(response.getBody(), "Null or negative risk limit"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Null or negative risk limit"));
   }
 }

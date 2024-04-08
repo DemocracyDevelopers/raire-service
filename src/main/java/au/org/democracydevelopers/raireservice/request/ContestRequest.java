@@ -25,6 +25,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.ReadOnlyProperty;
+import java.beans.ConstructorProperties;
 
 /**
  * Request (expected to be json) identifying a contest by name and listing its candidates.
@@ -35,49 +36,28 @@ import org.springframework.data.annotation.ReadOnlyProperty;
  */
 public abstract class ContestRequest {
 
-  // Transient hides it for json serialization used for testing.
-  protected final transient Logger logger = LoggerFactory.getLogger(ContestRequest.class);
+  protected final static Logger logger = LoggerFactory.getLogger(ContestRequest.class);
 
   /**
    * The name of the contest
    */
   @ReadOnlyProperty
-  protected String contestName;
+  public final String contestName;
 
   /**
    * List of candidate names.
    */
   @ReadOnlyProperty
-  protected List<String> candidates;
-
-  /**
-   * No args constructor. Used for serialization.
-   */
-  public ContestRequest() {
-  }
+  public final List<String> candidates;
 
   /**
    * All args constructor.
    * @param contestName the name of the contest
    * @param candidates the list of candidates by name
    */
+  @ConstructorProperties({"contestName", "candidates"})
   public ContestRequest(String contestName, List<String> candidates) {
     this.contestName = contestName;
-    this.candidates = candidates;
-  }
-
-  /**
-   * Set the contest name. Used for deserialization.
-   * @param contestName the name of the contest.
-   */
-  public void setContestName(String contestName) {
-    this.contestName = contestName;
-  }
-  /**
-   * Set the candidate list. Used for deserialization.
-   * @param candidates the list of candidate names as strings.
-   */
-  public void setCandidates(List<String> candidates) {
     this.candidates = candidates;
   }
 
