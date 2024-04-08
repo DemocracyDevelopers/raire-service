@@ -571,6 +571,7 @@ create table assertion
     diluted_margin              double precision not null,
     loser                       varchar(255)     not null,
     margin                      integer          not null,
+    current_risk                numeric(19, 2)   not null,
     estimated_samples_to_audit  integer          not null,
     one_vote_over_count         integer          not null,
     one_vote_under_count        integer          not null,
@@ -582,23 +583,22 @@ create table assertion
     winner                      varchar(255)     not null
 );
 
-create table assertion_context
+create table assertion_discrepancies
 (
-    id                 bigint                    not null
-        constraint fk_assertion_assertion_context
+    id          bigint  not null
+        constraint fkt31yi3mf6c9axmt1gn1mu33ea
             references assertion,
-    assumed_continuing varchar(255)              not null
+    discrepancy integer not null,
+    cvr_id      bigint  not null,
+    primary key (id, cvr_id)
 );
 
-create table assertion_discrepancy
+create table assertion_context
 (
-    id                 bigint          not null
-        constraint fk_assertion_assertion_discrepancy_id
+    id                 bigint       not null
+        constraint fki0lyp4tghtpohaa9ma6kv2174
             references assertion,
-    cvr_id             bigint          not null
-        constraint fk_cast_vote_record_assertion_discrepancy
-            references cast_vote_record,
-    assumed_continuing varchar(255)    not null
+    assumed_continuing varchar(255) not null
 );
 
 create table audit_to_assertions

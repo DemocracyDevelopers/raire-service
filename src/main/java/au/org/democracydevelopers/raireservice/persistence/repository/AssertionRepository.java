@@ -34,10 +34,17 @@ import org.springframework.stereotype.Repository;
 public interface AssertionRepository extends JpaRepository<Assertion, Long> {
 
   /**
-   * Retrieve all Assertions from the database belonging to the contest with
-   * the given name.
+   * Retrieve all Assertions from the database belonging to the contest with the given name.
    * @param contestName Name of the contest whose assertions being retrieved.
    */
   @Query(value="select a from Assertion a where a.contestName = :contestName")
   List<Assertion> findByContestName(@Param("contestName") String contestName);
+
+  /**
+   * Delete all Assertions belonging to the contest with the given name from the database. This
+   * is Spring syntactic sugar for the corresponding 'delete' query.
+   * @param contestName The name of the contest whose assertions are to be deleted.
+   * @return The number of records deleted from the database.
+   */
+  long deleteByContestName(String contestName);
 }

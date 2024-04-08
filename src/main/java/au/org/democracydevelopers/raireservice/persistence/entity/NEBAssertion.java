@@ -20,11 +20,30 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
+import au.org.democracydevelopers.raireservice.request.RequestValidationException;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import java.util.List;
 
 @Entity
 @DiscriminatorValue("NEB")
 public class NEBAssertion extends Assertion {
+
+  /**
+   * {@inheritDoc}
+   */
+  public NEBAssertion() {
+    super();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public NEBAssertion(String contestName, String winner, String loser, int margin,
+      long universeSize, double difficulty, List<String> assumedContinuing)
+      throws RequestValidationException
+  {
+    super(contestName, winner, loser, margin, universeSize, difficulty, assumedContinuing);
+  }
 
 }

@@ -1,8 +1,11 @@
+-- noinspection SqlDialectInspectionForFile
+
 -- Test Counties
 INSERT INTO county (id, name) values (8, 'Ballina');
 INSERT INTO county (id, name) values (9, 'Byron');
 INSERT INTO county (id, name) values (10, 'Westgarth');
 INSERT INTO county (id, name) values (11, 'Malformed');
+INSERT INTO county (id, name) values (12, 'One Assertion County');
 -- Contest
 -- Simple contests to test basic functioning.
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (8, 999990, 0, 'IRV', 'Multi-County Contest 1', 0, 7, 1);
@@ -26,6 +29,11 @@ INSERT INTO contest (county_id, id, version, description, name, sequence_number,
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (11, 999985, 0, 'IRV', 'Malformed Contest 3', 13, 4, 1);
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (11, 999984, 0, 'IRV', 'Malformed Contest 4', 14, 4, 1);
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (11, 999983, 0, 'IRV', 'Malformed Contest 5', 15, 4, 1);
+-- Contest to test assertion removal (where only one assertion exists)
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (12, 999970, 0, 'IRV', 'One NEB Assertion Contest', 16, 5, 1);
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (12, 999971, 0, 'IRV', 'One NEN Assertion Contest', 17, 5, 1);
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (12, 999972, 0, 'IRV', 'One NEN NEB Assertion Contest', 18, 5, 1);
+
 --CVRs
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (1, 1, 'Type 1', 1, 8, '1-1-1', 1, 'UPLOADED', 1);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (1, 8, '["Alice","Bob","Charlie"]', 999998, 0);
@@ -67,6 +75,18 @@ INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) val
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, NULL, 999986, 14);
 -- This entry is not an error, just a blank vote.
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, '[]', 999985, 15);
--- A vote where the choice string is not a list.
+-- Votes where the choice string is not a list.
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, 'NotAList', 999984, 16);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, '', 999983, 17);
+
+-- Assertions
+INSERT INTO assertion values ('NEB', 0, 'One NEB Assertion Contest', 1.1, 0.32, 'Bob', 100, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Alice');
+
+INSERT INTO assertion values ('NEN', 1, 'One NEN Assertion Contest', 3.01, 0.12, 'Charlie', 240, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Alice');
+INSERT INTO assertion_context values (1, 'Diego');
+INSERT INTO assertion_context values (1, 'Bob');
+
+INSERT INTO assertion values ('NEB', 2, 'One NEN NEB Assertion Contest', 0.1, 0.52, 'Liesl', 112, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Amanda');
+
+INSERT INTO assertion values ('NEN', 3, 'One NEN NEB Assertion Contest', 3.17, 0.72, 'Wendell', 250, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Amanda');
+INSERT INTO assertion_context values (3, 'Liesl');
