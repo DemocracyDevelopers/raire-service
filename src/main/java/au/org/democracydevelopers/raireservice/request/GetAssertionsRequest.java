@@ -21,6 +21,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.request;
 
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
+import java.beans.ConstructorProperties;
 import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.annotation.ReadOnlyProperty;
@@ -43,13 +44,7 @@ public class GetAssertionsRequest extends ContestRequest {
    * The risk limit for the audit, expected to be in the range [0,1].
    */
   @ReadOnlyProperty
-  private BigDecimal riskLimit;
-
-  /**
-   * No args constructor. Needed for serialization.
-   */
-  public GetAssertionsRequest() {
-  }
+  public final BigDecimal riskLimit;
 
   /**
    * All args constructor.
@@ -57,19 +52,12 @@ public class GetAssertionsRequest extends ContestRequest {
    * @param candidates a list of candidates by name
    * @param riskLimit the risk limit for the audit, expected to be in the range [0,1].
    */
+  @ConstructorProperties({"contestName", "candidates", "riskLimit"})
   public GetAssertionsRequest(String contestName, List<String> candidates, BigDecimal riskLimit) {
 
     super(contestName, candidates);
     this.riskLimit = riskLimit;
   }
-
-  /**
-   * Set the risk limit. Used for deserialization.
-   * @param riskLimit the risk limit as a BigDecimal.
-   */
-   public void setRiskLimit(BigDecimal riskLimit) {
-     this.riskLimit = riskLimit;
-   }
 
   /**
    * Validates the request to retrieve assertions for the contest, checking that the contest exists
