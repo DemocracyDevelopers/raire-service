@@ -29,6 +29,11 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * RAIRE generates a set of assertions for a given IRV contest. The different types of assertion
+ * that RAIRE can generate are defined as subclasses of this base Assertion class. For a description
+ * of what assertions are and the role they play in an IRV audit, see the Guide to RAIRE.
+ */
 @Entity
 @Table(name = "assertion")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
