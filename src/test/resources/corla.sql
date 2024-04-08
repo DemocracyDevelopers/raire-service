@@ -584,19 +584,30 @@ create table assertion
 
 create table assertion_context
 (
-    id                 bigint not null
-        constraint fki0lyp4tghtpohaa9ma6kv2174
+    id                 bigint                    not null
+        constraint fk_assertion_assertion_context
             references assertion,
-    assumed_continuing varchar(255)
+    assumed_continuing varchar(255)              not null
+);
+
+create table assertion_discrepancy
+(
+    id                 bigint          not null
+        constraint fk_assertion_assertion_discrepancy_id
+            references assertion,
+    cvr_id             bigint          not null
+        constraint fk_cast_vote_record_assertion_discrepancy
+            references cast_vote_record,
+    assumed_continuing varchar(255)    not null
 );
 
 create table audit_to_assertions
 (
-    id            bigint not null
-        constraint fkgrx2l2qywbc3nv83iid55ql36
+    id                 bigint          not null
+        constraint fk_comparison_audit_audit_to_assertions
             references comparison_audit,
-    assertions_id bigint not null
-        constraint fkqomhyyib2xno6nq0wjpv95fs5
+    assertion_id       bigint          not null
+        constraint fk_assertion_audit_to_assertions
             references assertion
 );
 

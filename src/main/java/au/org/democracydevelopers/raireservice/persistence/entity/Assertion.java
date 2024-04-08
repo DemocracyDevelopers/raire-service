@@ -22,8 +22,10 @@ package au.org.democracydevelopers.raireservice.persistence.entity;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import jakarta.persistence.*;
+import java.util.Map;
 
 @Entity
 @Table(name = "assertion")
@@ -64,6 +66,14 @@ public abstract class Assertion {
   protected int margin;
 
   /**
+   * Assertion difficulty, as estimated by raire-java. (Note that raire-java has multiple ways
+   * of estimating difficulty, and that these measurements are not necessarily in terms of numbers
+   * of ballots. For example, one method may be: difficulty =  1 / assertion margin).
+   */
+  @Column(name = "difficulty", nullable = false)
+  protected double difficulty;
+
+  /**
    * List of candidates that the Assertion assumes are 'continuing' in the Assertion's context.
    */
   @ElementCollection(fetch = FetchType.EAGER)
@@ -78,12 +88,14 @@ public abstract class Assertion {
   protected double dilutedMargin = 0;
 
   /**
-   * Assertion difficulty, as estimated by raire-java. (Note that raire-java has multiple ways
-   * of estimating difficulty, and that these measurements are not necessarily in terms of numbers
-   * of ballots. For example, one method may be: difficulty =  1 / assertion margin).
+   * Maximum discrepancies that have been recorded against this assertion, if any, for a given
+   * CVR identified through its ID.
    */
-  @Column(name = "difficulty", nullable = false)
-  protected double difficulty = 0;
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "assertion_discrepancies", joinColumns = @JoinColumn(name = "id"))
+  @MapKeyColumn(name = "cvr_id")
+  @Column(name = "discrepancy")
+  protected Map<Long,Integer> cvrDiscrepancy = new HashMap<>();
 
   /**
    * The expected number of samples to audit overall for the Assertion, assuming overstatements

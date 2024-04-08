@@ -56,7 +56,7 @@ public class AssertionRepositoryTests {
    */
   @Test
   @Transactional
-  void contestNoAssertions(){
+  void existentContestNoAssertions(){
     List<Assertion> retrieved = assertionRepository.findByContestName("No CVR Mayoral");
     assertEquals(0, retrieved.size());
   }
