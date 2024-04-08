@@ -20,8 +20,16 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.repository;
 
+import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
+import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
+import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
+import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
+import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
+
+import java.util.Arrays;
 import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -47,4 +55,51 @@ public interface AssertionRepository extends JpaRepository<Assertion, Long> {
    * @return The number of records deleted from the database.
    */
   long deleteByContestName(String contestName);
+
+  /**
+   * For the given collection of raire-java assertions, transform them into a form suitable
+   * for storing in the corla database and save them to the database.
+   * @param contestName Name of the contest to which these assertions belong.
+   * @param universeSize Number of ballots in the auditing universe for these assertions.
+   * @param candidates Names of the candidates in the contest.
+   * @param assertions Array of raire-java assertions for the contest.
+   * @throws IllegalStateException if the caller supplies a non-positive universe size.
+   * @throws ArrayIndexOutOfBoundsException if the winner or loser indices in any of the raire-java
+   * assertions are invalid with respect to the given array of candidates.
+   */
+  default void storeAssertions(String contestName, long universeSize, String[] candidates,
+      AssertionAndDifficulty[] assertions)
+      throws IllegalArgumentException, ArrayIndexOutOfBoundsException
+  {
+      List<Assertion> translated = Arrays.stream(assertions).map(a -> createAssertion(contestName,
+          universeSize, candidates, a)).toList();
+
+      this.saveAll(translated);
+  }
+
+  /**
+   * Translates a raire-java assertion into an Assertion, suitable for saving to the database.
+   * @param contestName Name of the contest to which this assertion belongs.
+   * @param universeSize Number of ballots in the auditing universe for the assertion.
+   * @param candidates Names of the candidates in the contest.
+   * @param aad The raire-java AssertionAndDifficulty to be translated to an Assertion.
+   * @return Assertion object, ready for saving to the database.
+   * @throws IllegalStateException if the caller supplies a non-positive universe size.
+   * @throws ArrayIndexOutOfBoundsException if the winner or loser indices in the raire-java
+   * assertion are invalid with respect to the given array of candidates.
+   */
+  private Assertion createAssertion(String contestName, long universeSize, String[] candidates,
+      au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty aad)
+      throws IllegalStateException, ArrayIndexOutOfBoundsException
+  {
+      if(aad.assertion.isNEB()){
+        return new NEBAssertion(contestName, universeSize, aad.margin, aad.difficulty,
+            candidates, (NotEliminatedBefore) aad.assertion);
+      }
+      else{
+        return new NENAssertion(contestName, universeSize, aad.margin, aad.difficulty,
+            candidates, (NotEliminatedNext) aad.assertion);
+      }
+  }
+
 }

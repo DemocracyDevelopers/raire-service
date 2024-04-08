@@ -23,6 +23,8 @@ package au.org.democracydevelopers.raireservice.persistence.entity;
 import au.org.democracydevelopers.raireservice.request.RequestValidationException;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Entity
@@ -37,13 +39,24 @@ public class NENAssertion extends Assertion {
   }
 
   /**
-   * {@inheritDoc}
+   * Construct a NENAssertion give a raire-java NotEliminatedNext construct.
+   * @param contestName Name of the contest to which this assertion belongs.
+   * @param universeSize Number of ballots in the auditing universe for the assertion.
+   * @param margin Absolute margin of the assertion.
+   * @param difficulty Difficulty of the assertion, as computed by raire-java.
+   * @param candidates Names of the candidates in this assertion's contest.
+   * @param nen Raire-java NotEliminatedNext assertion to be transformed into a NENAssertion.
+   * @throws IllegalStateException if the caller supplies a non-positive universe size.
+   * @throws ArrayIndexOutOfBoundsException if the winner or loser indices in the raire-java
+   * assertion are invalid with respect to the given array of candidates.
    */
-  public NENAssertion(String contestName, String winner, String loser, int margin,
-      long universeSize, double difficulty, List<String> assumedContinuing)
-      throws RequestValidationException
+  public NENAssertion(String contestName, long universeSize, int margin, double difficulty,
+      String[] candidates, au.org.democracydevelopers.raire.assertions.NotEliminatedNext nen)
+      throws IllegalStateException, ArrayIndexOutOfBoundsException
   {
-    super(contestName, winner, loser, margin, universeSize, difficulty, assumedContinuing);
+    super(contestName, candidates[nen.winner], candidates[nen.loser], margin, universeSize,
+        difficulty, Arrays.stream(nen.continuing).mapToObj(i -> candidates[i]).toList());
   }
+
 
 }

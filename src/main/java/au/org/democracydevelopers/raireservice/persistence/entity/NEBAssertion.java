@@ -20,10 +20,9 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
-import au.org.democracydevelopers.raireservice.request.RequestValidationException;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @DiscriminatorValue("NEB")
@@ -37,13 +36,23 @@ public class NEBAssertion extends Assertion {
   }
 
   /**
-   * {@inheritDoc}
+   * Construct a NEBAssertion give a raire-java NotEliminatedBefore construct.
+   * @param contestName Name of the contest to which this assertion belongs.
+   * @param universeSize Number of ballots in the auditing universe for the assertion.
+   * @param margin Absolute margin of the assertion.
+   * @param difficulty Difficulty of the assertion, as computed by raire-java.
+   * @param candidates Names of the candidates in this assertion's contest.
+   * @param neb Raire-java NotEliminatedBefore assertion to be transformed into a NENAssertion.
+   * @throws IllegalStateException if the caller supplies a non-positive universe size.
+   * @throws ArrayIndexOutOfBoundsException if the winner or loser indices in the raire-java
+   * assertion are invalid with respect to the given array of candidates.
    */
-  public NEBAssertion(String contestName, String winner, String loser, int margin,
-      long universeSize, double difficulty, List<String> assumedContinuing)
-      throws RequestValidationException
+  public NEBAssertion(String contestName, long universeSize, int margin, double difficulty,
+      String[] candidates, au.org.democracydevelopers.raire.assertions.NotEliminatedBefore neb)
+      throws IllegalStateException, ArrayIndexOutOfBoundsException
   {
-    super(contestName, winner, loser, margin, universeSize, difficulty, assumedContinuing);
+    super(contestName, candidates[neb.winner], candidates[neb.loser], margin, universeSize,
+        difficulty, new ArrayList<>());
   }
 
 }

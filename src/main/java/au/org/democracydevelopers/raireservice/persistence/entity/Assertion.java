@@ -20,7 +20,6 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
-import au.org.democracydevelopers.raireservice.request.RequestValidationException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,25 +46,31 @@ public abstract class Assertion {
   private long id;
 
   /**
+   * Version. Used for optimistic locking.
+   */
+  @Column(name = "version", updatable = false, nullable = false)
+  private long version;
+
+  /**
    * Name of the contest for which this Assertion was generated.
    */
   @Column(name = "contest_name", updatable = false, nullable = false)
-  protected String contestName;
+  private String contestName;
 
   @Column(name = "winner", updatable = false, nullable = false)
-  protected String winner;
+  private String winner;
 
   /**
    * Loser of the Assertion (a candidate in the contest).
    */
   @Column(name = "loser", updatable = false, nullable = false)
-  protected String loser;
+  private String loser;
 
   /**
    * Assertion margin (note: this is not the *diluted* margin).
    */
   @Column(name = "margin", updatable = false, nullable = false)
-  protected int margin;
+  private int margin;
 
   /**
    * Assertion difficulty, as estimated by raire-java. (Note that raire-java has multiple ways
@@ -73,7 +78,7 @@ public abstract class Assertion {
    * of ballots. For example, one method may be: difficulty =  1 / assertion margin).
    */
   @Column(name = "difficulty", updatable = false, nullable = false)
-  protected double difficulty;
+  private double difficulty;
 
   /**
    * List of candidates that the Assertion assumes are 'continuing' in the Assertion's context.
@@ -81,14 +86,14 @@ public abstract class Assertion {
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "assertion_context", joinColumns = @JoinColumn(name = "id"))
   @Column(updatable = false, nullable = false)
-  protected List<String> assumedContinuing = new ArrayList<>();
+  private List<String> assumedContinuing = new ArrayList<>();
 
   /**
    * Diluted margin for the Assertion. This is equal to the assertion margin divided by the
    * number of ballots in the relevant auditing universe.
    */
   @Column(name = "diluted_margin", updatable = false, nullable = false)
-  protected double dilutedMargin;
+  private double dilutedMargin;
 
   /**
    * Maximum discrepancies that have been recorded against this assertion, if any, for a given
@@ -98,52 +103,52 @@ public abstract class Assertion {
   @CollectionTable(name = "assertion_discrepancies", joinColumns = @JoinColumn(name = "id"))
   @MapKeyColumn(name = "cvr_id")
   @Column(name = "discrepancy", updatable = false, nullable = false)
-  protected Map<Long,Integer> cvrDiscrepancy = new HashMap<>();
+  private Map<Long,Integer> cvrDiscrepancy = new HashMap<>();
 
   /**
    * The expected number of samples to audit overall for the Assertion, assuming overstatements
    * continue at the current rate experienced in the audit.
    */
   @Column(updatable = false, nullable = false)
-  protected Integer estimated_samples_to_audit = 0;
+  private int estimated_samples_to_audit = 0;
 
   /**
    * The two-vote understatements recorded against the Assertion.
    */
   @Column(updatable = false, nullable = false)
-  protected Integer two_vote_under_count = 0;
+  private int two_vote_under_count = 0;
 
   /**
    * The one-vote understatements recorded against the Assertion.
    */
   @Column(updatable = false, nullable = false)
-  protected Integer one_vote_under_count = 0;
+  private int one_vote_under_count = 0;
 
   /**
    * The one-vote overstatements recorded against the Assertion.
    */
   @Column(updatable = false, nullable = false)
-  protected Integer one_vote_over_count = 0;
+  private int one_vote_over_count = 0;
 
   /**
    * The two-vote overstatements recorded against the Assertion.
    */
   @Column(updatable = false, nullable = false)
-  protected Integer two_vote_over_count = 0;
+  private int two_vote_over_count = 0;
 
   /**
    * Discrepancies recorded against the Assertion that are neither understatements nor
    * overstatements.
    */
   @Column(updatable = false, nullable = false)
-  protected Integer other_count = 0;
+  private int other_count = 0;
 
   /**
    * Current risk measurement recorded against the Assertion. It is initialized to 1, as prior
    * to an audit starting, and without additional information, we assume maximum risk.
    */
   @Column(updatable = false, nullable = false)
-  protected BigDecimal current_risk = BigDecimal.valueOf(1);
+  private BigDecimal current_risk = BigDecimal.valueOf(1);
 
   /**
    * Construct an empty Assertion (for persistence).
@@ -159,11 +164,11 @@ public abstract class Assertion {
    * @param universeSize Total number of ballots in the auditing universe of the Assertion.
    * @param difficulty Assertion difficulty, as computed by raire-java.
    * @param assumedContinuing List of candidates, by name, that the Assertion assumes is continuing.
-   * @throws RequestValidationException if the caller supplies a non-positive universe size.
+   * @throws IllegalStateException if the caller supplies a non-positive universe size.
    */
   public Assertion(String contestName, String winner, String loser, int margin,
       long universeSize, double difficulty, List<String> assumedContinuing)
-      throws RequestValidationException
+      throws IllegalStateException
   {
       this.contestName = contestName;
       this.winner = winner;
@@ -173,7 +178,7 @@ public abstract class Assertion {
       if(universeSize <= 0){
         String msg = "An assertion must have a positive universe size.";
         logger.error(msg);
-        throw new RequestValidationException(msg);
+        throw new IllegalStateException(msg);
       }
 
       this.dilutedMargin = margin / (double) universeSize;
@@ -200,7 +205,6 @@ public abstract class Assertion {
   public String getLoser() {
     return loser;
   }
-
 
   /**
    * Returns the name of the contest for which the Assertion has been formed.
