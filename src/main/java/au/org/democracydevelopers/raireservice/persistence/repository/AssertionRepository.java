@@ -21,7 +21,10 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.persistence.repository;
 
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -30,4 +33,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AssertionRepository extends JpaRepository<Assertion, Long> {
 
+  /**
+   * Retrieve all Assertions from the database belonging to the contest with
+   * the given name.
+   * @param contestName Name of the contest whose assertions being retrieved.
+   */
+  @Query(value="select a from Assertion a where a.contestName = :contestName")
+  List<Assertion> findByContestName(@Param("contestName") String contestName);
 }
