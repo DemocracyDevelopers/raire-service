@@ -61,7 +61,7 @@ public class GenerateAssertionsRequest extends ContestRequest {
    * @param timeLimitSeconds the elapsed time allowed for RAIRE to generate assertions, in seconds.
    * @param candidates the list of candidates by name
    */
-  @ConstructorProperties({"contestName", "totalAuditableBallots", "timeLimitSeconds"})
+  @ConstructorProperties({"contestName", "totalAuditableBallots", "timeLimitSeconds","candidates"})
   public GenerateAssertionsRequest(String contestName, int totalAuditableBallots, float timeLimitSeconds,
       List<String> candidates) {
     super(contestName, candidates);
