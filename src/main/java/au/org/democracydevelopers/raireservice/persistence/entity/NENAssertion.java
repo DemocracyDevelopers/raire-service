@@ -25,6 +25,6 @@ import jakarta.persistence.Entity;
 
 @Entity
 @DiscriminatorValue("NEN")
-public class NENAssertion {
+public class NENAssertion extends Assertion {
 
 }
