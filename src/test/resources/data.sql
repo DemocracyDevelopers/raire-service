@@ -83,6 +83,8 @@ INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) val
 INSERT INTO assertion values ('NEB', 0, 'One NEB Assertion Contest', 1.1, 0.32, 'Bob', 100, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Alice');
 
 INSERT INTO assertion values ('NEN', 1, 'One NEN Assertion Contest', 3.01, 0.12, 'Charlie', 240, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Alice');
+INSERT INTO assertion_context values (1, 'Alice');
+INSERT INTO assertion_context values (1, 'Charlie');
 INSERT INTO assertion_context values (1, 'Diego');
 INSERT INTO assertion_context values (1, 'Bob');
 
@@ -90,3 +92,5 @@ INSERT INTO assertion values ('NEB', 2, 'One NEN NEB Assertion Contest', 0.1, 0.
 
 INSERT INTO assertion values ('NEN', 3, 'One NEN NEB Assertion Contest', 3.17, 0.72, 'Wendell', 250, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Amanda');
 INSERT INTO assertion_context values (3, 'Liesl');
+INSERT INTO assertion_context values (3, 'Wendell');
+INSERT INTO assertion_context values (3, 'Amanda');

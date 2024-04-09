@@ -24,7 +24,8 @@ package au.org.democracydevelopers.raireservice.persistence.repository;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
-import java.math.BigDecimal;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,53 @@ public class AssertionRepositoryTests {
 
   @Autowired
   AssertionRepository assertionRepository;
+
+  /**
+   * To facilitate easier checking of retrieved/saved assertion content.
+   */
+  private static final Gson GSON =
+      new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
+
+  /**
+   * Test assertion: Alice NEB Bob in the contest "One NEB Assertion Contest".
+   */
+  private String aliceNEBBob = "{\"id\":0,\"version\":0,\"contestName\":" +
+      "\"One NEB Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Bob\",\"margin\":100," +
+      "\"difficulty\":1.1,\"assumedContinuing\":[],\"dilutedMargin\":0.32,\"cvrDiscrepancy\":{}," +
+      "\"estimatedSamplesToAudit\":0,\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0," +
+      "\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
+
+  /**
+   * Test assertion: Alice NEN Charlie assuming Alice, Charlie, Diego and Bob are continuing,
+   * for the contest "One NEN Assertion Contest".
+   */
+  private String aliceNENCharlie = "{\"id\":1,\"version\":0,\"contestName\":" +
+      "\"One NEN Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Charlie\",\"margin\":240," +
+      "\"difficulty\":3.01,\"assumedContinuing\":[\"Alice\",\"Charlie\",\"Diego\",\"Bob\"]," +
+      "\"dilutedMargin\":0.12,\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0," +
+      "\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0," +
+      "\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
+
+  /**
+   * Test assertion: Amanda NEB Liesl in the contest "One NEN NEB Assertion Contest".
+   */
+  private String amandaNEBLiesl = "{\"id\":2,\"version\":0,\"contestName\":" +
+      "\"One NEN NEB Assertion Contest\",\"winner\":\"Amanda\",\"loser\":\"Liesl\",\"margin\":112,"+
+      "\"difficulty\":0.1,\"assumedContinuing\":[],\"dilutedMargin\":0.52," +
+      "\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0,\"twoVoteUnderCount\":0," +
+      "\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0," +
+      "\"currentRisk\":1.00}";
+
+  /**
+   * Test assertion: Amanda NEN Wendell assuming Liesl, Wendell and Amanda are continuing,
+   * for the contest "One NEN NEB Assertion Contest".
+   */
+  private String amandaNENWendell = "{\"id\":3,\"version\":0,\"contestName\":" +
+      "\"One NEN NEB Assertion Contest\",\"winner\":\"Amanda\",\"loser\":\"Wendell\"," +
+      "\"margin\":250,\"difficulty\":3.17,\"assumedContinuing\":[\"Liesl\",\"Wendell\"," +
+      "\"Amanda\"],\"dilutedMargin\":0.72,\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0," +
+      "\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0," +
+      "\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
 
   /**
    * Retrieval of assertions for an existing contest with no associated assertions will return an
@@ -103,22 +151,7 @@ public class AssertionRepositoryTests {
 
     final Assertion r = retrieved.get(0);
     assertEquals(NEBAssertion.class, r.getClass());
-    assertEquals(0, r.getId());
-    assertEquals("Alice", r.getWinner());
-    assertEquals("Bob", r.getLoser());
-    assertEquals("One NEB Assertion Contest", r.getContestName());
-    assertEquals(100, r.getMargin());
-    assertEquals(0, r.getCurrentRisk().compareTo(BigDecimal.valueOf(1)));
-    assertEquals(1.1, r.getDifficulty());
-    assertEquals(0.32, r.getDilutedMargin());
-    assertEquals(0, r.getOneVoteOverCount());
-    assertEquals(0, r.getOneVoteUnderCount());
-    assertEquals(0, r.getTwoVoteOverCount());
-    assertEquals(0, r.getTwoVoteUnderCount());
-    assertEquals(0, r.getOtherDiscrepancies());
-    assertEquals(0, r.getEstimatedSamplesToAudit());
-    assertEquals(0, r.getCvrDiscrepancy().size());
-    assertEquals(0, r.getAssumedContinuing().size());
+    assertEquals(aliceNEBBob, GSON.toJson(r));
   }
 
   /**
@@ -132,22 +165,7 @@ public class AssertionRepositoryTests {
 
     final Assertion r = retrieved.get(0);
     assertEquals(NENAssertion.class, r.getClass());
-    assertEquals(1, r.getId());
-    assertEquals("Alice", r.getWinner());
-    assertEquals("Charlie", r.getLoser());
-    assertEquals("One NEN Assertion Contest", r.getContestName());
-    assertEquals(240, r.getMargin());
-    assertEquals(0, r.getCurrentRisk().compareTo(BigDecimal.valueOf(1)));
-    assertEquals(3.01, r.getDifficulty());
-    assertEquals(0.12, r.getDilutedMargin());
-    assertEquals(0, r.getOneVoteOverCount());
-    assertEquals(0, r.getOneVoteUnderCount());
-    assertEquals(0, r.getTwoVoteOverCount());
-    assertEquals(0, r.getTwoVoteUnderCount());
-    assertEquals(0, r.getOtherDiscrepancies());
-    assertEquals(0, r.getEstimatedSamplesToAudit());
-    assertEquals(0, r.getCvrDiscrepancy().size());
-    assertEquals(List.of("Diego", "Bob"), r.getAssumedContinuing());
+    assertEquals(aliceNENCharlie, GSON.toJson(r));
   }
 
   /**
@@ -161,41 +179,11 @@ public class AssertionRepositoryTests {
 
     final Assertion r1 = retrieved.get(0);
     assertEquals(NEBAssertion.class, r1.getClass());
-    assertEquals(2, r1.getId());
-    assertEquals("Amanda", r1.getWinner());
-    assertEquals("Liesl", r1.getLoser());
-    assertEquals("One NEN NEB Assertion Contest", r1.getContestName());
-    assertEquals(112, r1.getMargin());
-    assertEquals(0, r1.getCurrentRisk().compareTo(BigDecimal.valueOf(1)));
-    assertEquals(0.1, r1.getDifficulty());
-    assertEquals(0.52, r1.getDilutedMargin());
-    assertEquals(0, r1.getOneVoteOverCount());
-    assertEquals(0, r1.getOneVoteUnderCount());
-    assertEquals(0, r1.getTwoVoteOverCount());
-    assertEquals(0, r1.getTwoVoteUnderCount());
-    assertEquals(0, r1.getOtherDiscrepancies());
-    assertEquals(0, r1.getEstimatedSamplesToAudit());
-    assertEquals(0, r1.getCvrDiscrepancy().size());
-    assertEquals(0, r1.getAssumedContinuing().size());
+    assertEquals(amandaNEBLiesl, GSON.toJson(r1));
 
     final Assertion r2 = retrieved.get(1);
     assertEquals(NENAssertion.class, r2.getClass());
-    assertEquals(3, r2.getId());
-    assertEquals("Amanda", r2.getWinner());
-    assertEquals("Wendell", r2.getLoser());
-    assertEquals("One NEN NEB Assertion Contest", r2.getContestName());
-    assertEquals(250, r2.getMargin());
-    assertEquals(0, r2.getCurrentRisk().compareTo(BigDecimal.valueOf(1)));
-    assertEquals(3.17, r2.getDifficulty());
-    assertEquals(0.72, r2.getDilutedMargin());
-    assertEquals(0, r2.getOneVoteOverCount());
-    assertEquals(0, r2.getOneVoteUnderCount());
-    assertEquals(0, r2.getTwoVoteOverCount());
-    assertEquals(0, r2.getTwoVoteUnderCount());
-    assertEquals(0, r2.getOtherDiscrepancies());
-    assertEquals(0, r2.getEstimatedSamplesToAudit());
-    assertEquals(0, r2.getCvrDiscrepancy().size());
-    assertEquals(List.of("Liesl"), r2.getAssumedContinuing());
+    assertEquals(amandaNENWendell, GSON.toJson(r2));
   }
 
   /**

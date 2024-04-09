@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
 @DiscriminatorColumn(name = "assertion_type")
 public abstract class Assertion {
 
-  public static final Logger logger = LoggerFactory.getLogger(Assertion.class);
+  protected static final Logger logger = LoggerFactory.getLogger(Assertion.class);
 
   /**
    * Assertion ID.
@@ -53,7 +53,8 @@ public abstract class Assertion {
   /**
    * Version. Used for optimistic locking.
    */
-  @Column(name = "version", updatable = false, nullable = false)
+  @Version
+  @Column(name = "version", nullable = false)
   private long version;
 
   /**
@@ -114,49 +115,49 @@ public abstract class Assertion {
    * The expected number of samples to audit overall for the Assertion, assuming overstatements
    * continue at the current rate experienced in the audit.
    */
-  @Column(updatable = false, nullable = false)
-  private int estimated_samples_to_audit = 0;
+  @Column(name = "estimated_samples_to_audit", updatable = false, nullable = false)
+  private int estimatedSamplesToAudit = 0;
 
   /**
    * The two-vote understatements recorded against the Assertion.
    */
-  @Column(updatable = false, nullable = false)
-  private int two_vote_under_count = 0;
+  @Column(name = "two_vote_under_count", updatable = false, nullable = false)
+  private int twoVoteUnderCount = 0;
 
   /**
    * The one-vote understatements recorded against the Assertion.
    */
-  @Column(updatable = false, nullable = false)
-  private int one_vote_under_count = 0;
+  @Column(name = "one_vote_under_count", updatable = false, nullable = false)
+  private int oneVoteUnderCount = 0;
 
   /**
    * The one-vote overstatements recorded against the Assertion.
    */
-  @Column(updatable = false, nullable = false)
-  private int one_vote_over_count = 0;
+  @Column(name = "one_vote_over_count", updatable = false, nullable = false)
+  public final int oneVoteOverCount = 0;
 
   /**
    * The two-vote overstatements recorded against the Assertion.
    */
-  @Column(updatable = false, nullable = false)
-  private int two_vote_over_count = 0;
+  @Column(name = "two_vote_over_count", updatable = false, nullable = false)
+  private int twoVoteOverCount = 0;
 
   /**
    * Discrepancies recorded against the Assertion that are neither understatements nor
    * overstatements.
    */
-  @Column(updatable = false, nullable = false)
-  private int other_count = 0;
+  @Column(name = "other_count", updatable = false, nullable = false)
+  private int otherCount = 0;
 
   /**
    * Current risk measurement recorded against the Assertion. It is initialized to 1, as prior
    * to an audit starting, and without additional information, we assume maximum risk.
    */
-  @Column(updatable = false, nullable = false)
-  private BigDecimal current_risk = BigDecimal.valueOf(1);
+  @Column(name = "current_risk", updatable = false, nullable = false)
+  private BigDecimal currentRisk = BigDecimal.valueOf(1);
 
   /**
-   * Construct an empty Assertion (for persistence).
+   * Default no-args constructor (for persistence).
    */
   public Assertion() {}
 
@@ -192,91 +193,5 @@ public abstract class Assertion {
       this.assumedContinuing = assumedContinuing;
   }
 
-  /**
-   * Returns the Assertion ID.
-   */
-  public long getId() { return id; }
 
-  /**
-   * Returns the winner of the Assertion.
-   */
-  public String getWinner() {
-    return winner;
-  }
-
-  /**
-   * Returns the loser of the Assertion.
-   */
-  public String getLoser() {
-    return loser;
-  }
-
-  /**
-   * Returns the name of the contest for which the Assertion has been formed.
-   */
-  public String getContestName() {
-    return contestName;
-  }
-
-  /**
-   * Returns the name of the contest for which the Assertion has been formed.
-   */
-  public List<String> getAssumedContinuing() {
-    return assumedContinuing;
-  }
-
-  /**
-   * Returns the current risk measurement recorded against the assertion.
-   */
-  public BigDecimal getCurrentRisk() { return current_risk; }
-
-  /**
-   * Returns the Assertion's absolute margin.
-   */
-  public int getMargin() { return margin; }
-
-  /**
-   * Returns the Assertion's difficulty.
-   */
-  public double getDifficulty() { return difficulty; }
-
-  /**
-   * Returns the Assertion's diluted margin.
-   */
-  public double getDilutedMargin() { return dilutedMargin; }
-
-  /**
-   * Returns the discrepancies recorded against the Assertion, by CVR id.
-   */
-  public Map<Long,Integer> getCvrDiscrepancy(){ return cvrDiscrepancy; }
-
-  /**
-   * Returns the two vote overstatements recorded against the Assertion.
-   */
-  public int getTwoVoteOverCount() { return two_vote_over_count; }
-
-  /**
-   * Returns the two vote understatements recorded against the Assertion.
-   */
-  public int getTwoVoteUnderCount() { return two_vote_under_count; }
-
-  /**
-   * Returns the one vote overstatements recorded against the Assertion.
-   */
-  public int getOneVoteOverCount() { return one_vote_over_count; }
-
-  /**
-   * Returns the one vote understatements recorded against the Assertion.
-   */
-  public int getOneVoteUnderCount() { return one_vote_under_count; }
-
-  /**
-   * Returns the count of other discrepancies (neither over nor understatements).
-   */
-  public int getOtherDiscrepancies() { return other_count; }
-
-  /**
-   * Returns the estimated number of samples to audit.
-   */
-  public int getEstimatedSamplesToAudit() { return estimated_samples_to_audit; }
 }

@@ -20,6 +20,8 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.repository;
 
+import static java.util.stream.Collectors.toList;
+
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
@@ -71,35 +73,17 @@ public interface AssertionRepository extends JpaRepository<Assertion, Long> {
       AssertionAndDifficulty[] assertions)
       throws IllegalArgumentException, ArrayIndexOutOfBoundsException
   {
-      List<Assertion> translated = Arrays.stream(assertions).map(a -> createAssertion(contestName,
-          universeSize, candidates, a)).toList();
+      List<Assertion> translated = Arrays.stream(assertions).map(a -> {
+        if (a.assertion.isNEB()) {
+          return new NEBAssertion(contestName, universeSize, a.margin, a.difficulty,
+              candidates, (NotEliminatedBefore) a.assertion);
+        } else {
+          return new NENAssertion(contestName, universeSize, a.margin, a.difficulty,
+              candidates, (NotEliminatedNext) a.assertion);
+        }
+      }).toList();
 
       this.saveAll(translated);
-  }
-
-  /**
-   * Translates a raire-java assertion into an Assertion, suitable for saving to the database.
-   * @param contestName Name of the contest to which this assertion belongs.
-   * @param universeSize Number of ballots in the auditing universe for the assertion.
-   * @param candidates Names of the candidates in the contest.
-   * @param aad The raire-java AssertionAndDifficulty to be translated to an Assertion.
-   * @return Assertion object, ready for saving to the database.
-   * @throws IllegalStateException if the caller supplies a non-positive universe size.
-   * @throws ArrayIndexOutOfBoundsException if the winner or loser indices in the raire-java
-   * assertion are invalid with respect to the given array of candidates.
-   */
-  private Assertion createAssertion(String contestName, long universeSize, String[] candidates,
-      au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty aad)
-      throws IllegalStateException, ArrayIndexOutOfBoundsException
-  {
-      if(aad.assertion.isNEB()){
-        return new NEBAssertion(contestName, universeSize, aad.margin, aad.difficulty,
-            candidates, (NotEliminatedBefore) aad.assertion);
-      }
-      else{
-        return new NENAssertion(contestName, universeSize, aad.margin, aad.difficulty,
-            candidates, (NotEliminatedNext) aad.assertion);
-      }
   }
 
 }

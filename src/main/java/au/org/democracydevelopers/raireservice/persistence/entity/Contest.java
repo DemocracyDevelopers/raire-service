@@ -65,6 +65,7 @@ public class Contest {
   /**
    * Version. Used for optimistic locking.
    */
+  @Version
   @ReadOnlyProperty
   @Column(name = "version", nullable = false)
   private long version;
