@@ -20,11 +20,17 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import au.org.democracydevelopers.raire.algorithm.RaireResult;
+import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
+import au.org.democracydevelopers.raire.time.TimeTaken;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.RequestValidationException;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
+import au.org.democracydevelopers.raireservice.response.GetAssertionsResponse;
+import au.org.democracydevelopers.raireservice.response.Metadata;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -87,11 +93,17 @@ public class AssertionController {
    * appropriate http error. TODO add these when assertion retrieval is implemented.
    */
   @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<String> serve(@RequestBody GetAssertionsRequest request)
+  public ResponseEntity<GetAssertionsResponse> serve(@RequestBody GetAssertionsRequest request)
       throws RequestValidationException {
       request.Validate(contestRepository);
       // For the moment, this is just a dummy "OK" response. Later, it will contain the winner.
-      return new ResponseEntity<>("Placeholder assertions", HttpStatus.OK);
+      GetAssertionsResponse dummyResponse = new GetAssertionsResponse(
+          new Metadata(request, List.of()),
+          new RaireResult(new AssertionAndDifficulty[0], 10.0, 100, 0,
+              5, new TimeTaken(5L,5), new TimeTaken(2L, 2),
+              new TimeTaken(2L,2), false)
+      );
+      return new ResponseEntity<>(dummyResponse, HttpStatus.OK);
   }
 
   /**
