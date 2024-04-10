@@ -593,7 +593,7 @@ create table assertion_discrepancies
     primary key (id, cvr_id)
 );
 
-create table assertion_context
+create table assertion_assumed_continuing
 (
     id                 bigint       not null
         constraint fki0lyp4tghtpohaa9ma6kv2174

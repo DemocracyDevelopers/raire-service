@@ -55,7 +55,8 @@ public class NENAssertion extends Assertion {
    * @param difficulty Difficulty of the assertion, as computed by raire-java.
    * @param candidates Names of the candidates in this assertion's contest.
    * @param nen Raire-java NotEliminatedNext assertion to be transformed into a NENAssertion.
-   * @throws IllegalStateException if the caller supplies a non-positive universe size.
+   * @throws IllegalStateException if the caller supplies a non-positive universe size, invalid
+   * margin, or invalid combination of winner, loser and list of assumed continuing candidates.
    * @throws ArrayIndexOutOfBoundsException if the winner or loser indices in the raire-java
    * assertion are invalid with respect to the given array of candidates.
    */

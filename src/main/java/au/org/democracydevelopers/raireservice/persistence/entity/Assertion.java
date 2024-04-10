@@ -54,7 +54,7 @@ public abstract class Assertion {
    * Version. Used for optimistic locking.
    */
   @Version
-  @Column(name = "version", nullable = false)
+  @Column(name = "version", updatable = false, nullable = false)
   private long version;
 
   /**
@@ -90,7 +90,7 @@ public abstract class Assertion {
    * List of candidates that the Assertion assumes are 'continuing' in the Assertion's context.
    */
   @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(name = "assertion_context", joinColumns = @JoinColumn(name = "id"))
+  @CollectionTable(name = "assertion_assumed_continuing", joinColumns = @JoinColumn(name = "id"))
   @Column(updatable = false, nullable = false)
   private List<String> assumedContinuing = new ArrayList<>();
 
@@ -102,8 +102,9 @@ public abstract class Assertion {
   private double dilutedMargin;
 
   /**
-   * Maximum discrepancies that have been recorded against this assertion, if any, for a given
-   * CVR identified through its ID.
+   * A map between CVR ID and the discrepancy recorded against that CVR for this assertion
+   * in the assertions contest, if one exists. CVRs are only present in this map if
+   * a discrepancy exists between it and the paper ballot in the assertions contest.
    */
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "assertion_discrepancies", joinColumns = @JoinColumn(name = "id"))
@@ -157,7 +158,7 @@ public abstract class Assertion {
   private BigDecimal currentRisk = BigDecimal.valueOf(1);
 
   /**
-   * Default no-args constructor (for persistence).
+   * Default no-args constructor (required for persistence).
    */
   public Assertion() {}
 
@@ -170,27 +171,52 @@ public abstract class Assertion {
    * @param universeSize Total number of ballots in the auditing universe of the Assertion.
    * @param difficulty Assertion difficulty, as computed by raire-java.
    * @param assumedContinuing List of candidates, by name, that the Assertion assumes is continuing.
-   * @throws IllegalStateException if the caller supplies a non-positive universe size.
+   * @throws IllegalStateException if the caller supplies a non-positive universe size, invalid
+   * margin, or invalid combination of winner, loser and list of assumed continuing candidates.
    */
   public Assertion(String contestName, String winner, String loser, int margin,
       long universeSize, double difficulty, List<String> assumedContinuing)
       throws IllegalStateException
   {
-      this.contestName = contestName;
-      this.winner = winner;
-      this.loser = loser;
-      this.margin = margin;
+    this.contestName = contestName;
+    this.winner = winner;
+    this.loser = loser;
+    this.margin = margin;
 
-      if(universeSize <= 0){
-        String msg = "An assertion must have a positive universe size.";
-        logger.error(msg);
-        throw new IllegalStateException(msg);
-      }
+    if(universeSize <= 0){
+      String msg = "An assertion must have a positive universe size.";
+      logger.error(msg);
+      throw new IllegalStateException(msg);
+    }
 
-      this.dilutedMargin = margin / (double) universeSize;
+    if(margin < 0){
+      String msg = "An assertion must have a non-negative margin.";
+      logger.error(msg);
+      throw new IllegalStateException(msg);
+    }
 
-      this.difficulty = difficulty;
-      this.assumedContinuing = assumedContinuing;
+    if(winner.isBlank() || loser.isBlank()){
+      String msg = "The winner and loser of an assertion must not be blank/null.";
+      logger.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    if(winner.equals(loser)){
+      String msg = "The winner and loser of an assertion must not be the same candidate.";
+      logger.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    if(!assumedContinuing.contains(winner) || !assumedContinuing.contains(loser)){
+      String msg = "The winner and loser of an assertion must also be continuing candidates.";
+      logger.error(msg);
+      throw new IllegalStateException(msg);
+    }
+
+    this.dilutedMargin = margin / (double) universeSize;
+
+    this.difficulty = difficulty;
+    this.assumedContinuing = assumedContinuing;
   }
 
 
