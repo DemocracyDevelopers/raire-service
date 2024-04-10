@@ -24,6 +24,7 @@ import au.org.democracydevelopers.raireservice.persistence.repository.ContestRep
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.RequestValidationException;
+import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -64,12 +65,14 @@ public class AssertionController {
    * appropriate http error. TODO add these when assertion generation is implemented.
    */
   @PostMapping(path = "/generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<String> serve(@RequestBody GenerateAssertionsRequest request)
+  public ResponseEntity<GenerateAssertionsResponse> serve(@RequestBody GenerateAssertionsRequest request)
       throws RequestValidationException {
       request.Validate(contestRepository);
-      // For the moment, this is just a dummy "OK" response. Later, it will contain the winner
-      // as a ResponseEntity<GenerateAssertionsRequest>.
-      return new ResponseEntity<>("Placeholder winner", HttpStatus.OK);
+      // For the moment, this is just a dummy response. Later, it will contain the winner
+      // calculated by raire.
+      GenerateAssertionsResponse dummyResponse
+          = new GenerateAssertionsResponse(request.contestName, "Placeholder winner");
+      return new ResponseEntity<>(dummyResponse, HttpStatus.OK);
   }
 
 
