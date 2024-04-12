@@ -6,6 +6,7 @@ INSERT INTO county (id, name) values (9, 'Byron');
 INSERT INTO county (id, name) values (10, 'Westgarth');
 INSERT INTO county (id, name) values (11, 'Malformed');
 INSERT INTO county (id, name) values (12, 'One Assertion County');
+
 -- Contest
 -- Simple contests to test basic functioning.
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (8, 999990, 0, 'IRV', 'Multi-County Contest 1', 0, 7, 1);
@@ -79,18 +80,3 @@ INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) val
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, 'NotAList', 999984, 16);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, '', 999983, 17);
 
--- Assertions
-INSERT INTO assertion values ('NEB', 0, 'One NEB Assertion Contest', 1.1, 0.32, 'Bob', 100, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Alice');
-
-INSERT INTO assertion values ('NEN', 1, 'One NEN Assertion Contest', 3.01, 0.12, 'Charlie', 240, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Alice');
-INSERT INTO assertion_assumed_continuing values (1, 'Alice');
-INSERT INTO assertion_assumed_continuing values (1, 'Charlie');
-INSERT INTO assertion_assumed_continuing values (1, 'Diego');
-INSERT INTO assertion_assumed_continuing values (1, 'Bob');
-
-INSERT INTO assertion values ('NEB', 2, 'One NEN NEB Assertion Contest', 0.1, 0.52, 'Liesl', 112, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Amanda');
-
-INSERT INTO assertion values ('NEN', 3, 'One NEN NEB Assertion Contest', 3.17, 0.72, 'Wendell', 250, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Amanda');
-INSERT INTO assertion_assumed_continuing values (3, 'Liesl');
-INSERT INTO assertion_assumed_continuing values (3, 'Wendell');
-INSERT INTO assertion_assumed_continuing values (3, 'Amanda');

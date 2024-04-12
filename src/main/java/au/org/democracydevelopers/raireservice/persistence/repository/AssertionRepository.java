@@ -20,8 +20,6 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.repository;
 
-import static java.util.stream.Collectors.toList;
-
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
@@ -60,16 +58,20 @@ public interface AssertionRepository extends JpaRepository<Assertion, Long> {
 
   /**
    * For the given collection of raire-java assertions, transform them into a form suitable
-   * for storing in the corla database and save them to the database.
+   * for storing in the corla database and save them to the database. Note that this method will
+   * not verify that the provided array of candidate names are the candidates for the contest or
+   * that the names themselves are valid, as stored in the database, or that a contest of the
+   * given name exists.
    * @param contestName Name of the contest to which these assertions belong.
    * @param universeSize Number of ballots in the auditing universe for these assertions.
    * @param candidates Names of the candidates in the contest.
    * @param assertions Array of raire-java assertions for the contest.
-   * @throws IllegalStateException if the caller supplies a non-positive universe size.
+   * @throws IllegalArgumentException if the caller supplies a non-positive universe size,
+   * invalid margin, or invalid combination of winner, loser and list of assumed continuing candidates.
    * @throws ArrayIndexOutOfBoundsException if the winner or loser indices in any of the raire-java
    * assertions are invalid with respect to the given array of candidates.
    */
-  default void storeAssertions(String contestName, long universeSize, String[] candidates,
+  default void translateAndSaveAssertions(String contestName, long universeSize, String[] candidates,
       AssertionAndDifficulty[] assertions)
       throws IllegalArgumentException, ArrayIndexOutOfBoundsException
   {

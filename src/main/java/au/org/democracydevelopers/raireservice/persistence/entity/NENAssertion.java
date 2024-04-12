@@ -55,17 +55,23 @@ public class NENAssertion extends Assertion {
    * @param difficulty Difficulty of the assertion, as computed by raire-java.
    * @param candidates Names of the candidates in this assertion's contest.
    * @param nen Raire-java NotEliminatedNext assertion to be transformed into a NENAssertion.
-   * @throws IllegalStateException if the caller supplies a non-positive universe size, invalid
+   * @throws IllegalArgumentException if the caller supplies a non-positive universe size, invalid
    * margin, or invalid combination of winner, loser and list of assumed continuing candidates.
    * @throws ArrayIndexOutOfBoundsException if the winner or loser indices in the raire-java
    * assertion are invalid with respect to the given array of candidates.
    */
   public NENAssertion(String contestName, long universeSize, int margin, double difficulty,
       String[] candidates, au.org.democracydevelopers.raire.assertions.NotEliminatedNext nen)
-      throws IllegalStateException, ArrayIndexOutOfBoundsException
+      throws IllegalArgumentException, ArrayIndexOutOfBoundsException
   {
     super(contestName, candidates[nen.winner], candidates[nen.loser], margin, universeSize,
         difficulty, Arrays.stream(nen.continuing).mapToObj(i -> candidates[i]).toList());
+
+    if(!assumedContinuing.contains(winner) || !assumedContinuing.contains(loser)){
+      String msg = "The winner and loser of an assertion must also be continuing candidates.";
+      logger.error(msg);
+      throw new IllegalArgumentException(msg);
+    }
   }
 
 

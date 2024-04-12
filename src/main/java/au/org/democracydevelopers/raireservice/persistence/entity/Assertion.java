@@ -61,22 +61,22 @@ public abstract class Assertion {
    * Name of the contest for which this Assertion was generated.
    */
   @Column(name = "contest_name", updatable = false, nullable = false)
-  private String contestName;
+  protected String contestName;
 
   @Column(name = "winner", updatable = false, nullable = false)
-  private String winner;
+  protected String winner;
 
   /**
    * Loser of the Assertion (a candidate in the contest).
    */
   @Column(name = "loser", updatable = false, nullable = false)
-  private String loser;
+  protected String loser;
 
   /**
    * Assertion margin (note: this is not the *diluted* margin).
    */
   @Column(name = "margin", updatable = false, nullable = false)
-  private int margin;
+  protected int margin;
 
   /**
    * Assertion difficulty, as estimated by raire-java. (Note that raire-java has multiple ways
@@ -84,7 +84,7 @@ public abstract class Assertion {
    * of ballots. For example, one method may be: difficulty =  1 / assertion margin).
    */
   @Column(name = "difficulty", updatable = false, nullable = false)
-  private double difficulty;
+  protected double difficulty;
 
   /**
    * List of candidates that the Assertion assumes are 'continuing' in the Assertion's context.
@@ -92,14 +92,14 @@ public abstract class Assertion {
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "assertion_assumed_continuing", joinColumns = @JoinColumn(name = "id"))
   @Column(updatable = false, nullable = false)
-  private List<String> assumedContinuing = new ArrayList<>();
+  protected List<String> assumedContinuing = new ArrayList<>();
 
   /**
    * Diluted margin for the Assertion. This is equal to the assertion margin divided by the
    * number of ballots in the relevant auditing universe.
    */
   @Column(name = "diluted_margin", updatable = false, nullable = false)
-  private double dilutedMargin;
+  protected double dilutedMargin;
 
   /**
    * A map between CVR ID and the discrepancy recorded against that CVR for this assertion
@@ -110,52 +110,59 @@ public abstract class Assertion {
   @CollectionTable(name = "assertion_discrepancies", joinColumns = @JoinColumn(name = "id"))
   @MapKeyColumn(name = "cvr_id")
   @Column(name = "discrepancy", updatable = false, nullable = false)
-  private Map<Long,Integer> cvrDiscrepancy = new HashMap<>();
+  protected Map<Long,Integer> cvrDiscrepancy = new HashMap<>();
 
   /**
    * The expected number of samples to audit overall for the Assertion, assuming overstatements
    * continue at the current rate experienced in the audit.
    */
   @Column(name = "estimated_samples_to_audit", updatable = false, nullable = false)
-  private int estimatedSamplesToAudit = 0;
+  protected int estimatedSamplesToAudit = 0;
+
+  /**
+   * The expected number of samples to audit overall for the Assertion, assuming no further
+   * overstatements will be encountered in the audit.
+   */
+  @Column(name = "optimistic_samples_to_audit", updatable = false, nullable = false)
+  protected int optimisticSamplesToAudit = 0;
 
   /**
    * The two-vote understatements recorded against the Assertion.
    */
   @Column(name = "two_vote_under_count", updatable = false, nullable = false)
-  private int twoVoteUnderCount = 0;
+  protected int twoVoteUnderCount = 0;
 
   /**
    * The one-vote understatements recorded against the Assertion.
    */
   @Column(name = "one_vote_under_count", updatable = false, nullable = false)
-  private int oneVoteUnderCount = 0;
+  protected int oneVoteUnderCount = 0;
 
   /**
    * The one-vote overstatements recorded against the Assertion.
    */
   @Column(name = "one_vote_over_count", updatable = false, nullable = false)
-  public final int oneVoteOverCount = 0;
+  protected int oneVoteOverCount = 0;
 
   /**
    * The two-vote overstatements recorded against the Assertion.
    */
   @Column(name = "two_vote_over_count", updatable = false, nullable = false)
-  private int twoVoteOverCount = 0;
+  protected int twoVoteOverCount = 0;
 
   /**
    * Discrepancies recorded against the Assertion that are neither understatements nor
    * overstatements.
    */
   @Column(name = "other_count", updatable = false, nullable = false)
-  private int otherCount = 0;
+  protected int otherCount = 0;
 
   /**
    * Current risk measurement recorded against the Assertion. It is initialized to 1, as prior
    * to an audit starting, and without additional information, we assume maximum risk.
    */
   @Column(name = "current_risk", updatable = false, nullable = false)
-  private BigDecimal currentRisk = BigDecimal.valueOf(1);
+  protected BigDecimal currentRisk = new BigDecimal("1.00");
 
   /**
    * Default no-args constructor (required for persistence).
@@ -171,12 +178,12 @@ public abstract class Assertion {
    * @param universeSize Total number of ballots in the auditing universe of the Assertion.
    * @param difficulty Assertion difficulty, as computed by raire-java.
    * @param assumedContinuing List of candidates, by name, that the Assertion assumes is continuing.
-   * @throws IllegalStateException if the caller supplies a non-positive universe size, invalid
+   * @throws IllegalArgumentException if the caller supplies a non-positive universe size, invalid
    * margin, or invalid combination of winner, loser and list of assumed continuing candidates.
    */
   public Assertion(String contestName, String winner, String loser, int margin,
       long universeSize, double difficulty, List<String> assumedContinuing)
-      throws IllegalStateException
+      throws IllegalArgumentException
   {
     this.contestName = contestName;
     this.winner = winner;
@@ -186,31 +193,19 @@ public abstract class Assertion {
     if(universeSize <= 0){
       String msg = "An assertion must have a positive universe size.";
       logger.error(msg);
-      throw new IllegalStateException(msg);
+      throw new IllegalArgumentException(msg);
     }
 
-    if(margin < 0){
-      String msg = "An assertion must have a non-negative margin.";
+    if(margin < 0 || margin > universeSize){
+      String msg = "An assertion must have a non-negative margin that is less than universe size";
       logger.error(msg);
-      throw new IllegalStateException(msg);
-    }
-
-    if(winner.isBlank() || loser.isBlank()){
-      String msg = "The winner and loser of an assertion must not be blank/null.";
-      logger.error(msg);
-      throw new IllegalStateException(msg);
+      throw new IllegalArgumentException(msg);
     }
 
     if(winner.equals(loser)){
       String msg = "The winner and loser of an assertion must not be the same candidate.";
       logger.error(msg);
-      throw new IllegalStateException(msg);
-    }
-
-    if(!assumedContinuing.contains(winner) || !assumedContinuing.contains(loser)){
-      String msg = "The winner and loser of an assertion must also be continuing candidates.";
-      logger.error(msg);
-      throw new IllegalStateException(msg);
+      throw new IllegalArgumentException(msg);
     }
 
     this.dilutedMargin = margin / (double) universeSize;
@@ -218,6 +213,5 @@ public abstract class Assertion {
     this.difficulty = difficulty;
     this.assumedContinuing = assumedContinuing;
   }
-
 
 }
