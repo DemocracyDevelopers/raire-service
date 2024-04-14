@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import au.org.democracydevelopers.raireservice.response.GetAssertionsResponse;
 import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.time.TimeTaken;
@@ -28,7 +29,6 @@ import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.RequestValidationException;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
-import au.org.democracydevelopers.raireservice.response.GetAssertionsResponse;
 import au.org.democracydevelopers.raireservice.response.Metadata;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * This class controls the post request mappings for all requests related
@@ -65,7 +66,7 @@ public class AssertionController {
    * is a GenerateAssertionsResponse. TODO the String is just a placeholder for now.
    * In the case of success, it also stores the assertions that were derived for the specified contest
    * in the database.
-   * @throws RequestValidationException which is handled by RequestValidationExceptionHandler.
+   * @throws RequestValidationException which is handled by ControllerExceptionHandler.
    * This tests for invalid requests, such as non-existent, null, or non-IRV contest names.
    * Other exceptions that are specific to assertion generation are caught and translated into the
    * appropriate http error. TODO add these when assertion generation is implemented.
@@ -87,7 +88,7 @@ public class AssertionController {
    * @param request a GetAssertionsRequest, specifying an IRV contest name for which to retrieve the
    *                assertions.
    * @return the assertions, as JSON (in the case of success) or an error. TODO the String is just a placeholder for now.
-   * @throws RequestValidationException which is handled by RequestValidationExceptionHandler.
+   * @throws RequestValidationException which is handled by ControllerExceptionHandler.
    * This tests for invalid requests, such as non-existent, null, or non-IRV contest names.
    * Other exceptions that are specific to assertion generation are caught and translated into the
    * appropriate http error. TODO add these when assertion retrieval is implemented.
@@ -95,15 +96,25 @@ public class AssertionController {
   @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<GetAssertionsResponse> serve(@RequestBody GetAssertionsRequest request)
       throws RequestValidationException {
-      request.Validate(contestRepository);
+
+    request.Validate(contestRepository);
+
+    try {
       // For the moment, this is just a dummy "OK" response. Later, it will contain the winner.
       GetAssertionsResponse dummyResponse = new GetAssertionsResponse(
           new Metadata(request, List.of()),
           new RaireResult(new AssertionAndDifficulty[0], 10.0, 100, 0,
-              5, new TimeTaken(5L,5), new TimeTaken(2L, 2),
-              new TimeTaken(2L,2), false)
+              5, new TimeTaken(5L, 5), new TimeTaken(2L, 2),
+              new TimeTaken(2L, 2), false)
       );
       return new ResponseEntity<>(dummyResponse, HttpStatus.OK);
+
+      // TODO Catch all the exceptions that the GetAssertionsService can throw, for example if the
+      // assertions are present but retrieval fails for some reason.
+      // Spring has a builtin handler called
+    } catch (IllegalArgumentException  | ArrayIndexOutOfBoundsException ex) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    }
   }
 
   /**
