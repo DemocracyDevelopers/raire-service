@@ -47,7 +47,7 @@ public abstract class Assertion {
    */
   @Id
   @Column(updatable = false, nullable = false)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id;
 
   /**
@@ -88,6 +88,7 @@ public abstract class Assertion {
 
   /**
    * List of candidates that the Assertion assumes are 'continuing' in the Assertion's context.
+   * Note that this is always empty for NEB assertions.
    */
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "assertion_assumed_continuing", joinColumns = @JoinColumn(name = "id"))
