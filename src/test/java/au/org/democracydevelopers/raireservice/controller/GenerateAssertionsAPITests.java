@@ -93,6 +93,9 @@ public class GenerateAssertionsAPITests {
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
+    // TODO this test is obviously failing at the moment because I've just got a dummy
+    // generateAssertions class that always throws an exception. Debug this test to see
+    // the error messages / headers.
     assertTrue(response.getStatusCode().is2xxSuccessful());
   }
 

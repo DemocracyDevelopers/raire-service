@@ -42,7 +42,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
  */
 public class GenerateAssertionsException extends Exception {
 
-  private static ObjectWriter objectWriter;
   public RaireErrorCodes errorCode;
 
   /**
@@ -72,7 +71,8 @@ public class GenerateAssertionsException extends Exception {
       case InvalidNumberOfCandidates e -> this.errorCode = RaireErrorCodes.INTERNAL_ERROR ;
       case WrongWinner e -> this.errorCode = RaireErrorCodes.INTERNAL_ERROR ;
 
-      // We shouldn't have generic Raire errors.
+      // TODO We shouldn't have generic Raire errors.
+      // When the RaireError class is sealed, we'll be able to delete this line.
       case RaireError e -> throw new IllegalStateException("Unexpected value: " + error);
     }
   }

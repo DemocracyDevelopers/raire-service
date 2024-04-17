@@ -48,13 +48,13 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
      * is intended to be shown to the user. Note that errors may be a consequence of the data
      * (e.g. tied winners) or of a server error.
      * @param ex the GenerateAssertionsException.
-     * @return
+     * @return the error message and error code.
      */
     @org.springframework.web.bind.annotation.ExceptionHandler(GenerateAssertionsException.class)
     public ResponseEntity<String> handleErrorResponseException(GenerateAssertionsException ex) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("code", String.valueOf(ex.errorCode));
+        headers.add("error_code", String.valueOf(ex.errorCode));
 
-        return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

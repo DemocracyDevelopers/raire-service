@@ -30,6 +30,8 @@ import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.RequestValidationException;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
 import au.org.democracydevelopers.raireservice.response.Metadata;
+import au.org.democracydevelopers.raireservice.service.GenerateAssertionsException;
+import au.org.democracydevelopers.raireservice.service.GenerateAssertionsService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -57,6 +59,7 @@ public class AssertionController {
 
   private final ContestRepository contestRepository;
 
+  private final GenerateAssertionsService generateAssertionsService;
 
   /**
    * The API endpoint for generating assertions, by contest name, and returning the IRV winner.
@@ -73,13 +76,10 @@ public class AssertionController {
    */
   @PostMapping(path = "/generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<GenerateAssertionsResponse> serve(@RequestBody GenerateAssertionsRequest request)
-      throws RequestValidationException {
+      throws RequestValidationException, GenerateAssertionsException {
       request.Validate(contestRepository);
-      // For the moment, this is just a dummy response. Later, it will contain the winner
-      // calculated by raire.
-      GenerateAssertionsResponse dummyResponse
-          = new GenerateAssertionsResponse(request.contestName, "Placeholder winner");
-      return new ResponseEntity<>(dummyResponse, HttpStatus.OK);
+      GenerateAssertionsResponse response = generateAssertionsService.generateAssertions();
+      return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
 
@@ -111,17 +111,20 @@ public class AssertionController {
 
       // TODO Catch all the exceptions that the GetAssertionsService can throw, for example if the
       // assertions are present but retrieval fails for some reason.
-      // Spring has a builtin handler called
+      // They can either be caught here or handled by the ControllerExceptionHandler.
     } catch (IllegalArgumentException  | ArrayIndexOutOfBoundsException ex) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
   }
 
   /**
-   * Constructor
+   * All args constructor
    * @param contestRepository the contestRespository, used for validating requests.
+   * @param generateAssertionsService the generateAssertions service.
    */
-  public AssertionController(ContestRepository contestRepository) {
+  public AssertionController(ContestRepository contestRepository,
+      GenerateAssertionsService generateAssertionsService) {
     this.contestRepository = contestRepository;
+    this.generateAssertionsService = generateAssertionsService;
   }
 }
