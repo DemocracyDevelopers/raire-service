@@ -44,6 +44,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 /*
@@ -52,6 +53,7 @@ import org.springframework.test.context.ActiveProfiles;
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class GenerateAssertionsExceptionTests {
 
   @Autowired
