@@ -112,6 +112,7 @@ public class AssertionController {
       // TODO Catch all the exceptions that the GetAssertionsService can throw, for example if the
       // assertions are present but retrieval fails for some reason.
       // They can either be caught here or handled by the ControllerExceptionHandler.
+      // This should be part of Issue https://github.com/DemocracyDevelopers/raire-service/issues/44
     } catch (IllegalArgumentException  | ArrayIndexOutOfBoundsException ex) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
