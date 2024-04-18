@@ -35,7 +35,8 @@ public class GenerateAssertionsService {
 
   public GenerateAssertionsResponse generateAssertions() throws GenerateAssertionsException {
     RaireError error = new TimeoutCheckingWinner();
-    throw new GenerateAssertionsException(error);
+    List<String> candidates = List.of("Alice","Bob");
+    throw new GenerateAssertionsException(error, candidates);
   }
 
 }
