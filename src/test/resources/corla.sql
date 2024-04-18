@@ -9,6 +9,50 @@ create table asm_state
     version      bigint
 );
 
+
+create table assertion
+(
+    assertion_type              varchar(31)      not null,
+    id                          bigserial
+        primary key,
+    contest_name                varchar(255)     not null,
+    difficulty                  double precision not null,
+    diluted_margin              double precision not null,
+    loser                       varchar(255)     not null,
+    margin                      integer          not null,
+    current_risk                numeric(19, 2)   not null,
+    estimated_samples_to_audit  integer          not null,
+    one_vote_over_count         integer          not null,
+    one_vote_under_count        integer          not null,
+    optimistic_samples_to_audit integer          not null,
+    other_count                 integer          not null,
+    two_vote_over_count         integer          not null,
+    two_vote_under_count        integer          not null,
+    version                     bigint,
+    winner                      varchar(255)     not null
+);
+
+
+create table assertion_context
+(
+    id                 bigint       not null
+        constraint fki0lyp4tghtpohaa9ma6kv2174
+            references assertion,
+    assumed_continuing varchar(255) not null
+);
+
+
+create table assertion_discrepancies
+(
+    id          bigint  not null
+        constraint fkt31yi3mf6c9axmt1gn1mu33ea
+            references assertion,
+    discrepancy integer not null,
+    cvr_id      bigint  not null,
+    primary key (id, cvr_id)
+);
+
+
 create table ballot_manifest_info
 (
     id                      bigint       not null
@@ -25,6 +69,7 @@ create table ballot_manifest_info
     ultimate_sequence_start bigint,
     uri                     varchar(255)
 );
+
 
 create index idx_bmi_county
     on ballot_manifest_info (county_id);
@@ -57,6 +102,7 @@ create table cast_vote_record
     constraint uniquecvr
         unique (county_id, imprinted_id, record_type, revision)
 );
+
 
 create index idx_cvr_county_type
     on cast_vote_record (county_id, record_type);
@@ -94,8 +140,10 @@ create table contest_result
     winners_allowed integer
 );
 
+
 create table comparison_audit
 (
+    audit_type                    varchar(31)    not null,
     id                            bigint         not null
         primary key,
     contest_cvr_ids               text,
@@ -117,12 +165,23 @@ create table comparison_audit
     two_vote_under_count          integer        not null,
     version                       bigint,
     overstatements                numeric(19, 2),
+    universe_size                 bigint,
     contest_result_id             bigint         not null
         constraint fkn14qkca2ilirtpr4xctw960pe
-            references contest_result,
-    audit_type                    varchar(31)    not null,
-    universe_size                 bigint
+            references contest_result
 );
+
+
+create table audit_to_assertions
+(
+    id            bigint not null
+        constraint fkgrx2l2qywbc3nv83iid55ql36
+            references comparison_audit,
+    assertions_id bigint not null
+        constraint fkqomhyyib2xno6nq0wjpv95fs5
+            references assertion
+);
+
 
 create table contest_vote_total
 (
@@ -134,6 +193,7 @@ create table contest_vote_total
     primary key (result_id, choice)
 );
 
+
 create table county
 (
     id      bigint       not null
@@ -143,6 +203,7 @@ create table county
             unique,
     version bigint
 );
+
 
 create table administrator
 (
@@ -154,14 +215,13 @@ create table administrator
     type             varchar(255) not null,
     username         varchar(255) not null
         constraint uk_esogmqxeek1uwdyhxvubme3qf
-            unique
-        constraint idx_admin_username
             unique,
     version          bigint,
     county_id        bigint
         constraint fkh6rcfib1ishmhry9ctgm16gie
             references county
 );
+
 
 create table contest
 (
@@ -179,6 +239,7 @@ create table contest
     constraint ukdv45ptogm326acwp45hm46uaf
         unique (name, county_id, description, votes_allowed)
 );
+
 
 create index idx_contest_name
     on contest (name);
@@ -201,6 +262,7 @@ create table contest_choice
         unique (contest_id, name)
 );
 
+
 create table contests_to_contest_results
 (
     contest_result_id bigint not null
@@ -214,6 +276,7 @@ create table contests_to_contest_results
     primary key (contest_result_id, contest_id)
 );
 
+
 create table counties_to_contest_results
 (
     contest_result_id bigint not null
@@ -224,6 +287,7 @@ create table counties_to_contest_results
             references county,
     primary key (contest_result_id, county_id)
 );
+
 
 create table county_contest_result
 (
@@ -247,6 +311,7 @@ create table county_contest_result
         unique (county_id, contest_id)
 );
 
+
 create index idx_ccr_county
     on county_contest_result (county_id);
 
@@ -262,6 +327,7 @@ create table county_contest_vote_total
     choice     varchar(255) not null,
     primary key (result_id, choice)
 );
+
 
 create table cvr_audit_info
 (
@@ -280,6 +346,7 @@ create table cvr_audit_info
             references cast_vote_record
 );
 
+
 create table contest_comparison_audit_disagreement
 (
     contest_comparison_audit_id bigint not null
@@ -290,6 +357,7 @@ create table contest_comparison_audit_disagreement
             references cvr_audit_info,
     primary key (contest_comparison_audit_id, cvr_audit_info_id)
 );
+
 
 create table contest_comparison_audit_discrepancy
 (
@@ -302,6 +370,7 @@ create table contest_comparison_audit_discrepancy
             references cvr_audit_info,
     primary key (contest_comparison_audit_id, cvr_audit_info_id)
 );
+
 
 create table cvr_contest_info
 (
@@ -318,6 +387,7 @@ create table cvr_contest_info
     index      integer not null,
     primary key (cvr_id, index)
 );
+
 
 create index idx_cvrci_uri
     on cvr_contest_info (county_id, contest_id);
@@ -336,6 +406,7 @@ create table dos_dashboard
     version             bigint
 );
 
+
 create table contest_to_audit
 (
     dashboard_id bigint not null
@@ -347,6 +418,19 @@ create table contest_to_audit
             references contest,
     reason       varchar(255)
 );
+
+
+create table irv_ballot_interpretation
+(
+    id            bigint not null
+        primary key,
+    contest_name  varchar(255),
+    cvr_id        bigint,
+    raw_choices   varchar(1024),
+    valid_choices varchar(1024),
+    version       bigint
+);
+
 
 create table log
 (
@@ -364,6 +448,7 @@ create table log
             references log
 );
 
+
 create table tribute
 (
     id                     bigint not null
@@ -378,6 +463,7 @@ create table tribute
     uri                    varchar(255),
     version                bigint
 );
+
 
 create table uploaded_file
 (
@@ -397,6 +483,7 @@ create table uploaded_file
         constraint fk8gh92iwaes042cc1uvi6714yj
             references county
 );
+
 
 create table county_dashboard
 (
@@ -430,6 +517,7 @@ create table county_dashboard
             references uploaded_file
 );
 
+
 create table audit_board
 (
     dashboard_id  bigint    not null
@@ -442,6 +530,7 @@ create table audit_board
     primary key (dashboard_id, index)
 );
 
+
 create table audit_intermediate_report
 (
     dashboard_id bigint  not null
@@ -452,6 +541,7 @@ create table audit_intermediate_report
     index        integer not null,
     primary key (dashboard_id, index)
 );
+
 
 create table audit_investigation_report
 (
@@ -464,6 +554,7 @@ create table audit_investigation_report
     index        integer not null,
     primary key (dashboard_id, index)
 );
+
 
 create table county_contest_comparison_audit
 (
@@ -497,6 +588,7 @@ create table county_contest_comparison_audit
             references county_dashboard
 );
 
+
 create index idx_ccca_dashboard
     on county_contest_comparison_audit (dashboard_id);
 
@@ -511,6 +603,7 @@ create table county_contest_comparison_audit_disagreement
     primary key (county_contest_comparison_audit_id, cvr_audit_info_id)
 );
 
+
 create table county_contest_comparison_audit_discrepancy
 (
     county_contest_comparison_audit_id bigint not null
@@ -523,6 +616,7 @@ create table county_contest_comparison_audit_discrepancy
     primary key (county_contest_comparison_audit_id, cvr_audit_info_id)
 );
 
+
 create table county_dashboard_to_comparison_audit
 (
     dashboard_id        bigint not null
@@ -533,6 +627,7 @@ create table county_dashboard_to_comparison_audit
             references comparison_audit,
     primary key (dashboard_id, comparison_audit_id)
 );
+
 
 create table round
 (
@@ -558,46 +653,9 @@ create table round
     primary key (dashboard_id, index)
 );
 
+
 create index idx_uploaded_file_county
     on uploaded_file (county_id);
 
-create table assertion
-(
-    assertion_type              varchar(31)      not null,
-    id                          bigint           not null
-        primary key,
-    contest_name                varchar(255)     not null,
-    difficulty                  double precision not null,
-    diluted_margin              double precision not null,
-    loser                       varchar(255)     not null,
-    margin                      integer          not null,
-    estimated_samples_to_audit  integer          not null,
-    one_vote_over_count         integer          not null,
-    one_vote_under_count        integer          not null,
-    optimistic_samples_to_audit integer          not null,
-    other_count                 integer          not null,
-    two_vote_over_count         integer          not null,
-    two_vote_under_count        integer          not null,
-    version                     bigint,
-    winner                      varchar(255)     not null
-);
-
-create table assertion_context
-(
-    id                 bigint not null
-        constraint fki0lyp4tghtpohaa9ma6kv2174
-            references assertion,
-    assumed_continuing varchar(255)
-);
-
-create table audit_to_assertions
-(
-    id            bigint not null
-        constraint fkgrx2l2qywbc3nv83iid55ql36
-            references comparison_audit,
-    assertions_id bigint not null
-        constraint fkqomhyyib2xno6nq0wjpv95fs5
-            references assertion
-);
 
 
