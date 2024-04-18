@@ -47,7 +47,6 @@ public class GenerateAssertionsException extends Exception {
 
   /**
    * Main constructor, for translating a RaireError into a GenerateAssertionsException.
-   *
    * @param error the RaireError to be expressed as a GenerateAssertionsException.
    */
   public GenerateAssertionsException(RaireError error, List<String> candidates) {
@@ -162,8 +161,11 @@ public class GenerateAssertionsException extends Exception {
           message = "Time out trimming assertions - the assertions are usable, but could be reduced given more trimming time.";
       case TimeoutCheckingWinner e ->
           message = "Time out checking winner - the election is either tied or extremely complex.";
-      case CouldNotRuleOut e -> message = "Could not rule out alternative elimination order: "
-          + Arrays.stream(e.eliminationOrder).mapToObj(candidates::get)+".";
+      case CouldNotRuleOut e -> {
+        List<String> sequenceList = Arrays.stream(e.eliminationOrder).mapToObj(candidates::get).toList();
+        String sequence = String.join(", ", sequenceList);
+        message = "Could not rule out alternative elimination order: "+sequence+".";
+      }
 
       // I think this is what we get if the candidate list entered in the request has the
       // right number but wrong names vs the database.
@@ -171,7 +173,7 @@ public class GenerateAssertionsException extends Exception {
       case InvalidCandidateNumber e -> message = "Candidate list does not match database.";
 
       // Internal coding errors.
-      default -> message = "Internal Error";
+      default -> message = "Internal error";
     }
     return message;
   }
