@@ -22,20 +22,18 @@ package au.org.democracydevelopers.raireservice.service;
 
 import au.org.democracydevelopers.raire.RaireError;
 import au.org.democracydevelopers.raire.RaireError.TiedWinners;
-import au.org.democracydevelopers.raire.RaireError.TimeoutCheckingWinner;
-import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
-import java.util.List;
-import org.springframework.stereotype.Service;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
-/**
- * A dummy implementation that does nothing but throw an exception.
- */
-@Service
-public class GenerateAssertionsService {
+@SpringBootTest
+public class GenerateAssertionsExceptionTests {
 
-  public GenerateAssertionsResponse generateAssertions() throws GenerateAssertionsException {
-    RaireError error = new TimeoutCheckingWinner();
-    throw new GenerateAssertionsException(error);
+  @Test
+  public void TiedWinnersIsTiedWinners() {
+    int[] winners  = {0,1};
+    RaireError raireError = new TiedWinners(winners);
+    GenerateAssertionsException e = new GenerateAssertionsException(raireError);
   }
+
 
 }

@@ -46,11 +46,10 @@ public class GenerateAssertionsException extends Exception {
 
   /**
    * Main constructor, for translating a RaireError into a GenerateAssertionsException.
-   * @param message a human-readable message for the exception.
    * @param error the RaireError to be expressed as a GenerateAssertionsException.
    */
-  public GenerateAssertionsException(String message, RaireError error) {
-    super(message);
+  public GenerateAssertionsException(RaireError error) {
+    super(makeMessage(error));
     switch (error) {
       case TiedWinners e -> this.errorCode = RaireErrorCodes.TIED_WINNERS;
       case TimeoutFindingAssertions e -> this.errorCode = RaireErrorCodes.TIMEOUT_FINDING_ASSERTIONS;
@@ -58,9 +57,10 @@ public class GenerateAssertionsException extends Exception {
       case TimeoutCheckingWinner e -> this.errorCode = RaireErrorCodes.TIMEOUT_CHECKING_WINNER;
       case CouldNotRuleOut e -> this.errorCode = RaireErrorCodes.COULD_NOT_RULE_OUT_ALTERNATIVE;
 
-      // TODO: I think this is what we get if the candidate list entered in the request has the
+      // I think this is what we get if the candidate list entered in the request has the
       // right number but wrong names vs the database. It's therefore not (really) an internal error
       // - it's a colorado-rla error.
+      // TODO add a test for this case. (See Issue.)
       case InvalidCandidateNumber e -> this.errorCode = RaireErrorCodes.WRONG_CANDIDATE_NAMES;
 
       // Internal coding errors.
@@ -77,9 +77,13 @@ public class GenerateAssertionsException extends Exception {
     }
   }
 
+  private static String makeMessage(RaireError error) {
+    return "todo";
+  }
+
   /**
-   * Message-only constructor, for the case where something went so weirdly wrong we could not even
-   * get an intelligible RaireError.
+   * Message-only constructor, for the case where something other than a raire error went wrong during
+   * assertion generation, for example a database error.
    * @param message a human-readable message for the exception.
    */
   public GenerateAssertionsException(String message) {
@@ -136,6 +140,5 @@ public class GenerateAssertionsException extends Exception {
      * These are errors that the user can't do anything about.
      */
     INTERNAL_ERROR,
-
   }
 }
