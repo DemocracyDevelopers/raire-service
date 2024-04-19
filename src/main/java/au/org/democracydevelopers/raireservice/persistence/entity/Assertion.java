@@ -28,6 +28,7 @@ import jakarta.persistence.*;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.annotation.ReadOnlyProperty;
 
 /**
  * RAIRE generates a set of assertions for a given IRV contest. The different types of assertion
@@ -48,6 +49,7 @@ public abstract class Assertion {
   @Id
   @Column(updatable = false, nullable = false)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @ReadOnlyProperty
   private long id;
 
   /**
@@ -55,27 +57,32 @@ public abstract class Assertion {
    */
   @Version
   @Column(name = "version", updatable = false, nullable = false)
+  @ReadOnlyProperty
   private long version;
 
   /**
    * Name of the contest for which this Assertion was generated.
    */
   @Column(name = "contest_name", updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected String contestName;
 
   @Column(name = "winner", updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected String winner;
 
   /**
    * Loser of the Assertion (a candidate in the contest).
    */
   @Column(name = "loser", updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected String loser;
 
   /**
    * Assertion margin (note: this is not the *diluted* margin).
    */
   @Column(name = "margin", updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected int margin;
 
   /**
@@ -84,6 +91,7 @@ public abstract class Assertion {
    * of ballots. For example, one method may be: difficulty =  1 / assertion margin).
    */
   @Column(name = "difficulty", updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected double difficulty;
 
   /**
@@ -93,6 +101,7 @@ public abstract class Assertion {
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "assertion_assumed_continuing", joinColumns = @JoinColumn(name = "id"))
   @Column(updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected List<String> assumedContinuing = new ArrayList<>();
 
   /**
@@ -100,6 +109,7 @@ public abstract class Assertion {
    * number of ballots in the relevant auditing universe.
    */
   @Column(name = "diluted_margin", updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected double dilutedMargin;
 
   /**
@@ -111,6 +121,7 @@ public abstract class Assertion {
   @CollectionTable(name = "assertion_discrepancies", joinColumns = @JoinColumn(name = "id"))
   @MapKeyColumn(name = "cvr_id")
   @Column(name = "discrepancy", updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected Map<Long,Integer> cvrDiscrepancy = new HashMap<>();
 
   /**
@@ -118,6 +129,7 @@ public abstract class Assertion {
    * continue at the current rate experienced in the audit.
    */
   @Column(name = "estimated_samples_to_audit", updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected int estimatedSamplesToAudit = 0;
 
   /**
@@ -125,12 +137,14 @@ public abstract class Assertion {
    * overstatements will be encountered in the audit.
    */
   @Column(name = "optimistic_samples_to_audit", updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected int optimisticSamplesToAudit = 0;
 
   /**
    * The two-vote understatements recorded against the Assertion.
    */
   @Column(name = "two_vote_under_count", updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected int twoVoteUnderCount = 0;
 
   /**
@@ -143,12 +157,14 @@ public abstract class Assertion {
    * The one-vote overstatements recorded against the Assertion.
    */
   @Column(name = "one_vote_over_count", updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected int oneVoteOverCount = 0;
 
   /**
    * The two-vote overstatements recorded against the Assertion.
    */
   @Column(name = "two_vote_over_count", updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected int twoVoteOverCount = 0;
 
   /**
@@ -156,6 +172,7 @@ public abstract class Assertion {
    * overstatements.
    */
   @Column(name = "other_count", updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected int otherCount = 0;
 
   /**
@@ -163,6 +180,7 @@ public abstract class Assertion {
    * to an audit starting, and without additional information, we assume maximum risk.
    */
   @Column(name = "current_risk", updatable = false, nullable = false)
+  @ReadOnlyProperty
   protected BigDecimal currentRisk = new BigDecimal("1.00");
 
   /**
