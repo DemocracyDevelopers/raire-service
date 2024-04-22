@@ -25,7 +25,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * The metadata expected by the assertion-explainer, to be returned as part of a Get Assertions Response.
+ * The metadata expected by the assertion-explainer, to be returned as part of a GetAssertionsResponse.
  * This includes the contest name, candidate list and risk Limit, copied directly from the request.
  * It also includes the assertion risks, in the same order as the assertions themselves, as calculated
  * by colorado-rla and stored in the database during the audit. This can be displayed by the assertion
@@ -44,22 +44,24 @@ public class Metadata {
   public final String contest;
 
   /**
-   * The audit risk limit. This is expected to be the same for all contests in colorado-rla,
-   * but for raire it really does not need to be.
+   * The audit risk limit. Current practice in colorado is to have the same risk limit for all contests
+   * under audit, but this parameter allows it to vary - raire-java can compute a difficulty for each
+   * contest, as a function of each per-contest risk limit. This affects the estimated difficulty, but
+   * does not affect the margin, nor what assertions are generated.
    */
   public final BigDecimal riskLimit;
 
   /**
    * The ordered list of current risk estimates, one for each assertion, in the same order as
-   * the array of assertions that will accompany this metadata. This is constantly updated throughout
-   * the audit process.
+   * the array of assertions that will accompany this metadata. Risk estimates for each assertion are
+   * constantly updated in the database for each assertion by colorado-rla.
    */
   public final List<BigDecimal> assertionRisks;
 
   /**
    * This is effectively the all-args constructor - the first three args are packaged into the
    * GetAssertionsRequest.
-   * @param request the Get Assertions Request, which provides the contest name, list of candidate names
+   * @param request the GetAssertionsRequest, which provides the contest name, list of candidate names
    *                and risk limit.
    * @param assertionRisks an array of current estimates of risks, one for each assertion.
    */

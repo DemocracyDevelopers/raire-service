@@ -120,7 +120,7 @@ public class AssertionController {
 
   /**
    * All args constructor
-   * @param contestRepository the contestRespository, used for validating requests.
+   * @param contestRepository the contestRepository, used for validating requests.
    * @param generateAssertionsService the generateAssertions service.
    */
   public AssertionController(ContestRepository contestRepository,

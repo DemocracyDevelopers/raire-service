@@ -43,6 +43,10 @@ import java.util.List;
  */
 public class GenerateAssertionsException extends Exception {
 
+  /**
+   * The error code - an enum used to describe what went wrong. Returned in the http response for
+   * colorado-rla to interpret for the user.
+   */
   public RaireErrorCodes errorCode;
 
   /**
@@ -77,7 +81,7 @@ public class GenerateAssertionsException extends Exception {
   }
 
   /**
-   * Message-only constructor, for the case where something other than a raire error went wrong
+   * Message-only constructor, for the case where something other than a raire-java error went wrong
    * during assertion generation, for example a database error.
    *
    * @param message a human-readable message for the exception.
@@ -87,6 +91,9 @@ public class GenerateAssertionsException extends Exception {
     this.errorCode = RaireErrorCodes.INTERNAL_ERROR;
   }
 
+  /**
+   * Error codes describing what went wrong, for returning via http to colorado-rla.
+   */
   public enum RaireErrorCodes {
 
     // Errors that the user can do something about.
@@ -128,16 +135,16 @@ public class GenerateAssertionsException extends Exception {
     // Internal errors (that the user can do nothing about)
 
     /**
-     * A catch-all for various kinds of raire errors that indicate a programming error: invalid
+     * A catch-all for various kinds of errors that indicate a programming error: invalid
      * input errors such as InvalidNumberOfCandidates, InvalidTimeout, InvalidCandidateNumber -
-     * these should all be caught before being sent to raire. Also database errors. These are errors
+     * these should all be caught before being sent to raire-java. Also database errors. These are errors
      * that the user can't do anything about.
      */
     INTERNAL_ERROR,
   }
 
   /**
-   * Make a human-readable error message out of the raire error.
+   * Make a human-readable error message out of a raire-java error.
    *
    * @param error      the RaireError to be explained
    * @param candidates the list of candidate names as strings

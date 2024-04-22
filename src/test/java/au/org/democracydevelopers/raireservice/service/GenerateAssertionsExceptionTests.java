@@ -130,7 +130,7 @@ public class GenerateAssertionsExceptionTests {
 
   /**
    * Reasonable error message and correct error code for CouldNotRuleOut.
-   * Raire returns this error when it fails to rule out a certain elimineation sequence, even though
+   * Raire returns this error when it fails to rule out a certain elimination sequence, even though
    * it didn't detect tied winners.  It's possible that this never actually happens, because
    * the tied-winner detection should prevent it.
    */
@@ -146,7 +146,7 @@ public class GenerateAssertionsExceptionTests {
 
   /**
    * Invalid timeout is an internal error, because an invalid timeout request should be detected
-   * at input time and not passed to raire.
+   * at input time and not passed to raire-java.
    */
   @Test
   public void invalidTimeoutIsAnInternalError() {
@@ -158,7 +158,7 @@ public class GenerateAssertionsExceptionTests {
   }
 
   /**
-   * Didn't rule out loser is an internal error, because raire computes its own winners and
+   * Didn't rule out loser is an internal error, because raire-java computes its own winners and
    * losers based on the database, so it shouldn't be inconsistent later with what it initially
    * computed.
    */
@@ -172,7 +172,7 @@ public class GenerateAssertionsExceptionTests {
   }
 
   /**
-   * Ruled out winner is an internal error, because raire computes its own winners and
+   * Ruled out winner is an internal error, because raire-java computes its own winners and
    * losers based on the database, so it shouldn't be inconsistent later with what it initially
    * computed.
    */
@@ -199,7 +199,7 @@ public class GenerateAssertionsExceptionTests {
 
   /**
    * Invalid number of candidates is an internal error, because an invalid candidate list should be detected
-   * at input time and not passed to raire.
+   * at input time and not passed to raire-java.
    */
   @Test
   public void invalidNumberOfCandidatesIsAnInternalError() {
@@ -211,7 +211,7 @@ public class GenerateAssertionsExceptionTests {
   }
 
   /**
-   * Wrong winner is an internal error, because raire computes its own winners and
+   * Wrong winner is an internal error, because raire-java computes its own winners and
    * losers based on the database, so it shouldn't be inconsistent later with what it initially
    * computed.
    */
