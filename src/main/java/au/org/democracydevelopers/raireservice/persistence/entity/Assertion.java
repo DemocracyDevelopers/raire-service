@@ -31,9 +31,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.ReadOnlyProperty;
 
 /**
- * RAIRE generates a set of assertions for a given IRV contest. The different types of assertion
- * that RAIRE can generate are defined as subclasses of this base Assertion class. For a description
- * of what assertions are and the role they play in an IRV audit, see the Guide to RAIRE.
+ * RAIRE (raire-java) generates a set of assertions for a given IRV contest. The different types of
+ * assertion that RAIRE can generate are defined as subclasses of this base Assertion class. For a
+ * description of what assertions are and the role they play in an IRV audit, see the Guide to
+ * RAIRE. This class has ReadOnlyProperty annotations against attributes as raire-service creates
+ * assertions to be stored in the database, but never modified existing assertions that are present
+ * in the database. The only type of 'modification' that the raire-service will do, if required,
+ * is delete assertions from the database for a specific contest, re-generate them, and store
+ * the new assertions in the database.
  */
 @Entity
 @Table(name = "assertion")
