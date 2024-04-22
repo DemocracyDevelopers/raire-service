@@ -1,8 +1,12 @@
+-- noinspection SqlDialectInspectionForFile
+
 -- Test Counties
 INSERT INTO county (id, name) values (8, 'Ballina');
 INSERT INTO county (id, name) values (9, 'Byron');
 INSERT INTO county (id, name) values (10, 'Westgarth');
 INSERT INTO county (id, name) values (11, 'Malformed');
+INSERT INTO county (id, name) values (12, 'One Assertion County');
+
 -- Contest
 -- Simple contests to test basic functioning.
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (8, 999990, 0, 'IRV', 'Multi-County Contest 1', 0, 7, 1);
@@ -26,6 +30,11 @@ INSERT INTO contest (county_id, id, version, description, name, sequence_number,
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (11, 999985, 0, 'IRV', 'Malformed Contest 3', 13, 4, 1);
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (11, 999984, 0, 'IRV', 'Malformed Contest 4', 14, 4, 1);
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (11, 999983, 0, 'IRV', 'Malformed Contest 5', 15, 4, 1);
+-- Contest to test assertion removal (where only one assertion exists)
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (12, 999970, 0, 'IRV', 'One NEB Assertion Contest', 16, 5, 1);
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (12, 999971, 0, 'IRV', 'One NEN Assertion Contest', 17, 5, 1);
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (12, 999972, 0, 'IRV', 'One NEN NEB Assertion Contest', 18, 5, 1);
+
 --CVRs
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (1, 1, 'Type 1', 1, 8, '1-1-1', 1, 'UPLOADED', 1);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (1, 8, '["Alice","Bob","Charlie"]', 999998, 0);
@@ -67,6 +76,19 @@ INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) val
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, NULL, 999986, 14);
 -- This entry is not an error, just a blank vote.
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, '[]', 999985, 15);
--- A vote where the choice string is not a list.
+-- Votes where the choice string is not a list.
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, 'NotAList', 999984, 16);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (12, 11, '', 999983, 17);
+
+-- For assertion testing (retrieval of assertions when audit is in progress)
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (13, 13, 'Type 3', 1, 12, '13-1-4', 13, 'UPLOADED', 4);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (13, 12, '["Alice","Charlie"]', 999971, 18);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (13, 12, '["Liesl","Amanda"]', 999972, 19);
+
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (14, 14, 'Type 3', 1, 12, '14-1-4', 14, 'UPLOADED', 4);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (14, 12, '["Charlie"]', 999971, 20);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (14, 12, '["Liesl","Wendell"]', 999972, 21);
+
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (15, 15, 'Type 3', 1, 12, '15-1-4', 15, 'UPLOADED', 4);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (15, 12, '["Alice"]', 999971, 22);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (15, 12, '["Wendell","Liesel"]', 999972, 23);

@@ -44,15 +44,13 @@ public interface CVRContestInfoRepository extends JpaRepository<CVRContestInfo, 
    * @param contestId the ID of the contest
    * @param countyId the ID of the county
    * @return a List of List<String> where each List<String> is a list of ranked choices.
-   * @throws org.springframework.orm.jpa.JpaSystemException when an error has occurred in the
-   * conversion of ranked choice vote entries to an array of strings (most likely because the
-   * entry was either null or blank or not a JSON representation of a list).
-   * @throws org.springframework.dao.DataAccessException when a database error has occurred, such
-   * as a connection failure.
+   * @throws JpaSystemException when an error has occurred in the conversion of ranked choice vote
+   * entries to an array of strings (most likely because the entry was either null or blank or not
+   * a JSON representation of a list).
    */
   @Query(value = "select ci.choices from CVRContestInfo ci " +
       " where ci.contestId = :contestId and ci.countyId = :countyId")
   List<String[]> getCVRs(@Param("contestId") long contestId, @Param("countyId") long countyId)
-      throws JpaSystemException, DataAccessException;
+      throws JpaSystemException;
 
 }
