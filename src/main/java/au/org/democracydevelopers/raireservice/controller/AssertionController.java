@@ -78,7 +78,7 @@ public class AssertionController {
   public ResponseEntity<GenerateAssertionsResponse> serve(@RequestBody GenerateAssertionsRequest request)
       throws RequestValidationException, GenerateAssertionsException {
       request.Validate(contestRepository);
-      GenerateAssertionsResponse response = generateAssertionsService.generateAssertions();
+      GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
       return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
@@ -100,7 +100,7 @@ public class AssertionController {
     request.Validate(contestRepository);
 
     try {
-      // For the moment, this is just a dummy "OK" response. Later, it will contain the winner.
+      // For the moment, this is just a dummy "OK" response. Later, it will contain the assertions.
       GetAssertionsResponse dummyResponse = new GetAssertionsResponse(
           new Metadata(request, List.of()),
           new RaireResult(new AssertionAndDifficulty[0], 10.0, 100, 0,

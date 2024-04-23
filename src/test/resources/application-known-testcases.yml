@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:tc:postgresql://localhost:5432/corlaTest?TC_INITSCRIPT=file:src/test/resources/corla.sql
+    username: corlatestadmin
+    password: corlatestsecret
+  jpa:
+    hibernate:
+      ddl-auto: none
+  sql:
+    init:
+      data-locations: classpath:simple_assertions.sql

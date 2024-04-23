@@ -23,6 +23,7 @@ package au.org.democracydevelopers.raireservice.service;
 import au.org.democracydevelopers.raire.RaireError;
 import au.org.democracydevelopers.raire.RaireError.TiedWinners;
 import au.org.democracydevelopers.raire.RaireError.TimeoutCheckingWinner;
+import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class GenerateAssertionsService {
 
-  public GenerateAssertionsResponse generateAssertions() throws GenerateAssertionsException {
+  public GenerateAssertionsResponse generateAssertions(GenerateAssertionsRequest request) throws GenerateAssertionsException {
     RaireError error = new TimeoutCheckingWinner();
     List<String> candidates = List.of("Alice","Bob");
     throw new GenerateAssertionsException(error, candidates);
