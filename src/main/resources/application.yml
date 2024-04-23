@@ -18,6 +18,9 @@ spring:
 
 server:
   port: 8080
+  # includes exception messages in ResponseStatusException.
+  error:
+    include-message: always
 
 raire:
 

@@ -18,12 +18,14 @@ You should have received a copy of the GNU Affero General Public License along w
 raire-service. If not, see <https://www.gnu.org/licenses/>.
 */
 
-package au.org.democracydevelopers.raireservice.request;
+package au.org.democracydevelopers.raireservice.controller;
 
+import au.org.democracydevelopers.raireservice.request.RequestValidationException;
+import au.org.democracydevelopers.raireservice.service.GenerateAssertionsException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
@@ -33,10 +35,26 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
  * ResponseStatusException.
  */
 @ControllerAdvice
-public class RequestValidationExceptionHandler extends ResponseEntityExceptionHandler {
+public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(RequestValidationException.class)
+    @org.springframework.web.bind.annotation.ExceptionHandler(RequestValidationException.class)
     public ResponseEntity<String> handleInvalidRequestException(RequestValidationException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Handle exceptions that arise during assertion generation. This will return the custom code
+     * in the headers, so that colorado-rla can interpret it. The error message will be short and
+     * is intended to be shown to the user. Note that errors may be a consequence of the data
+     * (e.g. tied winners) or of a server error.
+     * @param ex the GenerateAssertionsException.
+     * @return the error message and error code.
+     */
+    @org.springframework.web.bind.annotation.ExceptionHandler(GenerateAssertionsException.class)
+    public ResponseEntity<String> handleErrorResponseException(GenerateAssertionsException ex) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("error_code", String.valueOf(ex.errorCode));
+
+        return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

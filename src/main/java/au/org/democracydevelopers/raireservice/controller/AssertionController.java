@@ -20,10 +20,19 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import au.org.democracydevelopers.raireservice.response.GetAssertionsResponse;
+import au.org.democracydevelopers.raire.algorithm.RaireResult;
+import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
+import au.org.democracydevelopers.raire.time.TimeTaken;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.RequestValidationException;
+import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
+import au.org.democracydevelopers.raireservice.response.Metadata;
+import au.org.democracydevelopers.raireservice.service.GenerateAssertionsException;
+import au.org.democracydevelopers.raireservice.service.GenerateAssertionsService;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +40,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * This class controls the post request mappings for all requests related
@@ -49,6 +59,7 @@ public class AssertionController {
 
   private final ContestRepository contestRepository;
 
+  private final GenerateAssertionsService generateAssertionsService;
 
   /**
    * The API endpoint for generating assertions, by contest name, and returning the IRV winner.
@@ -58,18 +69,17 @@ public class AssertionController {
    * is a GenerateAssertionsResponse. TODO the String is just a placeholder for now.
    * In the case of success, it also stores the assertions that were derived for the specified contest
    * in the database.
-   * @throws RequestValidationException which is handled by RequestValidationExceptionHandler.
+   * @throws RequestValidationException which is handled by ControllerExceptionHandler.
    * This tests for invalid requests, such as non-existent, null, or non-IRV contest names.
    * Other exceptions that are specific to assertion generation are caught and translated into the
    * appropriate http error. TODO add these when assertion generation is implemented.
    */
   @PostMapping(path = "/generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<String> serve(@RequestBody GenerateAssertionsRequest request)
-      throws RequestValidationException {
+  public ResponseEntity<GenerateAssertionsResponse> serve(@RequestBody GenerateAssertionsRequest request)
+      throws RequestValidationException, GenerateAssertionsException {
       request.Validate(contestRepository);
-      // For the moment, this is just a dummy "OK" response. Later, it will contain the winner
-      // as a ResponseEntity<GenerateAssertionsRequest>.
-      return new ResponseEntity<>("Placeholder winner", HttpStatus.OK);
+      GenerateAssertionsResponse response = generateAssertionsService.generateAssertions();
+      return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
 
@@ -78,24 +88,44 @@ public class AssertionController {
    * @param request a GetAssertionsRequest, specifying an IRV contest name for which to retrieve the
    *                assertions.
    * @return the assertions, as JSON (in the case of success) or an error. TODO the String is just a placeholder for now.
-   * @throws RequestValidationException which is handled by RequestValidationExceptionHandler.
+   * @throws RequestValidationException which is handled by ControllerExceptionHandler.
    * This tests for invalid requests, such as non-existent, null, or non-IRV contest names.
    * Other exceptions that are specific to assertion generation are caught and translated into the
    * appropriate http error. TODO add these when assertion retrieval is implemented.
    */
   @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<String> serve(@RequestBody GetAssertionsRequest request)
+  public ResponseEntity<GetAssertionsResponse> serve(@RequestBody GetAssertionsRequest request)
       throws RequestValidationException {
-      request.Validate(contestRepository);
+
+    request.Validate(contestRepository);
+
+    try {
       // For the moment, this is just a dummy "OK" response. Later, it will contain the winner.
-      return new ResponseEntity<>("Placeholder assertions", HttpStatus.OK);
+      GetAssertionsResponse dummyResponse = new GetAssertionsResponse(
+          new Metadata(request, List.of()),
+          new RaireResult(new AssertionAndDifficulty[0], 10.0, 100, 0,
+              5, new TimeTaken(5L, 5), new TimeTaken(2L, 2),
+              new TimeTaken(2L, 2), false)
+      );
+      return new ResponseEntity<>(dummyResponse, HttpStatus.OK);
+
+      // TODO Catch all the exceptions that the GetAssertionsService can throw, for example if the
+      // assertions are present but retrieval fails for some reason.
+      // They can either be caught here or handled by the ControllerExceptionHandler.
+      // This should be part of Issue https://github.com/DemocracyDevelopers/raire-service/issues/44
+    } catch (IllegalArgumentException  | ArrayIndexOutOfBoundsException ex) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    }
   }
 
   /**
-   * Constructor
-   * @param contestRepository the contestRespository, used for validating requests.
+   * All args constructor
+   * @param contestRepository the contestRepository, used for validating requests.
+   * @param generateAssertionsService the generateAssertions service.
    */
-  public AssertionController(ContestRepository contestRepository) {
+  public AssertionController(ContestRepository contestRepository,
+      GenerateAssertionsService generateAssertionsService) {
     this.contestRepository = contestRepository;
+    this.generateAssertionsService = generateAssertionsService;
   }
 }
