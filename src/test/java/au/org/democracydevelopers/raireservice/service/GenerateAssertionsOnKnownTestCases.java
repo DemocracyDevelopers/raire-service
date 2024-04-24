@@ -18,27 +18,22 @@ You should have received a copy of the GNU Affero General Public License along w
 raire-service. If not, see <https://www.gnu.org/licenses/>.
 */
 
-package au.org.democracydevelopers.raireservice.controller;
+package au.org.democracydevelopers.raireservice.service;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
-import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
-import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
-import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
-import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
-import au.org.democracydevelopers.raireservice.service.GenerateAssertionsException;
-import au.org.democracydevelopers.raireservice.service.GenerateAssertionsService;
+import au.org.democracydevelopers.raireservice.response.GetAssertionsResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.Arrays;
-import java.util.List;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -47,7 +42,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -56,9 +50,10 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @ActiveProfiles("known-testcases")
 @SpringBootTest
+@Disabled // TODO Re-enable when GenerateAssertionsService is implemented.
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class KnownTestCasesTests {
+public class GenerateAssertionsOnKnownTestCases {
 
   @Autowired
   AssertionRepository assertionRepository;
@@ -73,14 +68,14 @@ public class KnownTestCasesTests {
       new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
 
   /**
-   * Array of candidates: Alice, Charlie, Diego, Bob.
+   * Array of candidates: Alice, Chuan, Diego, Bob.
    */
-  private static final String[] aliceCharlieDiegoBob = {"Alice", "Charlie", "Diego", "Bob"};
+  private static final String[] aliceChuanDiegoBob = {"Alice", "Chuan", "Diego", "Bob"};
 
   /**
-   * Array of candidates: Alice, Charlie, Bob.
+   * Array of candidates: Alice, Chuan, Bob.
    */
-  private static final String[] aliceCharlieBob = {"Alice", "Charlie", "Bob"};
+  private static final String[] aliceChuanBob = {"Alice", "Chuan", "Bob"};
 
   /**
    * Test assertion: Alice NEB Bob in the contest "One NEB Assertion Contest".
@@ -93,12 +88,12 @@ public class KnownTestCasesTests {
       "\"currentRisk\":1.00}";
 
   /**
-   * Test assertion: Alice NEN Charlie assuming Alice, Charlie, Diego and Bob are continuing, for
+   * Test assertion: Alice NEN Chuan assuming Alice, Chuan, Diego and Bob are continuing, for
    * the contest "One NEN Assertion Contest".
    */
-  private final static String aliceNENCharlie = "{\"id\":2,\"version\":0,\"contestName\":" +
-      "\"One NEN Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Charlie\",\"margin\":240," +
-      "\"difficulty\":3.01,\"assumedContinuing\":[\"Alice\",\"Charlie\",\"Diego\",\"Bob\"]," +
+  private final static String aliceNENChuan = "{\"id\":2,\"version\":0,\"contestName\":" +
+      "\"One NEN Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Chuan\",\"margin\":240," +
+      "\"difficulty\":3.01,\"assumedContinuing\":[\"Alice\",\"Chuan\",\"Diego\",\"Bob\"]," +
       "\"dilutedMargin\":0.12,\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0," +
       "\"optimisticSamplesToAudit\":0,\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0," +
       "\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
@@ -126,10 +121,10 @@ public class KnownTestCasesTests {
       "\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
 
   /**
-   * Test assertion: Charlie C. Chaplin NEB Alice P. Mangrove in "Multi-County Contest 1".
+   * Test assertion: Chuan C. Chaplin NEB Alice P. Mangrove in "Multi-County Contest 1".
    */
-  private final static String charlieNEBAlice = "{\"id\":5,\"version\":0,\"contestName\":" +
-      "\"Multi-County Contest 1\",\"winner\":\"Charlie C. Chaplin\",\"loser\":\"Alice P. Mangrove\","
+  private final static String chuanNEBAlice = "{\"id\":5,\"version\":0,\"contestName\":" +
+      "\"Multi-County Contest 1\",\"winner\":\"Chuan C. Chaplin\",\"loser\":\"Alice P. Mangrove\","
       +
       "\"margin\":310,\"difficulty\":2.1,\"assumedContinuing\":[],\"dilutedMargin\":0.01," +
       "\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0,\"optimisticSamplesToAudit\":0," +
@@ -191,15 +186,15 @@ public class KnownTestCasesTests {
       "\"currentRisk\":0.50}";
 
   /**
-   * Test assertion: Alice NEN Charlie assuming Alice, Charlie, Diego and Bob are continuing, for
+   * Test assertion: Alice NEN Chuan assuming Alice, Chuan, Diego and Bob are continuing, for
    * the contest "One NEN Assertion Contest" when the audit is in progress and some discrepancies
    * have been found.
    */
-  private final static String aliceNENCharlieInProgress =
+  private final static String aliceNENChuanInProgress =
       "{\"id\":2,\"version\":0,\"contestName\":" +
-          "\"One NEN Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Charlie\",\"margin\":240,"
+          "\"One NEN Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Chuan\",\"margin\":240,"
           +
-          "\"difficulty\":3.01,\"assumedContinuing\":[\"Alice\",\"Charlie\",\"Diego\",\"Bob\"]," +
+          "\"difficulty\":3.01,\"assumedContinuing\":[\"Alice\",\"Chuan\",\"Diego\",\"Bob\"]," +
           "\"dilutedMargin\":0.12,\"cvrDiscrepancy\":{\"13\":1,\"14\":0,\"15\":0}," +
           "\"estimatedSamplesToAudit\":245,\"optimisticSamplesToAudit\":201,\"twoVoteUnderCount\":0,"
           +
@@ -234,7 +229,7 @@ public class KnownTestCasesTests {
       "\"oneVoteOverCount\":2,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":0.70}";
 
   private final static GenerateAssertionsRequest request
-      = new GenerateAssertionsRequest("Tied Winners Contest", 2, 5, Arrays.stream(aliceCharlieBob).toList());
+      = new GenerateAssertionsRequest("Tied Winners Contest", 2, 5, Arrays.stream(aliceChuanBob).toList());
 
   /**
    * Trivial test to see whether the placeholder service throws the expected placeholder exception.
@@ -246,4 +241,36 @@ public class KnownTestCasesTests {
         generateAssertionsService.generateAssertions(request)
     );
   }
+
+  @Test
+  void testThatTheTestsAreDisabled() {
+    assertTrue(false);
+  }
+
+  /**
+   * Exact matching of the assertions described in the Guide to Raire Example 2.
+   * The test data has 1/1000 of the votes, so divide margins by 1000.
+   * The difficulties should be the same, because both numerator and denominator should be divided by 1000.
+   */
+  @Test
+  void testGuideToRaireExample2() throws GenerateAssertionsException {
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest("Guide To Raire Example 2",
+        41, 5, Arrays.stream(aliceChuanBob).toList());
+    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+
+  }
+
+  /**
+   * Doubling the totalAuditableBallots doubles the difficulty but not the margins.
+   */
+
+  /**
+   * Insufficient totalAuditableBallots causes the right exception.
+   */
+
+  /**
+   * Tied winners causes the right exception.
+   */
+
+
 }
