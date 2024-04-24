@@ -21,18 +21,26 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.service;
 
 
+import static org.apache.commons.lang3.StringUtils.substring;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
+import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
+import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
-import au.org.democracydevelopers.raireservice.response.GetAssertionsResponse;
+import au.org.democracydevelopers.raireservice.service.GenerateAssertionsException.RaireErrorCodes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +76,13 @@ public class GenerateAssertionsOnKnownTestCases {
       new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
 
   /**
+   * Names of contests, to match pre-loaded data.
+   */
+  private static final String guideToRaireExample1 = "Guide To Raire Example 1";
+  private static final String guideToRaireExample2 = "Guide To Raire Example 2";
+  private static final String tiedWinnersContest = "Tied Winners Contest";
+
+  /**
    * Array of candidates: Alice, Chuan, Diego, Bob.
    */
   private static final String[] aliceChuanDiegoBob = {"Alice", "Chuan", "Diego", "Bob"};
@@ -76,6 +91,14 @@ public class GenerateAssertionsOnKnownTestCases {
    * Array of candidates: Alice, Chuan, Bob.
    */
   private static final String[] aliceChuanBob = {"Alice", "Chuan", "Bob"};
+
+  /**
+   * All the initial data for an assertion, which is the same for them all.
+   */
+  private final static String genericInitialAssertionState
+      = "\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0," +
+      "\"optimisticSamplesToAudit\":0,\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0," +
+      "\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
 
   /**
    * Test assertion: Alice NEB Bob in the contest "One NEB Assertion Contest".
@@ -110,23 +133,30 @@ public class GenerateAssertionsOnKnownTestCases {
       "\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
 
   /**
-   * Test assertion: Amanda NEN Wendell assuming Liesl, Wendell and Amanda are continuing, for the
-   * contest "One NEN NEB Assertion Contest".
+   * Test assertion: Chuan NEN Bob assuming Bob and Chuan are continuing, for "Guide To Raire Example 2".
+   * Margin is 9,000, but data is divided by 1000, so 9. Difficulty is 41/9 = 4.5555...,
+   * rounded to 4.6 in the Guide.
+   * Diluted margin is 9/41 = 0.219512195...
+   * TODO check how many dp are serialised and refine test string accordingly.
+   * We need two different orders for the 'assumed continuing' array because we're not sure what order
+   * will be generated.
    */
-  private final static String amandaNENWendell = "{\"id\":4,\"version\":0,\"contestName\":" +
-      "\"One NEN NEB Assertion Contest\",\"winner\":\"Amanda\",\"loser\":\"Wendell\"," +
-      "\"margin\":560,\"difficulty\":3.17,\"assumedContinuing\":[\"Liesl\",\"Wendell\"," +
-      "\"Amanda\"],\"dilutedMargin\":0.5,\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0," +
-      "\"optimisticSamplesToAudit\":0,\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0," +
-      "\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
+  private final static String chuanNENBob = "{\"id\":4,\"version\":0,\"contestName\":" +
+      "\""+guideToRaireExample2+"\",\"winner\":\"Chuan\",\"loser\":\"Bob\"," +
+      "\"margin\":9,\"difficulty\":4.5555555555555555,\"assumedContinuing\":";
+
+  private final static String chuanNENBobOrder1 = chuanNENBob + "[\"Chuan\",\"Bob\"],"+
+      "\"dilutedMargin\":0.219512195121951,"+genericInitialAssertionState;
+  private final static String chuanNENBobOrder2 = chuanNENBob + "[\"Bob\",\"Chuan\"],"+
+      "\"dilutedMargin\":0.219512195121951,"+genericInitialAssertionState;
 
   /**
-   * Test assertion: Chuan C. Chaplin NEB Alice P. Mangrove in "Multi-County Contest 1".
+   * Test assertion: Chuan NEB Alice in contest "Guide To Raire Example 2".
+   * Margin is 10,000, but data is divided by 1000, so 10. Difficulty is 4.1 as in the Guide.
    */
   private final static String chuanNEBAlice = "{\"id\":5,\"version\":0,\"contestName\":" +
-      "\"Multi-County Contest 1\",\"winner\":\"Chuan C. Chaplin\",\"loser\":\"Alice P. Mangrove\","
-      +
-      "\"margin\":310,\"difficulty\":2.1,\"assumedContinuing\":[],\"dilutedMargin\":0.01," +
+      "\""+guideToRaireExample2+"\",\"winner\":\"Chuan\",\"loser\":\"Alice\"," +
+      "\"margin\":10,\"difficulty\":4.1,\"assumedContinuing\":[],\"dilutedMargin\":0.01," +
       "\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0,\"optimisticSamplesToAudit\":0," +
       "\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0," +
       "\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
@@ -229,7 +259,7 @@ public class GenerateAssertionsOnKnownTestCases {
       "\"oneVoteOverCount\":2,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":0.70}";
 
   private final static GenerateAssertionsRequest request
-      = new GenerateAssertionsRequest("Tied Winners Contest", 2, 5, Arrays.stream(aliceChuanBob).toList());
+      = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5, Arrays.stream(aliceChuanBob).toList());
 
   /**
    * Trivial test to see whether the placeholder service throws the expected placeholder exception.
@@ -248,15 +278,62 @@ public class GenerateAssertionsOnKnownTestCases {
   }
 
   /**
+   * Tied winners throws the right exception.
+   * This is a super-simple election with two candidates with one vote each.
+   */
+  @Test
+  void tiedWinnersThrowsTiedWinnersException() {
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(tiedWinnersContest,
+        2, 5, Arrays.stream(aliceChuanBob).toList());
+    GenerateAssertionsException ex = assertThrows(GenerateAssertionsException.class, () ->
+        generateAssertionsService.generateAssertions(request)
+    );
+    String msg = ex.getMessage();
+    assertTrue(StringUtils.containsIgnoreCase(msg,"Tied winners"));
+    assertTrue(StringUtils.containsIgnoreCase(msg,"Alice"));
+    assertTrue(StringUtils.containsIgnoreCase(msg,"Bob"));
+    assertSame(ex.errorCode, RaireErrorCodes.TIED_WINNERS);
+  }
+
+  /**
    * Exact matching of the assertions described in the Guide to Raire Example 2.
    * The test data has 1/1000 of the votes, so divide margins by 1000.
    * The difficulties should be the same, because both numerator and denominator should be divided by 1000.
    */
   @Test
   void testGuideToRaireExample2() throws GenerateAssertionsException {
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("Guide To Raire Example 2",
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample2,
         41, 5, Arrays.stream(aliceChuanBob).toList());
     GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    assertTrue(StringUtils.containsIgnoreCase(response.winner,"Chuan"));
+    List<Assertion> assertions = assertionRepository.findByContestName(guideToRaireExample2);
+    assertEquals(2, assertions.size());
+
+    // There should be one NEB assertion: Chaun NEB Alice
+    Optional<Assertion> nebMaybeAssertion = assertions.stream().filter(a -> a instanceof NEBAssertion).findFirst();
+    assertTrue(nebMaybeAssertion.isPresent());
+    NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
+    // Remove the id prefix, because we don't know what the assertion id will be.
+    String expectedNEBStringWithoutID = chuanNEBAlice.substring(chuanNEBAlice.indexOf(','));
+    String retrievedString =   GSON.toJson(nebAssertion);
+    String retrievedStringWithoutID =  retrievedString.substring(retrievedString.indexOf(','));
+    assertEquals(expectedNEBStringWithoutID, retrievedStringWithoutID);
+
+    // There should be one NEN assertion: Chuan > Bob if only {Chuan,Bob} remain.
+    Optional<Assertion> nenMaybeAssertion = assertions.stream().filter(a -> a instanceof NENAssertion).findFirst();
+    assertTrue(nenMaybeAssertion.isPresent());
+    NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
+    // Remove the id prefix, because we don't know what the assertion id will be.
+    String expectedString1WithoutID = chuanNENBobOrder1.substring(chuanNENBobOrder1.indexOf(','));
+    String expectedString2WithoutID = chuanNENBobOrder2.substring(chuanNENBobOrder2.indexOf(','));
+    String retrievedNENString =   GSON.toJson(nenAssertion);
+    String retrievedNENStringWithoutID =  retrievedNENString.substring(retrievedNENString.indexOf(','));
+    // We're not sure what order the 'assumed equals' list is in, but it should match one of them.
+    assertTrue(expectedString1WithoutID.equals(retrievedNENStringWithoutID)
+        || expectedString2WithoutID.equals(retrievedNENStringWithoutID));
+
+
+
 
   }
 
@@ -273,4 +350,11 @@ public class GenerateAssertionsOnKnownTestCases {
    */
 
 
+  private boolean isNEB(Object a) {
+    return (a instanceof NEBAssertion);
+  }
+
+  private boolean isNEN(Assertion a) {
+    return (a instanceof NENAssertion);
+  }
 }
