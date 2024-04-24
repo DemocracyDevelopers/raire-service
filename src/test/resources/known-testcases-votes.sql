@@ -4,6 +4,7 @@
 -- Test Counties
 INSERT INTO county (id, name) values (8, 'TiedWinnersCounty');
 INSERT INTO county (id, name) values (9, 'GuideToRaireCounty');
+INSERT INTO county (id, name) values (10, 'SimpleCounty');
 
 -- Contest
 -- Simple contests to test basic functioning.

@@ -83,9 +83,9 @@ public class GenerateAssertionsOnKnownTestCases {
   private static final String tiedWinnersContest = "Tied Winners Contest";
 
   /**
-   * Array of candidates: Alice, Chuan, Diego, Bob.
+   * Array of candidates: Alice, Bob, Chuan, Diego.
    */
-  private static final String[] aliceChuanDiegoBob = {"Alice", "Chuan", "Diego", "Bob"};
+  private static final String[] aliceBobChuanDiego = {"Alice", "Bob", "Chuan", "Diego"};
 
   /**
    * Array of candidates: Alice, Chuan, Bob.
@@ -101,36 +101,15 @@ public class GenerateAssertionsOnKnownTestCases {
       "\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
 
   /**
-   * Test assertion: Alice NEB Bob in the contest "One NEB Assertion Contest".
+   * Test assertion: Alice NEB Bob, for "Guide To Raire Example 1".
+   * Margin is 4000, but data is divided by 500, so 8. Difficulty is 3.375 as in the Guide.
+   * Diluted margin is 8/27 = 0.296...
+   * TODO check how many dp are serialised and refine test string accordingly.
    */
-  private final static String aliceNEBBob = "{\"id\":1,\"version\":0,\"contestName\":" +
-      "\"One NEB Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Bob\",\"margin\":320," +
-      "\"difficulty\":1.1,\"assumedContinuing\":[],\"dilutedMargin\":0.32,\"cvrDiscrepancy\":{}," +
-      "\"estimatedSamplesToAudit\":0,\"optimisticSamplesToAudit\":0,\"twoVoteUnderCount\":0," +
-      "\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0," +
-      "\"currentRisk\":1.00}";
-
-  /**
-   * Test assertion: Alice NEN Chuan assuming Alice, Chuan, Diego and Bob are continuing, for
-   * the contest "One NEN Assertion Contest".
-   */
-  private final static String aliceNENChuan = "{\"id\":2,\"version\":0,\"contestName\":" +
-      "\"One NEN Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Chuan\",\"margin\":240," +
-      "\"difficulty\":3.01,\"assumedContinuing\":[\"Alice\",\"Chuan\",\"Diego\",\"Bob\"]," +
-      "\"dilutedMargin\":0.12,\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0," +
-      "\"optimisticSamplesToAudit\":0,\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0," +
-      "\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
-
-  /**
-   * Test assertion: Amanda NEB Liesl in the contest "One NEN NEB Assertion Contest".
-   */
-  private final static String amandaNEBLiesl = "{\"id\":3,\"version\":0,\"contestName\":" +
-      "\"One NEN NEB Assertion Contest\",\"winner\":\"Amanda\",\"loser\":\"Liesl\",\"margin\":112,"
-      +
-      "\"difficulty\":0.1,\"assumedContinuing\":[],\"dilutedMargin\":0.1," +
-      "\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0,\"optimisticSamplesToAudit\":0," +
-      "\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0," +
-      "\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
+  private final static String chuanNEBBob = "{\"id\":4,\"version\":0,\"contestName\":" +
+      "\""+guideToRaireExample1+"\",\"winner\":\"Chuan\",\"loser\":\"Bob\"," +
+      "\"margin\":8,\"difficulty\":3.375,\"assumedContinuing\":[],\"dilutedMargin\":0.2962962962962963, +"
+      + genericInitialAssertionState;
 
   /**
    * Test assertion: Chuan NEN Bob assuming Bob and Chuan are continuing, for "Guide To Raire Example 2".
@@ -296,6 +275,32 @@ public class GenerateAssertionsOnKnownTestCases {
   }
 
   /**
+   * Some tests of the assertions described in the Guide to Raire Example 1.
+   * The test data has 1/500 of the votes, so divide margins by 500.
+   * The difficulties should be the same, because both numerator and denominator should be divided by 500.
+   * We do not test the NEN assertions because the ones in the Guide have some redundancy.
+   */
+  @Test
+  void testGuideToRaireExample1() throws GenerateAssertionsException {
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample1,
+        27, 5, Arrays.stream(aliceBobChuanDiego).toList());
+    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    assertTrue(StringUtils.containsIgnoreCase(response.winner, "Chuan"));
+    List<Assertion> assertions = assertionRepository.findByContestName(guideToRaireExample2);
+
+    // There should be one NEB assertion: Chaun NEB Bob
+    Optional<Assertion> nebMaybeAssertion = assertions.stream()
+        .filter(a -> a instanceof NEBAssertion).findFirst();
+    assertTrue(nebMaybeAssertion.isPresent());
+    NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
+    // Remove the id prefix, because we don't know what the assertion id will be.
+    String expectedNEBStringWithoutID = chuanNEBBob.substring(chuanNEBBob.indexOf(','));
+    String retrievedString = GSON.toJson(nebAssertion);
+    String retrievedStringWithoutID = retrievedString.substring(retrievedString.indexOf(','));
+    assertEquals(expectedNEBStringWithoutID, retrievedStringWithoutID);
+  }
+
+  /**
    * Exact matching of the assertions described in the Guide to Raire Example 2.
    * The test data has 1/1000 of the votes, so divide margins by 1000.
    * The difficulties should be the same, because both numerator and denominator should be divided by 1000.
@@ -345,16 +350,4 @@ public class GenerateAssertionsOnKnownTestCases {
    * Insufficient totalAuditableBallots causes the right exception.
    */
 
-  /**
-   * Tied winners causes the right exception.
-   */
-
-
-  private boolean isNEB(Object a) {
-    return (a instanceof NEBAssertion);
-  }
-
-  private boolean isNEN(Assertion a) {
-    return (a instanceof NENAssertion);
-  }
 }
