@@ -37,6 +37,9 @@ import au.org.democracydevelopers.raireservice.response.GenerateAssertionsRespon
 import au.org.democracydevelopers.raireservice.service.GenerateAssertionsException.RaireErrorCodes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +61,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @ActiveProfiles("known-testcases")
 @SpringBootTest
-@Disabled // TODO Re-enable when GenerateAssertionsService is implemented.
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GenerateAssertionsOnKnownTestCases {
@@ -204,18 +206,13 @@ public class GenerateAssertionsOnKnownTestCases {
   private final static GenerateAssertionsRequest tiedWinnersRequest
       = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5, Arrays.stream(aliceChuanBob).toList());
 
-
-
-  private final static GenerateAssertionsRequest tiedWinnersRequest
-      = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5, Arrays.stream(aliceChuanBob).toList());
-
   /**
    * Trivial test to see whether the placeholder service throws the expected placeholder exception.
    */
   @Test
   @Transactional
   void dummyServiceThrowsException() {
-    Exception ex = assertThrows(GenerateAssertionsException.class, () ->
+    assertThrows(GenerateAssertionsException.class, () ->
         generateAssertionsService.generateAssertions(tiedWinnersRequest)
     );
   }
@@ -225,6 +222,8 @@ public class GenerateAssertionsOnKnownTestCases {
    * This is a super-simple election with two candidates with one vote each.
    */
   @Test
+  @Transactional
+  @Disabled
   void tiedWinnersThrowsTiedWinnersException() {
     GenerateAssertionsException ex = assertThrows(GenerateAssertionsException.class, () ->
         generateAssertionsService.generateAssertions(tiedWinnersRequest)
@@ -243,6 +242,8 @@ public class GenerateAssertionsOnKnownTestCases {
    * We do not test the NEN assertions because the ones in the Guide have some redundancy.
    */
   @Test
+  @Transactional
+  @Disabled
   void testGuideToRaireExample1() throws GenerateAssertionsException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample1,
         27, 5, Arrays.stream(aliceBobChuanDiego).toList());
@@ -268,6 +269,8 @@ public class GenerateAssertionsOnKnownTestCases {
    * The difficulties should be the same, because both numerator and denominator should be divided by 1000.
    */
   @Test
+  @Transactional
+  @Disabled
   void testGuideToRaireExample2() throws GenerateAssertionsException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample2,
         41, 5, Arrays.stream(aliceChuanBob).toList());
@@ -316,6 +319,8 @@ public class GenerateAssertionsOnKnownTestCases {
    * This is the single-county case.
    */
   @Test
+  @Transactional
+  @Disabled
   public void simpleContestSingleCounty() throws GenerateAssertionsException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         5, 5, Arrays.stream(aliceChuanBob).toList());
@@ -325,12 +330,54 @@ public class GenerateAssertionsOnKnownTestCases {
     assertEquals(2, assertions.size());
 
     // There should be one NEB assertion: Alice NEB Chaun
-    Optional<Assertion> nebMaybeAssertion = assertions.stream().filter(a -> a instanceof NEBAssertion).findFirst();
+    Optional<Assertion> nebMaybeAssertion = assertions.stream()
+        .filter(a -> a instanceof NEBAssertion).findFirst();
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
     // Remove the id prefix, because we don't know what the assertion id will be.
     String expectedNEBStringWithoutID
         = aliceNEBChuanSimpleContest.substring(aliceNEBChuanSimpleContest.indexOf(','));
+    String retrievedString = GSON.toJson(nebAssertion);
+    String retrievedStringWithoutID = retrievedString.substring(retrievedString.indexOf(','));
+    assertEquals(expectedNEBStringWithoutID, retrievedStringWithoutID);
+
+    // There should be one NEN assertion: Alice > Bob if only {Alice,Bob} remain.
+    Optional<Assertion> nenMaybeAssertion = assertions.stream()
+        .filter(a -> a instanceof NENAssertion).findFirst();
+    assertTrue(nenMaybeAssertion.isPresent());
+    NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
+    // Remove the id prefix, because we don't know what the assertion id will be.
+    String expectedString1WithoutID = aliceNENBobOrder1.substring(aliceNENBobOrder1.indexOf(','));
+    String expectedString2WithoutID = aliceNENBobOrder2.substring(aliceNENBobOrder2.indexOf(','));
+    String retrievedNENString = GSON.toJson(nenAssertion);
+    String retrievedNENStringWithoutID = retrievedNENString.substring(
+        retrievedNENString.indexOf(','));
+    // We're not sure what order the 'assumed equals' list is in, but it should match one of them.
+    assertTrue(expectedString1WithoutID.equals(retrievedNENStringWithoutID)
+        || expectedString2WithoutID.equals(retrievedNENStringWithoutID));
+  }
+
+  /**
+   * The same simple contest, but across two counties. Nothing should change.
+   */
+  @Test
+  @Transactional
+  @Disabled
+  public void simpleContestCrossCounty() throws GenerateAssertionsException {
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(crossCountySimpleContest,
+        5, 5, Arrays.stream(aliceChuanBob).toList());
+    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    assertTrue(StringUtils.containsIgnoreCase(response.winner, "Alice"));
+    List<Assertion> assertions = assertionRepository.findByContestName(crossCountySimpleContest);
+    assertEquals(2, assertions.size());
+
+    // There should be one NEB assertion: Alice NEB Chaun
+    Optional<Assertion> nebMaybeAssertion = assertions.stream().filter(a -> a instanceof NEBAssertion).findFirst();
+    assertTrue(nebMaybeAssertion.isPresent());
+    NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
+    // Remove the id prefix, because we don't know what the assertion id will be.
+    String expectedNEBStringWithoutID
+        = aliceNEBChuanCrossCountySimpleContest.substring(aliceNEBChuanCrossCountySimpleContest.indexOf(','));
     String retrievedString =   GSON.toJson(nebAssertion);
     String retrievedStringWithoutID =  retrievedString.substring(retrievedString.indexOf(','));
     assertEquals(expectedNEBStringWithoutID, retrievedStringWithoutID);
@@ -340,8 +387,8 @@ public class GenerateAssertionsOnKnownTestCases {
     assertTrue(nenMaybeAssertion.isPresent());
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
     // Remove the id prefix, because we don't know what the assertion id will be.
-    String expectedString1WithoutID = aliceNENBobOrder1.substring(aliceNENBobOrder1.indexOf(','));
-    String expectedString2WithoutID = aliceNENBobOrder2.substring(aliceNENBobOrder2.indexOf(','));
+    String expectedString1WithoutID = aliceNENBobOrder1CrossCounty.substring(aliceNENBobOrder1CrossCounty.indexOf(','));
+    String expectedString2WithoutID = aliceNENBobOrder2CrossCounty.substring(aliceNENBobOrder2CrossCounty.indexOf(','));
     String retrievedNENString =   GSON.toJson(nenAssertion);
     String retrievedNENStringWithoutID =  retrievedNENString.substring(retrievedNENString.indexOf(','));
     // We're not sure what order the 'assumed equals' list is in, but it should match one of them.
@@ -350,11 +397,86 @@ public class GenerateAssertionsOnKnownTestCases {
   }
 
   /**
-   * Doubling the totalAuditableBallots doubles the difficulty but not the margins.
+   * Single-county simple contest again.
+   * Doubling the totalAuditableBallots to 10 doubles the difficulty, and halves the diluted margin,
+   * but does not change the absolute margins.
+   * The actual test data is still the same, with 5 ballots - we just set totalAuditableBallots in
+   * the request to 10.
+   * We now have 10 totalAuditableBallots, so we expect:
+   * A NEB B: Margin 1, diluted margin 1/10 = 0.1, difficulty 10/1 = 10.
+   * A NEN B | {A,B} continuing: Margin 1, diluted margin 1/10 = 0.1, difficulty 10/1 = 10.
    */
+  @Test
+  @Transactional
+  @Disabled
+  public void simpleContestSingleCountyDoubleBallots() throws GenerateAssertionsException {
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
+        10, 5, Arrays.stream(aliceChuanBob).toList());
+    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    assertTrue(StringUtils.containsIgnoreCase(response.winner, "Alice"));
+    List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
+    assertEquals(2, assertions.size());
+
+    // There should be one NEB assertion: Alice NEB Chaun
+    Optional<Assertion> nebMaybeAssertion = assertions.stream()
+        .filter(a -> a instanceof NEBAssertion).findFirst();
+    assertTrue(nebMaybeAssertion.isPresent());
+    NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
+    String retrievedString = GSON.toJson(nebAssertion);
+    JsonObject data = GSON.fromJson(retrievedString, JsonObject.class);
+    // margin should be 1.
+    JsonElement marginElement = data.get("margin");
+    int margin = GSON.fromJson(marginElement, Integer.class);
+    assertEquals(1, margin);
+
+    // difficulty should be 10.
+    JsonElement difficultyElement = data.get("difficulty");
+    BigDecimal difficulty = GSON.fromJson(difficultyElement, BigDecimal.class);
+    assertEquals(BigDecimal.valueOf(10), difficulty);
+
+    // diluted margin should be 0.1
+    JsonElement dilutedMarginElement = data.get("diluted_margin");
+    BigDecimal dilutedMargin = GSON.fromJson(dilutedMarginElement, BigDecimal.class);
+    assertEquals(BigDecimal.valueOf(0.1), dilutedMargin);
+
+    // There should be one NEN assertion: Alice > Bob if only {Alice,Bob} remain.
+    Optional<Assertion> nenMaybeAssertion = assertions.stream()
+        .filter(a -> a instanceof NENAssertion).findFirst();
+    assertTrue(nenMaybeAssertion.isPresent());
+    NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
+    String retrievedNENString = GSON.toJson(nenAssertion);
+    JsonObject NENdata = GSON.fromJson(retrievedNENString, JsonObject.class);
+    // margin should be 1.
+    JsonElement NENmarginElement = NENdata.get("margin");
+    int NENmargin = GSON.fromJson(NENmarginElement, Integer.class);
+    assertEquals(1, NENmargin);
+
+    // difficulty should be 10.
+    JsonElement NENdifficultyElement = data.get("difficulty");
+    BigDecimal NENdifficulty = GSON.fromJson(NENdifficultyElement, BigDecimal.class);
+    assertEquals(BigDecimal.valueOf(10), NENdifficulty);
+
+    // diluted margin should be 0.1
+    JsonElement NENdilutedMarginElement = data.get("diluted_margin");
+    BigDecimal NENdilutedMargin = GSON.fromJson(NENdilutedMarginElement, BigDecimal.class);
+    assertEquals(BigDecimal.valueOf(0.1), NENdilutedMargin);
+  }
 
   /**
    * Insufficient totalAuditableBallots causes the right exception.
+   * This test case has 5 ballots, so 2 totalAuditableBallots is an error.
    */
-
+  @Test
+  @Transactional
+  @Disabled
+  public void simpleContestSingleCountyInsuffientBallotsThrowsException() {
+    GenerateAssertionsRequest notEnoughBallotsRequest = new GenerateAssertionsRequest(simpleContest,
+        2, 5, Arrays.stream(aliceChuanBob).toList());
+    GenerateAssertionsException ex = assertThrows(GenerateAssertionsException.class, () ->
+        generateAssertionsService.generateAssertions(notEnoughBallotsRequest)
+    );
+    String msg = ex.getMessage();
+    assertTrue(StringUtils.containsIgnoreCase(msg, "Error"));
+    assertSame(ex.errorCode, RaireErrorCodes.INTERNAL_ERROR);
+  }
 }
