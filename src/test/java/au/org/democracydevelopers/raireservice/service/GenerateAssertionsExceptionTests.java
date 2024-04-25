@@ -116,8 +116,6 @@ public class GenerateAssertionsExceptionTests {
 
   /**
    * Reasonable error message and correct error code for invalidCandidateNumber.
-   * TODO check that this is what happens when the candidate list doesn't match the database.
-   * See Issue https://github.com/DemocracyDevelopers/raire-service/issues/66
    */
   @Test
   public void invalidCandidateNumberGetsCorrectMessage() {

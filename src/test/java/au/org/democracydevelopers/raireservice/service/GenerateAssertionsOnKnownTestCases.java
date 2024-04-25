@@ -479,4 +479,25 @@ public class GenerateAssertionsOnKnownTestCases {
     assertTrue(StringUtils.containsIgnoreCase(msg, "Error"));
     assertSame(ex.errorCode, RaireErrorCodes.INTERNAL_ERROR);
   }
+
+  /**
+   * Candidate names that don't match the database cause the right exception.
+   * Note that it's OK if the _list_ is different, as long as none of the actual votes contain
+   * unexpected names.
+   * This test case has "Alice", "Bob", "Chuan".
+   */
+  @Test
+  @Transactional
+  @Disabled
+  public void WrongCandidatesThrowsException() {
+    String[] wrongCandidates = {"Alicia", "Chuan", "Boba"};
+    GenerateAssertionsRequest wrongCandidatesRequest = new GenerateAssertionsRequest(simpleContest,
+        5, 5, Arrays.stream(wrongCandidates).toList());
+    GenerateAssertionsException ex = assertThrows(GenerateAssertionsException.class, () ->
+        generateAssertionsService.generateAssertions(wrongCandidatesRequest)
+    );
+    String msg = ex.getMessage();
+    assertTrue(StringUtils.containsIgnoreCase(msg, "Candidate list"));
+    assertSame(ex.errorCode, RaireErrorCodes.WRONG_CANDIDATE_NAMES);
+  }
 }
