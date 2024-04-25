@@ -123,7 +123,7 @@ INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, 
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (20013, 9, '["Bob","Chuan","Alice"]', 999992, 0);
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20014, 14, 'Type 1', 3, 9, '2-3-4', 14, 'UPLOADED', 2);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (20014, 9, '["Bob","Chuan","Alice"]', 999992, 0);
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20015, 1, 'Type 1', 3, 9, '2-3-5', 15, 'UPLOADED', 2);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20015, 15, 'Type 1', 3, 9, '2-3-5', 15, 'UPLOADED', 2);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (20015, 9, '["Bob","Chuan","Alice"]', 999992, 0);
 
 -- 6 (B)
@@ -163,37 +163,70 @@ INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, 
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (20031, 9, '["Chuan","Bob"]', 999992, 0);
 
 -- 10 (C)
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20032, 1, 'Type 1', 6, 9, '2-6-1', 32, 'UPLOADED', 2);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20032, 32, 'Type 1', 6, 9, '2-6-1', 32, 'UPLOADED', 2);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (20032, 9, '["Chuan"]', 999992, 0);
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20033, 1, 'Type 1', 6, 9, '2-6-2', 33, 'UPLOADED', 2);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20033, 33, 'Type 1', 6, 9, '2-6-2', 33, 'UPLOADED', 2);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (20033, 9, '["Chuan"]', 999992, 0);
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20034, 1, 'Type 1', 6, 9, '2-6-3', 34, 'UPLOADED', 2);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20034, 34, 'Type 1', 6, 9, '2-6-3', 34, 'UPLOADED', 2);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (20034, 9, '["Chuan"]', 999992, 0);
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20035, 1, 'Type 1', 6, 9, '2-6-4', 35, 'UPLOADED', 2);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20035, 35, 'Type 1', 6, 9, '2-6-4', 35, 'UPLOADED', 2);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (20035, 9, '["Chuan"]', 999992, 0);
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20036, 1, 'Type 1', 6, 9, '2-6-5', 36, 'UPLOADED', 2);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20036, 36, 'Type 1', 6, 9, '2-6-5', 36, 'UPLOADED', 2);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (20036, 9, '["Chuan"]', 999992, 0);
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20037, 1, 'Type 1', 6, 9, '2-6-6', 37, 'UPLOADED', 2);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20037, 37, 'Type 1', 6, 9, '2-6-6', 37, 'UPLOADED', 2);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (20037, 9, '["Chuan"]', 999992, 0);
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20038, 1, 'Type 1', 6, 9, '2-6-7', 38, 'UPLOADED', 2);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20038, 38, 'Type 1', 6, 9, '2-6-7', 38, 'UPLOADED', 2);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (20038, 9, '["Chuan"]', 999992, 0);
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20039, 1, 'Type 1', 6, 9, '2-6-8', 39, 'UPLOADED', 2);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20039, 39, 'Type 1', 6, 9, '2-6-8', 39, 'UPLOADED', 2);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (20039, 9, '["Chuan"]', 999992, 0);
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20040, 1, 'Type 1', 6, 9, '2-6-9', 40, 'UPLOADED', 2);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20040, 40, 'Type 1', 6, 9, '2-6-9', 40, 'UPLOADED', 2);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (20040, 9, '["Chuan"]', 999992, 0);
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20041, 1, 'Type 1', 6, 9, '2-6-10', 41, 'UPLOADED', 2);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (20041, 41, 'Type 1', 6, 9, '2-6-10', 41, 'UPLOADED', 2);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (20041, 9, '["Chuan"]', 999992, 0);
 
 -- Tied Winners Contest
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (1, 1, 'Type 1', 1, 8, '1-1-1', 1, 'UPLOADED', 1);
-INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (1, 8, '["Alice","Bob","Chuan"]', 999990, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30001, 1, 'Type 1', 1, 8, '3-1-1', 1, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30001, 8, '["Alice","Bob","Chuan"]', 999990, 0);
 
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (2, 2, 'Type 1', 1, 8, '1-1-2', 2, 'UPLOADED', 1);
-INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (2, 8, '["Bob","Alice","Chuan"]', 999990, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30002, 2, 'Type 1', 1, 8, '3-1-2', 2, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30002, 8, '["Bob","Alice","Chuan"]', 999990, 0);
 
--- Simple Contest
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30001, 1, 'Type 1', 1, 10, '1-1-1', 1, 'UPLOADED', 1);
-INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30001, 10, '["Alice","Bob","Chuan"]', 999993, 0);
+-- Simple Contest, single county.
+-- This should produce "A NEB C" and "A NEN B | {A,B} continuing". Note that "A NEB B" is _not_ true.
+-- 2 (A,B,C)
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30003, 3, 'Type 1', 1, 10, '3-1-3', 3, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30003, 10, '["Alice","Bob","Chuan"]', 999993, 0);
 
-INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30002, 2, 'Type 1', 1, 10, '1-1-2', 2, 'UPLOADED', 1);
-INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30002, 10, '["Bob","Alice","Chuan"]', 999993, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30004, 4, 'Type 1', 1, 10, '3-1-4', 4, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30004, 10, '["Alice","Bob","Chuan"]', 999993, 0);
+
+-- 2 (B)
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30005, 5, 'Type 1', 1, 10, '3-1-5', 5, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30005, 10, '["Bob"]', 999993, 0);
+
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30006, 6, 'Type 1', 1, 10, '3-1-6', 6, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30006, 10, '["Bob"]', 999993, 0);
+
+-- 1 (C,A)
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30007, 7, 'Type 1', 1, 10, '3-1-7', 7, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30007, 10, '["Chuan","Alice"]', 999993, 0);
+
+-- The same Simple Contest, but divided between two counties.
+-- This should produce the same assertions: "A NEB C" and "A NEN B | {A,B} continuing".
+-- 2 (A,B,C) in county 10.
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30008, 8, 'Type 1', 1, 10, '3-1-8', 8, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30008, 10, '["Alice","Bob","Chuan"]', 999994, 0);
+
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30009, 9, 'Type 1', 1, 10, '3-1-9', 9, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30009, 10, '["Alice","Bob","Chuan"]', 999994, 0);
+
+-- 2 (B) in county 11.
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30010, 10, 'Type 1', 1, 10, '3-1-10', 10, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30010, 11, '["Bob"]', 999995, 0);
+
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30011, 11, 'Type 1', 1, 10, '3-1-11', 11, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30011, 11, '["Bob"]', 999995, 0);
+
+-- 1 (C,A) in county 11.
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30012, 12, 'Type 1', 1, 10, '3-1-12', 12, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30012, 11, '["Chuan","Alice"]', 999995, 0);

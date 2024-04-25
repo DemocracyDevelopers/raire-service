@@ -81,6 +81,8 @@ public class GenerateAssertionsOnKnownTestCases {
   private static final String guideToRaireExample1 = "Guide To Raire Example 1";
   private static final String guideToRaireExample2 = "Guide To Raire Example 2";
   private static final String tiedWinnersContest = "Tied Winners Contest";
+  private static final String simpleContest = "Simple Contest";
+  private static final String crossCountySimpleContest = "Cross-county Simple Contest";
 
   /**
    * Array of candidates: Alice, Bob, Chuan, Diego.
@@ -141,103 +143,70 @@ public class GenerateAssertionsOnKnownTestCases {
       "\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
 
   /**
-   * Test assertion: Alice P. Mangrove NEB Al (Bob) Jones in "Multi-County Contest 1".
+   * Test assertion: Alice NEB Chuan, in 'Simple Contest'.
+   * Margin is 1. Diluted Margin 1/5 = 0.2, difficulty 5/1 = 5.
+   *
    */
-  private final static String aliceNEBAl = "{\"id\":6,\"version\":0,\"contestName\":" +
-      "\"Multi-County Contest 1\",\"winner\":\"Alice P. Mangrove\",\"loser\":\"Al (Bob) Jones\"," +
-      "\"margin\":2170,\"difficulty\":0.9,\"assumedContinuing\":[],\"dilutedMargin\":0.07," +
-      "\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0,\"optimisticSamplesToAudit\":0," +
-      "\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0," +
-      "\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
+  private final static String aliceNEBChuanSimpleContest = "{\"id\":4,\"version\":0,\"contestName\":" +
+      "\""+simpleContest+"\",\"winner\":\"Alice\",\"loser\":\"Chuan\"," +
+      "\"margin\":1,\"difficulty\":5,\"assumedContinuing\":[],\"dilutedMargin\":0.2, +"
+      + genericInitialAssertionState;
 
   /**
-   * Test assertion: Alice P. Mangrove NEN West W. Westerson in "Multi-County Contest 1" assuming
-   * only these two candidates remain standing.
+   * Test assertion: Alice NEB Chuan, in 'Cross County Simple Contest'.
+   * Margin is 1. Diluted Margin 1/5 = 0.2, difficulty 5/1 = 5.
+   *
    */
-  private final static String aliceNENwest = "{\"id\":7,\"version\":0,\"contestName\":" +
-      "\"Multi-County Contest 1\",\"winner\":\"Alice P. Mangrove\",\"loser\":\"West W. Westerson\","
-      +
-      "\"margin\":31,\"difficulty\":5.0,\"assumedContinuing\":[\"West W. Westerson\"," +
-      "\"Alice P. Mangrove\"],\"dilutedMargin\":0.001,\"cvrDiscrepancy\":{}," +
-      "\"estimatedSamplesToAudit\":0,\"optimisticSamplesToAudit\":0,\"twoVoteUnderCount\":0," +
-      "\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0," +
-      "\"currentRisk\":1.00}";
+  private final static String aliceNEBChuanCrossCountySimpleContest =
+      "{\"id\":4,\"version\":0,\"contestName\":" +
+      "\""+crossCountySimpleContest+"\",\"winner\":\"Alice\",\"loser\":\"Chuan\"," +
+      "\"margin\":1,\"difficulty\":5,\"assumedContinuing\":[],\"dilutedMargin\":0.2, +"
+      + genericInitialAssertionState;
+
 
   /**
-   * Test assertion: CC NEB A in "Larger Contest".
+   * Test assertion: Alice NEN Bob assuming Bob and Alice are continuing, for "Simple Contest".
+   * Margin is 1, diluted margin is 1/5 = 0.2, difficulty = 5/1 = 5.
+   * We need two different orders for the 'assumed continuing' array because we're not sure what order
+   * will be generated.
    */
-  private final static String CCNEBA = "{\"id\":8,\"version\":0,\"contestName\":" +
-      "\"Larger Contest\",\"winner\":\"CC\",\"loser\":\"A\"," +
-      "\"margin\":25,\"difficulty\":5.0,\"assumedContinuing\":[],\"dilutedMargin\":0.0125," +
-      "\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0,\"optimisticSamplesToAudit\":0," +
-      "\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0," +
-      "\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
+  private final static String aliceNENBob = "{\"id\":4,\"version\":0,\"contestName\":" +
+      "\""+simpleContest+"\",\"winner\":\"Alice\",\"loser\":\"Bob\"," +
+      "\"margin\":1,\"difficulty\":5,\"assumedContinuing\":";
+
+  private final static String aliceNENBobOrder1 = aliceNENBob + "[\"Alice\",\"Bob\"],"+
+      "\"dilutedMargin\":0.2,"+genericInitialAssertionState;
+  private final static String aliceNENBobOrder2 = aliceNENBob + "[\"Bob\",\"Alice\"],"+
+      "\"dilutedMargin\":0.2,"+genericInitialAssertionState;
 
   /**
-   * Test assertion: CC NEN B in "Larger Contest".
+   * Test assertion - the same, but for cross-county simple contest.
+   * Alice NEN Bob assuming Bob and Alice are continuing, for "Simple Contest".
+   * Margin is 1, diluted margin is 1/5 = 0.2, difficulty = 5/1 = 5.
    */
-  private final static String CCNENB = "{\"id\":9,\"version\":0,\"contestName\":" +
-      "\"Larger Contest\",\"winner\":\"CC\",\"loser\":\"B\"," +
-      "\"margin\":100,\"difficulty\":2.0,\"assumedContinuing\":[\"A\",\"B\",\"CC\"]," +
-      "\"dilutedMargin\":0.05,\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0," +
-      "\"optimisticSamplesToAudit\":0,\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0," +
-      "\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
+  private final static String aliceNENBobCrossCounty = "{\"id\":4,\"version\":0,\"contestName\":" +
+      "\""+crossCountySimpleContest+"\",\"winner\":\"Alice\",\"loser\":\"Bob\"," +
+      "\"margin\":1,\"difficulty\":5,\"assumedContinuing\":";
+
+  private final static String aliceNENBobOrder1CrossCounty = aliceNENBobCrossCounty + "[\"Alice\",\"Bob\"],"+
+      "\"dilutedMargin\":0.2,"+genericInitialAssertionState;
+  private final static String aliceNENBobOrder2CrossCounty = aliceNENBobCrossCounty + "[\"Bob\",\"Alice\"],"+
+      "\"dilutedMargin\":0.2,"+genericInitialAssertionState;
 
   /**
-   * Test assertion: Alice NEB Bob in the contest "One NEB Assertion Contest" when the audit is in
-   * progress and some discrepancies have been found.
+   * Test assertion - the same, but for cross-county simple contest.
+   * Alice NEN Bob assuming Bob and Alice are continuing, for "Simple Contest".
+   * Margin is 1, diluted margin is 1/5 = 0.2, difficulty = 5/1 = 5.
    */
-  private final static String aliceNEBBobInProgress = "{\"id\":1,\"version\":0,\"contestName\":" +
-      "\"One NEB Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Bob\",\"margin\":320," +
-      "\"difficulty\":1.1,\"assumedContinuing\":[],\"dilutedMargin\":0.32,\"cvrDiscrepancy\":{}," +
-      "\"estimatedSamplesToAudit\":111,\"optimisticSamplesToAudit\":111,\"twoVoteUnderCount\":0," +
-      "\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0," +
-      "\"currentRisk\":0.50}";
 
-  /**
-   * Test assertion: Alice NEN Chuan assuming Alice, Chuan, Diego and Bob are continuing, for
-   * the contest "One NEN Assertion Contest" when the audit is in progress and some discrepancies
-   * have been found.
-   */
-  private final static String aliceNENChuanInProgress =
-      "{\"id\":2,\"version\":0,\"contestName\":" +
-          "\"One NEN Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Chuan\",\"margin\":240,"
-          +
-          "\"difficulty\":3.01,\"assumedContinuing\":[\"Alice\",\"Chuan\",\"Diego\",\"Bob\"]," +
-          "\"dilutedMargin\":0.12,\"cvrDiscrepancy\":{\"13\":1,\"14\":0,\"15\":0}," +
-          "\"estimatedSamplesToAudit\":245,\"optimisticSamplesToAudit\":201,\"twoVoteUnderCount\":0,"
-          +
-          "\"oneVoteUnderCount\":0,\"oneVoteOverCount\":1,\"twoVoteOverCount\":0,\"otherCount\":2,"
-          +
-          "\"currentRisk\":0.20}";
 
-  /**
-   * Test assertion: Amanda NEB Liesl in the contest "One NEN NEB Assertion Contest" when the audit
-   * is in progress and some discrepancies have been found.
-   */
-  private final static String amandaNEBLieslInProgress =
-      "{\"id\":3,\"version\":0,\"contestName\":" +
-          "\"One NEN NEB Assertion Contest\",\"winner\":\"Amanda\",\"loser\":\"Liesl\",\"margin\":112,"
-          +
-          "\"difficulty\":0.1,\"assumedContinuing\":[],\"dilutedMargin\":0.1," +
-          "\"cvrDiscrepancy\":{\"13\":-1,\"14\":2,\"15\":2},\"estimatedSamplesToAudit\":27," +
-          "\"optimisticSamplesToAudit\":20,\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":1," +
-          "\"oneVoteOverCount\":0,\"twoVoteOverCount\":2,\"otherCount\":0,\"currentRisk\":0.08}";
 
-  /**
-   * Test assertion: Amanda NEN Wendell assuming Liesl, Wendell and Amanda are continuing, for the
-   * contest "One NEN NEB Assertion Contest" when the audit is in progress and some discrepancies
-   * have been found.
-   */
-  private final static String amandaNENWendellInProgress = "{\"id\":4,\"version\":0," +
-      "\"contestName\":\"One NEN NEB Assertion Contest\",\"winner\":\"Amanda\"," +
-      "\"loser\":\"Wendell\",\"margin\":560,\"difficulty\":3.17," +
-      "\"assumedContinuing\":[\"Liesl\",\"Wendell\",\"Amanda\"],\"dilutedMargin\":0.5," +
-      "\"cvrDiscrepancy\":{\"13\":1,\"14\":1,\"15\":-2},\"estimatedSamplesToAudit\":300," +
-      "\"optimisticSamplesToAudit\":200,\"twoVoteUnderCount\":1,\"oneVoteUnderCount\":0," +
-      "\"oneVoteOverCount\":2,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":0.70}";
+  private final static GenerateAssertionsRequest tiedWinnersRequest
+      = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5, Arrays.stream(aliceChuanBob).toList());
 
-  private final static GenerateAssertionsRequest request
+
+
+  private final static GenerateAssertionsRequest tiedWinnersRequest
       = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5, Arrays.stream(aliceChuanBob).toList());
 
   /**
@@ -247,13 +216,8 @@ public class GenerateAssertionsOnKnownTestCases {
   @Transactional
   void dummyServiceThrowsException() {
     Exception ex = assertThrows(GenerateAssertionsException.class, () ->
-        generateAssertionsService.generateAssertions(request)
+        generateAssertionsService.generateAssertions(tiedWinnersRequest)
     );
-  }
-
-  @Test
-  void testThatTheTestsAreDisabled() {
-    assertTrue(false);
   }
 
   /**
@@ -262,10 +226,8 @@ public class GenerateAssertionsOnKnownTestCases {
    */
   @Test
   void tiedWinnersThrowsTiedWinnersException() {
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest(tiedWinnersContest,
-        2, 5, Arrays.stream(aliceChuanBob).toList());
     GenerateAssertionsException ex = assertThrows(GenerateAssertionsException.class, () ->
-        generateAssertionsService.generateAssertions(request)
+        generateAssertionsService.generateAssertions(tiedWinnersRequest)
     );
     String msg = ex.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg,"Tied winners"));
@@ -340,6 +302,51 @@ public class GenerateAssertionsOnKnownTestCases {
 
 
 
+  }
+
+  /**
+   * Simple contest. The votes are
+   * 2 (A,B)
+   * 2 (B)
+   * 1 (C,A).
+   * The assertions should be
+   * A NEB C
+   * A NEN B | {A,B} continuing.
+   * Note that A NEB B is not true.
+   * This is the single-county case.
+   */
+  @Test
+  public void simpleContestSingleCounty() throws GenerateAssertionsException {
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
+        5, 5, Arrays.stream(aliceChuanBob).toList());
+    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    assertTrue(StringUtils.containsIgnoreCase(response.winner, "Alice"));
+    List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
+    assertEquals(2, assertions.size());
+
+    // There should be one NEB assertion: Alice NEB Chaun
+    Optional<Assertion> nebMaybeAssertion = assertions.stream().filter(a -> a instanceof NEBAssertion).findFirst();
+    assertTrue(nebMaybeAssertion.isPresent());
+    NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
+    // Remove the id prefix, because we don't know what the assertion id will be.
+    String expectedNEBStringWithoutID
+        = aliceNEBChuanSimpleContest.substring(aliceNEBChuanSimpleContest.indexOf(','));
+    String retrievedString =   GSON.toJson(nebAssertion);
+    String retrievedStringWithoutID =  retrievedString.substring(retrievedString.indexOf(','));
+    assertEquals(expectedNEBStringWithoutID, retrievedStringWithoutID);
+
+    // There should be one NEN assertion: Alice > Bob if only {Alice,Bob} remain.
+    Optional<Assertion> nenMaybeAssertion = assertions.stream().filter(a -> a instanceof NENAssertion).findFirst();
+    assertTrue(nenMaybeAssertion.isPresent());
+    NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
+    // Remove the id prefix, because we don't know what the assertion id will be.
+    String expectedString1WithoutID = aliceNENBobOrder1.substring(aliceNENBobOrder1.indexOf(','));
+    String expectedString2WithoutID = aliceNENBobOrder2.substring(aliceNENBobOrder2.indexOf(','));
+    String retrievedNENString =   GSON.toJson(nenAssertion);
+    String retrievedNENStringWithoutID =  retrievedNENString.substring(retrievedNENString.indexOf(','));
+    // We're not sure what order the 'assumed equals' list is in, but it should match one of them.
+    assertTrue(expectedString1WithoutID.equals(retrievedNENStringWithoutID)
+        || expectedString2WithoutID.equals(retrievedNENStringWithoutID));
   }
 
   /**
