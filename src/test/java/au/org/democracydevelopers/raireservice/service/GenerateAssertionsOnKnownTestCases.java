@@ -54,6 +54,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.shaded.org.hamcrest.number.BigDecimalCloseTo;
 
 /**
  * Tests to validate the behaviour of Assertion generation on a collection of simple contest with
@@ -92,6 +93,7 @@ public class GenerateAssertionsOnKnownTestCases {
   /**
    * Names of contests, to match pre-loaded data.
    */
+  private static final String oneNEBAssertionContest = "One NEB Assertion Contest";
   private static final String guideToRaireExample1 = "Guide To Raire Example 1";
   private static final String guideToRaireExample2 = "Guide To Raire Example 2";
   private static final String tiedWinnersContest = "Tied Winners Contest";
@@ -209,6 +211,20 @@ public class GenerateAssertionsOnKnownTestCases {
 
   private final static GenerateAssertionsRequest tiedWinnersRequest
       = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5, Arrays.stream(aliceChuanBob).toList());
+
+  /**
+   * Check that basic assertion retrieval works. This is just a sanity check for the other tests.
+   */
+  @Test
+  @Transactional
+  void assertionRetrievalWorks() {
+
+    Assertion assertion = assertionRepository.findByContestName(oneNEBAssertionContest).getFirst();
+
+    assertTrue(correctAssertionData(320, BigDecimal.valueOf(0.32), BigDecimal.valueOf(1.1),
+        "Alice","Bob", assertion));
+  }
+
 
   /**
    * Trivial test to see whether the placeholder service throws the expected placeholder exception.
@@ -503,5 +519,34 @@ public class GenerateAssertionsOnKnownTestCases {
     String msg = ex.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Candidate list"));
     assertSame(ex.errorCode, RaireErrorCodes.WRONG_CANDIDATE_NAMES);
+  }
+
+  /**
+   * Check the relevant assertion data values from json.
+   * @param margin the expected raw margin
+   * @param dilutedMargin the expected diluted margin
+   * @param difficulty the expected difficulty
+   * @param winner the expected winner
+   * @param loser the expected loser
+   * @param assertion the assertion to be checked
+   * @return true if the assertion's data match all the expected values.
+   */
+  private boolean correctAssertionData(int margin, BigDecimal dilutedMargin, BigDecimal difficulty,
+      String winner, String loser, Assertion assertion) {
+
+    String retrievedString = GSON.toJson(assertion);
+    JsonObject data = GSON.fromJson(retrievedString, JsonObject.class);
+
+    JsonElement marginElement = data.get("margin");
+    JsonElement difficultyElement = data.get("difficulty");
+    JsonElement dilutedMarginElement = data.get("dilutedMargin");
+    JsonElement loserElement = data.get("loser");
+    JsonElement winnerElement = data.get("winner");
+
+    return (margin == GSON.fromJson(marginElement, Integer.class)
+        && (difficulty.compareTo(GSON.fromJson(difficultyElement, BigDecimal.class)) == 0)
+        && (dilutedMargin.compareTo(GSON.fromJson(dilutedMarginElement, BigDecimal.class)) == 0)
+        && loser.equals(GSON.fromJson(loserElement, String.class)))
+        && winner.equals(GSON.fromJson(winnerElement, String.class));
   }
 }

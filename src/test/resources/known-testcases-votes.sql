@@ -7,6 +7,9 @@ INSERT INTO county (id, name) values (9, 'GuideToRaireCounty');
 INSERT INTO county (id, name) values (10, 'SimpleCounty1');
 INSERT INTO county (id, name) values (11, 'SimpleCounty2');
 
+-- A test assertion to allow for some basic sanity checking.
+INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values ('NEB', 'One NEB Assertion Contest', 1.1, 0.32, 'Bob', 320, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Alice');
+
 -- Contest
 -- Simple contests to test basic functioning.
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (8, 999990, 0, 'IRV', 'Tied Winners Contest', 2, 7, 1);
