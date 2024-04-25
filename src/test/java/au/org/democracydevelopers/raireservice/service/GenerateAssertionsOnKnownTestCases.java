@@ -56,8 +56,20 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Tests to validate the behaviour of Assertion retrieval and storage. Assertions and other
- * relevant data is preloaded into the test database from src/test/resources/data.sql.
+ * Tests to validate the behaviour of Assertion generation on a collection of simple contest with
+ * human-computable assertions. Relevant data is preloaded into the test database from
+ * src/test/resources/known-testcases-votes.sql.
+ * This includes
+ * - The examples from the Guide To Raire Vol 2. Exact matching for Ex. 2 and some for Ex. 1.
+ * - A very simple example test with two obvious assertions (an NEN and NEB), described below.
+ * - A cross-county version of the simple example.
+ * - A request for the simple example with twice the totalAuditableBallots as ballots in the database,
+ *   to test that the diluted margin and difficulties change by a factor of 2, but absolute margin
+ *   stays the same
+ * - A request for the simple example with fewer totalAuditableBallots than there are in the database,
+ *   to check that there's an appropriate error response.
+ * - A request for the simple example with the wrong candidate names, to check that there's an
+ *   appropriate error response.
  */
 @ActiveProfiles("known-testcases")
 @SpringBootTest
@@ -194,14 +206,6 @@ public class GenerateAssertionsOnKnownTestCases {
       "\"dilutedMargin\":0.2,"+genericInitialAssertionState;
   private final static String aliceNENBobOrder2CrossCounty = aliceNENBobCrossCounty + "[\"Bob\",\"Alice\"],"+
       "\"dilutedMargin\":0.2,"+genericInitialAssertionState;
-
-  /**
-   * Test assertion - the same, but for cross-county simple contest.
-   * Alice NEN Bob assuming Bob and Alice are continuing, for "Simple Contest".
-   * Margin is 1, diluted margin is 1/5 = 0.2, difficulty = 5/1 = 5.
-   */
-
-
 
   private final static GenerateAssertionsRequest tiedWinnersRequest
       = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5, Arrays.stream(aliceChuanBob).toList());
