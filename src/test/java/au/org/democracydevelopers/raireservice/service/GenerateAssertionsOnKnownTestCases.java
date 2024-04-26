@@ -39,6 +39,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -280,7 +281,8 @@ public class GenerateAssertionsOnKnownTestCases {
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
 
-    //assertTrue(correctAssertionData(4000, B))
+    assertTrue(correctAssertionData(4000, BigDecimal.valueOf(8 / 27.0), BigDecimal.valueOf(27 / 8.0),
+        "Chuan", "Bob", nebAssertion));
   }
 
   /**
@@ -300,32 +302,27 @@ public class GenerateAssertionsOnKnownTestCases {
     assertEquals(2, assertions.size());
 
     // There should be one NEB assertion: Chaun NEB Alice
+    // Margin is 10,000, but data is divided by 1000, so 10. Difficulty is 4.1 as in the Guide.
+    // Diluted Margin is 10/41.
     Optional<Assertion> nebMaybeAssertion = assertions.stream().filter(a -> a instanceof NEBAssertion).findFirst();
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
-    // Remove the id prefix, because we don't know what the assertion id will be.
-    String expectedNEBStringWithoutID = chuanNEBAlice.substring(chuanNEBAlice.indexOf(','));
-    String retrievedString =   GSON.toJson(nebAssertion);
-    String retrievedStringWithoutID =  retrievedString.substring(retrievedString.indexOf(','));
-    assertEquals(expectedNEBStringWithoutID, retrievedStringWithoutID);
+    assertTrue(correctAssertionData(10, BigDecimal.valueOf(10 / 41.0), BigDecimal.valueOf(4.1),
+        "Chuan","Alice",nebAssertion));
 
     // There should be one NEN assertion: Chuan > Bob if only {Chuan,Bob} remain.
+    // Margin is 9,000, but data is divided by 1000, so 9. Difficulty is 41/9 = 4.5555...,
+    // rounded to 4.6 in the Guide.
+    // Diluted margin is 9/41 = 0.219512195...
+    // TODO check how many dp are serialised and refine test accordingly.
     Optional<Assertion> nenMaybeAssertion = assertions.stream().filter(a -> a instanceof NENAssertion).findFirst();
     assertTrue(nenMaybeAssertion.isPresent());
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
-    // Remove the id prefix, because we don't know what the assertion id will be.
-    String expectedString1WithoutID = chuanNENBobOrder1.substring(chuanNENBobOrder1.indexOf(','));
-    String expectedString2WithoutID = chuanNENBobOrder2.substring(chuanNENBobOrder2.indexOf(','));
-    String retrievedNENString =   GSON.toJson(nenAssertion);
-    String retrievedNENStringWithoutID =  retrievedNENString.substring(retrievedNENString.indexOf(','));
-    // We're not sure what order the 'assumed equals' list is in, but it should match one of them.
-    assertTrue(expectedString1WithoutID.equals(retrievedNENStringWithoutID)
-        || expectedString2WithoutID.equals(retrievedNENStringWithoutID));
-
-
-
-
+    assertTrue(correctAssertionData(9, BigDecimal.valueOf(9/41.0), BigDecimal.valueOf(41.0/9),
+        "Chuan", "Bob", nenAssertion));
+    assertTrue(correctAssumedContinuing(List.of("Chuan","Bob"), nenAssertion));
   }
+
 
   /**
    * Simple contest. The votes are
@@ -548,5 +545,24 @@ public class GenerateAssertionsOnKnownTestCases {
         && (dilutedMargin.compareTo(GSON.fromJson(dilutedMarginElement, BigDecimal.class)) == 0)
         && loser.equals(GSON.fromJson(loserElement, String.class)))
         && winner.equals(GSON.fromJson(winnerElement, String.class));
+  }
+
+  /**
+   * Check that the expected assumedContinuing list matches the one in the assertion.
+   * @param expectedNames the list of candidate names expected to be in the 'assumed continuing' field.
+   * @param assertion the assertion to be checked.
+   * @return true if the NEN assertion's 'assumed continuing' list matches expectedNames, ignoring order.
+   */
+  private boolean correctAssumedContinuing(List<String> expectedNames, Assertion assertion) {
+    String retrievedString = GSON.toJson(assertion);
+    JsonObject data = GSON.fromJson(retrievedString, JsonObject.class);
+    JsonElement assumedContinuingElement = data.get("assumedContinuing");
+    List<String> assertionContinuing = GSON.fromJson(assumedContinuingElement, new TypeToken<List<String>>(){}.getType());
+    // First check there are no duplicates (we are assuming there are none in the expected list).
+    List<String> assertionListWithoutDuplicates = assertionContinuing.stream().distinct().toList();
+    return assertionListWithoutDuplicates.size() == assertionContinuing.size()
+        // then check the contents are the same
+        && assertionContinuing.size() == expectedNames.size()
+        && assertionContinuing.containsAll(expectedNames);
   }
 }
