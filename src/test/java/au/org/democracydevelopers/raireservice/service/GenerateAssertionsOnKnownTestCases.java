@@ -21,7 +21,6 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.service;
 
 
-import static org.apache.commons.lang3.StringUtils.substring;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -55,13 +54,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.shaded.org.hamcrest.number.BigDecimalCloseTo;
 
 /**
  * Tests to validate the behaviour of Assertion generation on a collection of simple contest with
  * human-computable assertions. Relevant data is preloaded into the test database from
  * src/test/resources/known_testcases_votes.sql.
  * This includes
+ * - A contest with tied winners, to check that the correct error is produced.
  * - The examples from the Guide To Raire Vol 2. Exact matching for Ex. 2 and some for Ex. 1.
  * - A very simple example test with two obvious assertions (an NEN and NEB), described below.
  * - A cross-county version of the simple example.
@@ -112,109 +111,12 @@ public class GenerateAssertionsOnKnownTestCases {
    */
   private static final String[] aliceChuanBob = {"Alice", "Chuan", "Bob"};
 
-  /**
-   * All the initial data for an assertion, which is the same for them all.
-   */
-  private final static String genericInitialAssertionState
-      = "\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0," +
-      "\"optimisticSamplesToAudit\":0,\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0," +
-      "\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
-
-  /**
-   * Test assertion: Alice NEB Bob, for "Guide To Raire Example 1".
-   * Margin is 4000, but data is divided by 500, so 8. Difficulty is 3.375 as in the Guide.
-   * Diluted margin is 8/27 = 0.296...
-   */
-  private final static String chuanNEBBob = "{\"id\":4,\"version\":0,\"contestName\":" +
-      "\""+guideToRaireExample1+"\",\"winner\":\"Chuan\",\"loser\":\"Bob\"," +
-      "\"margin\":8,\"difficulty\":3.375,\"assumedContinuing\":[],\"dilutedMargin\":0.2962962962962963, +"
-      + genericInitialAssertionState;
-
-  /**
-   * Test assertion: Chuan NEN Bob assuming Bob and Chuan are continuing, for "Guide To Raire Example 2".
-   * Margin is 9,000, but data is divided by 1000, so 9. Difficulty is 41/9 = 4.5555...,
-   * rounded to 4.6 in the Guide.
-   * Diluted margin is 9/41 = 0.219512195...
-   * TODO check how many dp are serialised and refine test string accordingly.
-   * We need two different orders for the 'assumed continuing' array because we're not sure what order
-   * will be generated.
-   */
-  private final static String chuanNENBob = "{\"id\":4,\"version\":0,\"contestName\":" +
-      "\""+guideToRaireExample2+"\",\"winner\":\"Chuan\",\"loser\":\"Bob\"," +
-      "\"margin\":9,\"difficulty\":4.5555555555555555,\"assumedContinuing\":";
-
-  private final static String chuanNENBobOrder1 = chuanNENBob + "[\"Chuan\",\"Bob\"],"+
-      "\"dilutedMargin\":0.219512195121951,"+genericInitialAssertionState;
-  private final static String chuanNENBobOrder2 = chuanNENBob + "[\"Bob\",\"Chuan\"],"+
-      "\"dilutedMargin\":0.219512195121951,"+genericInitialAssertionState;
-
-  /**
-   * Test assertion: Chuan NEB Alice in contest "Guide To Raire Example 2".
-   * Margin is 10,000, but data is divided by 1000, so 10. Difficulty is 4.1 as in the Guide.
-   */
-  private final static String chuanNEBAlice = "{\"id\":5,\"version\":0,\"contestName\":" +
-      "\""+guideToRaireExample2+"\",\"winner\":\"Chuan\",\"loser\":\"Alice\"," +
-      "\"margin\":10,\"difficulty\":4.1,\"assumedContinuing\":[],\"dilutedMargin\":0.01," +
-      "\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0,\"optimisticSamplesToAudit\":0," +
-      "\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0," +
-      "\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
-
-  /**
-   * Test assertion: Alice NEB Chuan, in 'Simple Contest'.
-   * Margin is 1. Diluted Margin 1/5 = 0.2, difficulty 5/1 = 5.
-   *
-   */
-  private final static String aliceNEBChuanSimpleContest = "{\"id\":4,\"version\":0,\"contestName\":" +
-      "\""+simpleContest+"\",\"winner\":\"Alice\",\"loser\":\"Chuan\"," +
-      "\"margin\":1,\"difficulty\":5,\"assumedContinuing\":[],\"dilutedMargin\":0.2, +"
-      + genericInitialAssertionState;
-
-  /**
-   * Test assertion: Alice NEB Chuan, in 'Cross County Simple Contest'.
-   * Margin is 1. Diluted Margin 1/5 = 0.2, difficulty 5/1 = 5.
-   *
-   */
-  private final static String aliceNEBChuanCrossCountySimpleContest =
-      "{\"id\":4,\"version\":0,\"contestName\":" +
-      "\""+crossCountySimpleContest+"\",\"winner\":\"Alice\",\"loser\":\"Chuan\"," +
-      "\"margin\":1,\"difficulty\":5,\"assumedContinuing\":[],\"dilutedMargin\":0.2, +"
-      + genericInitialAssertionState;
-
-
-  /**
-   * Test assertion: Alice NEN Bob assuming Bob and Alice are continuing, for "Simple Contest".
-   * Margin is 1, diluted margin is 1/5 = 0.2, difficulty = 5/1 = 5.
-   * We need two different orders for the 'assumed continuing' array because we're not sure what order
-   * will be generated.
-   */
-  private final static String aliceNENBob = "{\"id\":4,\"version\":0,\"contestName\":" +
-      "\""+simpleContest+"\",\"winner\":\"Alice\",\"loser\":\"Bob\"," +
-      "\"margin\":1,\"difficulty\":5,\"assumedContinuing\":";
-
-  private final static String aliceNENBobOrder1 = aliceNENBob + "[\"Alice\",\"Bob\"],"+
-      "\"dilutedMargin\":0.2,"+genericInitialAssertionState;
-  private final static String aliceNENBobOrder2 = aliceNENBob + "[\"Bob\",\"Alice\"],"+
-      "\"dilutedMargin\":0.2,"+genericInitialAssertionState;
-
-  /**
-   * Test assertion - the same, but for cross-county simple contest.
-   * Alice NEN Bob assuming Bob and Alice are continuing, for "Simple Contest".
-   * Margin is 1, diluted margin is 1/5 = 0.2, difficulty = 5/1 = 5.
-   */
-  private final static String aliceNENBobCrossCounty = "{\"id\":4,\"version\":0,\"contestName\":" +
-      "\""+crossCountySimpleContest+"\",\"winner\":\"Alice\",\"loser\":\"Bob\"," +
-      "\"margin\":1,\"difficulty\":5,\"assumedContinuing\":";
-
-  private final static String aliceNENBobOrder1CrossCounty = aliceNENBobCrossCounty + "[\"Alice\",\"Bob\"],"+
-      "\"dilutedMargin\":0.2,"+genericInitialAssertionState;
-  private final static String aliceNENBobOrder2CrossCounty = aliceNENBobCrossCounty + "[\"Bob\",\"Alice\"],"+
-      "\"dilutedMargin\":0.2,"+genericInitialAssertionState;
-
   private final static GenerateAssertionsRequest tiedWinnersRequest
       = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5, Arrays.stream(aliceChuanBob).toList());
 
   /**
    * Check that NEB assertion retrieval works. This is just a sanity check for the other tests.
+   * TODO This can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -228,6 +130,7 @@ public class GenerateAssertionsOnKnownTestCases {
 
   /**
    * Check that NEN assertion retrieval works. This is just a sanity check for the other tests.
+   * TODO This can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -238,11 +141,16 @@ public class GenerateAssertionsOnKnownTestCases {
     assertTrue(correctAssertionData(20, BigDecimal.valueOf(0.4), BigDecimal.valueOf(2.5),
         "Alice","Bob", assertion));
     assertTrue(correctAssumedContinuing(Arrays.stream(aliceChuanBob).toList(), assertion));
+    assertTrue(correctAssumedContinuing(List.of("Bob","Chuan","Alice"), assertion));
+    assertFalse(correctAssumedContinuing(Arrays.stream(aliceBobChuanDiego).toList(), assertion));
+    assertFalse(correctAssumedContinuing(List.of("Chuan","Bob"), assertion));
+    assertFalse(correctAssumedContinuing(List.of("C","B"), assertion));
   }
 
 
   /**
    * Trivial test to see whether the placeholder service throws the expected placeholder exception.
+   * TODO This can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -345,7 +253,9 @@ public class GenerateAssertionsOnKnownTestCases {
    * 1 (C,A).
    * The assertions should be
    * A NEB C
+   * - Margin 1, diluted margin 1/5 = 0.2, difficulty 5/1 = 5.
    * A NEN B | {A,B} continuing.
+   * - Margin 1, diluted margin 1/5 = 0.2, difficulty 5/1 = 5.
    * Note that A NEB B is not true.
    * This is the single-county case.
    */
@@ -365,27 +275,17 @@ public class GenerateAssertionsOnKnownTestCases {
         .filter(a -> a instanceof NEBAssertion).findFirst();
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
-    // Remove the id prefix, because we don't know what the assertion id will be.
-    String expectedNEBStringWithoutID
-        = aliceNEBChuanSimpleContest.substring(aliceNEBChuanSimpleContest.indexOf(','));
-    String retrievedString = GSON.toJson(nebAssertion);
-    String retrievedStringWithoutID = retrievedString.substring(retrievedString.indexOf(','));
-    assertEquals(expectedNEBStringWithoutID, retrievedStringWithoutID);
+    assertTrue(correctAssertionData(1, BigDecimal.valueOf(0.2), BigDecimal.valueOf(5),
+        "Alice","Chuan", nebAssertion));
 
     // There should be one NEN assertion: Alice > Bob if only {Alice,Bob} remain.
     Optional<Assertion> nenMaybeAssertion = assertions.stream()
         .filter(a -> a instanceof NENAssertion).findFirst();
     assertTrue(nenMaybeAssertion.isPresent());
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
-    // Remove the id prefix, because we don't know what the assertion id will be.
-    String expectedString1WithoutID = aliceNENBobOrder1.substring(aliceNENBobOrder1.indexOf(','));
-    String expectedString2WithoutID = aliceNENBobOrder2.substring(aliceNENBobOrder2.indexOf(','));
-    String retrievedNENString = GSON.toJson(nenAssertion);
-    String retrievedNENStringWithoutID = retrievedNENString.substring(
-        retrievedNENString.indexOf(','));
-    // We're not sure what order the 'assumed equals' list is in, but it should match one of them.
-    assertTrue(expectedString1WithoutID.equals(retrievedNENStringWithoutID)
-        || expectedString2WithoutID.equals(retrievedNENStringWithoutID));
+    assertTrue(correctAssertionData(1, BigDecimal.valueOf(0.2), BigDecimal.valueOf(5),
+        "Alice","Bob", nenAssertion));
+    assertTrue(correctAssumedContinuing(List.of("Bob","Alice"), nenAssertion));
   }
 
   /**
@@ -406,25 +306,17 @@ public class GenerateAssertionsOnKnownTestCases {
     Optional<Assertion> nebMaybeAssertion = assertions.stream().filter(a -> a instanceof NEBAssertion).findFirst();
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
-    // Remove the id prefix, because we don't know what the assertion id will be.
-    String expectedNEBStringWithoutID
-        = aliceNEBChuanCrossCountySimpleContest.substring(aliceNEBChuanCrossCountySimpleContest.indexOf(','));
-    String retrievedString =   GSON.toJson(nebAssertion);
-    String retrievedStringWithoutID =  retrievedString.substring(retrievedString.indexOf(','));
-    assertEquals(expectedNEBStringWithoutID, retrievedStringWithoutID);
+    assertTrue(correctAssertionData(1, BigDecimal.valueOf(0.2), BigDecimal.valueOf(5),
+        "Alice","Chuan", nebAssertion));
 
     // There should be one NEN assertion: Alice > Bob if only {Alice,Bob} remain.
     Optional<Assertion> nenMaybeAssertion = assertions.stream().filter(a -> a instanceof NENAssertion).findFirst();
     assertTrue(nenMaybeAssertion.isPresent());
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
-    // Remove the id prefix, because we don't know what the assertion id will be.
-    String expectedString1WithoutID = aliceNENBobOrder1CrossCounty.substring(aliceNENBobOrder1CrossCounty.indexOf(','));
-    String expectedString2WithoutID = aliceNENBobOrder2CrossCounty.substring(aliceNENBobOrder2CrossCounty.indexOf(','));
-    String retrievedNENString =   GSON.toJson(nenAssertion);
-    String retrievedNENStringWithoutID =  retrievedNENString.substring(retrievedNENString.indexOf(','));
-    // We're not sure what order the 'assumed equals' list is in, but it should match one of them.
-    assertTrue(expectedString1WithoutID.equals(retrievedNENStringWithoutID)
-        || expectedString2WithoutID.equals(retrievedNENStringWithoutID));
+    assertTrue(correctAssertionData(1, BigDecimal.valueOf(0.2), BigDecimal.valueOf(5),
+        "Alice","Bob", nenAssertion));
+    assertTrue(correctAssumedContinuing(List.of("Bob","Alice"), nenAssertion));
+
   }
 
   /**
@@ -453,44 +345,17 @@ public class GenerateAssertionsOnKnownTestCases {
         .filter(a -> a instanceof NEBAssertion).findFirst();
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
-    String retrievedString = GSON.toJson(nebAssertion);
-    JsonObject data = GSON.fromJson(retrievedString, JsonObject.class);
-    // margin should be 1.
-    JsonElement marginElement = data.get("margin");
-    int margin = GSON.fromJson(marginElement, Integer.class);
-    assertEquals(1, margin);
-
-    // difficulty should be 10.
-    JsonElement difficultyElement = data.get("difficulty");
-    BigDecimal difficulty = GSON.fromJson(difficultyElement, BigDecimal.class);
-    assertEquals(BigDecimal.valueOf(10), difficulty);
-
-    // diluted margin should be 0.1
-    JsonElement dilutedMarginElement = data.get("diluted_margin");
-    BigDecimal dilutedMargin = GSON.fromJson(dilutedMarginElement, BigDecimal.class);
-    assertEquals(BigDecimal.valueOf(0.1), dilutedMargin);
+    assertTrue(correctAssertionData(1, BigDecimal.valueOf(0.1), BigDecimal.valueOf(10),
+        "Alice","Chuan", nebAssertion));
 
     // There should be one NEN assertion: Alice > Bob if only {Alice,Bob} remain.
     Optional<Assertion> nenMaybeAssertion = assertions.stream()
         .filter(a -> a instanceof NENAssertion).findFirst();
     assertTrue(nenMaybeAssertion.isPresent());
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
-    String retrievedNENString = GSON.toJson(nenAssertion);
-    JsonObject NENdata = GSON.fromJson(retrievedNENString, JsonObject.class);
-    // margin should be 1.
-    JsonElement NENmarginElement = NENdata.get("margin");
-    int NENmargin = GSON.fromJson(NENmarginElement, Integer.class);
-    assertEquals(1, NENmargin);
-
-    // difficulty should be 10.
-    JsonElement NENdifficultyElement = data.get("difficulty");
-    BigDecimal NENdifficulty = GSON.fromJson(NENdifficultyElement, BigDecimal.class);
-    assertEquals(BigDecimal.valueOf(10), NENdifficulty);
-
-    // diluted margin should be 0.1
-    JsonElement NENdilutedMarginElement = data.get("diluted_margin");
-    BigDecimal NENdilutedMargin = GSON.fromJson(NENdilutedMarginElement, BigDecimal.class);
-    assertEquals(BigDecimal.valueOf(0.1), NENdilutedMargin);
+    assertTrue(correctAssertionData(1, BigDecimal.valueOf(0.1), BigDecimal.valueOf(10),
+        "Alice","Bob", nenAssertion));
+    assertTrue(correctAssumedContinuing(List.of("Bob","Alice"), nenAssertion));
   }
 
   /**
@@ -533,7 +398,7 @@ public class GenerateAssertionsOnKnownTestCases {
   }
 
   /**
-   * Check the relevant assertion data values from json.
+   * Utility to check the relevant assertion data values from json.
    * @param margin the expected raw margin
    * @param dilutedMargin the expected diluted margin
    * @param difficulty the expected difficulty
@@ -564,7 +429,7 @@ public class GenerateAssertionsOnKnownTestCases {
   }
 
   /**
-   * Check that the expected assumedContinuing list matches the one in the assertion.
+   * Utility to check that the expected assumedContinuing list matches the one in the assertion, ignoring order.
    * @param expectedNames the list of candidate names expected to be in the 'assumed continuing' field.
    * @param assertion the assertion to be checked.
    * @return true if the NEN assertion's 'assumed continuing' list matches expectedNames, ignoring order.
