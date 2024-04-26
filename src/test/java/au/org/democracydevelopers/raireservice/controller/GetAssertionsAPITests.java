@@ -81,8 +81,8 @@ public class GetAssertionsAPITests {
   }
 
   /**
-   * A trivial example of a valid get assertions request. Simply tests that it returns an HTTP
-   * success status.
+   * A trivial example of a invalid get assertions request. Simply tests that it returns an HTTP
+   * failure status with the reason that there are not assertions associated with the contest.
    */
   @Test
   public void testTrivialGetAssertionsExample() {
@@ -94,7 +94,9 @@ public class GetAssertionsAPITests {
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
-    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
+        "No assertions have been generated for the contest"));
   }
 
   /**

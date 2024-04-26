@@ -94,7 +94,7 @@ public class AssertionController {
    */
   @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<RaireSolution> serve(@RequestBody GetAssertionsRequest request)
-      throws RequestValidationException {
+      throws RequestValidationException, RaireServiceException {
 
     request.Validate(contestRepository);
 
@@ -109,7 +109,11 @@ public class AssertionController {
       // assertions are present but retrieval fails for some reason.
       // They can either be caught here or handled by the ControllerExceptionHandler.
       // This should be part of Issue https://github.com/DemocracyDevelopers/raire-service/issues/44
-    } catch (RaireServiceException ex) {
+    }
+    catch (RaireServiceException ex) {
+      throw ex;
+    }
+    catch(Exception ex){
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
     }
   }
