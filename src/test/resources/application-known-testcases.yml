@@ -8,4 +8,4 @@ spring:
       ddl-auto: none
   sql:
     init:
-      data-locations: classpath:simple_assertions.sql
+      data-locations: classpath:known_testcases_votes.sql

@@ -60,7 +60,7 @@ import org.testcontainers.shaded.org.hamcrest.number.BigDecimalCloseTo;
 /**
  * Tests to validate the behaviour of Assertion generation on a collection of simple contest with
  * human-computable assertions. Relevant data is preloaded into the test database from
- * src/test/resources/known-testcases-votes.sql.
+ * src/test/resources/known_testcases_votes.sql.
  * This includes
  * - The examples from the Guide To Raire Vol 2. Exact matching for Ex. 2 and some for Ex. 1.
  * - A very simple example test with two obvious assertions (an NEN and NEB), described below.
@@ -94,7 +94,8 @@ public class GenerateAssertionsOnKnownTestCases {
   /**
    * Names of contests, to match pre-loaded data.
    */
-  private static final String oneNEBAssertionContest = "One NEB Assertion Contest";
+  private static final String oneNEBAssertionContest = "Sanity Check NEB Assertion Contest";
+  private static final String oneNENAssertionContest = "Sanity Check NEN Assertion Contest";
   private static final String guideToRaireExample1 = "Guide To Raire Example 1";
   private static final String guideToRaireExample2 = "Guide To Raire Example 2";
   private static final String tiedWinnersContest = "Tied Winners Contest";
@@ -123,7 +124,6 @@ public class GenerateAssertionsOnKnownTestCases {
    * Test assertion: Alice NEB Bob, for "Guide To Raire Example 1".
    * Margin is 4000, but data is divided by 500, so 8. Difficulty is 3.375 as in the Guide.
    * Diluted margin is 8/27 = 0.296...
-   * TODO check how many dp are serialised and refine test string accordingly.
    */
   private final static String chuanNEBBob = "{\"id\":4,\"version\":0,\"contestName\":" +
       "\""+guideToRaireExample1+"\",\"winner\":\"Chuan\",\"loser\":\"Bob\"," +
@@ -214,16 +214,30 @@ public class GenerateAssertionsOnKnownTestCases {
       = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5, Arrays.stream(aliceChuanBob).toList());
 
   /**
-   * Check that basic assertion retrieval works. This is just a sanity check for the other tests.
+   * Check that NEB assertion retrieval works. This is just a sanity check for the other tests.
    */
   @Test
   @Transactional
-  void assertionRetrievalWorks() {
+  void NEBassertionRetrievalWorks() {
 
     Assertion assertion = assertionRepository.findByContestName(oneNEBAssertionContest).getFirst();
 
     assertTrue(correctAssertionData(320, BigDecimal.valueOf(0.32), BigDecimal.valueOf(1.1),
         "Alice","Bob", assertion));
+  }
+
+  /**
+   * Check that NEN assertion retrieval works. This is just a sanity check for the other tests.
+   */
+  @Test
+  @Transactional
+  void NENassertionRetrievalWorks() {
+
+    Assertion assertion = assertionRepository.findByContestName(oneNENAssertionContest).getFirst();
+
+    assertTrue(correctAssertionData(20, BigDecimal.valueOf(0.4), BigDecimal.valueOf(2.5),
+        "Alice","Bob", assertion));
+    assertTrue(correctAssumedContinuing(Arrays.stream(aliceChuanBob).toList(), assertion));
   }
 
 
@@ -527,6 +541,8 @@ public class GenerateAssertionsOnKnownTestCases {
    * @param loser the expected loser
    * @param assertion the assertion to be checked
    * @return true if the assertion's data match all the expected values.
+   * TODO check how many dp are serialised for the BigDecimals and refine test string accordingly.
+   * We may need something like BigDecimal.isCloseTo.
    */
   private boolean correctAssertionData(int margin, BigDecimal dilutedMargin, BigDecimal difficulty,
       String winner, String loser, Assertion assertion) {
