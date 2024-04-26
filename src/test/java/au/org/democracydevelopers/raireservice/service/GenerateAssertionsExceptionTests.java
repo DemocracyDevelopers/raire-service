@@ -38,7 +38,7 @@ import au.org.democracydevelopers.raire.RaireError.TimeoutFindingAssertions;
 import au.org.democracydevelopers.raire.RaireError.TimeoutTrimmingAssertions;
 import au.org.democracydevelopers.raire.RaireError.WrongWinner;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
-import au.org.democracydevelopers.raireservice.service.GenerateAssertionsException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -48,7 +48,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 /*
- * Simple tests on GenerateAssertionsExceptions, to ensure that the exceptions from raire-java
+ * Simple tests on RaireServiceExceptions, to ensure that the exceptions from raire-java
  * are being translated correctly.
  */
 @ActiveProfiles("test-containers")
@@ -69,7 +69,7 @@ public class GenerateAssertionsExceptionTests {
   public void TiedWinnersIsTiedWinners() {
     int[] winners  = {0,1};
     RaireError raireError = new TiedWinners(winners);
-    GenerateAssertionsException e = new GenerateAssertionsException(raireError, candidates);
+    RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Alice"));
     assertTrue(StringUtils.containsIgnoreCase(msg,"Bob"));
@@ -84,7 +84,7 @@ public class GenerateAssertionsExceptionTests {
   @Test
   public void timeoutFindingAssertionsGetsCorrectMessage() {
     RaireError raireError = new TimeoutFindingAssertions(5.0);
-    GenerateAssertionsException e = new GenerateAssertionsException(raireError, candidates);
+    RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Time out finding assertions"));
     assertEquals(RaireErrorCodes.TIMEOUT_FINDING_ASSERTIONS, e.errorCode);
@@ -96,7 +96,7 @@ public class GenerateAssertionsExceptionTests {
   @Test
   public void timeoutTrimmingAssertionsGetsCorrectMessage() {
     RaireError raireError = new TimeoutTrimmingAssertions();
-    GenerateAssertionsException e = new GenerateAssertionsException(raireError, candidates);
+    RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Time out trimming assertions"));
     assertEquals(RaireErrorCodes.TIMEOUT_TRIMMING_ASSERTIONS, e.errorCode);
@@ -108,7 +108,7 @@ public class GenerateAssertionsExceptionTests {
   @Test
   public void timeoutCheckingWinnerGetsCorrectMessage() {
     RaireError raireError = new TimeoutCheckingWinner();
-    GenerateAssertionsException e = new GenerateAssertionsException(raireError, candidates);
+    RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Time out checking winner"));
     assertEquals(RaireErrorCodes.TIMEOUT_CHECKING_WINNER, e.errorCode);
@@ -122,7 +122,7 @@ public class GenerateAssertionsExceptionTests {
   @Test
   public void invalidCandidateNumberGetsCorrectMessage() {
     RaireError raireError = new InvalidCandidateNumber();
-    GenerateAssertionsException e = new GenerateAssertionsException(raireError, candidates);
+    RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Candidate list does not match database"));
     assertEquals(RaireErrorCodes.WRONG_CANDIDATE_NAMES, e.errorCode);
@@ -138,7 +138,7 @@ public class GenerateAssertionsExceptionTests {
   public void CouldNotRuleOutEliminationSequenceIsProperlyTranscribed() {
     int[] sequence = {1,3,0,2};
     RaireError raireError = new CouldNotRuleOut(sequence);
-    GenerateAssertionsException e = new GenerateAssertionsException(raireError, candidates);
+    RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Bob, Diego, Alice, Chuan"));
     assertEquals(RaireErrorCodes.COULD_NOT_RULE_OUT_ALTERNATIVE, e.errorCode);
@@ -151,7 +151,7 @@ public class GenerateAssertionsExceptionTests {
   @Test
   public void invalidTimeoutIsAnInternalError() {
     RaireError raireError = new InvalidTimeout();
-    GenerateAssertionsException e = new GenerateAssertionsException(raireError, candidates);
+    RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Internal error"));
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
@@ -165,7 +165,7 @@ public class GenerateAssertionsExceptionTests {
   @Test
   public void didntRuleOutLoserIsAnInternalError() {
     RaireError raireError = new InternalErrorDidntRuleOutLoser();
-    GenerateAssertionsException e = new GenerateAssertionsException(raireError, candidates);
+    RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Internal error"));
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
@@ -179,7 +179,7 @@ public class GenerateAssertionsExceptionTests {
   @Test
   public void ruledOutWinnerIsAnInternalError() {
     RaireError raireError = new InternalErrorRuledOutWinner();
-    GenerateAssertionsException e = new GenerateAssertionsException(raireError, candidates);
+    RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Internal error"));
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
@@ -191,7 +191,7 @@ public class GenerateAssertionsExceptionTests {
   @Test
   public void internalErrorTrimmingIsAnInternalError() {
     RaireError raireError = new InternalErrorTrimming();
-    GenerateAssertionsException e = new GenerateAssertionsException(raireError, candidates);
+    RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Internal error"));
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
@@ -204,7 +204,7 @@ public class GenerateAssertionsExceptionTests {
   @Test
   public void invalidNumberOfCandidatesIsAnInternalError() {
     RaireError raireError = new InvalidNumberOfCandidates();
-    GenerateAssertionsException e = new GenerateAssertionsException(raireError, candidates);
+    RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Internal error"));
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
@@ -218,7 +218,7 @@ public class GenerateAssertionsExceptionTests {
   @Test
   public void wrongWinnerIsAnInternalError() {
     RaireError raireError = new WrongWinner(new int[]{});
-    GenerateAssertionsException e = new GenerateAssertionsException(raireError, candidates);
+    RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Internal error"));
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);

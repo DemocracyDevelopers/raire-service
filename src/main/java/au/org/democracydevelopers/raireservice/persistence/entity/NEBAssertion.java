@@ -21,14 +21,13 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
-import au.org.democracydevelopers.raire.assertions.EffectOfAssertionOnEliminationOrderSuffix;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
-import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A Not Eliminated Before assertion (or NEB) says that a candidate _winner_ will always have
@@ -79,11 +78,14 @@ public class NEBAssertion extends Assertion {
     int l = candidates.indexOf(loser);
 
     if(w != -1 && l != -1) {
-      return new AssertionAndDifficulty(new NotEliminatedBefore(w, l), difficulty, margin);
+      Map<String,Object> status = new HashMap<>();
+      status.put(STATUS_RISK, currentRisk);
+
+      return new AssertionAndDifficulty(new NotEliminatedBefore(w, l), difficulty, margin, status);
     }
     else{
-      final String msg = "NEBAssertion::convert Candidate list is inconsistent with assertion.";
-      logger.error(msg);
+      final String msg = "Candidate list is inconsistent with assertion.";
+      logger.error("NEBAssertion::convert " + msg);
       throw new IllegalArgumentException(msg);
     }
   }

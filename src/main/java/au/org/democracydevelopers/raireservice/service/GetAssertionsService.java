@@ -43,7 +43,7 @@ import org.springframework.stereotype.Service;
  * Collection of functions responsible for retrieving assertions from the colorado-rla database,
  * through the use of an AssertionRepository, and packaging them in a form suitable for export
  * in desired forms. Currently, assertions are packaged and returned in the form of a RaireSolution.
- * Assertions are retrieved for a contest as specfied in a GetAssertionsRequest.
+ * Assertions are retrieved for a contest as specified in a GetAssertionsRequest.
  */
 @Service
 public class GetAssertionsService {
@@ -97,6 +97,7 @@ public class GetAssertionsService {
         throw new RaireServiceException(msg, RaireErrorCodes.NO_ASSERTIONS_PRESENT);
       }
 
+      // Create contest metadata map, supplied as input when creating a RaireResult.
       Map<String, Object> metadata = new HashMap<String, Object>();
       metadata.put(CANDIDATES, request.candidates);
       metadata.put(RISK_LIMIT, request.riskLimit);

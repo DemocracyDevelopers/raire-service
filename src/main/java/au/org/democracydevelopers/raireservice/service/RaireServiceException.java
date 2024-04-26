@@ -181,7 +181,6 @@ public class RaireServiceException extends Exception {
         message = "Could not rule out alternative elimination order: "+sequence+".";
       }
 
-      case
       // I think this is what we get if the candidate list entered in the request has the
       // right number but wrong names vs the database.
       // TODO add a test for this case. (See Issue https://github.com/DemocracyDevelopers/raire-service/issues/66.)

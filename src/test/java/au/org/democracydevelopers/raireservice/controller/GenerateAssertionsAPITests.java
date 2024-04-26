@@ -20,7 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
-import static au.org.democracydevelopers.raireservice.service.GenerateAssertionsException.RaireErrorCodes.TIMEOUT_CHECKING_WINNER;
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes.TIMEOUT_CHECKING_WINNER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
