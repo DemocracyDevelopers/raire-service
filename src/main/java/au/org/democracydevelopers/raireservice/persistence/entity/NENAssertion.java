@@ -20,10 +20,14 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
+import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
+import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
+import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * A Not Eliminated Next assertion asserts that a _winner_ beats a _loser_ in an audit when all
@@ -74,5 +78,24 @@ public class NENAssertion extends Assertion {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  public AssertionAndDifficulty convert(List<String> candidates) throws IllegalArgumentException {
+    int w = candidates.indexOf(winner);
+    int l = candidates.indexOf(loser);
+    int[] continuing =  assumedContinuing.stream().mapToInt(candidates::indexOf).toArray();
 
+    // Check for validity of the assertion with respect to the given list of candidate names
+    if (w != -1 && l != -1 && Arrays.stream(continuing).noneMatch(c -> c == -1)) {
+      return new AssertionAndDifficulty(
+          new NotEliminatedNext(w, l, continuing), difficulty, margin
+      );
+    }
+    else{
+      final String msg = "NENAssertion::convert Candidate list is inconsistent with assertion.";
+      logger.error(msg);
+      throw new IllegalArgumentException(msg);
+    }
+  }
 }

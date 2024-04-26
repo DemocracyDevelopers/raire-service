@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
+import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -237,5 +238,18 @@ public abstract class Assertion {
     this.difficulty = difficulty;
     this.assumedContinuing = assumedContinuing;
   }
+
+  /**
+   * Construct and return a raire-java representation of this Assertion. This utility is
+   * ultimately used to construct an assertions report export in the same format that raire-java
+   * exports. This report is formed by serialising a RaireSolution object which itself contains
+   * assertions as AssertionAndDifficulty objects.
+   * @param candidates The candidates in this assertion's contest.
+   * @return a representation of this Assertion as an AssertionAndDifficulty object.
+   * @throws IllegalArgumentException when the provided candidate list is inconsistent with the
+   *                                  data stored in the assertion.
+   */
+  public abstract AssertionAndDifficulty convert(List<String> candidates)
+      throws IllegalArgumentException;
 
 }

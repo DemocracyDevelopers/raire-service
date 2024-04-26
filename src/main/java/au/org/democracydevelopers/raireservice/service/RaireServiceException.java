@@ -37,11 +37,11 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Exception indicating that assertion generation failed.
+ * Exception indicating that assertion generation or retrieval failed.
  * These are mostly direct transcriptions of raire-java exceptions, for things such as tied winners
  * or timeout generating assertions.
  */
-public class GenerateAssertionsException extends Exception {
+public class RaireServiceException extends Exception {
 
   /**
    * The error code - an enum used to describe what went wrong. Returned in the http response for
@@ -50,10 +50,10 @@ public class GenerateAssertionsException extends Exception {
   public RaireErrorCodes errorCode;
 
   /**
-   * Main constructor, for translating a RaireError into a GenerateAssertionsException.
-   * @param error the RaireError to be expressed as a GenerateAssertionsException.
+   * Main constructor, for translating a RaireError into a RaireServiceException.
+   * @param error the RaireError to be expressed as a RaireServiceException.
    */
-  public GenerateAssertionsException(RaireError error, List<String> candidates) {
+  public RaireServiceException(RaireError error, List<String> candidates) {
     super(makeMessage(error, candidates));
     switch (error) {
       case TiedWinners e -> this.errorCode = RaireErrorCodes.TIED_WINNERS;
@@ -63,7 +63,6 @@ public class GenerateAssertionsException extends Exception {
           this.errorCode = RaireErrorCodes.TIMEOUT_TRIMMING_ASSERTIONS;
       case TimeoutCheckingWinner e -> this.errorCode = RaireErrorCodes.TIMEOUT_CHECKING_WINNER;
       case CouldNotRuleOut e -> this.errorCode = RaireErrorCodes.COULD_NOT_RULE_OUT_ALTERNATIVE;
-
       // I think this is what we get if the candidate list entered in the request has the
       // right number but wrong names vs the database. It's therefore not (really) an internal error
       // - it's a colorado-rla error.
@@ -85,10 +84,11 @@ public class GenerateAssertionsException extends Exception {
    * during assertion generation, for example a database error.
    *
    * @param message a human-readable message for the exception.
+   * @param code a RaireErrorCodes code to indicate the type of error that has arisen.
    */
-  public GenerateAssertionsException(String message) {
+  public RaireServiceException(String message, RaireErrorCodes code) {
     super(message);
-    this.errorCode = RaireErrorCodes.INTERNAL_ERROR;
+    this.errorCode = code;
   }
 
   /**
@@ -132,6 +132,12 @@ public class GenerateAssertionsException extends Exception {
      */
     WRONG_CANDIDATE_NAMES,
 
+    /**
+     * The user has request to retrieve assertions for a contest for which no assertions have
+     * been generated.
+     */
+    NO_ASSERTIONS_PRESENT,
+
     // Internal errors (that the user can do nothing about)
 
     /**
@@ -159,18 +165,23 @@ public class GenerateAssertionsException extends Exception {
         String tiedWinners = String.join(", ", tiedWinnersList);
         message = "Tied winners: " + tiedWinners + ".";
       }
+
       case TimeoutFindingAssertions e ->
           message = "Time out finding assertions - try again with longer timeout.";
+
       case TimeoutTrimmingAssertions e ->
           message = "Time out trimming assertions - the assertions are usable, but could be reduced given more trimming time.";
+
       case TimeoutCheckingWinner e ->
           message = "Time out checking winner - the election is either tied or extremely complex.";
+
       case CouldNotRuleOut e -> {
         List<String> sequenceList = Arrays.stream(e.eliminationOrder).mapToObj(candidates::get).toList();
         String sequence = String.join(", ", sequenceList);
         message = "Could not rule out alternative elimination order: "+sequence+".";
       }
 
+      case
       // I think this is what we get if the candidate list entered in the request has the
       // right number but wrong names vs the database.
       // TODO add a test for this case. (See Issue https://github.com/DemocracyDevelopers/raire-service/issues/66.)
