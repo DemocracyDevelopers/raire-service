@@ -21,6 +21,8 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.service;
 
 
+import static au.org.democracydevelopers.raireservice.testUtils.correctAssertionData;
+import static au.org.democracydevelopers.raireservice.testUtils.correctAssumedContinuing;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -34,11 +36,6 @@ import au.org.democracydevelopers.raireservice.persistence.repository.AssertionR
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
 import au.org.democracydevelopers.raireservice.service.GenerateAssertionsException.RaireErrorCodes;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -83,12 +80,6 @@ public class GenerateAssertionsOnKnownTestCases {
 
   @Autowired
   GenerateAssertionsService generateAssertionsService;
-
-  /**
-   * To facilitate easier checking of retrieved/saved assertion content.
-   */
-  private static final Gson GSON =
-      new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
 
   /**
    * Names of contests, to match pre-loaded data.
@@ -397,53 +388,5 @@ public class GenerateAssertionsOnKnownTestCases {
     assertSame(ex.errorCode, RaireErrorCodes.WRONG_CANDIDATE_NAMES);
   }
 
-  /**
-   * Utility to check the relevant assertion data values from json.
-   * @param margin the expected raw margin
-   * @param dilutedMargin the expected diluted margin
-   * @param difficulty the expected difficulty
-   * @param winner the expected winner
-   * @param loser the expected loser
-   * @param assertion the assertion to be checked
-   * @return true if the assertion's data match all the expected values.
-   * TODO check how many dp are serialised for the BigDecimals and refine test string accordingly.
-   * We may need something like BigDecimal.isCloseTo.
-   */
-  private boolean correctAssertionData(int margin, BigDecimal dilutedMargin, BigDecimal difficulty,
-      String winner, String loser, Assertion assertion) {
 
-    String retrievedString = GSON.toJson(assertion);
-    JsonObject data = GSON.fromJson(retrievedString, JsonObject.class);
-
-    JsonElement marginElement = data.get("margin");
-    JsonElement difficultyElement = data.get("difficulty");
-    JsonElement dilutedMarginElement = data.get("dilutedMargin");
-    JsonElement loserElement = data.get("loser");
-    JsonElement winnerElement = data.get("winner");
-
-    return (margin == GSON.fromJson(marginElement, Integer.class)
-        && (difficulty.compareTo(GSON.fromJson(difficultyElement, BigDecimal.class)) == 0)
-        && (dilutedMargin.compareTo(GSON.fromJson(dilutedMarginElement, BigDecimal.class)) == 0)
-        && loser.equals(GSON.fromJson(loserElement, String.class)))
-        && winner.equals(GSON.fromJson(winnerElement, String.class));
-  }
-
-  /**
-   * Utility to check that the expected assumedContinuing list matches the one in the assertion, ignoring order.
-   * @param expectedNames the list of candidate names expected to be in the 'assumed continuing' field.
-   * @param assertion the assertion to be checked.
-   * @return true if the NEN assertion's 'assumed continuing' list matches expectedNames, ignoring order.
-   */
-  private boolean correctAssumedContinuing(List<String> expectedNames, Assertion assertion) {
-    String retrievedString = GSON.toJson(assertion);
-    JsonObject data = GSON.fromJson(retrievedString, JsonObject.class);
-    JsonElement assumedContinuingElement = data.get("assumedContinuing");
-    List<String> assertionContinuing = GSON.fromJson(assumedContinuingElement, new TypeToken<List<String>>(){}.getType());
-    // First check there are no duplicates (we are assuming there are none in the expected list).
-    List<String> assertionListWithoutDuplicates = assertionContinuing.stream().distinct().toList();
-    return assertionListWithoutDuplicates.size() == assertionContinuing.size()
-        // then check the contents are the same
-        && assertionContinuing.size() == expectedNames.size()
-        && assertionContinuing.containsAll(expectedNames);
-  }
 }
