@@ -8,4 +8,4 @@ spring:
       ddl-auto: none
   sql:
     init:
-      data-locations: classpath:NSW2021Data/Bellingen_Mayoral.sql
+      data-locations: classpath:NSW2021Data/*.sql
