@@ -21,7 +21,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.controller;
 
 import au.org.democracydevelopers.raireservice.request.RequestValidationException;
-import au.org.democracydevelopers.raireservice.service.GenerateAssertionsException;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,8 +50,8 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
      * @param ex the GenerateAssertionsException.
      * @return the error message and error code.
      */
-    @org.springframework.web.bind.annotation.ExceptionHandler(GenerateAssertionsException.class)
-    public ResponseEntity<String> handleErrorResponseException(GenerateAssertionsException ex) {
+    @org.springframework.web.bind.annotation.ExceptionHandler(RaireServiceException.class)
+    public ResponseEntity<String> handleErrorResponseException(RaireServiceException ex) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("error_code", String.valueOf(ex.errorCode));
 
