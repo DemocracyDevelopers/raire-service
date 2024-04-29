@@ -34,10 +34,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class GenerateAssertionsService {
 
-  public GenerateAssertionsResponse generateAssertions(GenerateAssertionsRequest request) throws GenerateAssertionsException {
+  public GenerateAssertionsResponse generateAssertions(GenerateAssertionsRequest request) throws RaireServiceException {
     RaireError error = new TimeoutCheckingWinner();
     List<String> candidates = List.of("Alice","Bob");
-    throw new GenerateAssertionsException(error, candidates);
+    throw new RaireServiceException(error, candidates);
   }
 
 }

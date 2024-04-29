@@ -22,11 +22,14 @@ package au.org.democracydevelopers.raireservice.persistence.repository;
 
 
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
+import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
+import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +42,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
@@ -288,6 +293,28 @@ public class AssertionRepositoryTests {
   }
 
   /**
+   * Test NEBAssertion::convert().
+   */
+  @Test
+  @Transactional
+  @Sql(scripts = {"/simple_assertions_in_progress.sql"}, executionPhase = BEFORE_TEST_METHOD)
+  void retrieveAssertionsOneNEBAssertionConvert(){
+    List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
+    assertEquals(1, retrieved.size());
+
+    final Assertion r = retrieved.get(0);
+    AssertionAndDifficulty aad = r.convert(List.of("Alice", "Bob"));
+    assertEquals(1.1, aad.difficulty);
+    assertEquals(320, aad.margin);
+    assertTrue(aad.assertion.isNEB());
+    assertEquals(0, ((NotEliminatedBefore)aad.assertion).winner);
+    assertEquals(1, ((NotEliminatedBefore)aad.assertion).loser);
+
+    // Check that current risk is 0.5
+    assertEquals(new BigDecimal("0.50"), aad.status.get(Assertion.STATUS_RISK));
+  }
+
+  /**
    * Retrieve assertions for a contest that has one NEN assertion.
    */
   @Test
@@ -300,6 +327,31 @@ public class AssertionRepositoryTests {
     final Assertion r = retrieved.get(0);
     assertEquals(NENAssertion.class, r.getClass());
     assertEquals(aliceNENCharlie, GSON.toJson(r));
+  }
+
+  /**
+   * Test NENAssertion::convert().
+   */
+  @Test
+  @Transactional
+  @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
+  void retrieveAssertionsExistentContestOneNENAssertionConvert(){
+    List<Assertion> retrieved = assertionRepository.findByContestName("One NEN Assertion Contest");
+    assertEquals(1, retrieved.size());
+
+    final Assertion r = retrieved.get(0);
+    AssertionAndDifficulty aad = r.convert(List.of("Alice", "Charlie", "Diego", "Bob"));
+    assertEquals(3.01, aad.difficulty);
+    assertEquals(240, aad.margin);
+    assertFalse(aad.assertion.isNEB());
+    assertEquals(0, ((NotEliminatedNext)aad.assertion).winner);
+    assertEquals(1, ((NotEliminatedNext)aad.assertion).loser);
+
+    int[] continuing = {0, 1, 2, 3};
+    assertArrayEquals(continuing, ((NotEliminatedNext)aad.assertion).continuing);
+
+    // Check that current risk is 1.00
+    assertEquals(new BigDecimal("1.00"), aad.status.get(Assertion.STATUS_RISK));
   }
 
   /**

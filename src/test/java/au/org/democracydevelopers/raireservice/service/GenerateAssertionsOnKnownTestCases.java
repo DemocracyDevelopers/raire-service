@@ -35,7 +35,7 @@ import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
-import au.org.democracydevelopers.raireservice.service.GenerateAssertionsException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -146,7 +146,7 @@ public class GenerateAssertionsOnKnownTestCases {
   @Test
   @Transactional
   void dummyServiceThrowsException() {
-    assertThrows(GenerateAssertionsException.class, () ->
+    assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.generateAssertions(tiedWinnersRequest)
     );
   }
@@ -159,7 +159,7 @@ public class GenerateAssertionsOnKnownTestCases {
   @Transactional
   @Disabled
   void tiedWinnersThrowsTiedWinnersException() {
-    GenerateAssertionsException ex = assertThrows(GenerateAssertionsException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.generateAssertions(tiedWinnersRequest)
     );
     String msg = ex.getMessage();
@@ -181,7 +181,7 @@ public class GenerateAssertionsOnKnownTestCases {
   @Test
   @Transactional
   @Disabled
-  void testGuideToRaireExample1() throws GenerateAssertionsException {
+  void testGuideToRaireExample1() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample1,
         27, 5, Arrays.stream(aliceBobChuanDiego).toList());
     GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
@@ -206,7 +206,7 @@ public class GenerateAssertionsOnKnownTestCases {
   @Test
   @Transactional
   @Disabled
-  void testGuideToRaireExample2() throws GenerateAssertionsException {
+  void testGuideToRaireExample2() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample2,
         41, 5, Arrays.stream(aliceChuanBob).toList());
     GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
@@ -253,7 +253,7 @@ public class GenerateAssertionsOnKnownTestCases {
   @Test
   @Transactional
   @Disabled
-  public void simpleContestSingleCounty() throws GenerateAssertionsException {
+  public void simpleContestSingleCounty() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         5, 5, Arrays.stream(aliceChuanBob).toList());
     GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
@@ -285,7 +285,7 @@ public class GenerateAssertionsOnKnownTestCases {
   @Test
   @Transactional
   @Disabled
-  public void simpleContestCrossCounty() throws GenerateAssertionsException {
+  public void simpleContestCrossCounty() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(crossCountySimpleContest,
         5, 5, Arrays.stream(aliceChuanBob).toList());
     GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
@@ -323,7 +323,7 @@ public class GenerateAssertionsOnKnownTestCases {
   @Test
   @Transactional
   @Disabled
-  public void simpleContestSingleCountyDoubleBallots() throws GenerateAssertionsException {
+  public void simpleContestSingleCountyDoubleBallots() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         10, 5, Arrays.stream(aliceChuanBob).toList());
     GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
@@ -359,7 +359,7 @@ public class GenerateAssertionsOnKnownTestCases {
   public void simpleContestSingleCountyInsuffientBallotsThrowsException() {
     GenerateAssertionsRequest notEnoughBallotsRequest = new GenerateAssertionsRequest(simpleContest,
         2, 5, Arrays.stream(aliceChuanBob).toList());
-    GenerateAssertionsException ex = assertThrows(GenerateAssertionsException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.generateAssertions(notEnoughBallotsRequest)
     );
     String msg = ex.getMessage();
@@ -380,7 +380,7 @@ public class GenerateAssertionsOnKnownTestCases {
     String[] wrongCandidates = {"Alicia", "Chuan", "Boba"};
     GenerateAssertionsRequest wrongCandidatesRequest = new GenerateAssertionsRequest(simpleContest,
         5, 5, Arrays.stream(wrongCandidates).toList());
-    GenerateAssertionsException ex = assertThrows(GenerateAssertionsException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.generateAssertions(wrongCandidatesRequest)
     );
     String msg = ex.getMessage();
