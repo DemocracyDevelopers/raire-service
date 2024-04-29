@@ -116,8 +116,6 @@ public class GenerateAssertionsExceptionTests {
 
   /**
    * Reasonable error message and correct error code for invalidCandidateNumber.
-   * TODO check that this is what happens when the candidate list doesn't match the database.
-   * See Issue https://github.com/DemocracyDevelopers/raire-service/issues/66
    */
   @Test
   public void invalidCandidateNumberGetsCorrectMessage() {
@@ -222,5 +220,20 @@ public class GenerateAssertionsExceptionTests {
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Internal error"));
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
+  }
+
+  /**
+   * A catch-all error generator for other kinds of things that might go wrong before sending the
+   * request to raire-java, for example if the totalAuditableBallots is less than the number of ballots
+   * we find for the contest.
+   */
+  @Test
+  public void genericErrorIsAnInternalError() {
+    GenerateAssertionsException e
+        = new GenerateAssertionsException("Total Auditable Ballots less than actual ballots");
+    String msg = e.getMessage();
+    assertTrue(StringUtils.containsIgnoreCase(msg, "Auditable Ballots"));
+    assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
+
   }
 }
