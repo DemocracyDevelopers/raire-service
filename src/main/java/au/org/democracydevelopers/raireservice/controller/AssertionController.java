@@ -82,7 +82,7 @@ public class AssertionController {
 
 
   /**
-   * The API endpoint for finding and return assertions, by contest name. This endpoint returns
+   * The API endpoint for finding and returning assertions, by contest name. This endpoint returns
    * assertions in the form of a JSON Visualiser Report.
    * @param request a GetAssertionsRequest, specifying an IRV contest name for which to retrieve the
    *                assertions.
