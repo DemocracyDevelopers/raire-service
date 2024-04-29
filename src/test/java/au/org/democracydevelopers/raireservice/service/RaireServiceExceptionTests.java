@@ -54,7 +54,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test-containers")
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class GenerateAssertionsExceptionTests {
+public class RaireServiceExceptionTests {
 
   @Autowired
   ContestRepository contestRepository;
@@ -229,8 +229,8 @@ public class GenerateAssertionsExceptionTests {
    */
   @Test
   public void genericErrorIsAnInternalError() {
-    GenerateAssertionsException e
-        = new GenerateAssertionsException("Total Auditable Ballots less than actual ballots");
+    RaireServiceException e
+        = new RaireServiceException("Total Auditable Ballots less than actual ballots", RaireErrorCodes.INTERNAL_ERROR);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Auditable Ballots"));
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
