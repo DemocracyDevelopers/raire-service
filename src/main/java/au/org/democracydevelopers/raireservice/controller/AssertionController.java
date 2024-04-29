@@ -76,7 +76,7 @@ public class AssertionController {
   public ResponseEntity<GenerateAssertionsResponse> serve(@RequestBody GenerateAssertionsRequest request)
       throws RequestValidationException, RaireServiceException {
       request.Validate(contestRepository);
-      GenerateAssertionsResponse response = generateAssertionsService.generateAssertions();
+      GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
       return new ResponseEntity<>(response, HttpStatus.OK);
   }
 

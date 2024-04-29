@@ -66,7 +66,8 @@ public class RaireServiceException extends Exception {
       // I think this is what we get if the candidate list entered in the request has the
       // right number but wrong names vs the database. It's therefore not (really) an internal error
       // - it's a colorado-rla error.
-      // TODO add a test for this case. (See Issue https://github.com/DemocracyDevelopers/raire-service/issues/66.)
+      // TODO check GenerateAssertionsOnKnownTestCases::wrongCandidateThrowsException for this case.
+      // (See Issue https://github.com/DemocracyDevelopers/raire-service/issues/66.)
       case InvalidCandidateNumber e -> this.errorCode = RaireErrorCodes.WRONG_CANDIDATE_NAMES;
 
       // Internal coding errors.
@@ -127,8 +128,6 @@ public class RaireServiceException extends Exception {
 
     /**
      * The list of candidate names in the request didn't match the database.
-     * TODO check that this does indeed reflect how we get this error.
-     * See Issue https://github.com/DemocracyDevelopers/raire-service/issues/66
      */
     WRONG_CANDIDATE_NAMES,
 
@@ -183,7 +182,6 @@ public class RaireServiceException extends Exception {
 
       // I think this is what we get if the candidate list entered in the request has the
       // right number but wrong names vs the database.
-      // TODO add a test for this case. (See Issue https://github.com/DemocracyDevelopers/raire-service/issues/66.)
       case InvalidCandidateNumber e -> message = "Candidate list does not match database.";
 
       // Internal coding errors.
