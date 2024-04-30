@@ -35,6 +35,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -93,6 +94,7 @@ public class AssertionController {
    * appropriate http error. TODO add these when assertion retrieval is implemented.
    */
   @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ResponseBody
   public ResponseEntity<RaireSolution> serve(@RequestBody GetAssertionsRequest request)
       throws RequestValidationException, RaireServiceException {
 

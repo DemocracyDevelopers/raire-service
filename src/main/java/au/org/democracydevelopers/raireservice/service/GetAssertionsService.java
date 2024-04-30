@@ -23,9 +23,8 @@ package au.org.democracydevelopers.raireservice.service;
 import au.org.democracydevelopers.raire.RaireSolution;
 
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
-import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
-import au.org.democracydevelopers.raire.time.TimeTaken;
+import au.org.democracydevelopers.raireservice.json.RaireResultMixIn;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
@@ -108,13 +107,8 @@ public class GetAssertionsService {
       List<AssertionAndDifficulty> translated = assertions.stream().map(
           a -> a.convert(request.candidates)).toList();
 
-      // A RaireSolution contains a RaireResult, which itself will contain the assertions for
-      // contest in the request. Default values for some of the attributes of RaireResult will
-      // be used -- these attributes will not be serialised in the (eventual) export.
-      final TimeTaken undefined = new TimeTaken(0, 0);
       double difficulty = 0;
       int margin = 0;
-      int winner = -1;
 
       // Get maximum difficulty and minimum margin across assertions.
       OptionalDouble maxDifficulty = translated.stream().map(a -> a.difficulty).
@@ -128,9 +122,8 @@ public class GetAssertionsService {
         margin = minMargin.getAsInt();
       }
 
-      RaireResult result = new RaireResult(translated.toArray(AssertionAndDifficulty[]::new),
-          difficulty, margin, winner, request.candidates.size(), undefined, undefined,
-          undefined, false);
+      RaireResultMixIn result = new RaireResultMixIn(translated.toArray(AssertionAndDifficulty[]::new),
+          difficulty, margin, request.candidates.size());
 
       return new RaireSolution(metadata, new RaireResultOrError(result));
     }

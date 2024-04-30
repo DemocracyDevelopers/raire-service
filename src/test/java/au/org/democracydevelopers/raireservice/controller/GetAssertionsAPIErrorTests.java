@@ -57,7 +57,7 @@ import org.apache.commons.lang3.StringUtils;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsAPITests {
+public class GetAssertionsAPIErrorTests {
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
 
@@ -81,7 +81,7 @@ public class GetAssertionsAPITests {
   }
 
   /**
-   * A trivial example of a invalid get assertions request. Simply tests that it returns an HTTP
+   * A trivial example of an invalid get assertions request. Simply tests that it returns an HTTP
    * failure status with the reason that there are not assertions associated with the contest.
    */
   @Test
