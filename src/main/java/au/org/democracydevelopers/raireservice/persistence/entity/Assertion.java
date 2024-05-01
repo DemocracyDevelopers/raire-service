@@ -196,6 +196,13 @@ public abstract class Assertion {
   protected BigDecimal currentRisk = new BigDecimal("1.00");
 
   /**
+   * Get the difficulty. Used only for testing.
+   */
+  public double getDifficulty() {
+    return difficulty;
+  }
+
+  /**
    * Default no-args constructor (required for persistence).
    */
   public Assertion() {}
