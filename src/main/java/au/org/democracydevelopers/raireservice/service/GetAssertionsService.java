@@ -24,7 +24,7 @@ import au.org.democracydevelopers.raire.RaireSolution;
 
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
-import au.org.democracydevelopers.raireservice.json.RaireResultMixIn;
+import au.org.democracydevelopers.raireservice.response.RaireResultMixIn;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
