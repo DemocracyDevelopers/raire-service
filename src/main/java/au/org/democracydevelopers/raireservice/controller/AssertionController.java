@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 /**
  * This class controls the post request mappings for all requests related
@@ -72,6 +71,9 @@ public class AssertionController {
    * This tests for invalid requests, such as non-existent, null, or non-IRV contest names.
    * Other exceptions that are specific to assertion generation are caught and translated into the
    * appropriate http error. TODO add these when assertion generation is implemented.
+   * @throws RaireServiceException for other errors that are specific to assertion generation, such
+   * as tied winners or timeouts. These are caught by ControllerExceptionHandler and translated into the
+   * appropriate http error.
    */
   @PostMapping(path = "/generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<GenerateAssertionsResponse> serve(@RequestBody GenerateAssertionsRequest request)
@@ -87,11 +89,11 @@ public class AssertionController {
    * assertions in the form of a JSON Visualiser Report.
    * @param request a GetAssertionsRequest, specifying an IRV contest name for which to retrieve the
    *                assertions.
-   * @return the assertions, as JSON (in the case of success) or an error. TODO the String is just a placeholder for now.
-   * @throws RequestValidationException which is handled by ControllerExceptionHandler.
-   * This tests for invalid requests, such as non-existent, null, or non-IRV contest names.
-   * Other exceptions that are specific to assertion generation are caught and translated into the
-   * appropriate http error. TODO add these when assertion retrieval is implemented.
+   * @return the assertions, as JSON (in the case of success) or an error.
+   * @throws RequestValidationException for invalid requests, such as non-existent, null, or non-IRV contest names.
+   * @throws RaireServiceException if the request is valid but assertion retrieval fails, for example
+   * if there are no assertions for the contest.
+   * These are handled by ControllerExceptionHandler.
    */
   @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
@@ -100,24 +102,11 @@ public class AssertionController {
 
     request.Validate(contestRepository);
 
-    try {
       // Extract a RaireSolution containing the assertions that we want to serialise into
       // a JSON Assertion Visualiser report.
       RaireSolution solution = getAssertionsService.getRaireSolution(request);
 
       return new ResponseEntity<>(solution, HttpStatus.OK);
-
-      // TODO Catch all the exceptions that the GetAssertionsService can throw, for example if the
-      // assertions are present but retrieval fails for some reason.
-      // They can either be caught here or handled by the ControllerExceptionHandler.
-      // This should be part of Issue https://github.com/DemocracyDevelopers/raire-service/issues/44
-    }
-    catch (RaireServiceException ex) {
-      throw ex;
-    }
-    catch(Exception ex){
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
-    }
   }
 
   /**

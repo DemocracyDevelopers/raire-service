@@ -29,32 +29,47 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 /**
- * Exception handler for the bad request types common to all Contest Requests,
- * including GenerateAssertionsRequest and GetAssertionsRequest.
- * Other errors (the ones specific to particular tasks) will be dealt with using
- * ResponseStatusException.
+ * Exception handler for all exceptions thrown by the AssertionController endpoints.
  */
 @ControllerAdvice
 public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
+    /**
+     * Handle RequestValidationExceptions, which can arise during generate or get assertion API requests.
+     * The error message will be short and is intended to be shown to the user. These errors are the
+     * fault of the caller.
+     */
     @org.springframework.web.bind.annotation.ExceptionHandler(RequestValidationException.class)
     public ResponseEntity<String> handleInvalidRequestException(RequestValidationException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     /**
-     * Handle exceptions that arise during assertion generation. This will return the custom code
-     * in the headers, so that colorado-rla can interpret it. The error message will be short and
-     * is intended to be shown to the user. Note that errors may be a consequence of the data
-     * (e.g. tied winners) or of a server error.
-     * @param ex the GenerateAssertionsException.
+     * Handle RaireServiceExceptions that arise during generate or get assertion API requests.
+     * This will return the custom code in the headers, so that colorado-rla can interpret it.
+     * The error message will be short and is intended to be shown to the user. These errors
+     * may be a consequence of the data (e.g. tied winners) or of a server error.
+     * @param ex the RaireException.
      * @return the error message and error code.
      */
     @org.springframework.web.bind.annotation.ExceptionHandler(RaireServiceException.class)
-    public ResponseEntity<String> handleErrorResponseException(RaireServiceException ex) {
+    public ResponseEntity<String> handleRaireException(RaireServiceException ex) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("error_code", String.valueOf(ex.errorCode));
 
         return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    /**
+     * Generic exception handling. This indicates an unexpected error.
+     * Exception-handlers are called in order of specificity, so this one will be last.
+     * @return the error message as an API response.
+     */
+    @org.springframework.web.bind.annotation.ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleException(Exception ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+
+    }
+
+
 }

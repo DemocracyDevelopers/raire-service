@@ -89,6 +89,7 @@ public class GetAssertionsServiceTests {
   /**
    * Retrieval of assertions for a non-existent contest will throw a RaireServiceException
    * with error code NO_ASSERTIONS_PRESENT.
+   * Note that this should not happen because it should be caught by request validation.
    */
   @Test
   @Transactional

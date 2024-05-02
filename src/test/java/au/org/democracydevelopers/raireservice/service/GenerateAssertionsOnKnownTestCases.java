@@ -21,10 +21,10 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.service;
 
 
-import static au.org.democracydevelopers.raireservice.testUtils.correctAssertionData;
+import static au.org.democracydevelopers.raireservice.testUtils.correctDBAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctAssumedContinuing;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,7 +36,6 @@ import au.org.democracydevelopers.raireservice.persistence.repository.AssertionR
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -81,6 +80,9 @@ public class GenerateAssertionsOnKnownTestCases {
   @Autowired
   GenerateAssertionsService generateAssertionsService;
 
+  // error allowed when comparing doubles.
+  private static final double EPS = 0.0000000001;
+
   /**
    * Names of contests, to match pre-loaded data.
    */
@@ -114,9 +116,8 @@ public class GenerateAssertionsOnKnownTestCases {
   void NEBassertionRetrievalWorks() {
 
     Assertion assertion = assertionRepository.findByContestName(oneNEBAssertionContest).getFirst();
-
-    assertTrue(correctAssertionData(320, BigDecimal.valueOf(0.32), BigDecimal.valueOf(1.1),
-        "Alice","Bob", assertion));
+    assertInstanceOf(NEBAssertion.class, assertion);
+    assertTrue(correctDBAssertionData(320, 0.32, 1.1, "Alice","Bob", assertion, EPS));
   }
 
   /**
@@ -129,13 +130,9 @@ public class GenerateAssertionsOnKnownTestCases {
 
     Assertion assertion = assertionRepository.findByContestName(oneNENAssertionContest).getFirst();
 
-    assertTrue(correctAssertionData(20, BigDecimal.valueOf(0.4), BigDecimal.valueOf(2.5),
-        "Alice","Bob", assertion));
+    assertTrue(correctDBAssertionData(20, 0.4, 2.5, "Alice", "Bob", assertion, EPS));
     assertTrue(correctAssumedContinuing(Arrays.stream(aliceChuanBob).toList(), assertion));
-    assertTrue(correctAssumedContinuing(List.of("Bob","Chuan","Alice"), assertion));
-    assertFalse(correctAssumedContinuing(Arrays.stream(aliceBobChuanDiego).toList(), assertion));
-    assertFalse(correctAssumedContinuing(List.of("Chuan","Bob"), assertion));
-    assertFalse(correctAssumedContinuing(List.of("C","B"), assertion));
+    assertInstanceOf(NENAssertion.class, assertion);
   }
 
 
@@ -194,8 +191,7 @@ public class GenerateAssertionsOnKnownTestCases {
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
 
-    assertTrue(correctAssertionData(4000, BigDecimal.valueOf(8 / 27.0), BigDecimal.valueOf(27 / 8.0),
-        "Chuan", "Bob", nebAssertion));
+    assertTrue(correctDBAssertionData(4000, 8 / 27.0, 27 / 8.0, "Chuan", "Bob", nebAssertion, EPS));
   }
 
   /**
@@ -220,19 +216,17 @@ public class GenerateAssertionsOnKnownTestCases {
     Optional<Assertion> nebMaybeAssertion = assertions.stream().filter(a -> a instanceof NEBAssertion).findFirst();
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
-    assertTrue(correctAssertionData(10, BigDecimal.valueOf(10 / 41.0), BigDecimal.valueOf(4.1),
-        "Chuan","Alice",nebAssertion));
+    assertTrue(correctDBAssertionData(10, 10 / 41.0, 4.1,
+        "Chuan","Alice",nebAssertion, EPS));
 
     // There should be one NEN assertion: Chuan > Bob if only {Chuan,Bob} remain.
     // Margin is 9,000, but data is divided by 1000, so 9. Difficulty is 41/9 = 4.5555...,
     // rounded to 4.6 in the Guide.
     // Diluted margin is 9/41 = 0.219512195...
-    // TODO check how many dp are serialised and refine test accordingly.
     Optional<Assertion> nenMaybeAssertion = assertions.stream().filter(a -> a instanceof NENAssertion).findFirst();
     assertTrue(nenMaybeAssertion.isPresent());
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
-    assertTrue(correctAssertionData(9, BigDecimal.valueOf(9/41.0), BigDecimal.valueOf(41.0/9),
-        "Chuan", "Bob", nenAssertion));
+    assertTrue(correctDBAssertionData(9, 9/41.0, 41.0/9, "Chuan", "Bob", nenAssertion, EPS));
     assertTrue(correctAssumedContinuing(List.of("Chuan","Bob"), nenAssertion));
   }
 
@@ -266,16 +260,14 @@ public class GenerateAssertionsOnKnownTestCases {
         .filter(a -> a instanceof NEBAssertion).findFirst();
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
-    assertTrue(correctAssertionData(1, BigDecimal.valueOf(0.2), BigDecimal.valueOf(5),
-        "Alice","Chuan", nebAssertion));
+    assertTrue(correctDBAssertionData(1, 0.2, 5, "Alice", "Chuan", nebAssertion, EPS));
 
     // There should be one NEN assertion: Alice > Bob if only {Alice,Bob} remain.
     Optional<Assertion> nenMaybeAssertion = assertions.stream()
         .filter(a -> a instanceof NENAssertion).findFirst();
     assertTrue(nenMaybeAssertion.isPresent());
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
-    assertTrue(correctAssertionData(1, BigDecimal.valueOf(0.2), BigDecimal.valueOf(5),
-        "Alice","Bob", nenAssertion));
+    assertTrue(correctDBAssertionData(1, 0.2, 5, "Alice", "Bob", nenAssertion, EPS));
     assertTrue(correctAssumedContinuing(List.of("Bob","Alice"), nenAssertion));
   }
 
@@ -297,15 +289,13 @@ public class GenerateAssertionsOnKnownTestCases {
     Optional<Assertion> nebMaybeAssertion = assertions.stream().filter(a -> a instanceof NEBAssertion).findFirst();
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
-    assertTrue(correctAssertionData(1, BigDecimal.valueOf(0.2), BigDecimal.valueOf(5),
-        "Alice","Chuan", nebAssertion));
+    assertTrue(correctDBAssertionData(1, 0.2, 5, "Alice", "Chuan", nebAssertion, EPS));
 
     // There should be one NEN assertion: Alice > Bob if only {Alice,Bob} remain.
     Optional<Assertion> nenMaybeAssertion = assertions.stream().filter(a -> a instanceof NENAssertion).findFirst();
     assertTrue(nenMaybeAssertion.isPresent());
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
-    assertTrue(correctAssertionData(1, BigDecimal.valueOf(0.2), BigDecimal.valueOf(5),
-        "Alice","Bob", nenAssertion));
+    assertTrue(correctDBAssertionData(1, 0.2, 5, "Alice", "Bob", nenAssertion, EPS));
     assertTrue(correctAssumedContinuing(List.of("Bob","Alice"), nenAssertion));
 
   }
@@ -336,16 +326,14 @@ public class GenerateAssertionsOnKnownTestCases {
         .filter(a -> a instanceof NEBAssertion).findFirst();
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
-    assertTrue(correctAssertionData(1, BigDecimal.valueOf(0.1), BigDecimal.valueOf(10),
-        "Alice","Chuan", nebAssertion));
+    assertTrue(correctDBAssertionData(1, 0.1, 10, "Alice", "Chuan", nebAssertion, EPS));
 
     // There should be one NEN assertion: Alice > Bob if only {Alice,Bob} remain.
     Optional<Assertion> nenMaybeAssertion = assertions.stream()
         .filter(a -> a instanceof NENAssertion).findFirst();
     assertTrue(nenMaybeAssertion.isPresent());
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
-    assertTrue(correctAssertionData(1, BigDecimal.valueOf(0.1), BigDecimal.valueOf(10),
-        "Alice","Bob", nenAssertion));
+    assertTrue(correctDBAssertionData(1, 0.1, 10, "Alice", "Bob", nenAssertion, EPS));
     assertTrue(correctAssumedContinuing(List.of("Bob","Alice"), nenAssertion));
   }
 

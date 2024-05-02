@@ -12,7 +12,7 @@ INSERT INTO assertion_assumed_continuing values (2, 'Diego');
 INSERT INTO assertion_assumed_continuing values (2, 'Bob');
 
 INSERT INTO county (id, name) VALUES (3,'One NEN NEB Assertion County');
-INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) VALUES (3,3,0,'IRV','One NEN Assertion Contest',3,4,1);
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) VALUES (3,3,0,'IRV','One NEN NEB Assertion Contest',3,4,1);
 INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values ('NEB', 'One NEN NEB Assertion Contest', 0.1, 0.1, 'Liesl', 112, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Amanda');
 
 INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values ('NEN', 'One NEN NEB Assertion Contest', 3.17, 0.5, 'Wendell', 560, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Amanda');
