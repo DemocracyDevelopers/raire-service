@@ -67,7 +67,6 @@ public class testUtils {
     return contestName.equals(retrievedContestName)
         && Math.abs(riskLimit - retrievedRiskLimit) < eps
         && setsNoDupesEqual(candidates, retrievedCandidates);
-
   }
 
   /**
@@ -78,7 +77,8 @@ public class testUtils {
    * @param eps margin of error for floating-point comparisons
    * @return true if the APIResponseBody's data matches the expected values.
    */
-  public static boolean correctSolutionData(int margin, double difficulty, int numAssertions, String APIResponseBody, double eps) {
+  public static boolean correctSolutionData(int margin, double difficulty, int numAssertions,
+      String APIResponseBody, double eps) {
     JsonObject data =  GSON.fromJson(APIResponseBody, JsonObject.class);
     JsonObject solutionElement = (JsonObject) data.get("solution").getAsJsonObject().get("Ok");
     int retrievedMargin = solutionElement.get("margin").getAsInt();
@@ -103,15 +103,33 @@ public class testUtils {
    * as strings.
    */
   public static boolean correctIndexedAPIAssertionData(String type, int margin, double difficulty,
-      int winner, int loser, List<Integer> assumedContinuing, double risk, String APIResponseBody, int index, double eps) {
+      int winner, int loser, List<Integer> assumedContinuing, double risk, String APIResponseBody,
+      int index, double eps) {
     JsonObject data =  GSON.fromJson(APIResponseBody, JsonObject.class);
     String assertion = data.get("solution").getAsJsonObject().get("Ok").getAsJsonObject()
         .get("assertions").getAsJsonArray().get(index).getAsJsonObject().toString();
-    return correctAPIAssertionData(type, margin, difficulty, winner, loser, assumedContinuing, risk, assertion, eps);
+    return correctAPIAssertionData(type, margin, difficulty, winner, loser, assumedContinuing, risk,
+        assertion, eps);
   }
 
+  /**
+   * Check that the data in an assertion expressed as json (of the form exported in the
+   * get-assertions API) matches the data entered as function parameters.
+   * @param type the assertion type (NEB or NEN).
+   * @param margin the absolute margin
+   * @param difficulty raire's estimated difficulty
+   * @param winner the assertion winner's index in the candidate list
+   * @param loser the assertion loser's index in the candidate list
+   * @param assumedContinuing if NEB, blank; if NEN, the list of indices of the candidates assumed
+   *                          to be continuing.
+   * @param risk the current risk estimate.
+   * @param assertionAsJson the assertion to be tested, as a json string.
+   * @param eps the error tolerance for floating-point comparisons.
+   * @return true if the input data matches the data extracted from the assertion as json.
+   */
   public static boolean correctAPIAssertionData(String type, int margin, double difficulty,
-      int winner, int loser, List<Integer> assumedContinuing, double risk, String assertionAsJson, double eps) {
+      int winner, int loser, List<Integer> assumedContinuing, double risk, String assertionAsJson,
+      double eps) {
     // It makes no sense to call this with NEB and a nonempty assumedContinuing.
     assert (type.equals("NEN") || assumedContinuing.isEmpty());
 
@@ -129,7 +147,8 @@ public class testUtils {
     if(retrievedType.equals("NEN")) {
       // type is NEN. Get 'assumed continuing' and compare it with expected.
       assert (assertionData.has("continuing"));
-      JsonArray retrievedAssumedContinuingData = assertionData.getAsJsonArray("continuing").getAsJsonArray();
+      JsonArray retrievedAssumedContinuingData
+          = assertionData.getAsJsonArray("continuing").getAsJsonArray();
       List<Integer> retrievedContinuing = new ArrayList<>();
       for (JsonElement jsonElement : retrievedAssumedContinuingData) {
         retrievedContinuing.add(jsonElement.getAsInt());
@@ -179,7 +198,8 @@ public class testUtils {
 
 
   /**
-   * Utility to check that the expected assumedContinuing list matches the one in the assertion, ignoring order.
+   * Utility to check that the expected assumedContinuing list matches the one in the assertion,
+   * ignoring order.
    * @param expectedNames the list of candidate names expected to be in the 'assumed continuing' field.
    * @param assertion the assertion to be checked.
    * @return true if the NEN assertion's 'assumed continuing' list matches expectedNames, ignoring order.
@@ -188,7 +208,8 @@ public class testUtils {
     String retrievedString = GSON.toJson(assertion);
     JsonObject data = GSON.fromJson(retrievedString, JsonObject.class);
     JsonElement assumedContinuingElement = data.get("assumedContinuing");
-    List<String> assertionContinuing = GSON.fromJson(assumedContinuingElement, new TypeToken<List<String>>(){}.getType());
+    List<String> assertionContinuing
+        = GSON.fromJson(assumedContinuingElement, new TypeToken<List<String>>(){}.getType());
     return setsNoDupesEqual(assertionContinuing, expectedNames);
   }
 
@@ -199,7 +220,8 @@ public class testUtils {
    * @param eps the margin of error allowed for equality-comparison.
    * @return true iff the maximum difficulty among the assertions equals expectedDifficulty.
    */
-  public static boolean difficultyMatchesMax(double expectedDifficulty, List<Assertion> assertions, double eps) {
+  public static boolean difficultyMatchesMax(double expectedDifficulty, List<Assertion> assertions,
+      double eps) {
     double assertionDifficultyMax = max(assertions.stream().map(Assertion::getDifficulty).toList());
     return Math.abs(assertionDifficultyMax - expectedDifficulty) < eps;
   }

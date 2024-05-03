@@ -55,7 +55,6 @@ import org.springframework.transaction.annotation.Transactional;
  * Contests which will be used for validity testing are pre-loaded into the database using
  * src/test/resources/data.sql.
  */
-
 @ActiveProfiles("assertions-in-progress")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
@@ -70,7 +69,9 @@ public class GetAssertionsInProgressValidAPIRequestTests {
   private final static String oneNENAssertionContest = "One NEN Assertion Contest";
   private final static String oneNEBOneNENAssertionContest = "One NEN NEB Assertion Contest";
 
-  // error allowed when comparing doubles.
+  /**
+   * error allowed when comparing doubles.
+   */
   private static final double EPS = 0.0000000001;
 
   @LocalServerPort
@@ -120,7 +121,6 @@ public class GetAssertionsInProgressValidAPIRequestTests {
   /**
    * Retrieve assertions for a contest that has one NEN assertion (audit in progress).
    */
-
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNENAssertion() {

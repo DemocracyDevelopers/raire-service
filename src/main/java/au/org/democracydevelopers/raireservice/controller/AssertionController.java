@@ -129,17 +129,18 @@ public class AssertionController {
 
     request.Validate(contestRepository);
 
-      // Extract a RaireSolution containing the assertions that we want to serialise into
-      // a JSON Assertion Visualiser report.
-      RaireSolution solution = getAssertionsService.getRaireSolution(request);
+    // Extract a RaireSolution containing the assertions that we want to serialise into
+    // a JSON Assertion Visualiser report.
+    RaireSolution solution = getAssertionsService.getRaireSolution(request);
 
-      return new ResponseEntity<>(solution, HttpStatus.OK);
+    return new ResponseEntity<>(solution, HttpStatus.OK);
   }
 
   /**
    * All args constructor
    * @param contestRepository the contestRepository, used for validating requests.
    * @param generateAssertionsService the generateAssertions service.
+   * @param getAssertionsService the getAssertions service.
    */
   public AssertionController(ContestRepository contestRepository,
       GenerateAssertionsService generateAssertionsService,
