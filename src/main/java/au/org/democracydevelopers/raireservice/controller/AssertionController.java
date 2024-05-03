@@ -22,7 +22,6 @@ package au.org.democracydevelopers.raireservice.controller;
 
 import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
-import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;

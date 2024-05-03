@@ -82,7 +82,7 @@ public class GetAssertionsService {
       }
 
       // Create contest metadata map, supplied as input when creating a RaireResult.
-      Map<String, Object> metadata = new HashMap<String, Object>();
+      Map<String, Object> metadata = new HashMap<>();
       metadata.put(Metadata.CANDIDATES, request.candidates);
       metadata.put(Metadata.RISK_LIMIT, request.riskLimit);
       metadata.put(Metadata.CONTEST, request.contestName);
