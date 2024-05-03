@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
@@ -181,8 +182,8 @@ public class GenerateAssertionsOnKnownTestCases {
   void testGuideToRaireExample1() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample1,
         27, 5, Arrays.stream(aliceBobChuanDiego).toList());
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
-    assertTrue(StringUtils.containsIgnoreCase(response.winner, "Chuan"));
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    assertTrue(StringUtils.containsIgnoreCase(request.candidates.get(response.Ok.winner), "Chuan"));
     List<Assertion> assertions = assertionRepository.findByContestName(guideToRaireExample2);
 
     // There should be one NEB assertion: Chaun NEB Bob
@@ -205,8 +206,8 @@ public class GenerateAssertionsOnKnownTestCases {
   void testGuideToRaireExample2() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample2,
         41, 5, Arrays.stream(aliceChuanBob).toList());
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
-    assertTrue(StringUtils.containsIgnoreCase(response.winner,"Chuan"));
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    assertTrue(StringUtils.containsIgnoreCase(request.candidates.get(response.Ok.winner),"Chuan"));
     List<Assertion> assertions = assertionRepository.findByContestName(guideToRaireExample2);
     assertEquals(2, assertions.size());
 
@@ -250,8 +251,8 @@ public class GenerateAssertionsOnKnownTestCases {
   public void simpleContestSingleCounty() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         5, 5, Arrays.stream(aliceChuanBob).toList());
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
-    assertTrue(StringUtils.containsIgnoreCase(response.winner, "Alice"));
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    assertTrue(StringUtils.containsIgnoreCase(request.candidates.get(response.Ok.winner), "Alice"));
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(2, assertions.size());
 
@@ -280,8 +281,8 @@ public class GenerateAssertionsOnKnownTestCases {
   public void simpleContestCrossCounty() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(crossCountySimpleContest,
         5, 5, Arrays.stream(aliceChuanBob).toList());
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
-    assertTrue(StringUtils.containsIgnoreCase(response.winner, "Alice"));
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    assertTrue(StringUtils.containsIgnoreCase(request.candidates.get(response.Ok.winner), "Alice"));
     List<Assertion> assertions = assertionRepository.findByContestName(crossCountySimpleContest);
     assertEquals(2, assertions.size());
 
@@ -316,8 +317,8 @@ public class GenerateAssertionsOnKnownTestCases {
   public void simpleContestSingleCountyDoubleBallots() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         10, 5, Arrays.stream(aliceChuanBob).toList());
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
-    assertTrue(StringUtils.containsIgnoreCase(response.winner, "Alice"));
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    assertTrue(StringUtils.containsIgnoreCase(request.candidates.get(response.Ok.winner), "Alice"));
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(2, assertions.size());
 

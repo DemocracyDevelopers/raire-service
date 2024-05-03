@@ -98,5 +98,5 @@ public class Contest {
    * Get the ID of the contest.
    * @return the contest ID.
    */
-  public int getContestID() { return id; }
+  public long getContestID() { return id; }
 }
