@@ -24,7 +24,6 @@ import au.org.democracydevelopers.raireservice.persistence.repository.ContestRep
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.annotation.ReadOnlyProperty;
 import java.beans.ConstructorProperties;
 
 /**

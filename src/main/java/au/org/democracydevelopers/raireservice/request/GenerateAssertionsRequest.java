@@ -23,7 +23,6 @@ package au.org.democracydevelopers.raireservice.request;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import java.beans.ConstructorProperties;
 import java.util.List;
-import org.springframework.data.annotation.ReadOnlyProperty;
 
 /**
  * Request (expected to be json) identifying the contest for which assertions should be generated.

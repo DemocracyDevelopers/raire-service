@@ -140,7 +140,7 @@ public class GetAssertionsServiceTests {
     assertEquals(1, ((NotEliminatedBefore)aad.assertion).loser);
 
     // Check that current risk is 1.00
-    assertEquals(new BigDecimal("1.00"), aad.status.get(Assertion.STATUS_RISK));
+    assertEquals(new BigDecimal("1.00"), aad.status.get(Metadata.STATUS_RISK));
   }
 
   /**
@@ -183,7 +183,7 @@ public class GetAssertionsServiceTests {
     assertArrayEquals(continuing, ((NotEliminatedNext)aad.assertion).continuing);
 
     // Check that current risk is 1.00
-    assertEquals(new BigDecimal("1.00"), aad.status.get(Assertion.STATUS_RISK));
+    assertEquals(new BigDecimal("1.00"), aad.status.get(Metadata.STATUS_RISK));
   }
 
   /**
@@ -218,7 +218,7 @@ public class GetAssertionsServiceTests {
     AssertionAndDifficulty aad1 = assertions[0];
     assertEquals(0.1, aad1.difficulty);
     assertEquals(112, aad1.margin);
-    assertEquals(new BigDecimal("0.08"), aad1.status.get(Assertion.STATUS_RISK));
+    assertEquals(new BigDecimal("0.08"), aad1.status.get(Metadata.STATUS_RISK));
     assertTrue(aad1.assertion.isNEB());
     assertEquals(2, ((NotEliminatedBefore)aad1.assertion).winner);
     assertEquals(0, ((NotEliminatedBefore)aad1.assertion).loser);
@@ -233,7 +233,7 @@ public class GetAssertionsServiceTests {
     int[] continuing = {0, 1, 2};
     assertArrayEquals(continuing, ((NotEliminatedNext)aad2.assertion).continuing);
 
-    assertEquals(new BigDecimal("0.70"), aad2.status.get(Assertion.STATUS_RISK));
+    assertEquals(new BigDecimal("0.70"), aad2.status.get(Metadata.STATUS_RISK));
   }
 
   /**

@@ -20,7 +20,6 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.response;
 
-import au.org.democracydevelopers.raireservice.request.ContestRequest;
 import java.beans.ConstructorProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

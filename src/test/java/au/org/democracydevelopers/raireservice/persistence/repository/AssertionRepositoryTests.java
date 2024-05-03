@@ -27,6 +27,7 @@ import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
+import au.org.democracydevelopers.raireservice.service.Metadata;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.math.BigDecimal;
@@ -311,7 +312,7 @@ public class AssertionRepositoryTests {
     assertEquals(1, ((NotEliminatedBefore)aad.assertion).loser);
 
     // Check that current risk is 0.5
-    assertEquals(new BigDecimal("0.50"), aad.status.get(Assertion.STATUS_RISK));
+    assertEquals(new BigDecimal("0.50"), aad.status.get(Metadata.STATUS_RISK));
   }
 
   /**
@@ -351,7 +352,7 @@ public class AssertionRepositoryTests {
     assertArrayEquals(continuing, ((NotEliminatedNext)aad.assertion).continuing);
 
     // Check that current risk is 1.00
-    assertEquals(new BigDecimal("1.00"), aad.status.get(Assertion.STATUS_RISK));
+    assertEquals(new BigDecimal("1.00"), aad.status.get(Metadata.STATUS_RISK));
   }
 
   /**
