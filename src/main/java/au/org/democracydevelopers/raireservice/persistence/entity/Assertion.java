@@ -47,13 +47,7 @@ import org.springframework.data.annotation.ReadOnlyProperty;
 @DiscriminatorColumn(name = "assertion_type")
 public abstract class Assertion {
 
-  protected static final Logger logger = LoggerFactory.getLogger(Assertion.class);
-
-  /**
-   * Status attribute for use when converting raire-java assertions to an Assertion (used in
-   * Assertion::convert).
-   */
-  public static final String STATUS_RISK = "risk";
+  private static final Logger logger = LoggerFactory.getLogger(Assertion.class);
 
   /**
    * Assertion ID.

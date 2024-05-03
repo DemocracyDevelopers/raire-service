@@ -22,6 +22,7 @@ package au.org.democracydevelopers.raireservice.persistence.entity;
 
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
+import au.org.democracydevelopers.raireservice.service.Metadata;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
@@ -29,6 +30,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Not Eliminated Next assertion asserts that a _winner_ beats a _loser_ in an audit when all
@@ -44,6 +47,8 @@ import java.util.Map;
 @Entity
 @DiscriminatorValue("NEN")
 public class NENAssertion extends Assertion {
+
+  private static final Logger logger = LoggerFactory.getLogger(NENAssertion.class);
 
   /**
    * {@inheritDoc}
@@ -90,7 +95,7 @@ public class NENAssertion extends Assertion {
     // Check for validity of the assertion with respect to the given list of candidate names
     if (w != -1 && l != -1 && Arrays.stream(continuing).noneMatch(c -> c == -1)) {
       Map<String,Object> status = new HashMap<>();
-      status.put(STATUS_RISK, currentRisk);
+      status.put(Metadata.STATUS_RISK, currentRisk);
 
       return new AssertionAndDifficulty(new NotEliminatedNext(w, l, continuing), difficulty,
           margin, status);

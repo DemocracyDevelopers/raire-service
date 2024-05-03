@@ -40,4 +40,9 @@ public class Metadata {
    * Metadata field name for the contest's name.
    */
   public final static String CONTEST = "contest";
+
+  /**
+   * Status attribute describing a risk level.
+   */
+  public static final String STATUS_RISK = "risk";
 }

@@ -43,7 +43,6 @@ public class GetAssertionsRequest extends ContestRequest {
   /**
    * The risk limit for the audit, expected to be in the range [0,1].
    */
-  @ReadOnlyProperty
   public final BigDecimal riskLimit;
 
   /**

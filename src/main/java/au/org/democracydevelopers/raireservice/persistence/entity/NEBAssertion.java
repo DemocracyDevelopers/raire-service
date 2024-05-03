@@ -22,12 +22,15 @@ package au.org.democracydevelopers.raireservice.persistence.entity;
 
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
+import au.org.democracydevelopers.raireservice.service.Metadata;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Not Eliminated Before assertion (or NEB) says that a candidate _winner_ will always have
@@ -41,6 +44,8 @@ import java.util.Map;
 @Entity
 @DiscriminatorValue("NEB")
 public class NEBAssertion extends Assertion {
+
+  private static final Logger logger = LoggerFactory.getLogger(NEBAssertion.class);
 
   /**
    * {@inheritDoc}
@@ -79,7 +84,7 @@ public class NEBAssertion extends Assertion {
 
     if(w != -1 && l != -1) {
       Map<String,Object> status = new HashMap<>();
-      status.put(STATUS_RISK, currentRisk);
+      status.put(Metadata.STATUS_RISK, currentRisk);
 
       return new AssertionAndDifficulty(new NotEliminatedBefore(w, l), difficulty, margin, status);
     }

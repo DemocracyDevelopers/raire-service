@@ -41,13 +41,11 @@ public abstract class ContestRequest {
   /**
    * The name of the contest
    */
-  @ReadOnlyProperty
   public final String contestName;
 
   /**
    * List of candidate names.
    */
-  @ReadOnlyProperty
   public final List<String> candidates;
 
   /**

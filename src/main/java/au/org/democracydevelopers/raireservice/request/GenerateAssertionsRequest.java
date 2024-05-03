@@ -45,13 +45,11 @@ public class GenerateAssertionsRequest extends ContestRequest {
    * This may not be the same as the number of ballots or CVRs in the contest, if the contest
    * is available only to a subset of voters in the universe.
    */
-  @ReadOnlyProperty
   public final int totalAuditableBallots;
 
   /**
    * The elapsed time allowed to raire to generate the assertions, in seconds.
    */
-  @ReadOnlyProperty
   public final float timeLimitSeconds;
 
   /**

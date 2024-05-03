@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 @Converter(autoApply = true)
 public class StringArrayConverter implements AttributeConverter<String[], String> {
 
-  protected final Logger logger = LoggerFactory.getLogger(StringArrayConverter.class);
+  private final Logger logger = LoggerFactory.getLogger(StringArrayConverter.class);
 
   /**
    * The type information for an array of String.
