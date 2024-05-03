@@ -20,10 +20,10 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.response;
 
+import au.org.democracydevelopers.raireservice.request.ContestRequest;
 import java.beans.ConstructorProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.annotation.ReadOnlyProperty;
 
 /**
  * The success response to a GenerateAssertionsRequest.
@@ -32,19 +32,16 @@ import org.springframework.data.annotation.ReadOnlyProperty;
  */
 public class GenerateAssertionsResponse {
 
-  protected final static Logger logger = LoggerFactory.getLogger(
-      au.org.democracydevelopers.raireservice.request.ContestRequest.class);
+  protected final static Logger logger = LoggerFactory.getLogger(ContestRequest.class);
 
   /**
    * The name of the contest.
    */
-  @ReadOnlyProperty
   public final String contestName;
 
   /**
    * The winner of the contest, as calculated by raire.
    */
-  @ReadOnlyProperty
   public final String winner;
 
   /**

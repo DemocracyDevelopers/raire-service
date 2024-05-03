@@ -93,4 +93,10 @@ public class Contest {
   public long getCountyID() {
     return countyID;
   }
+
+  /**
+   * Get the ID of the contest.
+   * @return the contest ID.
+   */
+  public int getContestID() { return getContestID(); }
 }
