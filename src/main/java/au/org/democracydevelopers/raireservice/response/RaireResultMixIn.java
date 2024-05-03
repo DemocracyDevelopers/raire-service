@@ -18,8 +18,10 @@ You should have received a copy of the GNU Affero General Public License along w
 raire-service. If not, see <https://www.gnu.org/licenses/>.
 */
 
-package au.org.democracydevelopers.raireservice.json;
+package au.org.democracydevelopers.raireservice.response;
 
+import au.org.democracydevelopers.raire.algorithm.RaireResult;
+import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.time.TimeTaken;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -27,8 +29,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * Mixin for the raire-java class RaireResult. When raire-service serialises RaireResult as part of a
  * RaireSolution, we want to ignore some RaireResult attributes as this data is not stored in
  * the colorado-rla database.
+ * The only purpose of this class is to ignore certain fields of RaireResult when serializing.
  */
-public abstract class RaireResultMixIn {
+public class RaireResultMixIn extends RaireResult {
 
   /**
    * The winner of an IRV contest is not stored in the colorado-rla database.
@@ -63,4 +66,20 @@ public abstract class RaireResultMixIn {
    * colorado-rla database.
    */
   @JsonIgnore public boolean warning_trim_timed_out;
+
+  /**
+   * Constructor - make a RaireResultMixin from the attributes we care about and intend to serialize.
+   * Create the superclass by inserting default values for the unspecified fields (winner, times taken,
+   * trim warning) - these will not be serialized.
+   * @param assertions the assertions with difficulties.
+   * @param difficulty the highest difficulty.
+   * @param margin the lowest margin.
+   * @param num_candidates the number of candidates in the contest.
+   */
+  public RaireResultMixIn(
+      AssertionAndDifficulty[] assertions,
+      double difficulty, int margin, int num_candidates) {
+    super(assertions, difficulty, margin, -1, num_candidates, new TimeTaken(0,0),
+        new TimeTaken(0,0), new TimeTaken(0,0), false);
+  }
 }

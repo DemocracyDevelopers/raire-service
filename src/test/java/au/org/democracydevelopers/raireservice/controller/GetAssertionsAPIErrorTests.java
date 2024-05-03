@@ -20,8 +20,10 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -57,7 +59,7 @@ import org.apache.commons.lang3.StringUtils;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsAPITests {
+public class GetAssertionsAPIErrorTests {
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
 
@@ -81,11 +83,11 @@ public class GetAssertionsAPITests {
   }
 
   /**
-   * A trivial example of a invalid get assertions request. Simply tests that it returns an HTTP
-   * failure status with the reason that there are not assertions associated with the contest.
+   * A valid request for a contest that exists but has no assertions. Returns the correct error
+   * code and message.
    */
   @Test
-  public void testTrivialGetAssertionsExample() {
+  public void testValidRequestWithNoAssertions() {
     String url = "http://localhost:" + port + getAssertionsEndpoint;
 
     String requestAsJson =
@@ -95,6 +97,8 @@ public class GetAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is5xxServerError());
+    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT.toString(),
+        response.getHeaders().get("error_code").getFirst());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
         "No assertions have been generated for the contest"));
   }
