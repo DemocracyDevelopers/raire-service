@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.service.RaireServiceException;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +72,9 @@ public class GetAssertionsValidAPIRequestTests {
   private final static String oneNENAssertionContest = "One NEN Assertion Contest";
   private final static String oneNEBOneNENAssertionContest = "One NEN NEB Assertion Contest";
 
-  // error allowed when comparing doubles.
+  /**
+   * Error allowed when comparing doubles.
+   */
   private static final double EPS = 0.0000000001;
 
   @LocalServerPort
@@ -141,7 +142,6 @@ public class GetAssertionsValidAPIRequestTests {
   /**
    * Retrieve assertions for a contest that has one NEN assertion.
    */
-
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNENAssertion() {
