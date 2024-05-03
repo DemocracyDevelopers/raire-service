@@ -45,15 +45,14 @@ import org.springframework.test.context.ActiveProfiles;
 
 
 /**
- * Tests for generate-assertions endpoint. This class automatically fires up the RAIRE Microservice on a
- * random port, then runs a series of (at this stage) very basic tests. Currently we check for proper
- * input validation, and check that one valid trivial request succeeds.
- * The list of tests is similar to GenerateAssertionsRequestTests.java, and also to GetAssertionsAPITests.java
- * when the same test is relevant to both endpoints.
- * Note that you have to run the *whole class*. Individual tests do not work separately because they don't
- * initiate the microservice on their own.
- * Contests which will be used for validity testing are pre-loaded into the database using
- * src/test/resources/data.sql.
+ * Tests for generate-assertions endpoint. This class automatically fires up the RAIRE Microservice
+ * on a random port, then runs a series of (at this stage) very basic tests. Currently we check for
+ * proper input validation, and check that one valid trivial request succeeds.
+ * The list of tests is similar to GenerateAssertionsRequestTests.java, and also to
+ * GetAssertionsAPITests.java when the same test is relevant to both endpoints. Note that you have
+ * to run the *whole class*. Individual tests do not work separately because they don't
+ * initiate the microservice on their own. Contests which will be used for validity testing are
+ * pre-loaded into the database using src/test/resources/data.sql.
  */
 
 @ActiveProfiles("test-containers")
@@ -107,8 +106,8 @@ public class GenerateAssertionsAPITests {
 
   /**
    * This is really just a test that the testing is working.
-   * There's no mapping for the plain localhost response, so when the microservice is running it just returns
-   * a default error. We check for 404.
+   * There's no mapping for the plain localhost response, so when the microservice is running it
+   * just returns a default error. We check for 404.
    */
   @Test
   public void testErrorForNonFunctioningEndpoint() {
@@ -122,8 +121,8 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsNoBodyError() {
-    ResponseEntity<String> response = restTemplate.postForEntity(baseURL + port + generateAssertionsEndpoint,
-                new HttpEntity<>("", new HttpHeaders()), String.class);
+    ResponseEntity<String> response = restTemplate.postForEntity(baseURL + port +
+        generateAssertionsEndpoint, new HttpEntity<>("", new HttpHeaders()), String.class);
     assertTrue(response.getStatusCode().is4xxClientError());
   }
 
@@ -160,7 +159,8 @@ public class GenerateAssertionsAPITests {
   }
 
   /**
-   * The generateAssertions endpoint, called with a valid plurality contest, returns a meaningful error.
+   * The generateAssertions endpoint, called with a valid plurality contest,
+   * returns a meaningful error.
    */
   @Test
   public void generateAssertionsWithPluralityContestIsAnError() {
@@ -178,7 +178,8 @@ public class GenerateAssertionsAPITests {
   }
 
   /**
-   * The generateAssertions endpoint, called with a mixed IRV and non-IRV contest, returns a meaningful error.
+   * The generateAssertions endpoint, called with a mixed IRV and non-IRV contest,
+   * returns a meaningful error.
    */
   @Test
   public void generateAssertionsWithMixedIRVPluralityContestIsAnError() {
@@ -250,7 +251,8 @@ public class GenerateAssertionsAPITests {
   }
 
   /**
-   * The generateAssertions endpoint, called with an all-whitespace contest name, returns a meaningful error.
+   * The generateAssertions endpoint, called with an all-whitespace contest name,
+   * returns a meaningful error.
    */
   @Test
   public void generateAssertionsWithWhitespaceContestNameIsAnError() {
@@ -322,7 +324,8 @@ public class GenerateAssertionsAPITests {
   }
 
   /**
-   * The generateAssertions endpoint, called with a whitespace candidate name, returns a meaningful error.
+   * The generateAssertions endpoint, called with a whitespace candidate name,
+   * returns a meaningful error.
    */
   @Test
   public void generateAssertionsWithWhiteSpaceCandidateNameIsAnError() {
@@ -355,11 +358,13 @@ public class GenerateAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),"Non-positive total auditable ballots"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
+        "Non-positive total auditable ballots"));
   }
 
   /**
-   * The generateAssertions endpoint, called with zero total auditable ballots, returns a meaningful error.
+   * The generateAssertions endpoint, called with zero total auditable ballots,
+   * returns a meaningful error.
    */
   @Test
   public void generateAssertionsWithZeroAuditableBallotsIsAnError() {
@@ -373,11 +378,13 @@ public class GenerateAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),"Non-positive total auditable ballots"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
+        "Non-positive total auditable ballots"));
   }
 
   /**
-   * The generateAssertions endpoint, called with negative total auditable ballots, returns a meaningful error.
+   * The generateAssertions endpoint, called with negative total auditable ballots,
+   * returns a meaningful error.
    */
   @Test
   public void generateAssertionsWithNegativeAuditableBallotsIsAnError() {
@@ -391,7 +398,8 @@ public class GenerateAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),"Non-positive total auditable ballots"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
+        "Non-positive total auditable ballots"));
   }
 
 
@@ -470,7 +478,8 @@ public class GenerateAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is5xxServerError());
-    assertEquals(TIMEOUT_CHECKING_WINNER.toString(), response.getHeaders().getFirst("error_code"));
+    assertEquals(TIMEOUT_CHECKING_WINNER.toString(),
+        response.getHeaders().getFirst("error_code"));
   }
 
 }

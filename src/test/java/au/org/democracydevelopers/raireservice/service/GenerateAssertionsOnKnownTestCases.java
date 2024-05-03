@@ -105,7 +105,8 @@ public class GenerateAssertionsOnKnownTestCases {
   private static final String[] aliceChuanBob = {"Alice", "Chuan", "Bob"};
 
   private final static GenerateAssertionsRequest tiedWinnersRequest
-      = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5, Arrays.stream(aliceChuanBob).toList());
+      = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5,
+      Arrays.stream(aliceChuanBob).toList());
 
   /**
    * Check that NEB assertion retrieval works. This is just a sanity check for the other tests.
@@ -117,7 +118,8 @@ public class GenerateAssertionsOnKnownTestCases {
 
     Assertion assertion = assertionRepository.findByContestName(oneNEBAssertionContest).getFirst();
     assertInstanceOf(NEBAssertion.class, assertion);
-    assertTrue(correctDBAssertionData(320, 0.32, 1.1, "Alice","Bob", assertion, EPS));
+    assertTrue(correctDBAssertionData(320, 0.32, 1.1, "Alice",
+        "Bob", assertion, EPS));
   }
 
   /**
@@ -130,7 +132,8 @@ public class GenerateAssertionsOnKnownTestCases {
 
     Assertion assertion = assertionRepository.findByContestName(oneNENAssertionContest).getFirst();
 
-    assertTrue(correctDBAssertionData(20, 0.4, 2.5, "Alice", "Bob", assertion, EPS));
+    assertTrue(correctDBAssertionData(20, 0.4, 2.5, "Alice",
+        "Bob", assertion, EPS));
     assertTrue(correctAssumedContinuing(Arrays.stream(aliceChuanBob).toList(), assertion));
     assertInstanceOf(NENAssertion.class, assertion);
   }
@@ -191,7 +194,8 @@ public class GenerateAssertionsOnKnownTestCases {
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
 
-    assertTrue(correctDBAssertionData(4000, 8 / 27.0, 27 / 8.0, "Chuan", "Bob", nebAssertion, EPS));
+    assertTrue(correctDBAssertionData(4000, 8 / 27.0, 27 / 8.0,
+        "Chuan", "Bob", nebAssertion, EPS));
   }
 
   /**
@@ -213,7 +217,8 @@ public class GenerateAssertionsOnKnownTestCases {
     // There should be one NEB assertion: Chaun NEB Alice
     // Margin is 10,000, but data is divided by 1000, so 10. Difficulty is 4.1 as in the Guide.
     // Diluted Margin is 10/41.
-    Optional<Assertion> nebMaybeAssertion = assertions.stream().filter(a -> a instanceof NEBAssertion).findFirst();
+    Optional<Assertion> nebMaybeAssertion =
+        assertions.stream().filter(a -> a instanceof NEBAssertion).findFirst();
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
     assertTrue(correctDBAssertionData(10, 10 / 41.0, 4.1,
@@ -223,10 +228,12 @@ public class GenerateAssertionsOnKnownTestCases {
     // Margin is 9,000, but data is divided by 1000, so 9. Difficulty is 41/9 = 4.5555...,
     // rounded to 4.6 in the Guide.
     // Diluted margin is 9/41 = 0.219512195...
-    Optional<Assertion> nenMaybeAssertion = assertions.stream().filter(a -> a instanceof NENAssertion).findFirst();
+    Optional<Assertion> nenMaybeAssertion =
+        assertions.stream().filter(a -> a instanceof NENAssertion).findFirst();
     assertTrue(nenMaybeAssertion.isPresent());
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
-    assertTrue(correctDBAssertionData(9, 9/41.0, 41.0/9, "Chuan", "Bob", nenAssertion, EPS));
+    assertTrue(correctDBAssertionData(9, 9/41.0, 41.0/9,
+        "Chuan", "Bob", nenAssertion, EPS));
     assertTrue(correctAssumedContinuing(List.of("Chuan","Bob"), nenAssertion));
   }
 
@@ -260,14 +267,16 @@ public class GenerateAssertionsOnKnownTestCases {
         .filter(a -> a instanceof NEBAssertion).findFirst();
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
-    assertTrue(correctDBAssertionData(1, 0.2, 5, "Alice", "Chuan", nebAssertion, EPS));
+    assertTrue(correctDBAssertionData(1, 0.2, 5, "Alice",
+        "Chuan", nebAssertion, EPS));
 
     // There should be one NEN assertion: Alice > Bob if only {Alice,Bob} remain.
     Optional<Assertion> nenMaybeAssertion = assertions.stream()
         .filter(a -> a instanceof NENAssertion).findFirst();
     assertTrue(nenMaybeAssertion.isPresent());
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
-    assertTrue(correctDBAssertionData(1, 0.2, 5, "Alice", "Bob", nenAssertion, EPS));
+    assertTrue(correctDBAssertionData(1, 0.2, 5, "Alice",
+        "Bob", nenAssertion, EPS));
     assertTrue(correctAssumedContinuing(List.of("Bob","Alice"), nenAssertion));
   }
 
@@ -286,16 +295,19 @@ public class GenerateAssertionsOnKnownTestCases {
     assertEquals(2, assertions.size());
 
     // There should be one NEB assertion: Alice NEB Chaun
-    Optional<Assertion> nebMaybeAssertion = assertions.stream().filter(a -> a instanceof NEBAssertion).findFirst();
+    Optional<Assertion> nebMaybeAssertion =
+        assertions.stream().filter(a -> a instanceof NEBAssertion).findFirst();
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
-    assertTrue(correctDBAssertionData(1, 0.2, 5, "Alice", "Chuan", nebAssertion, EPS));
+    assertTrue(correctDBAssertionData(1, 0.2, 5, "Alice",
+        "Chuan", nebAssertion, EPS));
 
     // There should be one NEN assertion: Alice > Bob if only {Alice,Bob} remain.
     Optional<Assertion> nenMaybeAssertion = assertions.stream().filter(a -> a instanceof NENAssertion).findFirst();
     assertTrue(nenMaybeAssertion.isPresent());
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
-    assertTrue(correctDBAssertionData(1, 0.2, 5, "Alice", "Bob", nenAssertion, EPS));
+    assertTrue(correctDBAssertionData(1, 0.2, 5, "Alice",
+        "Bob", nenAssertion, EPS));
     assertTrue(correctAssumedContinuing(List.of("Bob","Alice"), nenAssertion));
 
   }
@@ -326,14 +338,16 @@ public class GenerateAssertionsOnKnownTestCases {
         .filter(a -> a instanceof NEBAssertion).findFirst();
     assertTrue(nebMaybeAssertion.isPresent());
     NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
-    assertTrue(correctDBAssertionData(1, 0.1, 10, "Alice", "Chuan", nebAssertion, EPS));
+    assertTrue(correctDBAssertionData(1, 0.1, 10, "Alice",
+        "Chuan", nebAssertion, EPS));
 
     // There should be one NEN assertion: Alice > Bob if only {Alice,Bob} remain.
     Optional<Assertion> nenMaybeAssertion = assertions.stream()
         .filter(a -> a instanceof NENAssertion).findFirst();
     assertTrue(nenMaybeAssertion.isPresent());
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
-    assertTrue(correctDBAssertionData(1, 0.1, 10, "Alice", "Bob", nenAssertion, EPS));
+    assertTrue(correctDBAssertionData(1, 0.1, 10, "Alice",
+        "Bob", nenAssertion, EPS));
     assertTrue(correctAssumedContinuing(List.of("Bob","Alice"), nenAssertion));
   }
 

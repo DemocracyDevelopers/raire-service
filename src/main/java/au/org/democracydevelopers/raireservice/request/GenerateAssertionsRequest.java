@@ -27,9 +27,9 @@ import org.springframework.data.annotation.ReadOnlyProperty;
 
 /**
  * Request (expected to be json) identifying the contest for which assertions should be generated.
- * This extends ContestRequest and uses the contest name and candidate list, plus validations, from there.
- * A GenerateAssertionsRequest identifies a contest by name along with the candidate list (which
- * is necessary for producing the metadata for later visualization).
+ * This extends ContestRequest and uses the contest name and candidate list, plus validations,
+ * from there. A GenerateAssertionsRequest identifies a contest by name along with the candidate list
+ * (which is necessary for producing the metadata for later visualization).
  * TotalAuditableBallots states the total number of ballots in the universe, which may _not_ be the
  * same as the number of CVRs that mention the contest.
  * TimeLimitSeconds is a limit on the elapsed time that RAIRE has to do assertion generation.
@@ -62,8 +62,8 @@ public class GenerateAssertionsRequest extends ContestRequest {
    * @param candidates the list of candidates by name
    */
   @ConstructorProperties({"contestName", "totalAuditableBallots", "timeLimitSeconds","candidates"})
-  public GenerateAssertionsRequest(String contestName, int totalAuditableBallots, float timeLimitSeconds,
-      List<String> candidates) {
+  public GenerateAssertionsRequest(String contestName, int totalAuditableBallots,
+      float timeLimitSeconds, List<String> candidates) {
     super(contestName, candidates);
     this.totalAuditableBallots = totalAuditableBallots;
     this.timeLimitSeconds = timeLimitSeconds;
@@ -83,8 +83,9 @@ public class GenerateAssertionsRequest extends ContestRequest {
 
     final String errorMsgTotalBallots = "Non-positive total auditable ballots";
     if(totalAuditableBallots <= 0) {
-      logger.error("Request for contest "+contestName+ ". "+errorMsgTotalBallots+": " +totalAuditableBallots);
-       throw new RequestValidationException(errorMsgTotalBallots);
+      logger.error("Request for contest "+contestName+ ". "+errorMsgTotalBallots+": "
+          +totalAuditableBallots);
+      throw new RequestValidationException(errorMsgTotalBallots);
     }
 
     final String errorMsgTimeLimit = "Non-positive time limit";

@@ -118,7 +118,8 @@ public class AssertionController {
    * @param request a GetAssertionsRequest, specifying an IRV contest name for which to retrieve the
    *                assertions.
    * @return the assertions, as JSON (in the case of success) or an error.
-   * @throws RequestValidationException for invalid requests, such as non-existent, null, or non-IRV contest names.
+   * @throws RequestValidationException for invalid requests, such as non-existent, null, or
+   * non-IRV contest names.
    * @throws RaireServiceException if the request is valid but assertion retrieval fails, for example
    * if there are no assertions for the contest.
    */

@@ -54,7 +54,8 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void validRequestForIRVContestIsValid() {
-    GetAssertionsRequest validRequest = new GetAssertionsRequest("Ballina Mayoral", List.of("Alice"), BigDecimal.valueOf(0.03));
+    GetAssertionsRequest validRequest = new GetAssertionsRequest("Ballina Mayoral",
+        List.of("Alice"), BigDecimal.valueOf(0.03));
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
   }
 
@@ -64,8 +65,10 @@ public class GetAssertionsRequestTests {
   @Test
   public void requestForNonexistentContestIsInvalid() {
     GetAssertionsRequest invalidRequest
-        = new GetAssertionsRequest("NonExistentContest", List.of("Alice"), BigDecimal.valueOf(0.03));
-    Exception ex = assertThrows(RequestValidationException.class, () -> invalidRequest.Validate(contestRepository));
+        = new GetAssertionsRequest("NonExistentContest", List.of("Alice"),
+        BigDecimal.valueOf(0.03));
+    Exception ex = assertThrows(RequestValidationException.class,
+        () -> invalidRequest.Validate(contestRepository));
     assertTrue(ex.getMessage().toLowerCase().contains("No such contest".toLowerCase()));
   }
 

@@ -142,8 +142,8 @@ public class RaireServiceException extends Exception {
     /**
      * A catch-all for various kinds of errors that indicate a programming error: invalid
      * input errors such as InvalidNumberOfCandidates, InvalidTimeout, InvalidCandidateNumber -
-     * these should all be caught before being sent to raire-java. Also database errors. These are errors
-     * that the user can't do anything about.
+     * these should all be caught before being sent to raire-java. Also database errors.
+     * These are errors that the user can't do anything about.
      */
     INTERNAL_ERROR,
   }
@@ -169,7 +169,8 @@ public class RaireServiceException extends Exception {
           message = "Time out finding assertions - try again with longer timeout.";
 
       case TimeoutTrimmingAssertions e ->
-          message = "Time out trimming assertions - the assertions are usable, but could be reduced given more trimming time.";
+          message = "Time out trimming assertions - the assertions are usable, but could be " +
+              "reduced given more trimming time.";
 
       case TimeoutCheckingWinner e ->
           message = "Time out checking winner - the election is either tied or extremely complex.";

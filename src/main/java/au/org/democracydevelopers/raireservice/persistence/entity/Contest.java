@@ -23,7 +23,7 @@ package au.org.democracydevelopers.raireservice.persistence.entity;
 import jakarta.persistence.*;
 import org.springframework.data.annotation.ReadOnlyProperty;
 
-/*
+/**
  * A contest class used for reading contest data out of the corla database.
  * This class omits the fields that are not relevant to input validation - we only care about
  * checking whether any requests raire-service receives for assertion generation or retrieval make

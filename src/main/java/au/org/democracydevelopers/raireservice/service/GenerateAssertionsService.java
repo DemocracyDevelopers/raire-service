@@ -41,7 +41,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 /**
- * A dummy implementation that does nothing but throw an exception.
+ * This class contains functionality for generating assertions for a given contest by calling
+ * raire-java, and persisting those assertions to the colorado-rla database.
  */
 @Service
 public class GenerateAssertionsService {
@@ -77,7 +78,7 @@ public class GenerateAssertionsService {
    * indicating why assertion generation was not successful.
    * @throws RaireServiceException if any vote data for a contest was found to be invalid (i.e.,
    * it referred to candidates that were not in the expected list) or an error arose in database
-   * access o
+   * access.
    */
   public RaireResultOrError generateAssertions(GenerateAssertionsRequest request)
       throws RaireServiceException {

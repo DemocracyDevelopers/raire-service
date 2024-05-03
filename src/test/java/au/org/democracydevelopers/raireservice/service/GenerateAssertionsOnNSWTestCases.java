@@ -343,8 +343,8 @@ public class GenerateAssertionsOnNSWTestCases {
   @Test
   @Transactional
   void dummyServiceThrowsException() {
-    GenerateAssertionsRequest firstRequest = new GenerateAssertionsRequest(nameContest_1, ballotCountContest_1,
-        DEFAULT_TIME_LIMIT, choicesContest_1);
+    GenerateAssertionsRequest firstRequest = new GenerateAssertionsRequest(nameContest_1,
+        ballotCountContest_1, DEFAULT_TIME_LIMIT, choicesContest_1);
     assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.generateAssertions(firstRequest)
     );
