@@ -74,7 +74,7 @@ public class GenerateAssertionsRequest extends ContestRequest {
    * IRV contest, that the total ballots and time limit have sensible values, and that
    * the contest has candidates. Note it does _not_ check whether the candidates are present in
    * the CVRs.
-   * @param contestRepository the respository for getting Contest objects from the database.
+   * @param contestRepository the repository for getting Contest objects from the database.
    * @throws RequestValidationException if the request is invalid.
    */
   public void Validate(ContestRepository contestRepository) throws RequestValidationException {
