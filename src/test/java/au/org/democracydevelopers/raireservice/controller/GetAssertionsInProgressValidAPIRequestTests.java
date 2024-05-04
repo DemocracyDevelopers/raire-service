@@ -64,6 +64,7 @@ public class GetAssertionsInProgressValidAPIRequestTests {
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
   private final static String getAssertionsEndpoint = "/raire/get-assertions";
+  private final static String getAssertionsCSVEndpoint = "/raire/get-assertions-csv";
 
   private final static String oneNEBAssertionContest = "One NEB Assertion Contest";
   private final static String oneNENAssertionContest = "One NEN Assertion Contest";
@@ -116,6 +117,27 @@ public class GetAssertionsInProgressValidAPIRequestTests {
     assertTrue(correctIndexedAPIAssertionData("NEB", 320, 1.1, 0,1, new ArrayList<>(),
         0.5, response.getBody(),0,EPS));
 
+  }
+
+
+  /**
+   * Retrieve assertions as csv for a contest that has one NEB assertion (audit in progress).
+   * Same as the previous test, but csv.
+   */
+  @Test
+  @Transactional
+  void retrieveAssertionsAsCSVExistentContestOneNEBAssertion() {
+    String url = baseURL + port + getAssertionsCSVEndpoint;
+
+    String requestAsJson =
+        "{\"riskLimit\":0.10,\"contestName\":\"" + oneNEBAssertionContest
+            + "\",\"candidates\":[\"Alice\",\"Bob\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertTrue(response.getBody().contains("this is a test"));
   }
 
   /**

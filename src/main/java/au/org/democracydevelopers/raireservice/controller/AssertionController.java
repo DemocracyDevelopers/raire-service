@@ -26,15 +26,21 @@ import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.RequestValidationException;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
+import au.org.democracydevelopers.raireservice.response.GetAssertionsCSV;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException;
 import au.org.democracydevelopers.raireservice.service.GenerateAssertionsService;
 import au.org.democracydevelopers.raireservice.service.GetAssertionsService;
+import java.io.InputStream;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -88,16 +94,17 @@ public class AssertionController {
    * The API endpoint for finding and returning assertions, by contest name. This endpoint returns
    * assertions in the form of a JSON Visualiser Report.
    * @param request a GetAssertionsRequest, specifying an IRV contest name for which to retrieve the
-   *                assertions.
+   *        assertions.
    * @return the assertions, as JSON (in the case of success) or an error.
-   * @throws RequestValidationException for invalid requests, such as non-existent, null, or non-IRV contest names.
+   * @throws RequestValidationException for invalid requests, such as non-existent, null, or non-IRV
+   *         contest names.
    * @throws RaireServiceException if the request is valid but assertion retrieval fails, for example
-   * if there are no assertions for the contest.
-   * These are handled by ControllerExceptionHandler.
+   *         if there are no assertions for the contest.
+   * These exceptions are handled by ControllerExceptionHandler.
    */
   @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
-  public ResponseEntity<RaireSolution> serve(@RequestBody GetAssertionsRequest request)
+  public ResponseEntity<RaireSolution> serveJson(@RequestBody GetAssertionsRequest request)
       throws RequestValidationException, RaireServiceException {
 
     request.Validate(contestRepository);
@@ -107,6 +114,37 @@ public class AssertionController {
     RaireSolution solution = getAssertionsService.getRaireSolution(request);
 
     return new ResponseEntity<>(solution, HttpStatus.OK);
+  }
+
+  /**
+   * The API endpoint for finding and returning assertions, by contest name. This endpoint returns
+   * assertions as a csv file.
+   * @param request a GetAssertionsRequest, specifying an IRV contest name for which to retrieve the
+   *                assertions.
+   * @return the assertions, as a csv file (in the case of success) or an error.
+   * @throws RequestValidationException for invalid requests, such as non-existent, null, or non-IRV
+   *         contest names.
+   * @throws RaireServiceException if the request is valid but assertion retrieval fails, for example
+   *         if there are no assertions for the contest.
+   * These exceptions are handled by ControllerExceptionHandler.
+   */
+  @PostMapping(path = "/get-assertions-csv")
+  @ResponseBody
+  public ResponseEntity<byte []> serveCSV(@RequestBody GetAssertionsRequest request)
+      throws RequestValidationException, RaireServiceException {
+
+    request.Validate(contestRepository);
+
+    // Extract a RaireSolution containing the assertions that we want, then convert to csv.
+    RaireSolution solution = getAssertionsService.getRaireSolution(request);
+    byte[] csv = GetAssertionsCSV.generateCSV(solution);
+
+    // Set correct headers; return response.
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+    // TODO: escape characters in contest name appropriately for a file name.
+    headers.setContentDispositionFormData("attachment", request.contestName+".csv");
+    return new ResponseEntity<>(csv, headers, HttpStatus.OK);
   }
 
   /**
