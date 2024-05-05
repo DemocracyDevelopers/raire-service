@@ -26,13 +26,10 @@ import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.RequestValidationException;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
-import au.org.democracydevelopers.raireservice.response.GetAssertionsCSV;
+import au.org.democracydevelopers.raireservice.service.GetAssertionsCSVService;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException;
 import au.org.democracydevelopers.raireservice.service.GenerateAssertionsService;
 import au.org.democracydevelopers.raireservice.service.GetAssertionsService;
-import java.io.InputStream;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -40,7 +37,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -64,6 +60,7 @@ public class AssertionController {
   private final GenerateAssertionsService generateAssertionsService;
 
   private final GetAssertionsService getAssertionsService;
+  private final GetAssertionsCSVService getAssertionsCSVService;
 
   /**
    * The API endpoint for generating assertions, by contest name, and returning the IRV winner.
@@ -136,8 +133,7 @@ public class AssertionController {
     request.Validate(contestRepository);
 
     // Extract a RaireSolution containing the assertions that we want, then convert to csv.
-    RaireSolution solution = getAssertionsService.getRaireSolution(request);
-    byte[] csv = GetAssertionsCSV.generateCSV(solution);
+    byte[] csv = getAssertionsCSVService.generateCSV(request).getBytes();
 
     // Set correct headers; return response.
     HttpHeaders headers = new HttpHeaders();
@@ -155,9 +151,10 @@ public class AssertionController {
    */
   public AssertionController(ContestRepository contestRepository,
       GenerateAssertionsService generateAssertionsService,
-      GetAssertionsService getAssertionsService) {
+      GetAssertionsService getAssertionsService, GetAssertionsCSVService getAssertionsCSVService) {
     this.contestRepository = contestRepository;
     this.generateAssertionsService = generateAssertionsService;
     this.getAssertionsService = getAssertionsService;
+    this.getAssertionsCSVService = getAssertionsCSVService;
   }
 }

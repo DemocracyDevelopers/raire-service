@@ -137,7 +137,7 @@ public class GetAssertionsInProgressValidAPIRequestTests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is2xxSuccessful());
-    assertTrue(response.getBody().contains("this is a test"));
+    assertTrue(response.getBody().contains("Bob"));
   }
 
   /**

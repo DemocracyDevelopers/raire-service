@@ -253,6 +253,119 @@ public abstract class Assertion {
   }
 
   /**
+   * Get the id. Used for sorting when assertions are output as csv.
+   * @return the id.
+   */
+  public long getId() {
+    return id;
+  }
+
+
+  /**
+   * Get the winner by name. Used for CSV output.
+   * @return the winner.
+   */
+  public String getWinner() {
+    return winner;
+  }
+
+  /**
+   * Get the loser by name. Used for CSV output.
+   * @return the loser.
+   */
+  public String getLoser() {
+    return loser;
+  }
+
+  /**
+   * Get the margin. Used for CSV output.
+   * @return the margin.
+   */
+  public int getMargin() {
+    return margin;
+  }
+
+  /**
+   * Get the list of candidates who are assumed continuing. Used for CSV output.
+   * @return the list of assumed-continuing candidates, by name.
+   */
+  public List<String> getAssumedContinuing() {
+    return assumedContinuing;
+  }
+
+  /**
+   * Get the diluted margin. Used for CSV output.
+   * @return the diluted margin.
+   */
+  public double getDilutedMargin() {
+    return dilutedMargin;
+  }
+
+  /**
+   * Get the estimated samples to audit. Used for CSV output.
+   * @return the estimated samples to audit.
+   */
+  public int getEstimatedSamplesToAudit() {
+    return estimatedSamplesToAudit;
+  }
+
+  /**
+   * Get the optimistic samples to audit. Used for CSV output.
+   * @return the optimistic samples to audit.
+   */
+  public int getOptimisticSamplesToAudit() {
+    return optimisticSamplesToAudit;
+  }
+
+  /**
+   * Get the two vote undercount. Used for CSV output.
+   * @return the two vote undercount.
+   */
+  public int getTwoVoteUnderCount() {
+    return twoVoteUnderCount;
+  }
+
+  /**
+   * Get the one vote undercount. Used for CSV output.
+   * @return the one vote undercount.
+   */
+  public int getOneVoteUnderCount() {
+    return oneVoteUnderCount;
+  }
+
+  /**
+   * Get the one vote overcount. Used for CSV output.
+   * @return the one vote overcount.
+   */
+  public int getOneVoteOverCount() {
+    return oneVoteOverCount;
+  }
+
+  /**
+   * Get the two vote overcount. Used for CSV output.
+   * @return the two vote overcount.
+   */
+  public int getTwoVoteOverCount() {
+    return twoVoteOverCount;
+  }
+
+  /**
+   * Get the count of discrepancies that are neither overcounts nor undercounts. Used for CSV output.
+   * @return the count of non-impactful discrepancies.
+   */
+  public int getOtherCount() {
+    return otherCount;
+  }
+
+  /**
+   * Get the current risk calculation. Used for CSV output.
+   * @return the risk.
+   */
+  public BigDecimal getCurrentRisk() {
+    return currentRisk;
+  }
+
+  /**
    * Construct and return a raire-java representation of this Assertion. This utility is
    * ultimately used to construct an assertions report export in the same format that raire-java
    * exports. This report is formed by serialising a RaireSolution object which itself contains
