@@ -20,24 +20,18 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.service;
 
-import au.org.democracydevelopers.raire.RaireSolution;
-import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -106,10 +100,12 @@ public class GetAssertionsCSVService {
    * audit and estimated samples to audit.
    * TODO at the moment this just gives the first extremum for each data type - fix it so that if there
    * are multiple matches to the same thing, it returns a list of them all.
-   * @param request
-   * @param assertions
-   * @return
-   * @throws RaireServiceException
+   * @param request the GetAssertionsRequest, used for contest name and candidate list.
+   * @param assertions the assertions to be written out.
+   * @return a preface to the CSV file.
+   * @throws RaireServiceException if some of the maxima or minima (for margin, difficulty, etc) don't
+   *         exist. This should never happen, because if there are any assertions in the database all
+   *         the extrema should have a value, and if there are no assertions we check for that first.
    */
   private String makePreface(GetAssertionsRequest request, List<Assertion> assertions)
       throws RaireServiceException {
