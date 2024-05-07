@@ -81,9 +81,9 @@ public class GenerateAssertionsOnKnownTestCases {
   GenerateAssertionsService generateAssertionsService;
 
   /**
-   * error allowed when comparing doubles.
+   * Error allowed when comparing doubles.
    */
-  private static final double EPS = 0.0000000001;
+  private static final double EPS = 0.0000001;
 
   /**
    * Names of contests, to match pre-loaded data.

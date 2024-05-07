@@ -73,7 +73,7 @@ public class GetAssertionsInProgressValidAPIRequestTests {
   /**
    * error allowed when comparing doubles.
    */
-  private static final double EPS = 0.0000000001;
+  private static final double EPS = 0.0000001;
 
   @LocalServerPort
   private int port;

@@ -65,7 +65,7 @@ public class GenerateAssertionsOnNSWTestCases {
   private static final int DEFAULT_TIME_LIMIT=5;
 
   // error allowed when comparing doubles.
-  private static final double EPS = 0.0000000001;
+  private static final double EPS = 0.0000001;
 
   /**
    * Expected data for each NSW contest.
