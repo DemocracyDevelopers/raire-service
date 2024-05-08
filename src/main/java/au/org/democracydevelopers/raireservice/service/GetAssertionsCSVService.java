@@ -26,6 +26,7 @@ import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -53,9 +54,13 @@ public class GetAssertionsCSVService {
   private final static String MARGIN = "Margin";
   private final static String DILUTED_MARGIN = "Diluted margin";
   private final static String DIFFICULTY = "Raire difficulty";
+  private final static String CURRENT_RISK = "Current risk";
   private final static String OPTIMISTIC_SAMPLES = "Optimistic samples to audit";
   private final static String ESTIMATED_SAMPLES = "Estimated samples to audit";
 
+  // List of statistics we find the minimum or maximum of.
+  private final static List<String> statisticNames = List.of(MARGIN, DILUTED_MARGIN,
+      DIFFICULTY, CURRENT_RISK, OPTIMISTIC_SAMPLES, ESTIMATED_SAMPLES);
   /**
    * Error allowed when comparing doubles.
    */
@@ -127,9 +132,6 @@ public class GetAssertionsCSVService {
     // The map from statistic name to list of indices of sortedAssertions that have the extreme value.
     Map<String, List<Integer>> extrema = new HashMap<>();
 
-    // List of statistics we find the minimum or maximum of.
-    List<String> statisticNames = List.of(MARGIN, DILUTED_MARGIN, DIFFICULTY, OPTIMISTIC_SAMPLES,
-        ESTIMATED_SAMPLES);
 
     // If there are no assertions, there are no extreme statistics.
     if(sortedAssertions.isEmpty()) {
@@ -194,6 +196,20 @@ public class GetAssertionsCSVService {
         extrema.replace(DIFFICULTY, new ArrayList<>(List.of(i)));
       }
 
+      // Current risk
+      BigDecimal currentRisk = sortedAssertions.get(extrema.get(CURRENT_RISK).getFirst())
+          .getCurrentRisk();
+      if(sortedAssertions.get(i).getCurrentRisk().compareTo(currentRisk) == 0) {
+        // This assertion has the same value as the current maximum. Add it to the list of
+        // extremal assertions.
+        extrema.get(CURRENT_RISK).add(i);
+      } else if (sortedAssertions.get(i).getCurrentRisk().compareTo(currentRisk) > 0) {
+
+        // This assertion has a strictly greater value than the current maximum. Replace the
+        // list of extremal assertions with this one only - it is (so far) the unique maximum.
+        extrema.replace(CURRENT_RISK, new ArrayList<>(List.of(i)));
+      }
+
       // Optimistic samples to audit
       double currentMaxOptimistic = sortedAssertions.get(extrema.get(OPTIMISTIC_SAMPLES).getFirst())
           .getOptimisticSamplesToAudit();
@@ -256,6 +272,10 @@ public class GetAssertionsCSVService {
               + sortedAssertions.get(extrema.get(DIFFICULTY).getFirst()).getDifficulty() + ","
               + String.join(",",
                   extrema.get(DIFFICULTY).stream().map(i -> (i+1)+"").toList()) + "\n"
+          + CURRENT_RISK + ","
+              + sortedAssertions.get(extrema.get(CURRENT_RISK).getFirst()).getCurrentRisk() + ","
+              + String.join(",",
+                  extrema.get(CURRENT_RISK).stream().map(i -> (i+1)+"").toList()) + "\n"
           + OPTIMISTIC_SAMPLES + ","
               + sortedAssertions.get(extrema.get(OPTIMISTIC_SAMPLES).getFirst()).getOptimisticSamplesToAudit() + ","
               + String.join(",",
@@ -263,7 +283,7 @@ public class GetAssertionsCSVService {
           + ESTIMATED_SAMPLES + ","
               + sortedAssertions.get(extrema.get(ESTIMATED_SAMPLES).getFirst()).getEstimatedSamplesToAudit() + ","
               + String.join(",",
-                  extrema.get(ESTIMATED_SAMPLES).stream().map(i -> (i+1)+"").toList()) + "\n";
+                  extrema.get(ESTIMATED_SAMPLES).stream().map(i -> (i+1)+"").toList());
   }
 
   private String makeHeaders() {
@@ -296,28 +316,28 @@ public class GetAssertionsCSVService {
        switch (assertion) {
          case NENAssertion ignored -> assertionType = "NEN";
          case NEBAssertion ignored -> assertionType = "NEB";
-         // TODO seal Assertion class to obviate need for default case.
+         // Ideally we would use the 'sealed' concept on the Assertion class to tell the compiler
+         // that there was no need for this default, but that interacted badly with persistence.
          default -> throw new IllegalStateException("Unexpected value: " + assertion);
        }
 
        contents.append(
            index++ + ","
-           + assertionType + ','
-           + StringEscapeUtils.escapeCsv(assertion.getWinner()) + ','
-           + StringEscapeUtils.escapeCsv(assertion.getLoser()) + ','
-           + String.join(",", assertion.getAssumedContinuing().stream()
-           .map(StringEscapeUtils::escapeCsv).toList()) + ','
-           + assertion.getDifficulty() + ','
-           + assertion.getMargin() + ','
-           + assertion.getDilutedMargin() + ','
-           + assertion.getCurrentRisk() + ','
-           + assertion.getEstimatedSamplesToAudit() + ','
-           + assertion.getOptimisticSamplesToAudit() + ','
-           + assertion.getTwoVoteOverCount() + ','
-           + assertion.getOneVoteOverCount() + ','
-           + assertion.getOtherCount() + ','
-           + assertion.getOneVoteUnderCount() + ','
-           + assertion.getTwoVoteUnderCount() + '\n'
+           + assertionType + ","
+           + StringEscapeUtils.escapeCsv(assertion.getWinner()) + ","
+           + StringEscapeUtils.escapeCsv(assertion.getLoser()) + ","
+           + StringEscapeUtils.escapeCsv(String.join(",", assertion.getAssumedContinuing())) + ","
+           + assertion.getDifficulty() + ","
+           + assertion.getMargin() + ","
+           + assertion.getDilutedMargin() + ","
+           + assertion.getCurrentRisk() + ","
+           + assertion.getEstimatedSamplesToAudit() + ","
+           + assertion.getOptimisticSamplesToAudit() + ","
+           + assertion.getTwoVoteOverCount() + ","
+           + assertion.getOneVoteOverCount() + ","
+           + assertion.getOtherCount() + ","
+           + assertion.getOneVoteUnderCount() + ","
+           + assertion.getTwoVoteUnderCount()
        );
     }
     return String.valueOf(contents);

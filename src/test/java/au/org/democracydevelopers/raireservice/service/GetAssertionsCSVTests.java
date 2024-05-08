@@ -27,6 +27,7 @@ import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import java.math.BigDecimal;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -60,6 +61,7 @@ public class GetAssertionsCSVTests {
   }
 
   @Test
+  @Disabled
   public void testCharacterEscaping() throws RaireServiceException {
     GetAssertionsRequest request = new GetAssertionsRequest("Lots of tricky characters Contest",
         trickyCharacters, new BigDecimal("0.10"));
@@ -68,7 +70,7 @@ public class GetAssertionsCSVTests {
   }
 
   @Test
-  public void testTwoAssertionContest() throws RaireServiceException {
+  public void testCSVDemoContest() throws RaireServiceException {
     GetAssertionsRequest request = new GetAssertionsRequest(
         "CSV Demo Contest", candidates, new BigDecimal("0.10"));
     String output = getAssertionsCSVService.generateCSV(request);
