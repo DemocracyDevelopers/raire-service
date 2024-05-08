@@ -296,8 +296,6 @@ public class GetAssertionsCSVService {
        switch (assertion) {
          case NENAssertion ignored -> assertionType = "NEN";
          case NEBAssertion ignored -> assertionType = "NEB";
-         // TODO seal Assertion class to obviate need for default case.
-         default -> throw new IllegalStateException("Unexpected value: " + assertion);
        }
 
        contents.append(

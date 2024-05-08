@@ -40,12 +40,14 @@ import org.springframework.data.annotation.ReadOnlyProperty;
  * in the database. The only type of 'modification' that the raire-service will do, if required,
  * is delete assertions from the database for a specific contest, re-generate them, and store
  * the new assertions in the database.
+ * The class is sealed so that other parts of the codebase can depend on there being only those
+ * particular two kinds of assertion (NEN and NEB).
  */
 @Entity
 @Table(name = "assertion")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "assertion_type")
-public abstract class Assertion {
+public abstract sealed class Assertion permits NENAssertion, NEBAssertion {
 
   protected static final Logger logger = LoggerFactory.getLogger(Assertion.class);
 

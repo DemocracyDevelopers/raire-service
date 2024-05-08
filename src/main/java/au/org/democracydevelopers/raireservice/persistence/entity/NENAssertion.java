@@ -43,7 +43,7 @@ import java.util.Map;
  */
 @Entity
 @DiscriminatorValue("NEN")
-public class NENAssertion extends Assertion {
+public final class NENAssertion extends Assertion {
 
   /**
    * {@inheritDoc}
