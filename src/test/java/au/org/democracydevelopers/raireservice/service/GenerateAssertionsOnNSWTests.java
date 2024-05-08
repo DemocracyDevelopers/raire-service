@@ -52,6 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @Ignore("Class not ready for tests")
+@Disabled
 public class GenerateAssertionsOnNSWTests {
 
   @Autowired

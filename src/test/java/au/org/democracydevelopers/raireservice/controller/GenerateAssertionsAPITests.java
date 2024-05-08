@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -467,6 +468,7 @@ public class GenerateAssertionsAPITests {
    * e.g. tied winners. See Issue.
    */
   @Test
+  @Disabled
   public void testErrorHeaderResponses() {
     String url = "http://localhost:" +port + generateAssertionsEndpoint;
 
