@@ -47,7 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Tests to validate the behaviour of Assertion generation on NSW 2021 Mayoral election data.
  * Data is loaded in from src/test/resources/NSW2021Data/
  */
-@ActiveProfiles("nsw-testcases")
+//@ActiveProfiles("nsw-testcases")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
