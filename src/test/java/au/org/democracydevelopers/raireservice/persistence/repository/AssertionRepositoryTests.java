@@ -22,15 +22,11 @@ package au.org.democracydevelopers.raireservice.persistence.repository;
 
 
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
-import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
-import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
-import au.org.democracydevelopers.raireservice.service.Metadata;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,15 +36,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 /**
  * Tests to validate the behaviour of Assertion retrieval and storage. Assertions and other
