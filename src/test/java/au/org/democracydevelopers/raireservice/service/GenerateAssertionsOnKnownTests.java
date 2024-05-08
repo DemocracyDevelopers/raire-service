@@ -353,7 +353,7 @@ public class GenerateAssertionsOnKnownTests {
    */
   @Test
   @Transactional
-  public void simpleContestSingleCountyInsufficientBallotsError() throws RaireServiceException {
+  public void simpleContestSingleCountyInsufficientBallotsError()  {
     GenerateAssertionsRequest notEnoughBallotsRequest = new GenerateAssertionsRequest(simpleContest,
         2, 5, Arrays.stream(aliceChuanBob).toList());
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
