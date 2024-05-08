@@ -42,6 +42,7 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
    * @param contestName the name of the contest.
    * @return the contests with that name, as retrieved from the database.
    */
+  @Query
   List<Contest> findByName(String contestName);
 
   /**
@@ -49,6 +50,7 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
    * @param contestName the name of the contest.
    * @return the first of that name,
    */
+  @Query
   Optional<Contest> findFirstByName(String contestName);
 
 
@@ -69,6 +71,7 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
    * @param contestName the name of the contest
    * @return false if there are any non-IRV descriptions for a contest of that name.
    */
+  @Query
   default boolean isAllIRV(String contestName) {
     List<Contest> contests = findByName(contestName);
 

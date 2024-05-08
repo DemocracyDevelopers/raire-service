@@ -91,8 +91,19 @@ public class GenerateAssertionsService {
       // First extract all county level contests matching the contest name in the request. For
       // these contests, extract CVR vote data from the database, and add those votes to the
       // vote consolidator.
-      contestRepository.findByName(request.contestName).stream().map(c -> cvrContestInfoRepository.getCVRs(
-          c.getContestID(), c.getCountyID())).flatMap(List::stream).forEach(consolidator::addVoteNames);
+      final List<String[]> votes = contestRepository.findByName(request.contestName).stream().map(
+          c -> cvrContestInfoRepository.getCVRs(c.getContestID(), c.getCountyID())).
+          flatMap(List::stream).toList();
+
+      if(votes.size() > request.totalAuditableBallots){
+        final String msg = votes.size() + " votes present for contest " + request.contestName +
+            " but a universe size of " + request.totalAuditableBallots + " ballots has been " +
+            " specified in the assertion generation request.";
+        logger.error("GenerateAssertionsService::generateAssertions " + msg);
+        throw new RaireServiceException(msg, RaireErrorCodes.INVALID_TOTAL_AUDITABLE_BALLOTS);
+      }
+
+      votes.forEach(consolidator::addVoteNames);
 
       // If the extracted votes are valid, get raire-java to generate assertions.
       // First, form a metadata map containing contest details.
@@ -116,6 +127,9 @@ public class GenerateAssertionsService {
           ex.getMessage();
       logger.error("GenerateAssertionsService::generateAssertions " + msg);
       throw new RaireServiceException(msg, RaireErrorCodes.WRONG_CANDIDATE_NAMES);
+    }
+    catch(RaireServiceException ex){
+      throw ex;
     }
     catch(DataAccessException ex){
       final String msg = "A data access exception arose when extracting CVR/Contest data. " +

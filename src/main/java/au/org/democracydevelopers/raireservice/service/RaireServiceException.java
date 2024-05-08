@@ -105,6 +105,12 @@ public class RaireServiceException extends Exception {
     TIED_WINNERS,
 
     /**
+     * The total number of auditable ballots for a contest is less than the number of CVRs in
+     * the database that contain the contest.
+     */
+    INVALID_TOTAL_AUDITABLE_BALLOTS,
+
+    /**
      * Time out checking winners - can happen if the contest is tied, or if it is complicated and
      * can't be distinguished from a tie.
      */

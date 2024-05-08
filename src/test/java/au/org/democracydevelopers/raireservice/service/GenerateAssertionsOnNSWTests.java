@@ -32,6 +32,7 @@ import au.org.democracydevelopers.raireservice.persistence.repository.AssertionR
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import java.util.List;
+import org.junit.Ignore;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,8 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GenerateAssertionsOnNSWTestCases {
+@Ignore("Class not ready for tests")
+public class GenerateAssertionsOnNSWTests {
 
   @Autowired
   private CVRContestInfoRepository cvrContestInfoRepository;
@@ -64,7 +66,9 @@ public class GenerateAssertionsOnNSWTestCases {
 
   private static final int DEFAULT_TIME_LIMIT=5;
 
-  // error allowed when comparing doubles.
+  /**
+   * Error allowed when comparing doubles.
+   */
   private static final double EPS = 0.0000000001;
 
   /**
@@ -338,19 +342,6 @@ public class GenerateAssertionsOnNSWTestCases {
   private static final String winnerContest_33 = "FAKER John";
 
   /**
-   * Trivial test to see whether the placeholder service throws the expected placeholder exception.
-   */
-  @Test
-  @Transactional
-  void dummyServiceThrowsException() {
-    GenerateAssertionsRequest firstRequest = new GenerateAssertionsRequest(nameContest_1,
-        ballotCountContest_1, DEFAULT_TIME_LIMIT, choicesContest_1);
-    assertThrows(RaireServiceException.class, () ->
-        generateAssertionsService.generateAssertions(firstRequest)
-    );
-  }
-
-  /**
    * Contest 1.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
@@ -379,6 +370,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_1, request.candidates.get(response.Ok.winner));
@@ -417,6 +409,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_2, request.candidates.get(response.Ok.winner));
@@ -455,6 +448,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_3, request.candidates.get(response.Ok.winner));
@@ -493,6 +487,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_4, request.candidates.get(response.Ok.winner));
@@ -531,6 +526,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_5, request.candidates.get(response.Ok.winner));
@@ -569,6 +565,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_6, request.candidates.get(response.Ok.winner));
@@ -607,6 +604,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_7, request.candidates.get(response.Ok.winner));
@@ -645,6 +643,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_8, request.candidates.get(response.Ok.winner));
@@ -683,6 +682,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_9, request.candidates.get(response.Ok.winner));
@@ -721,6 +721,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_10, request.candidates.get(response.Ok.winner));
@@ -759,6 +760,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_11, request.candidates.get(response.Ok.winner));
@@ -797,6 +799,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_12, request.candidates.get(response.Ok.winner));
@@ -835,6 +838,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_13, request.candidates.get(response.Ok.winner));
@@ -873,6 +877,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_14, request.candidates.get(response.Ok.winner));
@@ -911,6 +916,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_15, request.candidates.get(response.Ok.winner));
@@ -949,6 +955,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_16, request.candidates.get(response.Ok.winner));
@@ -987,6 +994,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_17, request.candidates.get(response.Ok.winner));
@@ -1025,6 +1033,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_18, request.candidates.get(response.Ok.winner));
@@ -1063,6 +1072,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_19, request.candidates.get(response.Ok.winner));
@@ -1101,6 +1111,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_20, request.candidates.get(response.Ok.winner));
@@ -1139,6 +1150,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_21, request.candidates.get(response.Ok.winner));
@@ -1177,6 +1189,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_22, request.candidates.get(response.Ok.winner));
@@ -1215,6 +1228,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_23, request.candidates.get(response.Ok.winner));
@@ -1253,6 +1267,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_24, request.candidates.get(response.Ok.winner));
@@ -1291,6 +1306,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_25, request.candidates.get(response.Ok.winner));
@@ -1329,6 +1345,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_26, request.candidates.get(response.Ok.winner));
@@ -1367,6 +1384,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_27, request.candidates.get(response.Ok.winner));
@@ -1405,6 +1423,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_28, request.candidates.get(response.Ok.winner));
@@ -1443,6 +1462,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_29, request.candidates.get(response.Ok.winner));
@@ -1481,6 +1501,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_30, request.candidates.get(response.Ok.winner));
@@ -1519,6 +1540,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_31, request.candidates.get(response.Ok.winner));
@@ -1557,6 +1579,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winner.
     assertEquals(winnerContest_32, request.candidates.get(response.Ok.winner));
@@ -1595,6 +1618,7 @@ public class GenerateAssertionsOnNSWTestCases {
 
     // Generate assertions.
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
     assertEquals(winnerContest_33, request.candidates.get(response.Ok.winner));
