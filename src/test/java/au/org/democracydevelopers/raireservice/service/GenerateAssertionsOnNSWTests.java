@@ -23,7 +23,6 @@ package au.org.democracydevelopers.raireservice.service;
 
 import static au.org.democracydevelopers.raireservice.testUtils.difficultyMatchesMax;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
