@@ -21,26 +21,26 @@ INSERT INTO assertion_assumed_continuing values (4, 'Alice');
 INSERT INTO assertion_assumed_continuing values (4, 'Bob');
 INSERT INTO assertion_assumed_continuing values (4, 'Chuan');
 INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values
-('NEN', 'Lots of assertions with ties Contest', 1.1, 0.22, 'Diego', 220, 1, 0.07, 430, 0, 0, 210, 0, 0, 0, 'Alice');
+('NEN', 'Lots of assertions with ties Contest', 1.1, 0.22, 'Diego', 220, 0.07, 430, 0, 0, 210, 0, 0, 0, 0, 'Alice');
 INSERT INTO assertion_assumed_continuing values (5, 'Alice');
 INSERT INTO assertion_assumed_continuing values (5, 'Diego');
 INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values
-('NEN', 'Lots of assertions with ties Contest', 1.2, 0.22, 'Bob', 220, 1, 0.04, 400, 0, 0, 110, 0, 0, 0, 'Alice');
-INSERT INTO assertion_assumed_continuing values (5, 'Alice');
-INSERT INTO assertion_assumed_continuing values (5, 'Bob');
-INSERT INTO assertion_assumed_continuing values (5, 'Diego');
+('NEN', 'Lots of assertions with ties Contest', 1.2, 0.22, 'Bob', 220, 0.04, 400, 0, 0, 110, 0, 0, 0, 0, 'Alice');
+INSERT INTO assertion_assumed_continuing values (6, 'Alice');
+INSERT INTO assertion_assumed_continuing values (6, 'Bob');
+INSERT INTO assertion_assumed_continuing values (6, 'Diego');
 
 -- This contest has lots of characters that need escaping.
 INSERT INTO county (id, name) VALUES (2,'Lots of tricky characters County');
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) VALUES (2,2,0,'IRV','Lots of tricky characters Contest',2,4,1);
 INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values
-('NEB', 'Lots of tricky characters County', 2.1, 0.32, '"Breaking", Bob', 320, 0.04, 110, 0, 0, 100, 0, 0, 0, 0, '"Annoying," Alice');
+('NEB', 'Lots of tricky characters County', 2.1, 0.32, '""Breaking"", Bob', 320, 0.04, 110, 0, 1, 100, 0, 0, 0, 0, '""Annoying,"" Alice');
 INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values
-('NEN', 'Lots of tricky characters County', 3.01, 0.12, 'Difficult, Diego', 240, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Challenging, Chuan');
-INSERT INTO assertion_assumed_continuing values (8, '"Annoying," Alice');
+('NEN', 'Lots of tricky characters County', 3.01, 0.12, 'Difficult, Diego', 240, 0.04, 120, 1, 0, 110, 0, 0, 0, 0, 'Challenging, Chuan');
+INSERT INTO assertion_assumed_continuing values (8, '""Annoying,"" Alice');
 INSERT INTO assertion_assumed_continuing values (8, 'Challenging, Chuan');
 INSERT INTO assertion_assumed_continuing values (8, 'Difficult, Diego');
-INSERT INTO assertion_assumed_continuing values (8, '"Breaking", Bob');
+INSERT INTO assertion_assumed_continuing values (8, '""Breaking"", Bob');
 
 -- This contest has sensible correlated values for making a demo csv
 INSERT INTO county (id, name) VALUES (3,'CSV Demo County');

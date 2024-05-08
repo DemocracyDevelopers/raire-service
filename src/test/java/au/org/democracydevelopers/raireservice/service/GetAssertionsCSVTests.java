@@ -40,7 +40,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("csv-challenges")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GetAssertionsCSVTests {
 
   @Autowired

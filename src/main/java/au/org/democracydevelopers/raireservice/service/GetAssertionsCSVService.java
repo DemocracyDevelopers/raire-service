@@ -186,7 +186,7 @@ public class GetAssertionsCSVService {
         // This assertion has the same value as the current maximum. Add it to the list of
         // extremal assertions.
         extrema.get(DIFFICULTY).add(i);
-      } else if (sortedAssertions.get(i).getDilutedMargin() > currentMinDilutedMargin) {
+      } else if (sortedAssertions.get(i).getDifficulty() > currentMaxDifficulty) {
         // Note the 'else if' is important here, (the 'else' part is redundant for the integer comparisons)
         // because if the new value is very slightly less than the current min, we only want to add
         // it once.
@@ -337,7 +337,7 @@ public class GetAssertionsCSVService {
            + assertion.getOneVoteOverCount() + ","
            + assertion.getOtherCount() + ","
            + assertion.getOneVoteUnderCount() + ","
-           + assertion.getTwoVoteUnderCount()
+           + assertion.getTwoVoteUnderCount() + "\n"
        );
     }
     return String.valueOf(contents);
