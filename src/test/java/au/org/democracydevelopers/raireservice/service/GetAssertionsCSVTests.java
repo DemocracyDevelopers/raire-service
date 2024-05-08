@@ -22,15 +22,10 @@ package au.org.democracydevelopers.raireservice.service;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raire.RaireSolution;
-import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
-import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
-import au.org.democracydevelopers.raireservice.response.RaireResultMixIn;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,23 +47,34 @@ public class GetAssertionsCSVTests {
 
   @Autowired
   GetAssertionsCSVService getAssertionsCSVService;
-  String[] candidates = {"Liesl", "Wendell", "Amanda"};
+  List<String> candidates = List.of("Alice", "Bob", "Chuan", "Diego");
+  List<String> trickyCharacters
+      = List.of("\"Annoying,\" Alice", "\"Breaking\", Bob", "Challenging, Chuan", "Difficult, Diego");
 
   @Test
-  public void testCSVOutput() throws RaireServiceException {
-    GetAssertionsRequest request = new GetAssertionsRequest("One NEB Assertion Contest",
-        List.of("Alice", "Bob"), new BigDecimal("0.10"));
+  public void testCSVTies() throws RaireServiceException {
+    GetAssertionsRequest request = new GetAssertionsRequest(
+        "Lots of assertions with ties Contest", candidates, new BigDecimal("0.10"));
     String output = getAssertionsCSVService.generateCSV(request);
     assertTrue(StringUtils.containsIgnoreCase(output, "Bob"));
   }
 
   @Test
-  public void testCSVOutput2() throws RaireServiceException {
-    GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
-        List.of(candidates), new BigDecimal("0.10"));
+  public void testCharacterEscaping() throws RaireServiceException {
+    GetAssertionsRequest request = new GetAssertionsRequest("Lots of tricky characters Contest",
+        trickyCharacters, new BigDecimal("0.10"));
     String output = getAssertionsCSVService.generateCSV(request);
-    assertTrue(StringUtils.containsIgnoreCase(output, "Liesl"));
+    assertTrue(StringUtils.containsIgnoreCase(output, "Difficult, Diego"));
   }
+
+  @Test
+  public void testTwoAssertionContest() throws RaireServiceException {
+    GetAssertionsRequest request = new GetAssertionsRequest(
+        "CSV Demo Contest", candidates, new BigDecimal("0.10"));
+    String output = getAssertionsCSVService.generateCSV(request);
+    assertTrue(StringUtils.containsIgnoreCase(output, "Alice"));
+  }
+
   /*
   Tests with tricky characters to escape.
       String test = preface + '\n' + headers + ',' + StringEscapeUtils.escapeCsv("Smith, Bob") + ','
