@@ -40,7 +40,7 @@ import java.util.Map;
  */
 @Entity
 @DiscriminatorValue("NEB")
-public final class NEBAssertion extends Assertion {
+public class NEBAssertion extends Assertion {
 
   /**
    * {@inheritDoc}
