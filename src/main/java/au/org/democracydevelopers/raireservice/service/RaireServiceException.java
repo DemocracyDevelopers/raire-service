@@ -63,10 +63,8 @@ public class RaireServiceException extends Exception {
           this.errorCode = RaireErrorCodes.TIMEOUT_TRIMMING_ASSERTIONS;
       case TimeoutCheckingWinner e -> this.errorCode = RaireErrorCodes.TIMEOUT_CHECKING_WINNER;
       case CouldNotRuleOut e -> this.errorCode = RaireErrorCodes.COULD_NOT_RULE_OUT_ALTERNATIVE;
-      // I think this is what we get if the candidate list entered in the request has the
-      // right number but wrong names vs the database. It's therefore not (really) an internal error
-      // - it's a colorado-rla error.
-      // (See Issue https://github.com/DemocracyDevelopers/raire-service/issues/66.)
+      // This is what we get if the candidate list entered in the request has the
+      // right number but wrong names vs the database.
       case InvalidCandidateNumber e -> this.errorCode = RaireErrorCodes.WRONG_CANDIDATE_NAMES;
 
       // Internal coding errors.
