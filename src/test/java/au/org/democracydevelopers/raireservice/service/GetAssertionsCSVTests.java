@@ -27,7 +27,6 @@ import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import java.math.BigDecimal;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -37,6 +36,14 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 
+/**
+ * Test cases for csv generation, including
+ * - a basic, simple test case with two assertions (NEN and NEB),
+ * - a test case with lots of ties, to test that extremum-calculationn is correct,
+ * - a test case with difficult characters, such as " and ' and , in the candidate names.
+ * TODO Note that there are assumptions about how these characters are represented in the database,
+ * which need to be validated on real data.
+ */
 @ActiveProfiles("csv-challenges")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
@@ -50,7 +57,7 @@ public class GetAssertionsCSVTests {
   GetAssertionsCSVService getAssertionsCSVService;
   List<String> candidates = List.of("Alice", "Bob", "Chuan", "Diego");
   List<String> trickyCharacters
-      = List.of("\"Annoying,\" Alice", "\"Breaking\", Bob", "Challenging, Chuan", "Difficult, Diego");
+      = List.of("\"Annoying,\" Alice", "\"Breaking\", Bob", "Challenging, Chuan", "O'Difficult, Diego");
 
   @Test
   public void testCSVTies() throws RaireServiceException {
@@ -61,7 +68,6 @@ public class GetAssertionsCSVTests {
   }
 
   @Test
-  @Disabled
   public void testCharacterEscaping() throws RaireServiceException {
     GetAssertionsRequest request = new GetAssertionsRequest("Lots of tricky characters Contest",
         trickyCharacters, new BigDecimal("0.10"));
@@ -76,11 +82,4 @@ public class GetAssertionsCSVTests {
     String output = getAssertionsCSVService.generateCSV(request);
     assertTrue(StringUtils.containsIgnoreCase(output, "Alice"));
   }
-
-  /*
-  Tests with tricky characters to escape.
-      String test = preface + '\n' + headers + ',' + StringEscapeUtils.escapeCsv("Smith, Bob") + ','
-          + StringEscapeUtils.escapeCsv("Alice \"The fixer\"") + ','
-          + StringEscapeUtils.escapeCsv("Alice's friend");
-   */
 }

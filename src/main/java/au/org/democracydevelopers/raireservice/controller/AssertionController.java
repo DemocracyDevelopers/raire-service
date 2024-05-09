@@ -165,14 +165,15 @@ public class AssertionController {
    * are not accepted here.
    * Based on the <a href="https://wiki.sei.cmu.edu/confluence/display/java/IDS50-J.+Use+conservative+file+naming+conventions">
    * Conservative file naming conventions</A> of David Svoboda, disallow whitespace and leading
-   * hyphens.
+   * hyphens. (Actually that reference advocates completely disallowing whitespace, whereas here we
+   * allow spaces if they are not leading.)
    * @param contestName the name of the contest
    * @return the same name, with any problematic characters filtered out.
    */
   private String removeIllegalChars(String contestName) {
     // Remove any characters other than those on the allowed list.
-    String cleanedName = contestName.replaceAll("[^-_.A-Za-z0-9]","");
-    // Remove leading hyphens ().
-    return cleanedName.replaceAll("^[-]*","");
+    String cleanedName = contestName.replaceAll("[^-_ .A-Za-z0-9]","");
+    // Remove leading hyphens and spaces.
+    return cleanedName.replaceAll("^[- ]*","");
   }
 }

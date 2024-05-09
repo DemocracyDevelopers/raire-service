@@ -253,36 +253,36 @@ public class GetAssertionsCSVService {
    */
   private String makePreface(GetAssertionsRequest request, Map<String, List<Integer>> extrema,
       List<Assertion> sortedAssertions) {
-      return "Contest name," + StringEscapeUtils.escapeCsv(request.contestName) + "\n"
-          + "Candidates," + StringEscapeUtils.escapeCsv(String.join(",", request.candidates))
-          + "\n\n"
-          + "\"Extreme item\",Value,\"Assertion IDs\"" + "\n"
+      return "Contest name," + StringEscapeUtils.escapeCsv(request.contestName) + '\n'
+          + "Candidates," + StringEscapeUtils.escapeCsv(String.join(",",
+            request.candidates.stream().map(StringEscapeUtils::escapeCsv).toList())) + "\n\n"
+          + "\"Extreme item\",Value,\"Assertion IDs\"" + '\n'
           // Print out the name of the extremum statistic, the extreme value, and the list of
           // indices meeting the extremum. The list is indexed 0..size-1, but humans want to read
           // lists as 1..size, so add 1 to index values before printing.
           + MARGIN + ","
           + sortedAssertions.get(extrema.get(MARGIN).getFirst()).getMargin() + ","
-          + StringEscapeUtils.escapeCsv(String.join(",",
+          + StringEscapeUtils.escapeCsv(String.join(", ",
               extrema.get(MARGIN).stream().map(i -> (i+1)+"").toList())) + "\n"
           + DILUTED_MARGIN + ","
           + sortedAssertions.get(extrema.get(DILUTED_MARGIN).getFirst()).getDilutedMargin() + ","
-          + StringEscapeUtils.escapeCsv(String.join(",",
+          + StringEscapeUtils.escapeCsv(String.join(", ",
               extrema.get(DILUTED_MARGIN).stream().map(i -> (i+1)+"").toList())) + "\n"
           + DIFFICULTY + ","
           + sortedAssertions.get(extrema.get(DIFFICULTY).getFirst()).getDifficulty() + ","
-          + StringEscapeUtils.escapeCsv(String.join(",",
+          + StringEscapeUtils.escapeCsv(String.join(", ",
               extrema.get(DIFFICULTY).stream().map(i -> (i+1)+"").toList())) + "\n"
           + CURRENT_RISK + ","
           + sortedAssertions.get(extrema.get(CURRENT_RISK).getFirst()).getCurrentRisk() + ","
-          + StringEscapeUtils.escapeCsv(String.join(",",
+          + StringEscapeUtils.escapeCsv(String.join(", ",
               extrema.get(CURRENT_RISK).stream().map(i -> (i+1)+"").toList())) + "\n"
           + OPTIMISTIC_SAMPLES + ","
           + sortedAssertions.get(extrema.get(OPTIMISTIC_SAMPLES).getFirst()).getOptimisticSamplesToAudit() + ","
-          + StringEscapeUtils.escapeCsv(String.join(",",
+          + StringEscapeUtils.escapeCsv(String.join(", ",
               extrema.get(OPTIMISTIC_SAMPLES).stream().map(i -> (i+1)+"").toList())) + "\n"
           + ESTIMATED_SAMPLES + ","
           + sortedAssertions.get(extrema.get(ESTIMATED_SAMPLES).getFirst()).getEstimatedSamplesToAudit() + ","
-          + StringEscapeUtils.escapeCsv(String.join(",",
+          + StringEscapeUtils.escapeCsv(String.join(", ",
               extrema.get(ESTIMATED_SAMPLES).stream().map(i -> (i+1)+"").toList()));
   }
 
@@ -326,7 +326,8 @@ public class GetAssertionsCSVService {
            + assertionType + ","
            + StringEscapeUtils.escapeCsv(assertion.getWinner()) + ","
            + StringEscapeUtils.escapeCsv(assertion.getLoser()) + ","
-           + StringEscapeUtils.escapeCsv(String.join(",", assertion.getAssumedContinuing())) + ","
+           + StringEscapeUtils.escapeCsv(String.join(", ",
+               assertion.getAssumedContinuing().stream().map(StringEscapeUtils::escapeCsv).toList())) + ","
            + assertion.getDifficulty() + ","
            + assertion.getMargin() + ","
            + assertion.getDilutedMargin() + ","
