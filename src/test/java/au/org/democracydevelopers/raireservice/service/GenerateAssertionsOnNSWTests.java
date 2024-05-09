@@ -31,7 +31,6 @@ import au.org.democracydevelopers.raireservice.persistence.repository.AssertionR
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import java.util.List;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,13 +45,13 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Tests to validate the behaviour of Assertion generation on NSW 2021 Mayoral election data.
  * Data is loaded in from src/test/resources/NSW2021Data/
+ * These tests all pass, but are disabled because loading in all the NSW data takes a long time.
  */
 @ActiveProfiles("nsw-testcases")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@Ignore("Class not ready for tests")
-@Disabled
+@Disabled("These tests pass but are disabled because loading in the data takes a long time.")
 public class GenerateAssertionsOnNSWTests {
 
   @Autowired
@@ -363,7 +362,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest1() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_1,
         ballotCountContest_1, DEFAULT_TIME_LIMIT, choicesContest_1);
@@ -402,7 +400,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest2() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_2,
         ballotCountContest_2, DEFAULT_TIME_LIMIT, choicesContest_2);
@@ -441,7 +438,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest3() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_3,
         ballotCountContest_3, DEFAULT_TIME_LIMIT, choicesContest_3);
@@ -480,7 +476,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest4() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_4,
         ballotCountContest_4, DEFAULT_TIME_LIMIT, choicesContest_4);
@@ -519,7 +514,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest5() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_5,
         ballotCountContest_5, DEFAULT_TIME_LIMIT, choicesContest_5);
@@ -558,7 +552,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest6() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_6,
         ballotCountContest_6, DEFAULT_TIME_LIMIT, choicesContest_6);
@@ -597,7 +590,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest7() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_7,
         ballotCountContest_7, DEFAULT_TIME_LIMIT, choicesContest_7);
@@ -636,7 +628,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest8() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_8,
         ballotCountContest_8, DEFAULT_TIME_LIMIT, choicesContest_8);
@@ -675,7 +666,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest9() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_9,
         ballotCountContest_9, DEFAULT_TIME_LIMIT, choicesContest_9);
@@ -714,7 +704,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest10() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_10,
         ballotCountContest_10, DEFAULT_TIME_LIMIT, choicesContest_10);
@@ -753,7 +742,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest11() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_11,
         ballotCountContest_11, DEFAULT_TIME_LIMIT, choicesContest_11);
@@ -792,7 +780,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest12() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_12,
         ballotCountContest_12, DEFAULT_TIME_LIMIT, choicesContest_12);
@@ -831,7 +818,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest13() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_13,
         ballotCountContest_13, DEFAULT_TIME_LIMIT, choicesContest_13);
@@ -870,7 +856,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest14() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_14,
         ballotCountContest_14, DEFAULT_TIME_LIMIT, choicesContest_14);
@@ -909,7 +894,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest15() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_15,
         ballotCountContest_15, DEFAULT_TIME_LIMIT, choicesContest_15);
@@ -948,7 +932,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest16() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_16,
         ballotCountContest_16, DEFAULT_TIME_LIMIT, choicesContest_16);
@@ -987,7 +970,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest17() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_17,
         ballotCountContest_17, DEFAULT_TIME_LIMIT, choicesContest_17);
@@ -1026,7 +1008,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest18() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_18,
         ballotCountContest_18, DEFAULT_TIME_LIMIT, choicesContest_18);
@@ -1065,7 +1046,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest19() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_19,
         ballotCountContest_19, DEFAULT_TIME_LIMIT, choicesContest_19);
@@ -1104,7 +1084,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest20() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_20,
         ballotCountContest_20, DEFAULT_TIME_LIMIT, choicesContest_20);
@@ -1143,7 +1122,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest21() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_21,
         ballotCountContest_21, DEFAULT_TIME_LIMIT, choicesContest_21);
@@ -1182,7 +1160,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest22() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_22,
         ballotCountContest_22, DEFAULT_TIME_LIMIT, choicesContest_22);
@@ -1221,7 +1198,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest23() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_23,
         ballotCountContest_23, DEFAULT_TIME_LIMIT, choicesContest_23);
@@ -1260,7 +1236,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest24() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_24,
         ballotCountContest_24, DEFAULT_TIME_LIMIT, choicesContest_24);
@@ -1299,7 +1274,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest25() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_25,
         ballotCountContest_25, DEFAULT_TIME_LIMIT, choicesContest_25);
@@ -1338,7 +1312,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest26() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_26,
         ballotCountContest_26, DEFAULT_TIME_LIMIT, choicesContest_26);
@@ -1377,7 +1350,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest27() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_27,
         ballotCountContest_27, DEFAULT_TIME_LIMIT, choicesContest_27);
@@ -1416,7 +1388,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest28() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_28,
         ballotCountContest_28, DEFAULT_TIME_LIMIT, choicesContest_28);
@@ -1455,7 +1426,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest29() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_29,
         ballotCountContest_29, DEFAULT_TIME_LIMIT, choicesContest_29);
@@ -1494,7 +1464,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest30() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_30,
         ballotCountContest_30, DEFAULT_TIME_LIMIT, choicesContest_30);
@@ -1533,7 +1502,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest31() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_31,
         ballotCountContest_31, DEFAULT_TIME_LIMIT, choicesContest_31);
@@ -1572,7 +1540,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest32() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_32,
         ballotCountContest_32, DEFAULT_TIME_LIMIT, choicesContest_32);
@@ -1611,7 +1578,6 @@ public class GenerateAssertionsOnNSWTests {
    */
   @Test
   @Transactional
-  //@Disabled
   public void checkDifficulty_contest33() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_33,
         ballotCountContest_33, DEFAULT_TIME_LIMIT, choicesContest_33);
