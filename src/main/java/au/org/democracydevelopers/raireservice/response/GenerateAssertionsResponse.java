@@ -21,8 +21,6 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.response;
 
 import java.beans.ConstructorProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The success response to a GenerateAssertionsRequest.
@@ -30,8 +28,6 @@ import org.slf4j.LoggerFactory;
  * name of the contest for which the initial request was made.
  */
 public class GenerateAssertionsResponse {
-
-  private final static Logger logger = LoggerFactory.getLogger(GenerateAssertionsResponse.class);
 
   /**
    * The name of the contest.
