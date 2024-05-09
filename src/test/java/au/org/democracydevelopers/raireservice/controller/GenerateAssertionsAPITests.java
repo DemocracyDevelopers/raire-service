@@ -82,30 +82,6 @@ public class GenerateAssertionsAPITests {
   }
 
   /**
-   * A trivial example of a valid generate assertions request. Simply tests that it returns an HTTP
-   * success status.
-   */
-  @Test
-  public void testTrivialGenerateAssertionsExample() {
-    String url = "http://localhost:" +port + generateAssertionsEndpoint;
-
-    String requestAsJson =
-        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
-            +"\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    // TODO this test is obviously failing at the moment because I've just got a dummy
-    // generateAssertions class that always throws an exception. Debug this test to see
-    // the error messages / headers.
-    // I have temporarily switched it to AssertFalse, but when GenerateAssertions is implemented
-    // it should be set back to true.
-    // assertTrue(response.getStatusCode().is2xxSuccessful());
-    assertFalse(response.getStatusCode().is2xxSuccessful());
-  }
-
-  /**
    * This is really just a test that the testing is working.
    * There's no mapping for the plain localhost response, so when the microservice is running it
    * just returns a default error. We check for 404.

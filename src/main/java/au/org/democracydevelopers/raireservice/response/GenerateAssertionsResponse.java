@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class GenerateAssertionsResponse {
 
-  protected final static Logger logger = LoggerFactory.getLogger(GenerateAssertionsResponse.class);
+  private final static Logger logger = LoggerFactory.getLogger(GenerateAssertionsResponse.class);
 
   /**
    * The name of the contest.

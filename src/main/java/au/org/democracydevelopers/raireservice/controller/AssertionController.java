@@ -106,8 +106,12 @@ public class AssertionController {
         throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
       }
 
-      // raire-java returned error information, form and throw an exception using that data.
-      throw new RaireServiceException(solution.Err, request.candidates);
+      // raire-java returned error information, form and throw an exception using that data. (Note:
+      // we need to create the exception first to get a human readable message to log).
+      RaireServiceException ex = new RaireServiceException(solution.Err, request.candidates);
+      final String msg = "An error occurred in raire-java: " + ex.getMessage();
+      logger.error("AssertionController::serve[GenerateAssertionsRequest] " + msg);
+      throw ex;
   }
 
 
