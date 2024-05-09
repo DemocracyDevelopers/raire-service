@@ -97,14 +97,15 @@ public class GetAssertionsInProgressValidAPIRequestTests {
   void retrieveAssertionsExistentContestOneNEBAssertion() {
     String url = baseURL + port + getAssertionsEndpoint;
 
-    String requestAsJson =
-        "{\"riskLimit\":0.10,\"contestName\":\""+oneNEBAssertionContest+"\",\"candidates\":[\"Alice\",\"Bob\"]}";
+    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
+        oneNEBAssertionContest+"\",\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     // The metadata has been constructed appropriately
-    assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest, 0.1, response.getBody(), EPS));
+    assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest, 0.1,
+        response.getBody(), EPS));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertFalse(StringUtils.containsIgnoreCase(response.getBody(), "Error"));
@@ -113,8 +114,8 @@ public class GetAssertionsInProgressValidAPIRequestTests {
     assertTrue(correctSolutionData(320,1.1, 1, response.getBody(),EPS));
 
     // We expect one assertion with the following data.
-    assertTrue(correctIndexedAPIAssertionData("NEB", 320, 1.1, 0,1, new ArrayList<>(),
-        0.5, response.getBody(),0,EPS));
+    assertTrue(correctIndexedAPIAssertionData("NEB", 320, 1.1, 0,
+        1, new ArrayList<>(), 0.5, response.getBody(),0,EPS));
 
   }
 

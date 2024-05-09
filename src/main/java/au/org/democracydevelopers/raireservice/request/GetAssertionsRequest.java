@@ -24,17 +24,16 @@ import au.org.democracydevelopers.raireservice.persistence.repository.ContestRep
 import java.beans.ConstructorProperties;
 import java.math.BigDecimal;
 import java.util.List;
-import org.springframework.data.annotation.ReadOnlyProperty;
 
 /**
  * Request (expected to be json) identifying the contest for which assertions should be retrieved
  * from the database (expected to be exported as json).
- * This extends ContestRequest and uses the contest name and candidate list, plus validations, from there.
- * A GetAssertionsRequest identifies a contest by name along with the candidate list (which
- * is necessary for producing the metadata for later visualization).
- * riskLimit states the risk limit for the audit. This is not actually used in raire-service computations,
- * but will be output later with the assertion export, so that it can be used in the assertion visualizer.
- * Validation consists only of checking that the request is reasonable, including calling
+ * This extends ContestRequest and uses the contest name and candidate list, plus validations,
+ * from there. A GetAssertionsRequest identifies a contest by name along with the candidate list
+ * (which is necessary for producing the metadata for later visualization). riskLimit states the
+ * risk limit for the audit. This is not actually used in raire-service computations,
+ * but will be output later with the assertion export, so that it can be used in the assertion
+ * visualizer. Validation consists only of checking that the request is reasonable, including calling
  * ContestRequest.Validate to check that the contest exists and is all IRV, and that the candidate
  * names are reasonable. GetAssertionsRequest.Validate then checks that the risk limit is non-negative.
  */
@@ -43,7 +42,6 @@ public class GetAssertionsRequest extends ContestRequest {
   /**
    * The risk limit for the audit, expected to be in the range [0,1].
    */
-  @ReadOnlyProperty
   public final BigDecimal riskLimit;
 
   /**

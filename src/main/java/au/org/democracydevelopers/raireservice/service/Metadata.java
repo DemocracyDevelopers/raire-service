@@ -18,36 +18,31 @@ You should have received a copy of the GNU Affero General Public License along w
 raire-service. If not, see <https://www.gnu.org/licenses/>.
 */
 
-package au.org.democracydevelopers.raireservice.response;
-
-import java.beans.ConstructorProperties;
+package au.org.democracydevelopers.raireservice.service;
 
 /**
- * The success response to a GenerateAssertionsRequest.
- * This simply returns the winner, as calculated by raire, along with the
- * name of the contest for which the initial request was made.
+ * This class defines the names of contest/audit metadata fields. Some of these are used when
+ * forming the metadata map passed to raire-java in a generate assertions request, and when
+ * forming contest metadata in the construction of a JSON assertion export (for visualisation).
  */
-public class GenerateAssertionsResponse {
+public class Metadata {
+  /**
+   * Metadata field name for the contest's candidates.
+   */
+  public final static String CANDIDATES = "candidates";
 
   /**
-   * The name of the contest.
+   * Metadata field name for the contest's risk limit.
    */
-  public final String contestName;
+  public final static String RISK_LIMIT = "risk_limit";
 
   /**
-   * The winner of the contest, as calculated by raire.
+   * Metadata field name for the contest's name.
    */
-  public final String winner;
+  public final static String CONTEST = "contest";
 
   /**
-   * All args constructor.
-   *
-   * @param contestName the name of the contest.
-   * @param winner      the name of the winner.
+   * Status attribute describing a risk level.
    */
-  @ConstructorProperties({"contestName", "winner"})
-  public GenerateAssertionsResponse(String contestName, String winner) {
-    this.contestName = contestName;
-    this.winner = winner;
-  }
+  public static final String STATUS_RISK = "risk";
 }

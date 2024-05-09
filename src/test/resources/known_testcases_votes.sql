@@ -14,6 +14,20 @@ INSERT INTO assertion_assumed_continuing values (2, 'Alice');
 INSERT INTO assertion_assumed_continuing values (2, 'Bob');
 INSERT INTO assertion_assumed_continuing values (2, 'Chuan');
 
+-- Further test assertions to allow for some basic sanity checking.
+INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values ('NEB', 'Sanity Check NEB NEN Assertion Contest', 1.1, 0.32, 'Bob', 320, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Alice');
+INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values ('NEN', 'Sanity Check NEB NEN Assertion Contest', 2.5, 0.4, 'Bob', 20, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Alice');
+INSERT INTO assertion_assumed_continuing values (4, 'Alice');
+INSERT INTO assertion_assumed_continuing values (4, 'Bob');
+INSERT INTO assertion_assumed_continuing values (4, 'Chuan');
+
+INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values ('NEB', 'Sanity Check 3 Assertion Contest', 1.1, 0.32, 'Bob', 320, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Alice');
+INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values ('NEB', 'Sanity Check 3 Assertion Contest', 1.5, 0.6, 'Chuan', 320, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Alice');
+INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values ('NEN', 'Sanity Check 3 Assertion Contest', 2.5, 0.4, 'Bob', 20, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Alice');
+INSERT INTO assertion_assumed_continuing values (6, 'Alice');
+INSERT INTO assertion_assumed_continuing values (6, 'Bob');
+INSERT INTO assertion_assumed_continuing values (6, 'Chuan');
+
 -- Contest
 -- Simple contests to test basic functioning.
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (8, 999990, 0, 'IRV', 'Tied Winners Contest', 2, 7, 1);
@@ -31,25 +45,25 @@ INSERT INTO contest (county_id, id, version, description, name, sequence_number,
 
 -- 10 (C,B,A)
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (1, 1, 'Type 1', 1, 9, '1-1-1', 1, 'UPLOADED', 1);
-INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (1, 9, '[Chuan","Bob","Alice]', 999991, 0);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (1, 9, '["Chuan","Bob","Alice"]', 999991, 0);
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (2, 2, 'Type 1', 1, 9, '1-1-2', 2, 'UPLOADED', 1);
-INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (2, 9, '[Chuan","Bob","Alice]', 999991, 0);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (2, 9, '["Chuan","Bob","Alice"]', 999991, 0);
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (3, 3, 'Type 1', 1, 9, '1-1-3', 3, 'UPLOADED', 1);
-INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (3, 9, '[Chuan","Bob","Alice]', 999991, 0);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (3, 9, '["Chuan","Bob","Alice"]', 999991, 0);
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (4, 4, 'Type 1', 1, 9, '1-1-4', 4, 'UPLOADED', 1);
-INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (4, 9, '[Chuan","Bob","Alice]', 999991, 0);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (4, 9, '["Chuan","Bob","Alice"]', 999991, 0);
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (5, 5, 'Type 1', 1, 9, '1-1-5', 5, 'UPLOADED', 1);
-INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (5, 9, '[Chuan","Bob","Alice]', 999991, 0);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (5, 9, '["Chuan","Bob","Alice"]', 999991, 0);
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (6, 6, 'Type 1', 1, 9, '1-1-6', 6, 'UPLOADED', 1);
-INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (6, 9, '[Chuan","Bob","Alice]', 999991, 0);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (6, 9, '["Chuan","Bob","Alice"]', 999991, 0);
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (7, 7, 'Type 1', 1, 9, '1-1-7', 7, 'UPLOADED', 1);
-INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (7, 9, '[Chuan","Bob","Alice]', 999991, 0);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (7, 9, '["Chuan","Bob","Alice"]', 999991, 0);
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (8, 8, 'Type 1', 1, 9, '1-1-8', 8, 'UPLOADED', 1);
-INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (8, 9, '[Chuan","Bob","Alice]', 999991, 0);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (8, 9, '["Chuan","Bob","Alice"]', 999991, 0);
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (9, 9, 'Type 1', 1, 9, '1-1-9', 9, 'UPLOADED', 1);
-INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (9, 9, '[Chuan","Bob","Alice]', 999991, 0);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (9, 9, '["Chuan","Bob","Alice"]', 999991, 0);
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (10, 10, 'Type 1', 1, 9, '1-1-10', 10, 'UPLOADED', 1);
-INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (10, 9, '[Chuan","Bob","Alice]', 999991, 0);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (10, 9, '["Chuan","Bob","Alice"]', 999991, 0);
 
 -- 2 (B,C,D)
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (11, 11, 'Type 1', 2, 9, '1-2-1', 11, 'UPLOADED', 1);

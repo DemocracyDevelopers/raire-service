@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -54,6 +55,7 @@ public interface AssertionRepository extends JpaRepository<Assertion, Long> {
    * @param contestName The name of the contest whose assertions are to be deleted.
    * @return The number of records deleted from the database.
    */
+  @Modifying
   long deleteByContestName(String contestName);
 
   /**
@@ -71,6 +73,7 @@ public interface AssertionRepository extends JpaRepository<Assertion, Long> {
    * @throws ArrayIndexOutOfBoundsException if the winner or loser indices in any of the raire-java
    * assertions are invalid with respect to the given array of candidates.
    */
+  @Modifying
   default void translateAndSaveAssertions(String contestName, long universeSize, String[] candidates,
       AssertionAndDifficulty[] assertions)
       throws IllegalArgumentException, ArrayIndexOutOfBoundsException

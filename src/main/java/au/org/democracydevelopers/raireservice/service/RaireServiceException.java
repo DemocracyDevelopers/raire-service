@@ -63,11 +63,8 @@ public class RaireServiceException extends Exception {
           this.errorCode = RaireErrorCodes.TIMEOUT_TRIMMING_ASSERTIONS;
       case TimeoutCheckingWinner e -> this.errorCode = RaireErrorCodes.TIMEOUT_CHECKING_WINNER;
       case CouldNotRuleOut e -> this.errorCode = RaireErrorCodes.COULD_NOT_RULE_OUT_ALTERNATIVE;
-      // I think this is what we get if the candidate list entered in the request has the
-      // right number but wrong names vs the database. It's therefore not (really) an internal error
-      // - it's a colorado-rla error.
-      // TODO check GenerateAssertionsOnKnownTestCases::wrongCandidateThrowsException for this case.
-      // (See Issue https://github.com/DemocracyDevelopers/raire-service/issues/66.)
+      // This is what we get if the candidate list entered in the request has the
+      // right number but wrong names vs the database.
       case InvalidCandidateNumber e -> this.errorCode = RaireErrorCodes.WRONG_CANDIDATE_NAMES;
 
       // Internal coding errors.
@@ -103,6 +100,12 @@ public class RaireServiceException extends Exception {
      * Tied winners - the contest is a tie and therefore cannot be audited.
      */
     TIED_WINNERS,
+
+    /**
+     * The total number of auditable ballots for a contest is less than the number of CVRs in
+     * the database that contain the contest.
+     */
+    INVALID_TOTAL_AUDITABLE_BALLOTS,
 
     /**
      * Time out checking winners - can happen if the contest is tied, or if it is complicated and
@@ -142,8 +145,8 @@ public class RaireServiceException extends Exception {
     /**
      * A catch-all for various kinds of errors that indicate a programming error: invalid
      * input errors such as InvalidNumberOfCandidates, InvalidTimeout, InvalidCandidateNumber -
-     * these should all be caught before being sent to raire-java. Also database errors. These are errors
-     * that the user can't do anything about.
+     * these should all be caught before being sent to raire-java. Also database errors.
+     * These are errors that the user can't do anything about.
      */
     INTERNAL_ERROR,
   }
@@ -169,7 +172,8 @@ public class RaireServiceException extends Exception {
           message = "Time out finding assertions - try again with longer timeout.";
 
       case TimeoutTrimmingAssertions e ->
-          message = "Time out trimming assertions - the assertions are usable, but could be reduced given more trimming time.";
+          message = "Time out trimming assertions - the assertions are usable, but could be " +
+              "reduced given more trimming time.";
 
       case TimeoutCheckingWinner e ->
           message = "Time out checking winner - the election is either tied or extremely complex.";

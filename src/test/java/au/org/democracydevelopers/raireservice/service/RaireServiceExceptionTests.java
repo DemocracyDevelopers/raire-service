@@ -230,7 +230,8 @@ public class RaireServiceExceptionTests {
   @Test
   public void genericErrorIsAnInternalError() {
     RaireServiceException e
-        = new RaireServiceException("Total Auditable Ballots less than actual ballots", RaireErrorCodes.INTERNAL_ERROR);
+        = new RaireServiceException("Total Auditable Ballots less than actual ballots",
+        RaireErrorCodes.INTERNAL_ERROR);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Auditable Ballots"));
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
