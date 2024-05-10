@@ -30,6 +30,7 @@ import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.service.Metadata;
+import au.org.democracydevelopers.raireservice.testUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.math.BigDecimal;
@@ -124,6 +125,7 @@ public class AssertionRepositoryInProgressTests {
   @Test
   @Transactional
   void retrieveAssertionsOneNEBAssertionInProgress(){
+    testUtils.log(logger,"retrieveAssertionsOneNEBAssertionInProgress");
     List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
     assertEquals(1, retrieved.size());
 
@@ -138,6 +140,7 @@ public class AssertionRepositoryInProgressTests {
   @Test
   @Transactional
   void retrieveAssertionsOneNEBAssertionConvert(){
+    testUtils.log(logger,"retrieveAssertionsOneNEBAssertionConvert");
     List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
     assertEquals(1, retrieved.size());
 
@@ -161,6 +164,7 @@ public class AssertionRepositoryInProgressTests {
   @Test
   @Transactional
   void retrieveAssertionsOneNENAssertionInProgress(){
+    testUtils.log(logger,"retrieveAssertionsOneNENAssertionInProgress");
     List<Assertion> retrieved = assertionRepository.findByContestName("One NEN Assertion Contest");
     assertEquals(1, retrieved.size());
 
@@ -177,6 +181,7 @@ public class AssertionRepositoryInProgressTests {
   @Test
   @Transactional
   void retrieveAssertionsOneNENOneNEBAssertionInProgress(){
+    testUtils.log(logger,"retrieveAssertionsOneNENOneNEBAssertionInProgress");
     List<Assertion> retrieved = assertionRepository.findByContestName("One NEN NEB Assertion Contest");
     assertEquals(2, retrieved.size());
 

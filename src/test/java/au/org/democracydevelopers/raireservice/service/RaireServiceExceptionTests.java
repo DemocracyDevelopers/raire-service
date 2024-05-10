@@ -39,6 +39,7 @@ import au.org.democracydevelopers.raire.RaireError.TimeoutTrimmingAssertions;
 import au.org.democracydevelopers.raire.RaireError.WrongWinner;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -49,9 +50,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
-/*
+/**
  * Simple tests on RaireServiceExceptions, to ensure that the exceptions from raire-java
- * are being translated correctly.
+ * are being translated correctly. Data is preloaded into the database using src/test/resources/data.sql.
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest
@@ -71,6 +72,7 @@ public class RaireServiceExceptionTests {
    */
   @Test
   public void TiedWinnersIsTiedWinners() {
+    testUtils.log(logger, "TiedWinnersIsTiedWinners");
     int[] winners  = {0,1};
     RaireError raireError = new TiedWinners(winners);
     RaireServiceException e = new RaireServiceException(raireError, candidates);
@@ -87,6 +89,7 @@ public class RaireServiceExceptionTests {
    */
   @Test
   public void timeoutFindingAssertionsGetsCorrectMessage() {
+    testUtils.log(logger, "timeoutFindingAssertionsGetsCorrectMessage");
     RaireError raireError = new TimeoutFindingAssertions(5.0);
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
@@ -99,6 +102,7 @@ public class RaireServiceExceptionTests {
    */
   @Test
   public void timeoutTrimmingAssertionsGetsCorrectMessage() {
+    testUtils.log(logger, "timeoutTrimmingAssertionsGetsCorrectMessage");
     RaireError raireError = new TimeoutTrimmingAssertions();
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
@@ -111,6 +115,7 @@ public class RaireServiceExceptionTests {
    */
   @Test
   public void timeoutCheckingWinnerGetsCorrectMessage() {
+    testUtils.log(logger, "timeoutCheckingWinnerGetsCorrectMessage");
     RaireError raireError = new TimeoutCheckingWinner();
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
@@ -123,6 +128,7 @@ public class RaireServiceExceptionTests {
    */
   @Test
   public void invalidCandidateNumberGetsCorrectMessage() {
+    testUtils.log(logger, "invalidCandidateNumberGetsCorrectMessage");
     RaireError raireError = new InvalidCandidateNumber();
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
@@ -138,6 +144,7 @@ public class RaireServiceExceptionTests {
    */
   @Test
   public void CouldNotRuleOutEliminationSequenceIsProperlyTranscribed() {
+    testUtils.log(logger, "CouldNotRuleOutEliminationSequenceIsProperlyTranscribed");
     int[] sequence = {1,3,0,2};
     RaireError raireError = new CouldNotRuleOut(sequence);
     RaireServiceException e = new RaireServiceException(raireError, candidates);
@@ -152,6 +159,7 @@ public class RaireServiceExceptionTests {
    */
   @Test
   public void invalidTimeoutIsAnInternalError() {
+    testUtils.log(logger, "invalidTimeoutIsAnInternalError");
     RaireError raireError = new InvalidTimeout();
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
@@ -166,6 +174,7 @@ public class RaireServiceExceptionTests {
    */
   @Test
   public void didntRuleOutLoserIsAnInternalError() {
+    testUtils.log(logger, "didntRuleOutLoserIsAnInternalError");
     RaireError raireError = new InternalErrorDidntRuleOutLoser();
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
@@ -180,6 +189,7 @@ public class RaireServiceExceptionTests {
    */
   @Test
   public void ruledOutWinnerIsAnInternalError() {
+    testUtils.log(logger, "ruledOutWinnerIsAnInternalError");
     RaireError raireError = new InternalErrorRuledOutWinner();
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
@@ -192,6 +202,7 @@ public class RaireServiceExceptionTests {
    */
   @Test
   public void internalErrorTrimmingIsAnInternalError() {
+    testUtils.log(logger, "internalErrorTrimmingIsAnInternalError");
     RaireError raireError = new InternalErrorTrimming();
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
@@ -205,6 +216,7 @@ public class RaireServiceExceptionTests {
    */
   @Test
   public void invalidNumberOfCandidatesIsAnInternalError() {
+    testUtils.log(logger, "invalidNumberOfCandidatesIsAnInternalError");
     RaireError raireError = new InvalidNumberOfCandidates();
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
@@ -219,6 +231,7 @@ public class RaireServiceExceptionTests {
    */
   @Test
   public void wrongWinnerIsAnInternalError() {
+    testUtils.log(logger, "wrongWinnerIsAnInternalError");
     RaireError raireError = new WrongWinner(new int[]{});
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
@@ -233,6 +246,7 @@ public class RaireServiceExceptionTests {
    */
   @Test
   public void genericErrorIsAnInternalError() {
+    testUtils.log(logger, "genericErrorIsAnInternalError");
     RaireServiceException e
         = new RaireServiceException("Total Auditable Ballots less than actual ballots",
         RaireErrorCodes.INTERNAL_ERROR);

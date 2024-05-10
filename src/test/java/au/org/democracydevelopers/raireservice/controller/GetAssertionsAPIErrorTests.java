@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -73,7 +74,6 @@ public class GetAssertionsAPIErrorTests {
   @LocalServerPort
   private int port;
 
-
   @Autowired
   private TestRestTemplate restTemplate;
 
@@ -92,6 +92,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void testValidRequestWithNoAssertions() {
+    testUtils.log(logger,"testValidRequestWithNoAssertions");
     String url = "http://localhost:" + port + getAssertionsEndpoint;
 
     String requestAsJson =
@@ -114,6 +115,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void testErrorForNonFunctioningEndpoint() {
+    testUtils.log(logger,"testErrorForNonFunctioningEndpoint");
     ResponseEntity<String> response = restTemplate.postForEntity(baseURL + port + "/",
         new HttpEntity<>("", httpHeaders), String.class);
     assertTrue(response.getStatusCode().isSameCodeAs(HttpStatusCode.valueOf(404)));
@@ -124,6 +126,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsNoBodyError() {
+    testUtils.log(logger,"getAssertionsNoBodyError");
     ResponseEntity<String> response = restTemplate.postForEntity(baseURL + port + getAssertionsEndpoint,
         new HttpEntity<>("", new HttpHeaders()), String.class);
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -134,6 +137,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void testGetAssertionsBadRequest() {
+    testUtils.log(logger,"testGetAssertionsBadRequest");
     String url = baseURL + port + getAssertionsEndpoint;
 
     HttpEntity<String> request = new HttpEntity<>("", httpHeaders);
@@ -148,6 +152,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsWithNonExistentContestIsAnError() {
+    testUtils.log(logger,"getAssertionsWithNonExistentContestIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =
@@ -166,6 +171,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsWithPluralityContestIsAnError() {
+    testUtils.log(logger,"getAssertionsWithPluralityContestIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =
@@ -184,6 +190,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsWithMixedIRVPluralityContestIsAnError() {
+    testUtils.log(logger,"getAssertionsWithMixedIRVPluralityContestIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =
@@ -203,6 +210,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsWithMissingContestNameIsAnError() {
+    testUtils.log(logger,"getAssertionsWithMissingContestNameIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"candidates\":[\"Alice\",\"Bob\"]}";
@@ -219,6 +227,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsWithNullContestNameIsAnError() {
+    testUtils.log(logger,"getAssertionsWithNullContestNameIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":null,\"candidates\":[\"Alice\",\"Bob\"]}";
@@ -235,6 +244,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsWithEmptyContestNameIsAnError() {
+    testUtils.log(logger,"getAssertionsWithEmptyContestNameIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"\",\"candidates\":[\"Alice\",\"Bob\"]}";
@@ -251,6 +261,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsWithWhitespaceContestNameIsAnError() {
+    testUtils.log(logger,"getAssertionsWithWhitespaceContestNameIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =
@@ -268,6 +279,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsWithMissingCandidateListIsAnError() {
+    testUtils.log(logger,"getAssertionsWithMissingCandidateListIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\"}";
@@ -284,6 +296,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsWithNullCandidateListIsAnError() {
+    testUtils.log(logger,"getAssertionsWithNullCandidateListIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =
@@ -301,6 +314,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsWithEmptyCandidateListIsAnError() {
+    testUtils.log(logger,"getAssertionsWithEmptyCandidateListIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =
@@ -318,6 +332,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsWithWhitespaceCandidateNameIsAnError() {
+    testUtils.log(logger,"getAssertionsWithWhitespaceCandidateNameIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =
@@ -336,6 +351,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsWithMissingRiskLimitIsAnError() {
+    testUtils.log(logger,"getAssertionsWithMissingRiskLimitIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =
@@ -353,6 +369,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsWithNullRiskLimitIsAnError() {
+    testUtils.log(logger,"getAssertionsWithNullRiskLimitIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =
@@ -371,6 +388,7 @@ public class GetAssertionsAPIErrorTests {
    */
   @Test
   public void getAssertionsWithNegativeRiskLimitIsAnError() {
+    testUtils.log(logger,"getAssertionsWithNegativeRiskLimitIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =

@@ -26,6 +26,7 @@ import static au.org.democracydevelopers.raireservice.testUtils.correctSolutionD
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -97,6 +98,7 @@ public class GetAssertionsInProgressValidAPIRequestTests {
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNEBAssertion() {
+    testUtils.log(logger,"retrieveAssertionsExistentContestOneNEBAssertion");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
@@ -127,6 +129,7 @@ public class GetAssertionsInProgressValidAPIRequestTests {
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNENAssertion() {
+    testUtils.log(logger,"retrieveAssertionsExistentContestOneNENAssertion");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =
@@ -158,6 +161,7 @@ public class GetAssertionsInProgressValidAPIRequestTests {
   @Test
   @Transactional
   void retrieveAssertionsOneNENOneNEBAssertionInProgress() {
+    testUtils.log(logger,"retrieveAssertionsOneNENOneNEBAssertionInProgress");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =

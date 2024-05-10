@@ -25,6 +25,7 @@ import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
+import au.org.democracydevelopers.raireservice.testUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.List;
@@ -58,6 +59,7 @@ public class AssertionRepositoryTests {
 
   @Autowired
   AssertionRepository assertionRepository;
+
 
   /**
    * To facilitate easier checking of retrieved/saved assertion content.
@@ -156,6 +158,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void existentContestNoAssertions(){
+    testUtils.log(logger,"existentContestNoAssertions");
     List<Assertion> retrieved = assertionRepository.findByContestName("No CVR Mayoral");
     assertEquals(0, retrieved.size());
   }
@@ -166,6 +169,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void nonExistentContestNoAssertions(){
+    testUtils.log(logger,"nonExistentContestNoAssertions");
     List<Assertion> retrieved = assertionRepository.findByContestName("Non-Existent Contest Name");
     assertEquals(0, retrieved.size());
   }
@@ -176,6 +180,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void deleteAssertionsNonExistentContest(){
+    testUtils.log(logger,"deleteAssertionsNonExistentContest");
     long records = assertionRepository.deleteByContestName("Non-Existent Contest Name");
     assertEquals(0, records);
   }
@@ -186,6 +191,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void deleteAssertionsExistentContestNoAssertions(){
+    testUtils.log(logger,"deleteAssertionsExistentContestNoAssertions");
     long records = assertionRepository.deleteByContestName("No CVR Mayoral");
     assertEquals(0, records);
   }
@@ -199,6 +205,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveNoAssertions(){
+    testUtils.log(logger,"translateAndSaveNoAssertions");
     String[] candidates = {"Alice", "Bob", "Charlie"};
     AssertionAndDifficulty[] empty = {};
     assertionRepository.translateAndSaveAssertions("Ballina Mayoral", 11000,
@@ -218,6 +225,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveAssertions(){
+    testUtils.log(logger,"translateAndSaveAssertions");
     saveAssertionsOneNEBContest();
 
     List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
@@ -386,6 +394,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveNegativeUniverseSizeNEB(){
+    testUtils.log(logger,"translateAndSaveNegativeUniverseSizeNEB");
     AssertionAndDifficulty[] assertions = formAssertionsOneNEBAssertionContest(320,
         0, 2);
 
@@ -403,6 +412,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveZeroUniverseSizeNEB(){
+    testUtils.log(logger,"translateAndSaveZeroUniverseSizeNEB");
     AssertionAndDifficulty[] assertions = formAssertionsOneNEBAssertionContest(320,
         0, 2);
 
@@ -420,6 +430,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveNegativeUniverseSizeNEN(){
+    testUtils.log(logger,"translateAndSaveNegativeUniverseSizeNEN");
     int[] continuing = {0, 1 ,2, 3};
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(240,
         0, 1, continuing);
@@ -438,6 +449,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveZeroUniverseSizeNEN(){
+    testUtils.log(logger,"translateAndSaveZeroUniverseSizeNEN");
     int[] continuing = {0, 1 ,2, 3};
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(240,
         0, 1, continuing);
@@ -457,6 +469,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveNegativeMarginNEB(){
+    testUtils.log(logger,"translateAndSaveNegativeMarginNEB");
     AssertionAndDifficulty[] assertions = formAssertionsOneNEBAssertionContest(-100,
         0, 2);
 
@@ -474,6 +487,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveNegativeMarginNEN(){
+    testUtils.log(logger,"translateAndSaveNegativeMarginNEN");
     int[] continuing = {0, 1 ,2, 3};
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(-100,
         0, 1, continuing);
@@ -493,6 +507,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveNegativeMarginTooHighNEB(){
+    testUtils.log(logger,"translateAndSaveNegativeMarginTooHighNEB");
     AssertionAndDifficulty[] assertions = formAssertionsOneNEBAssertionContest(2000,
         0, 2);
 
@@ -511,6 +526,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveMarginTooHighNEN(){
+    testUtils.log(logger,"translateAndSaveMarginTooHighNEN");
     int[] continuing = {0, 1 ,2, 3};
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(3000,
         0, 1, continuing);
@@ -529,6 +545,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveSameWinnerLoserNEB(){
+    testUtils.log(logger,"translateAndSaveSameWinnerLoserNEB");
     AssertionAndDifficulty[] assertions = formAssertionsOneNEBAssertionContest(320,
         1, 1);
 
@@ -546,6 +563,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveSameWinnerLoserNEN(){
+    testUtils.log(logger,"translateAndSaveSameWinnerLoserNEN");
     int[] continuing = {0, 1 ,2, 3};
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(240,
         0, 0, continuing);
@@ -564,6 +582,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveNENWinnerNotContinuing(){
+    testUtils.log(logger,"translateAndSaveNENWinnerNotContinuing");
     int[] continuing = {1 ,2, 3};
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(240,
         0, 1, continuing);
@@ -583,6 +602,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveNENLoserNotContinuing(){
+    testUtils.log(logger,"translateAndSaveNENLoserNotContinuing");
     int[] continuing = {0 ,2, 3};
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(240,
         0, 1, continuing);
@@ -602,6 +622,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveWinnerOutOfBoundsNEB(){
+    testUtils.log(logger,"translateAndSaveWinnerOutOfBoundsNEB");
     AssertionAndDifficulty[] assertions = formAssertionsOneNEBAssertionContest(320,
         5, 2);
 
@@ -617,6 +638,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveWinnerOutOfBoundsNEN(){
+    testUtils.log(logger,"translateAndSaveWinnerOutOfBoundsNEN");
     int[] continuing = {0 ,2, 3};
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(240,
         5, 1, continuing);
@@ -633,6 +655,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveLoserOutOfBoundsNEB(){
+    testUtils.log(logger,"translateAndSaveLoserOutOfBoundsNEB");
     AssertionAndDifficulty[] assertions = formAssertionsOneNEBAssertionContest(320,
         2, 7);
 
@@ -648,6 +671,7 @@ public class AssertionRepositoryTests {
   @Test
   @Transactional
   void translateAndSaveLoserOutOfBoundsNEN(){
+    testUtils.log(logger,"translateAndSaveLoserOutOfBoundsNEN");
     int[] continuing = {0 ,2, 3};
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(240,
         0, 7, continuing);
