@@ -138,8 +138,7 @@ public class AssertionController {
     // Set correct headers; return response.
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-    headers.setContentDispositionFormData("attachment",
-        removeIllegalChars(request.contestName)+"_Assertions.csv");
+    headers.setContentDispositionFormData("attachment", "assertions.csv");
     return new ResponseEntity<>(csv, headers, HttpStatus.OK);
   }
 
@@ -156,24 +155,5 @@ public class AssertionController {
     this.generateAssertionsService = generateAssertionsService;
     this.getAssertionsService = getAssertionsService;
     this.getAssertionsCSVService = getAssertionsCSVService;
-  }
-
-  /**
-   * Remove the characters that will not be accepted as a filename. Because this is platform-
-   * dependent, we retain only a subset that will be accepted by Mac,Windows and Linux.
-   * Anything else is dropped. This is an extra-restrictive test: there are valid filenames that
-   * are not accepted here.
-   * Based on the <a href="https://wiki.sei.cmu.edu/confluence/display/java/IDS50-J.+Use+conservative+file+naming+conventions">
-   * Conservative file naming conventions</A> of David Svoboda, disallow whitespace and leading
-   * hyphens. (Actually that reference advocates completely disallowing whitespace, whereas here we
-   * allow spaces if they are not leading.)
-   * @param contestName the name of the contest
-   * @return the same name, with any problematic characters filtered out.
-   */
-  private String removeIllegalChars(String contestName) {
-    // Remove any characters other than those on the allowed list.
-    String cleanedName = contestName.replaceAll("[^-_ .A-Za-z0-9]","");
-    // Remove leading hyphens and spaces.
-    return cleanedName.replaceAll("^[- ]*","");
   }
 }

@@ -245,7 +245,6 @@ public class GetAssertionsCSVService {
    * candidates), along with data about the extreme values in the set of assertions: the maximum
    * difficulty (as estimated by raire), the minimum margin and diluted margin, the maximum
    * optimistic samples to audit and estimated samples to audit.
-   *
    * @param request the GetAssertionsRequest, used for contest name and candidate list.
    * @param extrema the map from the name of a statistic to the list of indices of assertions that
    *                meet the extreme value (max or min as appropriate).
