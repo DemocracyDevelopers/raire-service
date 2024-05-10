@@ -29,6 +29,7 @@ import au.org.democracydevelopers.raireservice.testUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -402,7 +403,8 @@ public class AssertionRepositoryTests {
       assertionRepository.translateAndSaveAssertions("One NEB Assertion Contest",
         -1000, aliceCharlieBob, assertions));
 
-    assertTrue(ex.getMessage().toLowerCase().contains("assertion must have a positive universe size"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "assertion must have a positive universe size"));
   }
 
   /**
@@ -420,7 +422,8 @@ public class AssertionRepositoryTests {
         assertionRepository.translateAndSaveAssertions("One NEB Assertion Contest",
             0, aliceCharlieBob, assertions));
 
-    assertTrue(ex.getMessage().toLowerCase().contains("assertion must have a positive universe size"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "assertion must have a positive universe size"));
   }
 
   /**
@@ -439,7 +442,8 @@ public class AssertionRepositoryTests {
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             -2000, aliceCharlieDiegoBob, assertions));
 
-    assertTrue(ex.getMessage().toLowerCase().contains("assertion must have a positive universe size"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "assertion must have a positive universe size"));
   }
 
   /**
@@ -458,7 +462,8 @@ public class AssertionRepositoryTests {
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             0, aliceCharlieDiegoBob, assertions));
 
-    assertTrue(ex.getMessage().toLowerCase().contains("assertion must have a positive universe size"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "assertion must have a positive universe size"));
   }
 
 
@@ -477,7 +482,7 @@ public class AssertionRepositoryTests {
         assertionRepository.translateAndSaveAssertions("One NEB Assertion Contest",
             1000, aliceCharlieBob, assertions));
 
-    assertTrue(ex.getMessage().toLowerCase().contains("non-negative margin"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "non-negative margin"));
   }
 
   /**
@@ -496,7 +501,7 @@ public class AssertionRepositoryTests {
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             2000, aliceCharlieDiegoBob, assertions));
 
-    assertTrue(ex.getMessage().toLowerCase().contains("negative margin"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "negative margin"));
   }
 
 
@@ -515,7 +520,7 @@ public class AssertionRepositoryTests {
         assertionRepository.translateAndSaveAssertions("One NEB Assertion Contest",
             1000, aliceCharlieBob, assertions));
 
-    assertTrue(ex.getMessage().toLowerCase().contains("less than universe size"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "less than universe size"));
   }
 
 
@@ -535,7 +540,7 @@ public class AssertionRepositoryTests {
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             2000, aliceCharlieDiegoBob, assertions));
 
-    assertTrue(ex.getMessage().toLowerCase().contains("less than universe size"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "less than universe size"));
   }
 
   /**
@@ -553,7 +558,7 @@ public class AssertionRepositoryTests {
         assertionRepository.translateAndSaveAssertions("One NEB Assertion Contest",
             1000, aliceCharlieBob, assertions));
 
-    assertTrue(ex.getMessage().toLowerCase().contains("must not be the same candidate"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "must not be the same candidate"));
   }
 
   /**
@@ -572,7 +577,7 @@ public class AssertionRepositoryTests {
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             2000, aliceCharlieDiegoBob, assertions));
 
-    assertTrue(ex.getMessage().toLowerCase().contains("must not be the same candidate"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "must not be the same candidate"));
   }
 
   /**
@@ -591,8 +596,7 @@ public class AssertionRepositoryTests {
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             2000, aliceCharlieDiegoBob, assertions));
 
-    assertTrue(ex.getMessage().toLowerCase().contains(
-        "the winner and loser of an assertion must also be continuing candidates"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "must also be continuing"));
   }
 
   /**
@@ -611,8 +615,7 @@ public class AssertionRepositoryTests {
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             2000, aliceCharlieDiegoBob, assertions));
 
-    assertTrue(ex.getMessage().toLowerCase().contains(
-        "the winner and loser of an assertion must also be continuing candidates"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "must also be continuing"));
   }
 
   /**

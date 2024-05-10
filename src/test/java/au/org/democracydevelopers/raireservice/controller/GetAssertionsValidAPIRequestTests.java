@@ -31,6 +31,8 @@ import au.org.democracydevelopers.raireservice.service.RaireServiceException.Rai
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -50,7 +52,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.shaded.org.apache.commons.lang3.ObjectUtils.Null;
 
 /**
  * Tests for get-assertions endpoint. This class automatically fires up the RAIRE Microservice on a
@@ -58,7 +59,7 @@ import org.testcontainers.shaded.org.apache.commons.lang3.ObjectUtils.Null;
  * The list of tests is similar to - and in most cases identical to - the GetAssertionsServiceTests.
  * Note that you have to run the *whole class*. Individual tests do not work separately because they
  * don't initiate the microservice on their own.
- * Contests which will be used for validity testing are pre-loaded into the database using
+ * Contests which will be used for validity testing are preloaded into the database using
  * src/test/resources/data.sql.
  */
 @ActiveProfiles("simple-assertions")
@@ -183,7 +184,7 @@ public class GetAssertionsValidAPIRequestTests {
    */
   @Test
   @Transactional
-  void retrieveAssertionsIncorrectCandidateNamesIsAnError() throws NullPointerException {
+  void retrieveAssertionsIncorrectCandidateNamesIsAnError()  {
     testUtils.log(logger,"retrieveAssertionsIncorrectCandidateNamesIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
@@ -195,8 +196,8 @@ public class GetAssertionsValidAPIRequestTests {
 
     assertTrue(response.getStatusCode().is5xxServerError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
-        "Candidate list is inconsistent with assertion"));
+        "candidate list provided as parameter is inconsistent"));
     assertEquals(RaireErrorCodes.INTERNAL_ERROR.toString(),
-        response.getHeaders().get("error_code").getFirst());
+        Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
   }
 }

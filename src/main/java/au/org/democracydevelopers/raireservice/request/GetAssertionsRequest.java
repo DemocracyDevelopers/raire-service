@@ -81,6 +81,7 @@ public class GetAssertionsRequest extends ContestRequest {
       final String msg = String.format("%s Null or negative risk limit specified in request (%s). "
           + "Throwing a RequestValidationException.", prefix, riskLimit);
       logger.error(msg);
+      throw new RequestValidationException(msg);
     }
 
     logger.debug(String.format("%s Get Assertions Request validated.", prefix));

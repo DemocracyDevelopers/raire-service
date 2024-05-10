@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -263,8 +264,8 @@ public class CVRContestInfoRepositoryTests {
     testUtils.log(logger, "nonChoiceListVote1");
     Exception ex = assertThrows(JpaSystemException.class, () ->
         cvrContestInfoRepository.getCVRs(999984, 11));
-    assertTrue(ex.getMessage().toLowerCase().
-        contains("Error attempting to apply AttributeConverter".toLowerCase()));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "Error attempting to apply AttributeConverter"));
   }
 
   /**
@@ -278,7 +279,7 @@ public class CVRContestInfoRepositoryTests {
     testUtils.log(logger, "nonChoiceListVote2");
     Exception ex = assertThrows(JpaSystemException.class, () ->
         cvrContestInfoRepository.getCVRs(999983, 11));
-    assertTrue(ex.getMessage().toLowerCase().
-        contains("Error attempting to apply AttributeConverter".toLowerCase()));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "Error attempting to apply AttributeConverter"));
   }
 }

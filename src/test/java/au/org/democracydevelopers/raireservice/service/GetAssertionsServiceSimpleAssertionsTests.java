@@ -39,6 +39,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.math.BigDecimal;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,8 +175,8 @@ public class GetAssertionsServiceSimpleAssertionsTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         service.getRaireSolution(request));
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
-    assertTrue(ex.getMessage().toLowerCase().
-        contains("Candidate list is inconsistent with assertion".toLowerCase()));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "Candidate list provided as parameter is inconsistent"));
   }
 
   /**
@@ -193,7 +194,7 @@ public class GetAssertionsServiceSimpleAssertionsTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         service.getRaireSolution(request));
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
-    assertTrue(ex.getMessage().toLowerCase().
-        contains("Candidate list is inconsistent with assertion".toLowerCase()));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "Candidate list provided as parameter is inconsistent"));
   }
 }

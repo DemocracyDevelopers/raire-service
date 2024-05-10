@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,7 +93,7 @@ public class GenerateAssertionsRequestTests {
         "NonExistentContest", 100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> invalidRequest.Validate(contestRepository));
-    assertTrue(ex.getMessage().toLowerCase().contains("No such contest".toLowerCase()));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No such contest"));
   }
 
   /**
@@ -107,7 +108,7 @@ public class GenerateAssertionsRequestTests {
         100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().toLowerCase().contains("not all IRV".toLowerCase()));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "not comprised of all IRV"));
   }
 
   /**
@@ -122,7 +123,7 @@ public class GenerateAssertionsRequestTests {
         100, 100,  candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().toLowerCase().contains("not all IRV".toLowerCase()));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "not comprised of all IRV"));
   }
 
   /**
@@ -135,7 +136,7 @@ public class GenerateAssertionsRequestTests {
         100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("No contest name"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No contest name specified"));
   }
 
   /**
@@ -148,7 +149,7 @@ public class GenerateAssertionsRequestTests {
         100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("No contest name"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No contest name specified"));
   }
 
   /**
@@ -161,7 +162,7 @@ public class GenerateAssertionsRequestTests {
         100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("No contest name"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No contest name specified"));
   }
 
   /**
@@ -174,7 +175,7 @@ public class GenerateAssertionsRequestTests {
         100, 100, null);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Bad candidate list"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "bad candidate list"));
   }
 
   /**
@@ -187,7 +188,7 @@ public class GenerateAssertionsRequestTests {
         100, 100, List.of());
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Bad candidate list"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "bad candidate list"));
   }
 
   /**
@@ -200,7 +201,7 @@ public class GenerateAssertionsRequestTests {
         50, 50, List.of("Alice","    "));
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Bad candidate list"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "bad candidate list"));
   }
 
   /**
@@ -213,7 +214,8 @@ public class GenerateAssertionsRequestTests {
         0, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> validRequest.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Non-positive total auditable ballots"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "Non-positive total auditable ballots"));
   }
 
 
@@ -227,7 +229,8 @@ public class GenerateAssertionsRequestTests {
         -10, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> validRequest.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Non-positive total auditable ballots"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "Non-positive total auditable ballots"));
   }
 
   /**
@@ -240,7 +243,7 @@ public class GenerateAssertionsRequestTests {
           100, 0, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> validRequest.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Non-positive time limit"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "Non-positive time limit"));
   }
 
 
@@ -254,6 +257,6 @@ public class GenerateAssertionsRequestTests {
         100, -100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> validRequest.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Non-positive time limit"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "Non-positive time limit"));
   }
 }

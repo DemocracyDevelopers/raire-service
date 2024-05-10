@@ -90,7 +90,7 @@ public class GetAssertionsAPIErrorTests {
    * code and message.
    */
   @Test
-  public void testValidRequestWithNoAssertions() throws NullPointerException {
+  public void testValidRequestWithNoAssertions() {
     testUtils.log(logger,"testValidRequestWithNoAssertions");
     String url = "http://localhost:" + port + getAssertionsEndpoint;
 
@@ -102,7 +102,7 @@ public class GetAssertionsAPIErrorTests {
 
     assertTrue(response.getStatusCode().is5xxServerError());
     assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT.toString(),
-        response.getHeaders().get("error_code").getFirst());
+        Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
         "No assertions have been generated for the contest"));
   }
@@ -126,8 +126,8 @@ public class GetAssertionsAPIErrorTests {
   @Test
   public void getAssertionsNoBodyError() {
     testUtils.log(logger,"getAssertionsNoBodyError");
-    ResponseEntity<String> response = restTemplate.postForEntity(baseURL + port + getAssertionsEndpoint,
-        new HttpEntity<>("", new HttpHeaders()), String.class);
+    ResponseEntity<String> response = restTemplate.postForEntity(baseURL + port +
+            getAssertionsEndpoint, new HttpEntity<>("", new HttpHeaders()), String.class);
     assertTrue(response.getStatusCode().is4xxClientError());
   }
 
@@ -181,7 +181,7 @@ public class GetAssertionsAPIErrorTests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not all IRV"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not comprised of all IRV"));
   }
 
   /**
@@ -200,7 +200,7 @@ public class GetAssertionsAPIErrorTests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not all IRV"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not comprised of all IRV"));
 
   }
 

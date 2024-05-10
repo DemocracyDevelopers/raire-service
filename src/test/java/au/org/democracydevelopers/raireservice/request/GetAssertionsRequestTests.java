@@ -28,6 +28,7 @@ import au.org.democracydevelopers.raireservice.persistence.repository.ContestRep
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.math.BigDecimal;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +77,7 @@ public class GetAssertionsRequestTests {
         BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class,
         () -> invalidRequest.Validate(contestRepository));
-    assertTrue(ex.getMessage().toLowerCase().contains("No such contest".toLowerCase()));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No such contest"));
   }
 
   /**
@@ -90,7 +91,7 @@ public class GetAssertionsRequestTests {
     GetAssertionsRequest request
         = new GetAssertionsRequest(pluralityContestName, List.of("Alice"), BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().toLowerCase().contains("not all IRV".toLowerCase()));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "not comprised of all IRV"));
   }
 
   /**
@@ -104,7 +105,7 @@ public class GetAssertionsRequestTests {
     GetAssertionsRequest request
         = new GetAssertionsRequest(mixedContestName, List.of("Alice"), BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().toLowerCase().contains("not all IRV".toLowerCase()));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "not comprised of all IRV"));
   }
 
   /**
@@ -116,7 +117,7 @@ public class GetAssertionsRequestTests {
     GetAssertionsRequest request
         = new GetAssertionsRequest(null, List.of("Alice"), BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("No contest name"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No contest name"));
   }
 
   /**
@@ -128,7 +129,7 @@ public class GetAssertionsRequestTests {
     GetAssertionsRequest request
         = new GetAssertionsRequest("", List.of("Alice"), BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("No contest name"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No contest name"));
   }
 
   /**
@@ -140,7 +141,7 @@ public class GetAssertionsRequestTests {
     GetAssertionsRequest request
         = new GetAssertionsRequest("   ", List.of("Alice"), BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("No contest name"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No contest name"));
   }
 
   /**
@@ -152,7 +153,7 @@ public class GetAssertionsRequestTests {
     GetAssertionsRequest request
         = new GetAssertionsRequest("IRVContestName", null, BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Bad candidate list"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "bad candidate list"));
   }
 
   /**
@@ -164,7 +165,7 @@ public class GetAssertionsRequestTests {
     GetAssertionsRequest request
         = new GetAssertionsRequest("IRVContestName",  List.of(), BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Bad candidate list"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "bad candidate list"));
   }
 
   /**
@@ -176,7 +177,7 @@ public class GetAssertionsRequestTests {
     GetAssertionsRequest request
         = new GetAssertionsRequest("IRVContest", List.of("Alice","    "), BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Bad candidate list"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "bad candidate list"));
   }
 
   /**
@@ -188,7 +189,7 @@ public class GetAssertionsRequestTests {
     GetAssertionsRequest request
         = new GetAssertionsRequest("Ballina Mayoral", List.of("Alice"), null);
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("risk limit"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "risk limit"));
   }
 
   /**
@@ -200,6 +201,6 @@ public class GetAssertionsRequestTests {
     GetAssertionsRequest request
         = new GetAssertionsRequest("Ballina Mayoral", List.of("Alice"), BigDecimal.valueOf(-0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("risk limit"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "risk limit"));
   }
 }

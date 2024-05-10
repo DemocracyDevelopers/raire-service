@@ -158,7 +158,7 @@ public class GenerateAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not all IRV"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not comprised of all IRV"));
   }
 
   /**
@@ -178,7 +178,7 @@ public class GenerateAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not all IRV"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not comprised of all IRV"));
   }
 
   /**

@@ -411,7 +411,7 @@ public class GenerateAssertionsOnKnownTests {
         generateAssertionsService.persistAssertions(result, request));
 
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
-    assertTrue(ex.getMessage().toLowerCase().contains("invalid arguments"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "invalid arguments"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
@@ -434,7 +434,7 @@ public class GenerateAssertionsOnKnownTests {
         generateAssertionsService.persistAssertions(result, request));
 
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
-    assertTrue(ex.getMessage().toLowerCase().contains("invalid arguments"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "invalid arguments"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
@@ -457,7 +457,7 @@ public class GenerateAssertionsOnKnownTests {
         generateAssertionsService.persistAssertions(result, request));
 
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
-    assertTrue(ex.getMessage().toLowerCase().contains("non-negative margin"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "non-negative margin"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
@@ -480,7 +480,7 @@ public class GenerateAssertionsOnKnownTests {
         generateAssertionsService.persistAssertions(result, request));
 
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
-    assertTrue(ex.getMessage().toLowerCase().contains("less than universe size"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "less than universe size"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
@@ -503,7 +503,7 @@ public class GenerateAssertionsOnKnownTests {
         generateAssertionsService.persistAssertions(result, request));
 
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
-    assertTrue(ex.getMessage().toLowerCase().contains("must not be the same candidate"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "must not be the same candidate"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
@@ -527,8 +527,7 @@ public class GenerateAssertionsOnKnownTests {
         generateAssertionsService.persistAssertions(result, request));
 
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
-    assertTrue(ex.getMessage().toLowerCase().contains(
-        "the winner and loser of an assertion must also be continuing candidates"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "must also be continuing"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
@@ -552,8 +551,7 @@ public class GenerateAssertionsOnKnownTests {
         generateAssertionsService.persistAssertions(result, request));
 
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
-    assertTrue(ex.getMessage().toLowerCase().contains(
-        "the winner and loser of an assertion must also be continuing candidates"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "must also be continuing"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
@@ -577,7 +575,7 @@ public class GenerateAssertionsOnKnownTests {
         generateAssertionsService.persistAssertions(result, request));
 
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
-    assertTrue(ex.getMessage().toLowerCase().contains("index out of bounds"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "index out of bounds"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
@@ -601,7 +599,7 @@ public class GenerateAssertionsOnKnownTests {
         generateAssertionsService.persistAssertions(result, request));
 
     assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
-    assertTrue(ex.getMessage().toLowerCase().contains("index out of bounds"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "index out of bounds"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());

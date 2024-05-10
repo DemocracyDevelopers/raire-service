@@ -60,13 +60,6 @@ public class GetAssertionsServiceTests {
   AssertionRepository assertionRepository;
 
   /**
-   * To facilitate easier checking of retrieved/saved assertion content.
-   */
-  private static final Gson GSON =
-      new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
-
-
-  /**
    * Retrieval of assertions for an existing contest with no associated assertions will throw
    * a RaireServiceException with error code NO_ASSERTIONS_PRESENT.
    */
