@@ -22,10 +22,8 @@ package au.org.democracydevelopers.raireservice.controller;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes.TIMEOUT_CHECKING_WINNER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.service.GenerateAssertionsService;
 import au.org.democracydevelopers.raireservice.testUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
@@ -59,7 +57,6 @@ import org.springframework.test.context.ActiveProfiles;
  * initiate the microservice on their own. Contests which will be used for validity testing are
  * pre-loaded into the database using src/test/resources/data.sql.
  */
-
 @ActiveProfiles("test-containers")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)

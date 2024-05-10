@@ -41,10 +41,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/*
- * Tests on contest retrieval.
- * Contests are pre-loaded into the database using
- * src/test/resources/data.sql.
+/**
+ * Tests for contest retrieval.
+ * Contests are pre-loaded into the database using src/test/resources/data.sql.
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest

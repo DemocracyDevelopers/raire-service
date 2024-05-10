@@ -689,7 +689,7 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest9() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest9);
+    testUtils.log(logger, "checkDifficulty_contest9");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_9,
         ballotCountContest_9, DEFAULT_TIME_LIMIT, choicesContest_9);
 

@@ -63,7 +63,8 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GetAssertionsInProgressValidAPIRequestTests {
-  private final static Logger logger = LoggerFactory.getLogger(GetAssertionsInProgressValidAPIRequestTests.class);
+  private final static Logger logger = LoggerFactory.getLogger(
+      GetAssertionsInProgressValidAPIRequestTests.class);
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
   private final static String getAssertionsEndpoint = "/raire/get-assertions";

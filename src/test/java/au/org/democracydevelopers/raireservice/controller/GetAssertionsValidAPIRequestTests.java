@@ -50,17 +50,17 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.shaded.org.apache.commons.lang3.ObjectUtils.Null;
 
 /**
- * Tests for get-assertions endpoint. This class automatically fires up the RAIRE Microservice on a random
- * port, then runs a series of tests for correct responses to valid requests.
+ * Tests for get-assertions endpoint. This class automatically fires up the RAIRE Microservice on a
+ * random port, then runs a series of tests for correct responses to valid requests.
  * The list of tests is similar to - and in most cases identical to - the GetAssertionsServiceTests.
- * Note that you have to run the *whole class*. Individual tests do not work separately because they don't
- * initiate the microservice on their own.
+ * Note that you have to run the *whole class*. Individual tests do not work separately because they
+ * don't initiate the microservice on their own.
  * Contests which will be used for validity testing are pre-loaded into the database using
  * src/test/resources/data.sql.
  */
-
 @ActiveProfiles("simple-assertions")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
@@ -183,7 +183,7 @@ public class GetAssertionsValidAPIRequestTests {
    */
   @Test
   @Transactional
-  void retrieveAssertionsIncorrectCandidateNamesIsAnError() {
+  void retrieveAssertionsIncorrectCandidateNamesIsAnError() throws NullPointerException {
     testUtils.log(logger,"retrieveAssertionsIncorrectCandidateNamesIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 

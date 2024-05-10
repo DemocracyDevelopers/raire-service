@@ -58,7 +58,8 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class AssertionRepositorySimpleAssertionsTests {
 
-  private final static Logger logger = LoggerFactory.getLogger(AssertionRepositorySimpleAssertionsTests.class);
+  private final static Logger logger = LoggerFactory.getLogger(
+      AssertionRepositorySimpleAssertionsTests.class);
 
   @Autowired
   AssertionRepository assertionRepository;

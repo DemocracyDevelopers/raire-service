@@ -24,7 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepositoryTests;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
@@ -38,10 +37,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
-/*
+/**
  * Tests on GenerateAssertionsRequests, particularly focusing on the validation step.
  * Contests which will be used to test the validity of the GenerateAssertionsRequest are
- * pre-loaded into the database using src/test/resources/data.sql.
+ * preloaded into the database using src/test/resources/data.sql.
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest

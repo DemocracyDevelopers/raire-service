@@ -41,7 +41,6 @@ import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
-import au.org.democracydevelopers.raireservice.request.GetAssertionsRequestTests;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.Arrays;

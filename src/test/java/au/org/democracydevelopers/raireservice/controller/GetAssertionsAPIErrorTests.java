@@ -57,7 +57,6 @@ import org.apache.commons.lang3.StringUtils;
  * Contests which will be used for validity testing are pre-loaded into the database using
  * src/test/resources/data.sql.
  */
-
 @ActiveProfiles("test-containers")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
@@ -91,7 +90,7 @@ public class GetAssertionsAPIErrorTests {
    * code and message.
    */
   @Test
-  public void testValidRequestWithNoAssertions() {
+  public void testValidRequestWithNoAssertions() throws NullPointerException {
     testUtils.log(logger,"testValidRequestWithNoAssertions");
     String url = "http://localhost:" + port + getAssertionsEndpoint;
 
