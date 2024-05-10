@@ -100,8 +100,8 @@ public class AssertionController {
 
     if (solution.Ok != null) {
       // Generation of assertions was successful, now save them to the database.
-      logger.debug(String.format("%s Assertion generation successful: {} assertions " +
-              "generated in {}s.", prefix, solution.Ok.assertions.length,
+      logger.debug(String.format("%s Assertion generation successful: %d assertions " +
+              "generated in %ss.", prefix, solution.Ok.assertions.length,
               solution.Ok.time_to_find_assertions.seconds));
       generateAssertionsService.persistAssertions(solution.Ok, request);
 
@@ -151,8 +151,8 @@ public class AssertionController {
 
     final String prefix = "[endpoint:get-assertions(json)]";
     logger.debug(String.format(
-        "%s Get assertions request in JSON visualiser format for contest %s with candidates %s."),
-        prefix, request.contestName, request.candidates);
+        "%s Get assertions request in JSON visualiser format for contest %s with candidates %s.",
+        prefix, request.contestName, request.candidates));
 
     // Validate request: errors in the request will be thrown as RequestValidationExceptions that
     // are handled by the ControllerExceptionHandler.
