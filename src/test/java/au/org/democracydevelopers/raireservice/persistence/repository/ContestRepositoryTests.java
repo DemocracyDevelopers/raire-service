@@ -23,6 +23,8 @@ package au.org.democracydevelopers.raireservice.persistence.repository;
 import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -48,6 +50,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class ContestRepositoryTests {
+
+  private final static Logger logger = LoggerFactory.getLogger(ContestRepositoryTests.class);
+
   @Autowired
   ContestRepository contestRepository;
 

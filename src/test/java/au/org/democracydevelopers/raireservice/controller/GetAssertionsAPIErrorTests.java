@@ -27,6 +27,8 @@ import au.org.democracydevelopers.raireservice.service.RaireServiceException.Rai
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -60,6 +62,8 @@ import org.apache.commons.lang3.StringUtils;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GetAssertionsAPIErrorTests {
+
+  private final static Logger logger = LoggerFactory.getLogger(GetAssertionsAPIErrorTests.class);
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
 

@@ -28,6 +28,8 @@ import au.org.democracydevelopers.raireservice.persistence.repository.ContestRep
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -45,6 +47,8 @@ import org.springframework.test.context.ActiveProfiles;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class GetAssertionsRequestTests {
+
+  private final static Logger logger = LoggerFactory.getLogger(GetAssertionsRequestTests.class);
 
   @Autowired
   ContestRepository contestRepository;

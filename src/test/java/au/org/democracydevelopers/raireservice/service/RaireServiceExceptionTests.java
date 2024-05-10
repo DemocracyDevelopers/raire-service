@@ -42,6 +42,8 @@ import au.org.democracydevelopers.raireservice.service.RaireServiceException.Rai
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -55,6 +57,8 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class RaireServiceExceptionTests {
+
+  private final static Logger logger = LoggerFactory.getLogger(RaireServiceExceptionTests.class);
 
   @Autowired
   ContestRepository contestRepository;

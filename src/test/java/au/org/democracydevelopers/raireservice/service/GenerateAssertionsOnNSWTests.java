@@ -33,6 +33,8 @@ import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest
 import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -53,6 +55,8 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @Disabled("These tests pass but are disabled because loading in the data takes a long time.")
 public class GenerateAssertionsOnNSWTests {
+
+  private final static Logger logger = LoggerFactory.getLogger(GenerateAssertionsOnNSWTests.class);
 
   @Autowired
   private CVRContestInfoRepository cvrContestInfoRepository;
