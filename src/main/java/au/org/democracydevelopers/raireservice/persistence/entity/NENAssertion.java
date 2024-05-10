@@ -36,11 +36,8 @@ import org.slf4j.LoggerFactory;
 /**
  * A Not Eliminated Next assertion asserts that a _winner_ beats a _loser_ in an audit when all
  * candidates other that those in a specified _assumed to be continuing_ list have been removed.
- *
  * In particular, this means that _winner_ can not be the next candidate eliminated.
- *
  * This assertion type is also referred to as an NEN assertion in A Guide to RAIRE.
- *
  * The constructor for this class takes a raire-java NEN assertion construct (NotEliminatedNext)
  * and translates it into a NENAssertion entity, suitable for storage in the corla database.
  */

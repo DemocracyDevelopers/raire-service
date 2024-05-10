@@ -32,14 +32,11 @@ import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
-import au.org.democracydevelopers.raireservice.testUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -61,9 +58,6 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GetAssertionsServiceInProgressTests {
 
-  private final static Logger logger = LoggerFactory.getLogger(
-      GetAssertionsServiceInProgressTests.class);
-
   @Autowired
   AssertionRepository assertionRepository;
 
@@ -80,7 +74,6 @@ public class GetAssertionsServiceInProgressTests {
   @Test
   @Transactional
   void retrieveAssertionsOneNENOneNEBAssertionInProgress() throws RaireServiceException {
-    testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgress");
     GetAssertionsService service = new GetAssertionsService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
         List.of("Liesl", "Wendell", "Amanda", "Chuan"), new BigDecimal("0.05"));

@@ -31,7 +31,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
 
 public class testUtils {
 
@@ -40,13 +39,6 @@ public class testUtils {
    */
   private static final Gson GSON =
       new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
-
-  /**
-   * Print log statement indicating that we have started to run the given test.
-   */
-  public static void log(Logger logger, String test){
-    logger.debug(String.format("RUNNING TEST %s", test));
-  }
 
   /**
    * Utility to check that the API json response to a get assertions request contains the right metadata.

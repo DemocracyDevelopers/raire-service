@@ -25,13 +25,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.Arrays;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -52,8 +49,6 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class CVRContestInfoRepositoryTests {
 
-  private final static Logger logger = LoggerFactory.getLogger(CVRContestInfoRepositoryTests.class);
-
   @Autowired
   CVRContestInfoRepository cvrContestInfoRepository;
 
@@ -64,7 +59,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void retrieveCVRsNonExistentContestCounty() {
-    testUtils.log(logger, "retrieveCVRsNonExistentContestCounty");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(0, 0);
     assertTrue(retrieved.isEmpty());
   }
@@ -76,7 +70,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void retrieveCVRsNonExistentContestExistentCounty() {
-    testUtils.log(logger, "retrieveCVRsNonExistentContestExistentCounty");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(4, 8);
     assertTrue(retrieved.isEmpty());
   }
@@ -88,7 +81,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void retrieveCVRsNonExistentCountyExistentContest() {
-    testUtils.log(logger, "retrieveCVRsNonExistentCountyExistentContest");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999990, 0);
     assertTrue(retrieved.isEmpty());
   }
@@ -100,7 +92,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void retrieveCVRsExistentContestNoCVRs() {
-    testUtils.log(logger, "retrieveCVRsExistentContestNoCVRs");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999996, 10);
     assertTrue(retrieved.isEmpty());
   }
@@ -111,7 +102,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void retrieveCVRsOneCVRSingleCountyContest() {
-    testUtils.log(logger, "retrieveCVRsOneCVRSingleCountyContest");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999998, 8);
     assertEquals(1, retrieved.size());
     String[] choices = {"Alice", "Bob", "Charlie"};
@@ -124,7 +114,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void retrieveCVRsOneCVRMultiCountyContest() {
-    testUtils.log(logger, "retrieveCVRsOneCVRMultiCountyContest");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999988, 10);
     assertEquals(1, retrieved.size());
     String[] choices = {"Harold Holt","Wendy Squires","(B)(C)(D)"};
@@ -138,7 +127,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void retrieveCVRsMultiVoteCVR() {
-    testUtils.log(logger, "retrieveCVRsMultiVoteCVR");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999997, 8);
     assertEquals(1, retrieved.size());
     String[] choices = {"Laurie M.", "Bonny Smith", "Thomas D'Angelo"};
@@ -153,7 +141,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void retrieveMultipleCVRContestInfo1() {
-    testUtils.log(logger, "retrieveMultipleCVRContestInfo1");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999990, 8);
     assertEquals(3, retrieved.size());
 
@@ -174,7 +161,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void retrieveMultipleCVRContestInfo2() {
-    testUtils.log(logger, "retrieveMultipleCVRContestInfo2");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999991, 9);
     assertEquals(3, retrieved.size());
 
@@ -195,7 +181,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void retrieveMultipleCVRContestInfoSingleCountyContest() {
-    testUtils.log(logger, "retrieveMultipleCVRContestInfoSingleCountyContest");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999999, 10);
     assertEquals(4, retrieved.size());
 
@@ -218,7 +203,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void malformedChoiceStringIsNull1() {
-    testUtils.log(logger, "malformedChoiceStringIsNull1");
     Exception ex = assertThrows(JpaSystemException.class, () ->
         cvrContestInfoRepository.getCVRs(999987, 11));
     assertTrue(ex.getMessage().toLowerCase().
@@ -233,7 +217,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void malformedChoiceStringIsNull2() {
-    testUtils.log(logger, "malformedChoiceStringIsNull2");
     Exception ex = assertThrows(JpaSystemException.class, () ->
         cvrContestInfoRepository.getCVRs(999986, 11));
     assertTrue(ex.getMessage().toLowerCase().
@@ -248,7 +231,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void blankVoteChoiceString() {
-    testUtils.log(logger, "blankVoteChoiceString");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999985, 11);
     assertEquals(1, retrieved.size());
     assertEquals(0, retrieved.get(0).length);
@@ -261,7 +243,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void nonChoiceListVote1() {
-    testUtils.log(logger, "nonChoiceListVote1");
     Exception ex = assertThrows(JpaSystemException.class, () ->
         cvrContestInfoRepository.getCVRs(999984, 11));
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
@@ -276,7 +257,6 @@ public class CVRContestInfoRepositoryTests {
   @Test
   @Transactional
   void nonChoiceListVote2() {
-    testUtils.log(logger, "nonChoiceListVote2");
     Exception ex = assertThrows(JpaSystemException.class, () ->
         cvrContestInfoRepository.getCVRs(999983, 11));
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),

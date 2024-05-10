@@ -30,12 +30,9 @@ import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
-import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -56,8 +53,6 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @Disabled("These tests pass but are disabled because loading in the data takes a long time.")
 public class GenerateAssertionsOnNSWTests {
-
-  private final static Logger logger = LoggerFactory.getLogger(GenerateAssertionsOnNSWTests.class);
 
   @Autowired
   private CVRContestInfoRepository cvrContestInfoRepository;
@@ -353,7 +348,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest1() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest1");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(1, 1);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_1.contains(retrievedFirstChoice));
@@ -369,7 +363,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest1() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest1");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_1,
         ballotCountContest_1, DEFAULT_TIME_LIMIT, choicesContest_1);
 
@@ -393,7 +386,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest2() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest2");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(2, 2);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_2.contains(retrievedFirstChoice));
@@ -409,7 +401,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest2() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest2");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_2,
         ballotCountContest_2, DEFAULT_TIME_LIMIT, choicesContest_2);
 
@@ -433,7 +424,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest3() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest3");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(3, 3);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_3.contains(retrievedFirstChoice));
@@ -449,7 +439,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest3() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest3");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_3,
         ballotCountContest_3, DEFAULT_TIME_LIMIT, choicesContest_3);
 
@@ -473,7 +462,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest4() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest4");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(4, 4);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_4.contains(retrievedFirstChoice));
@@ -489,7 +477,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest4() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest4");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_4,
         ballotCountContest_4, DEFAULT_TIME_LIMIT, choicesContest_4);
 
@@ -513,7 +500,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest5() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest5");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(5, 5);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_5.contains(retrievedFirstChoice));
@@ -529,7 +515,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest5() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest5");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_5,
         ballotCountContest_5, DEFAULT_TIME_LIMIT, choicesContest_5);
 
@@ -553,7 +538,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest6() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest6");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(6, 6);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_6.contains(retrievedFirstChoice));
@@ -569,7 +553,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest6() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest6");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_6,
         ballotCountContest_6, DEFAULT_TIME_LIMIT, choicesContest_6);
 
@@ -593,7 +576,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest7() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest7");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(7, 7);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_7.contains(retrievedFirstChoice));
@@ -609,7 +591,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest7() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest7");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_7,
         ballotCountContest_7, DEFAULT_TIME_LIMIT, choicesContest_7);
 
@@ -633,7 +614,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest8() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest8");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(8, 8);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_8.contains(retrievedFirstChoice));
@@ -649,7 +629,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest8() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest8");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_8,
         ballotCountContest_8, DEFAULT_TIME_LIMIT, choicesContest_8);
 
@@ -673,7 +652,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest9() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest9");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(9, 9);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_9.contains(retrievedFirstChoice));
@@ -689,7 +667,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest9() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest9");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_9,
         ballotCountContest_9, DEFAULT_TIME_LIMIT, choicesContest_9);
 
@@ -713,7 +690,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest10() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest10");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(10, 10);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_10.contains(retrievedFirstChoice));
@@ -729,7 +705,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest10() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest10");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_10,
         ballotCountContest_10, DEFAULT_TIME_LIMIT, choicesContest_10);
 
@@ -753,7 +728,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest11() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest11");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(11, 11);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_11.contains(retrievedFirstChoice));
@@ -769,7 +743,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest11() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest11");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_11,
         ballotCountContest_11, DEFAULT_TIME_LIMIT, choicesContest_11);
 
@@ -793,7 +766,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest12() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest12");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(12, 12);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_12.contains(retrievedFirstChoice));
@@ -809,7 +781,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest12() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest12");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_12,
         ballotCountContest_12, DEFAULT_TIME_LIMIT, choicesContest_12);
 
@@ -833,7 +804,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest13() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest13");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(13, 13);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_13.contains(retrievedFirstChoice));
@@ -849,7 +819,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest13() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest13");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_13,
         ballotCountContest_13, DEFAULT_TIME_LIMIT, choicesContest_13);
 
@@ -873,7 +842,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest14() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest14");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(14, 14);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_14.contains(retrievedFirstChoice));
@@ -889,7 +857,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest14() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest14");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_14,
         ballotCountContest_14, DEFAULT_TIME_LIMIT, choicesContest_14);
 
@@ -913,7 +880,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest15() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest15");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(15, 15);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_15.contains(retrievedFirstChoice));
@@ -929,7 +895,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest15() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest15");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_15,
         ballotCountContest_15, DEFAULT_TIME_LIMIT, choicesContest_15);
 
@@ -953,7 +918,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest16() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest16");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(16, 16);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_16.contains(retrievedFirstChoice));
@@ -969,7 +933,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest16() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest16");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_16,
         ballotCountContest_16, DEFAULT_TIME_LIMIT, choicesContest_16);
 
@@ -993,7 +956,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest17() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest17");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(17, 17);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_17.contains(retrievedFirstChoice));
@@ -1009,7 +971,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest17() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest17");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_17,
         ballotCountContest_17, DEFAULT_TIME_LIMIT, choicesContest_17);
 
@@ -1033,7 +994,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest18() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest18");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(18, 18);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_18.contains(retrievedFirstChoice));
@@ -1049,7 +1009,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest18() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest18");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_18,
         ballotCountContest_18, DEFAULT_TIME_LIMIT, choicesContest_18);
 
@@ -1073,7 +1032,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest19() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest19");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(19, 19);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_19.contains(retrievedFirstChoice));
@@ -1089,7 +1047,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest19() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest19");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_19,
         ballotCountContest_19, DEFAULT_TIME_LIMIT, choicesContest_19);
 
@@ -1113,7 +1070,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest20() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest20");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(20, 20);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_20.contains(retrievedFirstChoice));
@@ -1129,7 +1085,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest20() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest20");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_20,
         ballotCountContest_20, DEFAULT_TIME_LIMIT, choicesContest_20);
 
@@ -1153,7 +1108,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest21() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest21");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(21, 21);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_21.contains(retrievedFirstChoice));
@@ -1169,7 +1123,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest21() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest21");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_21,
         ballotCountContest_21, DEFAULT_TIME_LIMIT, choicesContest_21);
 
@@ -1193,7 +1146,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest22() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest22");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(22, 22);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_22.contains(retrievedFirstChoice));
@@ -1209,7 +1161,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest22() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest22");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_22,
         ballotCountContest_22, DEFAULT_TIME_LIMIT, choicesContest_22);
 
@@ -1233,7 +1184,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest23() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest23");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(23, 23);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_23.contains(retrievedFirstChoice));
@@ -1249,7 +1199,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest23() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest23");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_23,
         ballotCountContest_23, DEFAULT_TIME_LIMIT, choicesContest_23);
 
@@ -1273,7 +1222,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest24() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest24");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(24, 24);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_24.contains(retrievedFirstChoice));
@@ -1289,7 +1237,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest24() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest24");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_24,
         ballotCountContest_24, DEFAULT_TIME_LIMIT, choicesContest_24);
 
@@ -1313,7 +1260,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest25() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest25");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(25, 25);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_25.contains(retrievedFirstChoice));
@@ -1329,7 +1275,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest25() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest25");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_25,
         ballotCountContest_25, DEFAULT_TIME_LIMIT, choicesContest_25);
 
@@ -1353,7 +1298,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest26() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest26");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(26, 26);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_26.contains(retrievedFirstChoice));
@@ -1369,7 +1313,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest26() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest26");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_26,
         ballotCountContest_26, DEFAULT_TIME_LIMIT, choicesContest_26);
 
@@ -1393,7 +1336,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest27() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest27");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(27, 27);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_27.contains(retrievedFirstChoice));
@@ -1409,7 +1351,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest27() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest27");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_27,
         ballotCountContest_27, DEFAULT_TIME_LIMIT, choicesContest_27);
 
@@ -1433,7 +1374,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest28() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest28");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(28, 28);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_28.contains(retrievedFirstChoice));
@@ -1449,7 +1389,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest28() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest28(");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_28,
         ballotCountContest_28, DEFAULT_TIME_LIMIT, choicesContest_28);
 
@@ -1473,7 +1412,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest29() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest29");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(29, 29);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_29.contains(retrievedFirstChoice));
@@ -1489,7 +1427,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest29() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest29");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_29,
         ballotCountContest_29, DEFAULT_TIME_LIMIT, choicesContest_29);
 
@@ -1513,7 +1450,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest30() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest30");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(30, 30);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_30.contains(retrievedFirstChoice));
@@ -1529,7 +1465,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest30() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest30");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_30,
         ballotCountContest_30, DEFAULT_TIME_LIMIT, choicesContest_30);
 
@@ -1553,7 +1488,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest31() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest31");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(31, 31);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_31.contains(retrievedFirstChoice));
@@ -1569,7 +1503,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest31() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest31");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_31,
         ballotCountContest_31, DEFAULT_TIME_LIMIT, choicesContest_31);
 
@@ -1593,7 +1526,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest32() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest32");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(32, 32);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_32.contains(retrievedFirstChoice));
@@ -1609,7 +1541,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest32() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest32");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_32,
         ballotCountContest_32, DEFAULT_TIME_LIMIT, choicesContest_32);
 
@@ -1633,7 +1564,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   void firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest33() {
-    testUtils.log(logger, "firstPreferenceOfFirstVoteHasAnExpectedCandidateName_contest33");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(33, 33);
     String retrievedFirstChoice = retrieved.getFirst()[0];
     assertTrue(choicesContest_33.contains(retrievedFirstChoice));
@@ -1649,7 +1579,6 @@ public class GenerateAssertionsOnNSWTests {
   @Test
   @Transactional
   public void checkDifficulty_contest33() throws RaireServiceException {
-    testUtils.log(logger, "checkDifficulty_contest33");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_33,
         ballotCountContest_33, DEFAULT_TIME_LIMIT, choicesContest_33);
 

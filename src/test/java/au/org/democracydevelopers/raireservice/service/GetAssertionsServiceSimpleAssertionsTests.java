@@ -34,15 +34,12 @@ import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
-import au.org.democracydevelopers.raireservice.testUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.math.BigDecimal;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -64,9 +61,6 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GetAssertionsServiceSimpleAssertionsTests {
 
-  private final static Logger logger = LoggerFactory.getLogger(
-      GetAssertionsServiceSimpleAssertionsTests.class);
-
   @Autowired
   AssertionRepository assertionRepository;
 
@@ -83,7 +77,6 @@ public class GetAssertionsServiceSimpleAssertionsTests {
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNEBAssertion() throws RaireServiceException {
-    testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertion");
     GetAssertionsService service = new GetAssertionsService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEB Assertion Contest",
         List.of("Alice", "Bob"), new BigDecimal("0.10"));
@@ -123,7 +116,6 @@ public class GetAssertionsServiceSimpleAssertionsTests {
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNENAssertion() throws RaireServiceException {
-    testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertion");
     GetAssertionsService service = new GetAssertionsService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN Assertion Contest",
         List.of("Alice", "Charlie", "Diego", "Bob"), new BigDecimal("0.10"));
@@ -167,7 +159,6 @@ public class GetAssertionsServiceSimpleAssertionsTests {
   @Test
   @Transactional
   void retrieveAssertionsInconsistentRequest1()  {
-    testUtils.log(logger, "retrieveAssertionsInconsistentRequest1");
     GetAssertionsService service = new GetAssertionsService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
         List.of("Alice", "Charlie", "Diego", "Bob"), new BigDecimal("0.10"));
@@ -186,7 +177,6 @@ public class GetAssertionsServiceSimpleAssertionsTests {
   @Test
   @Transactional
   void retrieveAssertionsInconsistentRequest2()  {
-    testUtils.log(logger, "retrieveAssertionsInconsistentRequest2");
     GetAssertionsService service = new GetAssertionsService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
         List.of(), new BigDecimal("0.10"));

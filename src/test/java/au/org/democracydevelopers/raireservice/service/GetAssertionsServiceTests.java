@@ -26,12 +26,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
-import au.org.democracydevelopers.raireservice.testUtils;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -52,8 +49,6 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GetAssertionsServiceTests {
 
-  private final static Logger logger = LoggerFactory.getLogger(GetAssertionsServiceTests.class);
-
   @Autowired
   AssertionRepository assertionRepository;
 
@@ -64,7 +59,6 @@ public class GetAssertionsServiceTests {
   @Test
   @Transactional
   void existentContestNoAssertions(){
-    testUtils.log(logger, "existentContestNoAssertions");
     GetAssertionsService service = new GetAssertionsService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("No CVR Mayoral",
         List.of(), new BigDecimal("0.10"));
@@ -82,7 +76,6 @@ public class GetAssertionsServiceTests {
   @Test
   @Transactional
   void nonExistentContestNoAssertions(){
-    testUtils.log(logger, "nonExistentContestNoAssertions");
     GetAssertionsService service = new GetAssertionsService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("Non-Existent Contest Name",
         List.of(), new BigDecimal("0.10"));
