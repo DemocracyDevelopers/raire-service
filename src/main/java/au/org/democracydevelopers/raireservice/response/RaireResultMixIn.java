@@ -76,9 +76,8 @@ public class RaireResultMixIn extends RaireResult {
    * @param margin the lowest margin.
    * @param num_candidates the number of candidates in the contest.
    */
-  public RaireResultMixIn(
-      AssertionAndDifficulty[] assertions,
-      double difficulty, int margin, int num_candidates) {
+  public RaireResultMixIn(AssertionAndDifficulty[] assertions, double difficulty, int margin,
+      int num_candidates) {
     super(assertions, difficulty, margin, -1, num_candidates, new TimeTaken(0,0),
         new TimeTaken(0,0), new TimeTaken(0,0), false);
   }

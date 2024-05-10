@@ -35,7 +35,7 @@ import java.beans.ConstructorProperties;
  */
 public abstract class ContestRequest {
 
-  protected final static Logger logger = LoggerFactory.getLogger(ContestRequest.class);
+  private final static Logger logger = LoggerFactory.getLogger(ContestRequest.class);
 
   /**
    * The name of the contest
@@ -72,7 +72,7 @@ public abstract class ContestRequest {
 
     if(contestName == null || contestName.isBlank()) {
       final String msg = String.format("%s No contest name specified. " +
-          "Throwing RequestValidationException.", prefix);
+          "Throwing a RequestValidationException.", prefix);
       logger.error(msg);
       throw new RequestValidationException(msg);
     }
@@ -92,12 +92,12 @@ public abstract class ContestRequest {
     }
 
     if(!contestRepository.isAllIRV(contestName)) {
-      final String msg = String.format("%s Request for contest %s: not comprised of all IRV contests.",
-          prefix, contestName);
+      final String msg = String.format("%s Request for contest %s: not comprised of all IRV " +
+          "contests. Throwing a RequestValidationException.", prefix, contestName);
       logger.error(msg);
       throw new RequestValidationException(msg);
     }
 
-    logger.debug(String.format("%s Request valid.", prefix));
+    logger.debug(String.format("%s Request for contest information valid.", prefix));
   }
 }

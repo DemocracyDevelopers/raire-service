@@ -237,16 +237,14 @@ public abstract class Assertion {
     if(margin < 0 || margin > universeSize){
       String msg = String.format("%s An assertion must have a non-negative margin that is " +
           "less than universe size (margin of %d provided with universe size %d). " +
-          "Throwing an IllegalArgumentException.", prefix,
-          margin, universeSize);
+          "Throwing an IllegalArgumentException.", prefix, margin, universeSize);
       logger.error(msg);
       throw new IllegalArgumentException(msg);
     }
 
     if(winner.equals(loser)){
-      String msg = String.format("%s The winner and loser of an assertion must not be the " +
-          "same candidate (%s provided for both). Throwing an IllegalArgumentException.",
-          prefix, winner);
+      String msg = String.format("%s The winner and loser of an assertion must not be the same " +
+          "candidate (%s provided for both). Throwing an IllegalArgumentException.", prefix, winner);
       logger.error(msg);
       throw new IllegalArgumentException(msg);
     }

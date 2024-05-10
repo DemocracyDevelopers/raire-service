@@ -57,7 +57,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/raire")
 public class AssertionController {
 
-  protected static final Logger logger = LoggerFactory.getLogger(AssertionController.class);
+  private static final Logger logger = LoggerFactory.getLogger(AssertionController.class);
 
   private final ContestRepository contestRepository;
 
@@ -85,7 +85,6 @@ public class AssertionController {
       throws RequestValidationException, RaireServiceException
   {
     final String prefix = "[endpoint:generate-assertions]";
-
     logger.debug(String.format("%s Assertion generation request received for contest: %s.",
         prefix, request.contestName));
 
