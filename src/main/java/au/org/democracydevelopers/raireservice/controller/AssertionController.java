@@ -84,34 +84,51 @@ public class AssertionController {
   public ResponseEntity<GenerateAssertionsResponse> serve(@RequestBody GenerateAssertionsRequest request)
       throws RequestValidationException, RaireServiceException
   {
-      request.Validate(contestRepository);
+    final String prefix = "[endpoint:generate-assertions]";
 
-      // Call raire-java to generate assertions, and check if it was able to do so successfully.
-      RaireResultOrError solution = generateAssertionsService.generateAssertions(request);
-      if (solution.Ok != null) {
-        // Generation of assertions was successful, now save them to the database.
-        generateAssertionsService.persistAssertions(solution.Ok, request);
+    logger.debug(String.format("%s Assertion generation request received for contest: %s.",
+        prefix, request.contestName));
 
-        // Form and return request response.
-        GenerateAssertionsResponse response = new GenerateAssertionsResponse(request.contestName,
-            request.candidates.get(solution.Ok.winner));
+    // Validate request: validation errors will be thrown as RequestValidationExceptions to be
+    // handled by the ControllerExceptionHandler.
+    request.Validate(contestRepository);
+    logger.debug(String.format("%s Assertion generation request successfully validated.",prefix));
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
-      }
+    // Call raire-java to generate assertions, and check if it was able to do so successfully.
+    logger.debug(String.format("%s Calling raire-java with assertion generation request.",prefix));
+    RaireResultOrError solution = generateAssertionsService.generateAssertions(request);
 
-      // raire-java was not able to generate assertions successfully.
-      if(solution.Err == null){
-        final String msg = "An error occurred in raire-java, yet no error information was returned.";
-        logger.error("AssertionController::serve[GenerateAssertionsRequest] " + msg);
-        throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
-      }
+    if (solution.Ok != null) {
+      // Generation of assertions was successful, now save them to the database.
+      logger.debug(String.format("%s Assertion generation successful: {} assertions " +
+              "generated in {}s.", prefix, solution.Ok.assertions.length,
+              solution.Ok.time_to_find_assertions.seconds));
+      generateAssertionsService.persistAssertions(solution.Ok, request);
 
-      // raire-java returned error information, form and throw an exception using that data. (Note:
-      // we need to create the exception first to get a human readable message to log).
-      RaireServiceException ex = new RaireServiceException(solution.Err, request.candidates);
-      final String msg = "An error occurred in raire-java: " + ex.getMessage();
-      logger.error("AssertionController::serve[GenerateAssertionsRequest] " + msg);
-      throw ex;
+      logger.debug(String.format("%s Assertions stored in database for contest %s.",
+          prefix, request.contestName));
+
+      // Form and return request response.
+      GenerateAssertionsResponse response = new GenerateAssertionsResponse(request.contestName,
+          request.candidates.get(solution.Ok.winner));
+
+      logger.debug(String.format("%s Assertion generation and storage complete.", prefix));
+      return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    // raire-java was not able to generate assertions successfully.
+    if(solution.Err == null){
+      final String msg = "An error occurred in raire-java, yet no error information was returned.";
+      logger.error(String.format("%s %s", prefix, msg));
+      throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
+    }
+
+    // raire-java returned error information, form and throw an exception using that data. (Note:
+    // we need to create the exception first to get a human readable message to log).
+    RaireServiceException ex = new RaireServiceException(solution.Err, request.candidates);
+    final String msg = "An error occurred in raire-java: " + ex.getMessage();
+    logger.error(String.format("%s %s", prefix, msg));
+    throw ex;
   }
 
 
@@ -132,11 +149,20 @@ public class AssertionController {
   public ResponseEntity<RaireSolution> serve(@RequestBody GetAssertionsRequest request)
       throws RequestValidationException, RaireServiceException {
 
+    final String prefix = "[endpoint:get-assertions(json)]";
+    logger.debug(String.format(
+        "%s Get assertions request in JSON visualiser format for contest %s with candidates %s."),
+        prefix, request.contestName, request.candidates);
+
+    // Validate request: errors in the request will be thrown as RequestValidationExceptions that
+    // are handled by the ControllerExceptionHandler.
     request.Validate(contestRepository);
+    logger.debug(String.format("%s Get assertions request successfully validated.", prefix));
 
     // Extract a RaireSolution containing the assertions that we want to serialise into
     // a JSON Assertion Visualiser report.
     RaireSolution solution = getAssertionsService.getRaireSolution(request);
+    logger.debug(String.format("%s Report generated for return.", prefix));
 
     return new ResponseEntity<>(solution, HttpStatus.OK);
   }
