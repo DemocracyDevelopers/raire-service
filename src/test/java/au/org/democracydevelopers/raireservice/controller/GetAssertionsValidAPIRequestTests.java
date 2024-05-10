@@ -31,7 +31,6 @@ import au.org.democracydevelopers.raireservice.service.RaireServiceException.Rai
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;

@@ -27,8 +27,6 @@ import au.org.democracydevelopers.raireservice.persistence.repository.AssertionR
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
 import au.org.democracydevelopers.raireservice.testUtils;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;

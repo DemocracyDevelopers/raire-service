@@ -462,7 +462,7 @@ public class GenerateAssertionsAPITests {
    * assertionGenerator currently implemented, but will need to be expanded to deal with real
    * error cases.
    * TODO when real AssertionGenerator class is implemented, write tests of each error state,
-   * See Issue https://github.com/DemocracyDevelopers/raire-service/issues/65
+   * See Issue github.com/DemocracyDevelopers/raire-service/issues/65
    * e.g. tied winners. See Issue.
    */
   @Test

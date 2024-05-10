@@ -80,7 +80,7 @@ public class GenerateAssertionsOnNSWTests {
    * Difficulties are taken from raire-java::src/test/java/au/org/democracydevelopers/raire/TestNSW
    * which in turn tests against raire-rs.
    * Winners are taken from the New South Wales official election results at
-   * https://pastvtr.elections.nsw.gov.au/LG2101/status/mayoral
+   * pastvtr.elections.nsw.gov.au/LG2101/status/mayoral
    * The ballotCounts are derived from the data, but double-checked for exact match with the
    * NSWEC website.
    */
