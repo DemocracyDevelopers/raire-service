@@ -68,20 +68,28 @@ public class GetAssertionsService {
    * @throws RaireServiceException when no assertions exist for the contest, or an error has
    * arisen during retrieval of assertions.
    */
-  public RaireSolution getRaireSolution(GetAssertionsRequest request)
-      throws RaireServiceException
+  public RaireSolution getRaireSolution(GetAssertionsRequest request) throws RaireServiceException
   {
+    final String prefix = "[getRaireSolution]";
     try {
+      logger.debug(String.format("%s Preparing to build a RaireSolution for serialisation into " +
+              "assertion visualiser report for contest %s.", prefix, request.contestName));
+      logger.debug(String.format("%s (Database access) Retrieve all assertions for contest %s.",
+          prefix, request.contestName));
       List<Assertion> assertions = assertionRepository.findByContestName(request.contestName);
 
       // If the contest has no assertions, return an error.
       if (assertions.isEmpty()) {
-        String msg = "No assertions have been generated for the contest " + request.contestName;
-        logger.error("GetAssertionsService::getRaireSolution " + msg);
+        final String msg = String.format("%s No assertions have been generated for the contest %s.",
+            prefix, request.contestName);
+        logger.error(msg);
         throw new RaireServiceException(msg, RaireErrorCodes.NO_ASSERTIONS_PRESENT);
       }
 
       // Create contest metadata map, supplied as input when creating a RaireResult.
+      logger.debug(String.format("%s Creating contest metadata map (candidates: %s), " +
+          "risk limit (%s), and contest name (%s).", prefix, request.candidates, request.riskLimit,
+          request.contestName));
       Map<String, Object> metadata = new HashMap<>();
       metadata.put(Metadata.CANDIDATES, request.candidates);
       metadata.put(Metadata.RISK_LIMIT, request.riskLimit);
@@ -89,9 +97,13 @@ public class GetAssertionsService {
 
       // Translate the assertions extracted from the database into AssertionAndDifficulty objects,
       // keeping track of the maximum difficulty and minimum margin.
+      logger.debug(String.format("%s Converting %d assertions into raire-java format.", prefix,
+          assertions.size()));
       List<AssertionAndDifficulty> translated = assertions.stream().map(
           a -> a.convert(request.candidates)).toList();
 
+      logger.debug(String.format("%s %d assertions translated.", prefix,
+          assertions.size()));
       double difficulty = 0;
       int margin = 0;
 
@@ -102,20 +114,33 @@ public class GetAssertionsService {
         difficulty = maxDifficulty.getAsDouble();
       }
 
+      logger.debug(String.format("%s Maximum difficulty across assertions: %f.",
+          prefix, difficulty));
+
       OptionalInt minMargin = translated.stream().map(a -> a.margin).mapToInt(v -> v).min();
       if(minMargin.isPresent()){
         margin = minMargin.getAsInt();
       }
 
+      logger.debug(String.format("%s Minimum margin across assertions: %d.", prefix, margin));
+
+      // Using a version of RaireResult in which certain attributes will be ignored in
+      // serialisation.
       RaireResultMixIn result = new RaireResultMixIn(translated.toArray(AssertionAndDifficulty[]::new),
           difficulty, margin, request.candidates.size());
 
-      return new RaireSolution(metadata, new RaireResultOrError(result));
+      RaireSolution solution = new RaireSolution(metadata, new RaireResultOrError(result));
+      logger.debug(String.format("%s Constructed RaireSolution for return and serialisation.", prefix));
+      return solution;
     }
     catch(RaireServiceException ex){
+      logger.error(String.format("%s RaireServiceException caught. Passing to caller: %s",
+          prefix, ex.getMessage()));
       throw ex;
     }
     catch(Exception ex){
+      logger.error(String.format("%s Generic exception caught. Passing to caller: %s",
+          prefix, ex.getMessage()));
       throw new RaireServiceException(ex.getMessage(), RaireErrorCodes.INTERNAL_ERROR);
     }
   }

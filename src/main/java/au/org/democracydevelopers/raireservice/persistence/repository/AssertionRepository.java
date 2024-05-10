@@ -98,6 +98,7 @@ public interface AssertionRepository extends JpaRepository<Assertion, Long> {
     }).toList();
 
     logger.debug(String.format("%s Translation complete.", prefix));
+    logger.debug(String.format("%s (Database access) Proceeding to save generated assertions.",prefix));
     this.saveAll(translated);
 
     logger.debug(String.format("%s Save all complete.", prefix));
