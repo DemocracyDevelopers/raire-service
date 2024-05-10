@@ -71,7 +71,8 @@ public class StringArrayConverter implements AttributeConverter<String[], String
   @Override
   public String convertToDatabaseColumn(final String[] arrayOfString) {
     if(arrayOfString == null){
-      final String msg = "Attempt to store a null value in place of a JSON list.";
+      final String msg = "[convertToDatabaseColumn] Attempt to store a null value in place " +
+          "of a JSON list.";
       logger.error(msg);
       throw new JsonSyntaxException(msg);
     }
@@ -93,7 +94,8 @@ public class StringArrayConverter implements AttributeConverter<String[], String
   @Override
   public String[] convertToEntityAttribute(final String arrayAsString) {
       if(arrayAsString.isBlank()){
-        final String msg = "A null/blank entry is present in the database in place of a JSON list.";
+        final String msg = "[convertToEntityAttribute] A null/blank entry is present in the " +
+            "database in place of a JSON list. Error in attempting to convert to a list.";
         logger.error(msg);
         throw new JsonSyntaxException(msg);
       }
