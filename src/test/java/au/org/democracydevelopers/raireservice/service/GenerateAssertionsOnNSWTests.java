@@ -23,14 +23,13 @@ package au.org.democracydevelopers.raireservice.service;
 
 import static au.org.democracydevelopers.raireservice.testUtils.difficultyMatchesMax;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
-import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
 import java.util.List;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -46,12 +45,14 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Tests to validate the behaviour of Assertion generation on NSW 2021 Mayoral election data.
  * Data is loaded in from src/test/resources/NSW2021Data/
+ * These tests all pass, but are disabled because loading in all the NSW data takes a long time.
  */
 @ActiveProfiles("nsw-testcases")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GenerateAssertionsOnNSWTestCases {
+@Disabled("These tests pass but are disabled because loading in the data takes a long time.")
+public class GenerateAssertionsOnNSWTests {
 
   @Autowired
   private CVRContestInfoRepository cvrContestInfoRepository;
@@ -64,7 +65,9 @@ public class GenerateAssertionsOnNSWTestCases {
 
   private static final int DEFAULT_TIME_LIMIT=5;
 
-  // error allowed when comparing doubles.
+  /**
+   * Error allowed when comparing doubles.
+   */
   private static final double EPS = 0.0000001;
 
   /**
@@ -78,35 +81,41 @@ public class GenerateAssertionsOnNSWTestCases {
    */
   // Contest Eurobodalla Mayoral
   private static final String nameContest_1 = "Eurobodalla Mayoral";
-  private static final List<String> choicesContest_1 = List.of("WORTHINGTON Alison","GRACE David","SMITH Gary","HATCHER Mat","HARRISON N (Tubby)","POLLOCK Rob","STARMER Karyn");
+  private static final List<String> choicesContest_1 = List.of("WORTHINGTON Alison","GRACE David",
+      "SMITH Gary","HATCHER Mat","HARRISON N (Tubby)","POLLOCK Rob","STARMER Karyn");
   private static final int ballotCountContest_1 = 25526;
   private static final double difficultyContest_1 = 23.079566003616637;
   private static final String winnerContest_1 = "HATCHER Mat";
 
   // Contest City of Lake Macquarie Mayoral
   private static final String nameContest_2 = "City of Lake Macquarie Mayoral";
-  private static final List<String> choicesContest_2 = List.of("FRASER Kay","DAWSON Rosmairi","CUBIS Luke","PAULING Jason");
+  private static final List<String> choicesContest_2 = List.of("FRASER Kay","DAWSON Rosmairi",
+      "CUBIS Luke","PAULING Jason");
   private static final int ballotCountContest_2 = 130336;
   private static final double difficultyContest_2 = 3.1113869658629745;
   private static final String winnerContest_2 = "FRASER Kay";
 
   // Contest City of Coffs Harbour Mayoral
   private static final String nameContest_3 = "City of Coffs Harbour Mayoral";
-  private static final List<String> choicesContest_3 = List.of("SWAN Tegan","CECATO George","ADENDORFF Michael","JUDGE Tony","PRYCE Rodger","PIKE Donna","AMOS Paul","TOWNLEY Sally","ARKAN John","CASSELL Jonathan");
+  private static final List<String> choicesContest_3 = List.of("SWAN Tegan","CECATO George",
+      "ADENDORFF Michael","JUDGE Tony","PRYCE Rodger","PIKE Donna","AMOS Paul","TOWNLEY Sally",
+      "ARKAN John","CASSELL Jonathan");
   private static final int ballotCountContest_3 = 45155;
   private static final double difficultyContest_3 = 8.571564160971906;
   private static final String winnerContest_3 = "AMOS Paul";
 
   // Contest Singleton Mayoral
   private static final String nameContest_4 = "Singleton Mayoral";
-  private static final List<String> choicesContest_4 = List.of("MOORE Sue","THOMPSON Danny","JARRETT Tony","CHARLTON Belinda");
+  private static final List<String> choicesContest_4 = List.of("MOORE Sue","THOMPSON Danny",
+      "JARRETT Tony","CHARLTON Belinda");
   private static final int ballotCountContest_4 = 13755;
   private static final double difficultyContest_4 = 12.118942731277533;
   private static final String winnerContest_4 = "MOORE Sue";
 
   // Contest City of Newcastle Mayoral
   private static final String nameContest_5 = "City of Newcastle Mayoral";
-  private static final List<String> choicesContest_5 = List.of("CHURCH John","NELMES Nuatali","HOLDING Rod","MACKENZIE John","O'BRIEN Steve","BARRIE Jenny");
+  private static final List<String> choicesContest_5 = List.of("CHURCH John","NELMES Nuatali",
+      "HOLDING Rod","MACKENZIE John","O'BRIEN Steve","BARRIE Jenny");
   private static final int ballotCountContest_5 = 100275;
   private static final double difficultyContest_5 = 5.913487055493307;
   private static final String winnerContest_5 = "NELMES Nuatali";
@@ -120,21 +129,24 @@ public class GenerateAssertionsOnNSWTestCases {
 
   // Contest City of Maitland Mayoral
   private static final String nameContest_7 = "City of Maitland Mayoral";
-  private static final List<String> choicesContest_7 = List.of("BROWN John","MITCHELL Ben","BAKER Loretta","PENFOLD Philip","SAFFARI Shahriar (Sean)","COOPER Michael","BURKE Brian");
+  private static final List<String> choicesContest_7 = List.of("BROWN John","MITCHELL Ben",
+      "BAKER Loretta","PENFOLD Philip","SAFFARI Shahriar (Sean)","COOPER Michael","BURKE Brian");
   private static final int ballotCountContest_7 = 54181;
   private static final double difficultyContest_7 = 47.072980017376196;
   private static final String winnerContest_7 = "PENFOLD Philip";
 
   // Contest Kempsey Mayoral
   private static final String nameContest_8 = "Kempsey Mayoral";
-  private static final List<String> choicesContest_8 = List.of("HAUVILLE Leo","EVANS Andrew","BAIN Arthur","CAMPBELL Liz","SAUL Dean","IRWIN Troy","RAEBURN Bruce");
+  private static final List<String> choicesContest_8 = List.of("HAUVILLE Leo","EVANS Andrew",
+      "BAIN Arthur","CAMPBELL Liz","SAUL Dean","IRWIN Troy","RAEBURN Bruce");
   private static final int ballotCountContest_8 = 17585;
   private static final double difficultyContest_8 = 45.43927648578811;
   private static final String winnerContest_8 = "HAUVILLE Leo";
 
   // Contest Canada Bay Mayoral
   private static final String nameContest_9 = "Canada Bay Mayoral";
-  private static final List<String> choicesContest_9 = List.of("TSIREKAS Angelo","LITTLE Julia","MEGNA Michael","JAGO Charles","RAMONDINO Daniela");
+  private static final List<String> choicesContest_9 = List.of("TSIREKAS Angelo","LITTLE Julia",
+      "MEGNA Michael","JAGO Charles","RAMONDINO Daniela");
   private static final int ballotCountContest_9 = 48542;
   private static final double difficultyContest_9 = 8.140533288613113;
   private static final String winnerContest_9 = "TSIREKAS Angelo";
@@ -148,21 +160,25 @@ public class GenerateAssertionsOnNSWTestCases {
 
   // Contest City of Sydney Mayoral
   private static final String nameContest_11 = "City of Sydney Mayoral";
-  private static final List<String> choicesContest_11 = List.of("VITHOULKAS Angela","WELDON Yvonne","SCOTT Linda","JARRETT Shauna","ELLSMORE Sylvie","MOORE Clover");
+  private static final List<String> choicesContest_11 = List.of("VITHOULKAS Angela",
+      "WELDON Yvonne","SCOTT Linda","JARRETT Shauna","ELLSMORE Sylvie","MOORE Clover");
   private static final int ballotCountContest_11 = 118511;
   private static final double difficultyContest_11 = 3.6873366521468576;
   private static final String winnerContest_11 = "MOORE Clover";
 
   // Contest Byron Mayoral
   private static final String nameContest_12 = "Byron Mayoral";
-  private static final List<String> choicesContest_12 = List.of("HUNTER Alan","CLARKE Bruce","COOREY Cate","ANDERSON John","MCILRATH Christopher","LYON Michael","DEY Duncan","PUGH Asren","SWIVEL Mark");
+  private static final List<String> choicesContest_12 = List.of("HUNTER Alan","CLARKE Bruce",
+      "COOREY Cate","ANDERSON John","MCILRATH Christopher","LYON Michael","DEY Duncan",
+      "PUGH Asren","SWIVEL Mark");
   private static final int ballotCountContest_12 = 18165;
   private static final double difficultyContest_12 = 17.13679245283019;
   private static final String winnerContest_12 = "LYON Michael";
 
   // Contest City of Broken Hill Mayoral
   private static final String nameContest_13 = "City of Broken Hill Mayoral";
-  private static final List<String> choicesContest_13 = List.of("TURLEY Darriea","KENNEDY Tom","GALLAGHER Dave");
+  private static final List<String> choicesContest_13 = List.of("TURLEY Darriea","KENNEDY Tom",
+      "GALLAGHER Dave");
   private static final int ballotCountContest_13 = 10812;
   private static final double difficultyContest_13 = 3.2773567747802366;
   private static final String winnerContest_13 = "KENNEDY Tom";
@@ -176,28 +192,32 @@ public class GenerateAssertionsOnNSWTestCases {
 
   // Contest City of Shoalhaven Mayoral
   private static final String nameContest_15 = "City of Shoalhaven Mayoral";
-  private static final List<String> choicesContest_15 = List.of("GREEN Paul","KITCHENER Mark","WHITE Patricia","WATSON Greg","DIGIGLIO Nina","FINDLEY Amanda");
+  private static final List<String> choicesContest_15 = List.of("GREEN Paul","KITCHENER Mark",
+      "WHITE Patricia","WATSON Greg","DIGIGLIO Nina","FINDLEY Amanda");
   private static final int ballotCountContest_15 = 67030;
   private static final double difficultyContest_15 = 41.53035935563817;
   private static final String winnerContest_15 = "FINDLEY Amanda";
 
   // Contest Mosman Mayoral
   private static final String nameContest_16 = "Mosman Mayoral";
-  private static final List<String> choicesContest_16 = List.of("MOLINE Libby","BENDALL Roy","HARDING Sarah","CORRIGAN Carolyn","MENZIES Simon");
+  private static final List<String> choicesContest_16 = List.of("MOLINE Libby","BENDALL Roy",
+      "HARDING Sarah","CORRIGAN Carolyn","MENZIES Simon");
   private static final int ballotCountContest_16 = 16425;
   private static final double difficultyContest_16 = 4.498767460969598;
   private static final String winnerContest_16 = "CORRIGAN Carolyn";
 
   // Contest City of Orange Mayoral
   private static final String nameContest_17 = "City of Orange Mayoral";
-  private static final List<String> choicesContest_17 = List.of("HAMLING Jason","SPALDING Amanda","JONES Neil","WHITTON Jeffery","DUFFY Kevin","SMITH Lesley","MILETO Tony");
+  private static final List<String> choicesContest_17 = List.of("HAMLING Jason","SPALDING Amanda",
+      "JONES Neil","WHITTON Jeffery","DUFFY Kevin","SMITH Lesley","MILETO Tony");
   private static final int ballotCountContest_17 = 24355;
   private static final double difficultyContest_17 = 50.01026694045174;
   private static final String winnerContest_17 = "HAMLING Jason";
 
   // Contest City of Wollongong Mayoral
   private static final String nameContest_18 = "City of Wollongong Mayoral";
-  private static final List<String> choicesContest_18 = List.of("GLYKIS Marie","DORAHY John","BROWN Tania","BRADBERY Gordon","ANTHONY Andrew","COX Mithra");
+  private static final List<String> choicesContest_18 = List.of("GLYKIS Marie","DORAHY John",
+      "BROWN Tania","BRADBERY Gordon","ANTHONY Andrew","COX Mithra");
   private static final int ballotCountContest_18 = 127240;
   private static final double difficultyContest_18 = 47.72693173293323;
   private static final String winnerContest_18 = "BRADBERY Gordon";
@@ -211,7 +231,8 @@ public class GenerateAssertionsOnNSWTestCases {
 
   // Contest Wollondilly Mayoral
   private static final String nameContest_20 = "Wollondilly Mayoral";
-  private static final List<String> choicesContest_20 = List.of("KHAN Robert","BANASIK Michael","DEETH Matthew","LAW Ray","GOULD Matt","HANNAN Judy");
+  private static final List<String> choicesContest_20 = List.of("KHAN Robert","BANASIK Michael",
+      "DEETH Matthew","LAW Ray","GOULD Matt","HANNAN Judy");
   private static final int ballotCountContest_20 = 31355;
   private static final double difficultyContest_20 = 24.40077821011673;
   private static final String winnerContest_20 = "GOULD Matt";
@@ -225,107 +246,104 @@ public class GenerateAssertionsOnNSWTestCases {
 
   // Contest Ballina Mayoral
   private static final String nameContest_22 = "Ballina Mayoral";
-  private static final List<String> choicesContest_22 = List.of("WILLIAMS Keith","JOHNSON Jeff","MCCARTHY Steve","JOHNSTON Eoin","CADWALLADER Sharon");
+  private static final List<String> choicesContest_22 = List.of("WILLIAMS Keith","JOHNSON Jeff",
+      "MCCARTHY Steve","JOHNSTON Eoin","CADWALLADER Sharon");
   private static final int ballotCountContest_22 = 26913;
   private static final double difficultyContest_22 = 7.285598267460747;
   private static final String winnerContest_22 = "CADWALLADER Sharon";
 
   // Contest Bellingen Mayoral
   private static final String nameContest_23 = "Bellingen Mayoral";
-  private static final List<String> choicesContest_23 = List.of("ALLAN Steve","WOODWARD Andrew","KING Dominic");
+  private static final List<String> choicesContest_23 = List.of("ALLAN Steve","WOODWARD Andrew",
+      "KING Dominic");
   private static final int ballotCountContest_23 = 8374;
   private static final double difficultyContest_23 = 3.3335987261146496;
   private static final String winnerContest_23 = "ALLAN Steve";
 
   // Contest City of Lismore Mayoral
   private static final String nameContest_24 = "City of Lismore Mayoral";
-  private static final List<String> choicesContest_24 = List.of("KRIEG Steve","COOK Darlene","HEALEY Patrick","GRINDON-EKINS Vanessa","ROB Big","BIRD Elly");
+  private static final List<String> choicesContest_24 = List.of("KRIEG Steve","COOK Darlene",
+      "HEALEY Patrick","GRINDON-EKINS Vanessa","ROB Big","BIRD Elly");
   private static final int ballotCountContest_24 = 26474;
   private static final double difficultyContest_24 = 2.929836210712705;
   private static final String winnerContest_24 = "KRIEG Steve";
 
   // Contest City of Willoughby Mayoral
   private static final String nameContest_25 = "City of Willoughby Mayoral";
-  private static final List<String> choicesContest_25 = List.of("ROZOS Angelo","CAMPBELL Craig","TAYLOR Tanya");
+  private static final List<String> choicesContest_25 = List.of("ROZOS Angelo","CAMPBELL Craig",
+      "TAYLOR Tanya");
   private static final int ballotCountContest_25 = 37942;
   private static final double difficultyContest_25 = 14.990912682734097;
   private static final String winnerContest_25 = "TAYLOR Tanya";
 
   // Contest The Hills Shire Mayoral
   private static final String nameContest_26 = "The Hills Shire Mayoral";
-  private static final List<String> choicesContest_26 = List.of("SHAHAMAT Vida","GANGEMI Peter","ROZYCKI Jerzy (George)","TRACEY Ryan","YAZDANI Ereboni (Alexia)");
+  private static final List<String> choicesContest_26 = List.of("SHAHAMAT Vida","GANGEMI Peter",
+      "ROZYCKI Jerzy (George)","TRACEY Ryan","YAZDANI Ereboni (Alexia)");
   private static final int ballotCountContest_26 = 105384;
   private static final double difficultyContest_26 = 3.6801229221958374;
   private static final String winnerContest_26 = "GANGEMI Peter";
 
   // Contest City of Cessnock Mayoral
   private static final String nameContest_27 = "City of Cessnock Mayoral";
-  private static final List<String> choicesContest_27 = List.of("MURRAY Janet","SUVAAL Jay","MOORES John","OLSEN Ian");
+  private static final List<String> choicesContest_27 = List.of("MURRAY Janet","SUVAAL Jay",
+      "MOORES John","OLSEN Ian");
   private static final int ballotCountContest_27 = 36497;
   private static final double difficultyContest_27 = 6.466513111268604;
   private static final String winnerContest_27 = "SUVAAL Jay";
 
   // Contest City of Griffith Mayoral
   private static final String nameContest_28 = "City of Griffith Mayoral";
-  private static final List<String> choicesContest_28 = List.of("MERCURI Rina","NAPOLI Anne","ZAPPACOSTA Dino","LA ROCCA Mariacarmina (Carmel)","CURRAN Doug");
+  private static final List<String> choicesContest_28 = List.of("MERCURI Rina","NAPOLI Anne",
+      "ZAPPACOSTA Dino","LA ROCCA Mariacarmina (Carmel)","CURRAN Doug");
   private static final int ballotCountContest_28 = 14179;
   private static final double difficultyContest_28 = 3.9320576816417083;
   private static final String winnerContest_28 = "CURRAN Doug";
 
   // Contest Port Macquarie-Hastings Mayoral
   private static final String nameContest_29 = "Port Macquarie-Hastings Mayoral";
-  private static final List<String> choicesContest_29 = List.of("PINSON Peta","GATES Steven","SHEPPARD Rachel","INTEMANN Lisa","LIPOVAC Nik");
+  private static final List<String> choicesContest_29 = List.of("PINSON Peta","GATES Steven",
+      "SHEPPARD Rachel","INTEMANN Lisa","LIPOVAC Nik");
   private static final int ballotCountContest_29 = 54499;
   private static final double difficultyContest_29 = 2.8524547262640008;
   private static final String winnerContest_29 = "PINSON Peta";
 
   // Contest City of Liverpool Mayoral
   private static final String nameContest_30 = "City of Liverpool Mayoral";
-  private static final List<String> choicesContest_30 = List.of("HAGARTY Nathan","MORSHED Asm","ANDJELKOVIC Milomir (Michael)","HARLE Peter","MANNOUN Ned");
+  private static final List<String> choicesContest_30 = List.of("HAGARTY Nathan","MORSHED Asm",
+      "ANDJELKOVIC Milomir (Michael)","HARLE Peter","MANNOUN Ned");
   private static final int ballotCountContest_30 = 115177;
   private static final double difficultyContest_30 = 45.416798107255524;
   private static final String winnerContest_30 = "MANNOUN Ned";
 
   // Contest Uralla Mayoral
   private static final String nameContest_31 = "Uralla Mayoral";
-  private static final List<String> choicesContest_31 = List.of("BELL Robert","LEDGER Natasha","STRUTT Isabel");
+  private static final List<String> choicesContest_31 = List.of("BELL Robert","LEDGER Natasha",
+      "STRUTT Isabel");
   private static final int ballotCountContest_31 = 3781;
   private static final double difficultyContest_31 = 1.6297413793103448;
   private static final String winnerContest_31 = "BELL Robert";
 
   // Contest Hunter's Hill Mayoral
   private static final String nameContest_32 = "Hunter's Hill Mayoral";
-  private static final List<String> choicesContest_32 = List.of("GUAZZAROTTO David","MILES Zac","QUINN Richard","WILLIAMS Ross");
+  private static final List<String> choicesContest_32 = List.of("GUAZZAROTTO David","MILES Zac",
+      "QUINN Richard","WILLIAMS Ross");
   private static final int ballotCountContest_32 = 8356;
   private static final double difficultyContest_32 = 38.330275229357795;
   private static final String winnerContest_32 = "MILES Zac";
 
   // Contest Burwood Mayoral
   private static final String nameContest_33 = "Burwood Mayoral";
-  private static final List<String> choicesContest_33 = List.of("HULL David","MURRAY Alan","CUTCHER Ned","FAKER John");
+  private static final List<String> choicesContest_33 = List.of("HULL David","MURRAY Alan",
+      "CUTCHER Ned","FAKER John");
   private static final int ballotCountContest_33 = 17797;
   private static final double difficultyContest_33 = 2.5269061479483175;
   private static final String winnerContest_33 = "FAKER John";
 
   /**
-   * Trivial test to see whether the placeholder service throws the expected placeholder exception.
-   * TODO This can be removed when the service is implemented and the other tests are passing.
-   */
-  @Test
-  @Transactional
-  void dummyServiceThrowsException() {
-    GenerateAssertionsRequest firstRequest = new GenerateAssertionsRequest(nameContest_1, ballotCountContest_1,
-        DEFAULT_TIME_LIMIT, choicesContest_1);
-    assertThrows(RaireServiceException.class, () ->
-        generateAssertionsService.generateAssertions(firstRequest)
-    );
-  }
-
-  /**
    * Contest 1.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -340,20 +358,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest1() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_1,
         ballotCountContest_1, DEFAULT_TIME_LIMIT, choicesContest_1);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_1, response.winner);
+    assertEquals(winnerContest_1, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_1);
@@ -364,7 +382,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 2.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -379,20 +396,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest2() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_2,
         ballotCountContest_2, DEFAULT_TIME_LIMIT, choicesContest_2);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_2, response.winner);
+    assertEquals(winnerContest_2, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_2);
@@ -403,7 +420,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 3.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -418,20 +434,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest3() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_3,
         ballotCountContest_3, DEFAULT_TIME_LIMIT, choicesContest_3);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_3, response.winner);
+    assertEquals(winnerContest_3, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_3);
@@ -442,7 +458,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 4.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -457,20 +472,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest4() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_4,
         ballotCountContest_4, DEFAULT_TIME_LIMIT, choicesContest_4);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_4, response.winner);
+    assertEquals(winnerContest_4, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_4);
@@ -481,7 +496,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 5.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -496,20 +510,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest5() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_5,
         ballotCountContest_5, DEFAULT_TIME_LIMIT, choicesContest_5);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_5, response.winner);
+    assertEquals(winnerContest_5, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_5);
@@ -520,7 +534,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 6.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -535,20 +548,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest6() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_6,
         ballotCountContest_6, DEFAULT_TIME_LIMIT, choicesContest_6);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_6, response.winner);
+    assertEquals(winnerContest_6, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_6);
@@ -559,7 +572,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 7.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -574,20 +586,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest7() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_7,
         ballotCountContest_7, DEFAULT_TIME_LIMIT, choicesContest_7);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_7, response.winner);
+    assertEquals(winnerContest_7, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_7);
@@ -598,7 +610,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 8.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -613,20 +624,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest8() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_8,
         ballotCountContest_8, DEFAULT_TIME_LIMIT, choicesContest_8);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_8, response.winner);
+    assertEquals(winnerContest_8, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_8);
@@ -637,7 +648,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 9.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -652,20 +662,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest9() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_9,
         ballotCountContest_9, DEFAULT_TIME_LIMIT, choicesContest_9);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_9, response.winner);
+    assertEquals(winnerContest_9, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_9);
@@ -676,7 +686,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 10.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -691,20 +700,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest10() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_10,
         ballotCountContest_10, DEFAULT_TIME_LIMIT, choicesContest_10);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_10, response.winner);
+    assertEquals(winnerContest_10, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_10);
@@ -715,7 +724,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 11.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -730,20 +738,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest11() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_11,
         ballotCountContest_11, DEFAULT_TIME_LIMIT, choicesContest_11);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_11, response.winner);
+    assertEquals(winnerContest_11, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_11);
@@ -754,7 +762,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 12.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -769,20 +776,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest12() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_12,
         ballotCountContest_12, DEFAULT_TIME_LIMIT, choicesContest_12);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_12, response.winner);
+    assertEquals(winnerContest_12, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_12);
@@ -793,7 +800,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 13.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -808,20 +814,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest13() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_13,
         ballotCountContest_13, DEFAULT_TIME_LIMIT, choicesContest_13);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_13, response.winner);
+    assertEquals(winnerContest_13, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_13);
@@ -832,7 +838,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 14.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -847,20 +852,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest14() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_14,
         ballotCountContest_14, DEFAULT_TIME_LIMIT, choicesContest_14);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_14, response.winner);
+    assertEquals(winnerContest_14, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_14);
@@ -871,7 +876,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 15.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -886,20 +890,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest15() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_15,
         ballotCountContest_15, DEFAULT_TIME_LIMIT, choicesContest_15);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_15, response.winner);
+    assertEquals(winnerContest_15, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_15);
@@ -910,7 +914,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 16.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -925,20 +928,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest16() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_16,
         ballotCountContest_16, DEFAULT_TIME_LIMIT, choicesContest_16);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_16, response.winner);
+    assertEquals(winnerContest_16, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_16);
@@ -949,7 +952,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 17.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -964,20 +966,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest17() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_17,
         ballotCountContest_17, DEFAULT_TIME_LIMIT, choicesContest_17);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_17, response.winner);
+    assertEquals(winnerContest_17, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_17);
@@ -988,7 +990,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 18.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1003,20 +1004,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest18() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_18,
         ballotCountContest_18, DEFAULT_TIME_LIMIT, choicesContest_18);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_18, response.winner);
+    assertEquals(winnerContest_18, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_18);
@@ -1027,7 +1028,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 19.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1042,20 +1042,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest19() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_19,
         ballotCountContest_19, DEFAULT_TIME_LIMIT, choicesContest_19);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_19, response.winner);
+    assertEquals(winnerContest_19, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_19);
@@ -1066,7 +1066,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 20.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1081,20 +1080,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest20() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_20,
         ballotCountContest_20, DEFAULT_TIME_LIMIT, choicesContest_20);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_20, response.winner);
+    assertEquals(winnerContest_20, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_20);
@@ -1105,7 +1104,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 21.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1120,20 +1118,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest21() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_21,
         ballotCountContest_21, DEFAULT_TIME_LIMIT, choicesContest_21);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_21, response.winner);
+    assertEquals(winnerContest_21, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_21);
@@ -1144,7 +1142,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 22.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1159,20 +1156,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest22() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_22,
         ballotCountContest_22, DEFAULT_TIME_LIMIT, choicesContest_22);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_22, response.winner);
+    assertEquals(winnerContest_22, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_22);
@@ -1183,7 +1180,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 23.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1198,20 +1194,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest23() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_23,
         ballotCountContest_23, DEFAULT_TIME_LIMIT, choicesContest_23);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_23, response.winner);
+    assertEquals(winnerContest_23, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_23);
@@ -1222,7 +1218,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 24.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1237,20 +1232,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest24() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_24,
         ballotCountContest_24, DEFAULT_TIME_LIMIT, choicesContest_24);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_24, response.winner);
+    assertEquals(winnerContest_24, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_24);
@@ -1261,7 +1256,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 25.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1276,20 +1270,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest25() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_25,
         ballotCountContest_25, DEFAULT_TIME_LIMIT, choicesContest_25);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_25, response.winner);
+    assertEquals(winnerContest_25, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_25);
@@ -1300,7 +1294,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 26.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1315,20 +1308,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest26() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_26,
         ballotCountContest_26, DEFAULT_TIME_LIMIT, choicesContest_26);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_26, response.winner);
+    assertEquals(winnerContest_26, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_26);
@@ -1339,7 +1332,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 27.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1354,20 +1346,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest27() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_27,
         ballotCountContest_27, DEFAULT_TIME_LIMIT, choicesContest_27);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_27, response.winner);
+    assertEquals(winnerContest_27, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_27);
@@ -1378,7 +1370,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 28.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1393,20 +1384,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest28() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_28,
         ballotCountContest_28, DEFAULT_TIME_LIMIT, choicesContest_28);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_28, response.winner);
+    assertEquals(winnerContest_28, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_28);
@@ -1417,7 +1408,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 29.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1432,20 +1422,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest29() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_29,
         ballotCountContest_29, DEFAULT_TIME_LIMIT, choicesContest_29);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_29, response.winner);
+    assertEquals(winnerContest_29, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_29);
@@ -1456,7 +1446,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 30.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1471,20 +1460,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest30() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_30,
         ballotCountContest_30, DEFAULT_TIME_LIMIT, choicesContest_30);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_30, response.winner);
+    assertEquals(winnerContest_30, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_30);
@@ -1495,7 +1484,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 31.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1510,20 +1498,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest31() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_31,
         ballotCountContest_31, DEFAULT_TIME_LIMIT, choicesContest_31);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_31, response.winner);
+    assertEquals(winnerContest_31, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_31);
@@ -1534,7 +1522,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 32.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1549,20 +1536,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest32() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_32,
         ballotCountContest_32, DEFAULT_TIME_LIMIT, choicesContest_32);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winner.
-    assertEquals(winnerContest_32, response.winner);
+    assertEquals(winnerContest_32, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_32);
@@ -1573,7 +1560,6 @@ public class GenerateAssertionsOnNSWTestCases {
    * Contest 33.
    * Sanity check to make sure that the first vote's first preference has one of the candidate names
    * we expect for that contest.
-   * TODO This test can be removed when the service is implemented and the other tests are passing.
    */
   @Test
   @Transactional
@@ -1588,20 +1574,20 @@ public class GenerateAssertionsOnNSWTestCases {
    * Generate assertions. Check the winner.
    * Then check the difficulty, to ensure it matches what is generated by raire-java directly (which in
    * turn has been tested against raire-rs).
-   * @throws RaireServiceException
+   * @throws RaireServiceException when an error occurs in assertion generation.
    */
   @Test
   @Transactional
-  @Disabled
   public void checkDifficulty_contest33() throws RaireServiceException {
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(nameContest_33,
         ballotCountContest_33, DEFAULT_TIME_LIMIT, choicesContest_33);
 
     // Generate assertions.
-    GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
+    RaireResultOrError response = generateAssertionsService.generateAssertions(request);
+    generateAssertionsService.persistAssertions(response.Ok, request);
 
     // Check winners.
-    assertEquals(winnerContest_33, response.winner);
+    assertEquals(winnerContest_33, request.candidates.get(response.Ok.winner));
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_33);

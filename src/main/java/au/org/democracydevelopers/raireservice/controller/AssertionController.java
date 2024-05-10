@@ -21,6 +21,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.controller;
 
 import au.org.democracydevelopers.raire.RaireSolution;
+import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
@@ -31,6 +32,9 @@ import au.org.democracydevelopers.raireservice.service.RaireServiceException;
 import au.org.democracydevelopers.raireservice.service.GenerateAssertionsService;
 import au.org.democracydevelopers.raireservice.service.GetAssertionsService;
 import org.springframework.http.HttpHeaders;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +59,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/raire")
 public class AssertionController {
 
+  protected static final Logger logger = LoggerFactory.getLogger(AssertionController.class);
+
   private final ContestRepository contestRepository;
 
   private final GenerateAssertionsService generateAssertionsService;
@@ -63,36 +69,64 @@ public class AssertionController {
   private final GetAssertionsCSVService getAssertionsCSVService;
 
   /**
-   * The API endpoint for generating assertions, by contest name, and returning the IRV winner.
+   * The API endpoint for generating assertions, by contest name, and returning the IRV winner as
+   * part of a GenerateAssertionsResponse. The raire-java API will be accessed to generate
+   * assertions for the contest. If this is successful, these assertions will be stored in the
+   * database.
    * @param request a GenerateAssertionsRequest, specifying an IRV contest name for which to generate
    *                the assertions.
    * @return the winner (in the case of success) or an error. The winner, together with the contest,
-   * is a GenerateAssertionsResponse. TODO the String is just a placeholder for now.
-   * In the case of success, it also stores the assertions that were derived for the specified contest
-   * in the database.
+   * is a GenerateAssertionsResponse.
    * @throws RequestValidationException which is handled by ControllerExceptionHandler.
    * This tests for invalid requests, such as non-existent, null, or non-IRV contest names.
-   * Other exceptions that are specific to assertion generation are caught and translated into the
-   * appropriate http error. TODO add these when assertion generation is implemented.
    * @throws RaireServiceException for other errors that are specific to assertion generation, such
    * as tied winners or timeouts. These are caught by ControllerExceptionHandler and translated into the
    * appropriate http error.
    */
   @PostMapping(path = "/generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<GenerateAssertionsResponse> serve(@RequestBody GenerateAssertionsRequest request)
-      throws RequestValidationException, RaireServiceException {
+      throws RequestValidationException, RaireServiceException
+  {
       request.Validate(contestRepository);
-      GenerateAssertionsResponse response = generateAssertionsService.generateAssertions(request);
-      return new ResponseEntity<>(response, HttpStatus.OK);
+
+      // Call raire-java to generate assertions, and check if it was able to do so successfully.
+      RaireResultOrError solution = generateAssertionsService.generateAssertions(request);
+      if (solution.Ok != null) {
+        // Generation of assertions was successful, now save them to the database.
+        generateAssertionsService.persistAssertions(solution.Ok, request);
+
+        // Form and return request response.
+        GenerateAssertionsResponse response = new GenerateAssertionsResponse(request.contestName,
+            request.candidates.get(solution.Ok.winner));
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+      }
+
+      // raire-java was not able to generate assertions successfully.
+      if(solution.Err == null){
+        final String msg = "An error occurred in raire-java, yet no error information was returned.";
+        logger.error("AssertionController::serve[GenerateAssertionsRequest] " + msg);
+        throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
+      }
+
+      // raire-java returned error information, form and throw an exception using that data. (Note:
+      // we need to create the exception first to get a human readable message to log).
+      RaireServiceException ex = new RaireServiceException(solution.Err, request.candidates);
+      final String msg = "An error occurred in raire-java: " + ex.getMessage();
+      logger.error("AssertionController::serve[GenerateAssertionsRequest] " + msg);
+      throw ex;
   }
 
 
   /**
    * The API endpoint for finding and returning assertions, by contest name. This endpoint returns
-   * assertions in the form of a JSON Visualiser Report.
+   * assertions in the form of a JSON Visualiser Report. Thrown exceptions are handled by
+   * ControllerExceptionHandler.
    * @param request a GetAssertionsRequest, specifying an IRV contest name for which to retrieve the
    *        assertions.
    * @return the assertions, as JSON (in the case of success) or an error.
+   * @throws RequestValidationException for invalid requests, such as non-existent, null, or
+   *         non-IRV contest names.
    * @throws RequestValidationException for invalid requests, such as non-existent, null, or non-IRV
    *         contest names.
    * @throws RaireServiceException if the request is valid but assertion retrieval fails, for example

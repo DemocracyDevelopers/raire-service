@@ -49,21 +49,6 @@ public class GetAssertionsService {
 
   private final static Logger logger = LoggerFactory.getLogger(GetAssertionsService.class);
 
-  /**
-   * Metadata field name for the contest's candidates.
-   */
-  private final static String CANDIDATES = "candidates";
-
-  /**
-   * Metadata field name for the contest's risk limit.
-   */
-  private final static String RISK_LIMIT = "risk_limit";
-
-  /**
-   * Metadata field name for the contest's name.
-   */
-  private final static String CONTEST = "contest";
-
   private final AssertionRepository assertionRepository;
 
   /**
@@ -97,10 +82,10 @@ public class GetAssertionsService {
       }
 
       // Create contest metadata map, supplied as input when creating a RaireResult.
-      Map<String, Object> metadata = new HashMap<String, Object>();
-      metadata.put(CANDIDATES, request.candidates);
-      metadata.put(RISK_LIMIT, request.riskLimit);
-      metadata.put(CONTEST, request.contestName);
+      Map<String, Object> metadata = new HashMap<>();
+      metadata.put(Metadata.CANDIDATES, request.candidates);
+      metadata.put(Metadata.RISK_LIMIT, request.riskLimit);
+      metadata.put(Metadata.CONTEST, request.contestName);
 
       // Translate the assertions extracted from the database into AssertionAndDifficulty objects,
       // keeping track of the maximum difficulty and minimum margin.

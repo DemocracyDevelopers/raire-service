@@ -22,14 +22,11 @@ package au.org.democracydevelopers.raireservice.persistence.repository;
 
 
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
-import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
-import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +36,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 /**
  * Tests to validate the behaviour of Assertion retrieval and storage. Assertions and other
@@ -56,7 +49,7 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 @ActiveProfiles("test-containers")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class AssertionRepositoryTests {
 
   @Autowired
@@ -153,74 +146,6 @@ public class AssertionRepositoryTests {
       "\"currentRisk\":1.00}";
 
   /**
-   * Test assertion: CC NEB A in "Larger Contest".
-   */
-  private final static String CCNEBA = "{\"id\":8,\"version\":0,\"contestName\":" +
-      "\"Larger Contest\",\"winner\":\"CC\",\"loser\":\"A\"," +
-      "\"margin\":25,\"difficulty\":5.0,\"assumedContinuing\":[],\"dilutedMargin\":0.0125," +
-      "\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0,\"optimisticSamplesToAudit\":0," +
-      "\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0," +
-      "\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
-
-  /**
-   * Test assertion: CC NEN B in "Larger Contest".
-   */
-  private final static String CCNENB = "{\"id\":9,\"version\":0,\"contestName\":" +
-      "\"Larger Contest\",\"winner\":\"CC\",\"loser\":\"B\"," +
-      "\"margin\":100,\"difficulty\":2.0,\"assumedContinuing\":[\"A\",\"B\",\"CC\"]," +
-      "\"dilutedMargin\":0.05,\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0," +
-      "\"optimisticSamplesToAudit\":0,\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0," +
-      "\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
-
-  /**
-   * Test assertion: Alice NEB Bob in the contest "One NEB Assertion Contest" when the audit is
-   * in progress and some discrepancies have been found.
-   */
-  private final static String aliceNEBBobInProgress = "{\"id\":1,\"version\":0,\"contestName\":" +
-      "\"One NEB Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Bob\",\"margin\":320," +
-      "\"difficulty\":1.1,\"assumedContinuing\":[],\"dilutedMargin\":0.32,\"cvrDiscrepancy\":{}," +
-      "\"estimatedSamplesToAudit\":111,\"optimisticSamplesToAudit\":111,\"twoVoteUnderCount\":0," +
-      "\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0," +
-      "\"currentRisk\":0.50}";
-
-  /**
-   * Test assertion: Alice NEN Charlie assuming Alice, Charlie, Diego and Bob are continuing,
-   * for the contest "One NEN Assertion Contest" when the audit is in progress and some
-   * discrepancies have been found.
-   */
-  private final static String aliceNENCharlieInProgress = "{\"id\":2,\"version\":0,\"contestName\":" +
-      "\"One NEN Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Charlie\",\"margin\":240," +
-      "\"difficulty\":3.01,\"assumedContinuing\":[\"Alice\",\"Charlie\",\"Diego\",\"Bob\"]," +
-      "\"dilutedMargin\":0.12,\"cvrDiscrepancy\":{\"13\":1,\"14\":0,\"15\":0}," +
-      "\"estimatedSamplesToAudit\":245,\"optimisticSamplesToAudit\":201,\"twoVoteUnderCount\":0," +
-      "\"oneVoteUnderCount\":0,\"oneVoteOverCount\":1,\"twoVoteOverCount\":0,\"otherCount\":2," +
-      "\"currentRisk\":0.20}";
-
-  /**
-   * Test assertion: Amanda NEB Liesl in the contest "One NEN NEB Assertion Contest" when the audit
-   * is in progress and some discrepancies have been found.
-   */
-  private final static String amandaNEBLieslInProgress = "{\"id\":3,\"version\":0,\"contestName\":" +
-      "\"One NEN NEB Assertion Contest\",\"winner\":\"Amanda\",\"loser\":\"Liesl\",\"margin\":112,"+
-      "\"difficulty\":0.1,\"assumedContinuing\":[],\"dilutedMargin\":0.1," +
-      "\"cvrDiscrepancy\":{\"13\":-1,\"14\":2,\"15\":2},\"estimatedSamplesToAudit\":27," +
-      "\"optimisticSamplesToAudit\":20,\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":1," +
-      "\"oneVoteOverCount\":0,\"twoVoteOverCount\":2,\"otherCount\":0,\"currentRisk\":0.08}";
-
-  /**
-   * Test assertion: Amanda NEN Wendell assuming Liesl, Wendell and Amanda are continuing,
-   * for the contest "One NEN NEB Assertion Contest" when the audit is in progress and some
-   * discrepancies have been found.
-   */
-  private final static String amandaNENWendellInProgress = "{\"id\":4,\"version\":0," +
-      "\"contestName\":\"One NEN NEB Assertion Contest\",\"winner\":\"Amanda\"," +
-      "\"loser\":\"Wendell\",\"margin\":560,\"difficulty\":3.17," +
-      "\"assumedContinuing\":[\"Liesl\",\"Wendell\",\"Amanda\"],\"dilutedMargin\":0.5," +
-      "\"cvrDiscrepancy\":{\"13\":1,\"14\":1,\"15\":-2},\"estimatedSamplesToAudit\":300," +
-      "\"optimisticSamplesToAudit\":200,\"twoVoteUnderCount\":1,\"oneVoteUnderCount\":0," +
-      "\"oneVoteOverCount\":2,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":0.70}";
-
-  /**
    * Retrieval of assertions for an existing contest with no associated assertions will return an
    * empty list.
    */
@@ -261,236 +186,6 @@ public class AssertionRepositoryTests {
     assertEquals(0, records);
   }
 
-  /**
-   * Retrieve assertions for a contest that has one NEB assertion.
-   */
-  @Test
-  @Transactional
-  @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
-  void retrieveAssertionsExistentContestOneNEBAssertion(){
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
-    assertEquals(1, retrieved.size());
-
-    final Assertion r = retrieved.get(0);
-    assertEquals(NEBAssertion.class, r.getClass());
-    assertEquals(aliceNEBBob, GSON.toJson(r));
-  }
-
-  /**
-   * Retrieve assertions for a contest that has one NEB assertion (audit in progress with no
-   * discrepancies observed).
-   */
-  @Test
-  @Transactional
-  @Sql(scripts = {"/simple_assertions_in_progress.sql"}, executionPhase = BEFORE_TEST_METHOD)
-  void retrieveAssertionsOneNEBAssertionInProgress(){
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
-    assertEquals(1, retrieved.size());
-
-    final Assertion r = retrieved.get(0);
-    assertEquals(NEBAssertion.class, r.getClass());
-    assertEquals(aliceNEBBobInProgress, GSON.toJson(r));
-  }
-
-  /**
-   * Test NEBAssertion::convert().
-   */
-  @Test
-  @Transactional
-  @Sql(scripts = {"/simple_assertions_in_progress.sql"}, executionPhase = BEFORE_TEST_METHOD)
-  void retrieveAssertionsOneNEBAssertionConvert(){
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
-    assertEquals(1, retrieved.size());
-
-    final Assertion r = retrieved.get(0);
-    AssertionAndDifficulty aad = r.convert(List.of("Alice", "Bob"));
-    assertEquals(1.1, aad.difficulty);
-    assertEquals(320, aad.margin);
-    assertTrue(aad.assertion.isNEB());
-    assertEquals(0, ((NotEliminatedBefore)aad.assertion).winner);
-    assertEquals(1, ((NotEliminatedBefore)aad.assertion).loser);
-
-    // Check that current risk is 0.5
-    assertEquals(new BigDecimal("0.50"), aad.status.get(Assertion.STATUS_RISK));
-  }
-
-  /**
-   * Retrieve assertions for a contest that has one NEN assertion.
-   */
-  @Test
-  @Transactional
-  @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
-  void retrieveAssertionsExistentContestOneNENAssertion(){
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEN Assertion Contest");
-    assertEquals(1, retrieved.size());
-
-    final Assertion r = retrieved.get(0);
-    assertEquals(NENAssertion.class, r.getClass());
-    assertEquals(aliceNENCharlie, GSON.toJson(r));
-  }
-
-  /**
-   * Test NENAssertion::convert().
-   */
-  @Test
-  @Transactional
-  @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
-  void retrieveAssertionsExistentContestOneNENAssertionConvert(){
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEN Assertion Contest");
-    assertEquals(1, retrieved.size());
-
-    final Assertion r = retrieved.get(0);
-    AssertionAndDifficulty aad = r.convert(List.of("Alice", "Charlie", "Diego", "Bob"));
-    assertEquals(3.01, aad.difficulty);
-    assertEquals(240, aad.margin);
-    assertFalse(aad.assertion.isNEB());
-    assertEquals(0, ((NotEliminatedNext)aad.assertion).winner);
-    assertEquals(1, ((NotEliminatedNext)aad.assertion).loser);
-
-    int[] continuing = {0, 1, 2, 3};
-    assertArrayEquals(continuing, ((NotEliminatedNext)aad.assertion).continuing);
-
-    // Check that current risk is 1.00
-    assertEquals(new BigDecimal("1.00"), aad.status.get(Assertion.STATUS_RISK));
-  }
-
-  /**
-   * Retrieve assertions for a contest that has one NEN assertion (audit in progress with some
-   * discrepancies observed).
-   */
-  @Test
-  @Transactional
-  @Sql(scripts = {"/simple_assertions_in_progress.sql"}, executionPhase = BEFORE_TEST_METHOD)
-  void retrieveAssertionsOneNENAssertionInProgress(){
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEN Assertion Contest");
-    assertEquals(1, retrieved.size());
-
-    final Assertion r = retrieved.get(0);
-    assertEquals(NENAssertion.class, r.getClass());
-    assertEquals(aliceNENCharlieInProgress, GSON.toJson(r));
-  }
-
-  /**
-   * Retrieve assertions for a contest that has one NEN and one NEB assertion.
-   */
-  @Test
-  @Transactional
-  @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
-  void retrieveAssertionsExistentContestOneNENOneNEBAssertion(){
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEN NEB Assertion Contest");
-    assertEquals(2, retrieved.size());
-
-    final Assertion r1 = retrieved.get(0);
-    assertEquals(NEBAssertion.class, r1.getClass());
-    assertEquals(amandaNEBLiesl, GSON.toJson(r1));
-
-    final Assertion r2 = retrieved.get(1);
-    assertEquals(NENAssertion.class, r2.getClass());
-    assertEquals(amandaNENWendell, GSON.toJson(r2));
-  }
-
-  /**
-   * Retrieve assertions for a contest that has one NEN and one NEB assertion (audit in progress
-   * with some discrepancies observed).
-   */
-  @Test
-  @Transactional
-  @Sql(scripts = {"/simple_assertions_in_progress.sql"}, executionPhase = BEFORE_TEST_METHOD)
-  void retrieveAssertionsOneNENOneNEBAssertionInProgress(){
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEN NEB Assertion Contest");
-    assertEquals(2, retrieved.size());
-
-    final Assertion r1 = retrieved.get(0);
-    assertEquals(NEBAssertion.class, r1.getClass());
-    assertEquals(amandaNEBLieslInProgress, GSON.toJson(r1));
-
-    final Assertion r2 = retrieved.get(1);
-    assertEquals(NENAssertion.class, r2.getClass());
-    assertEquals(amandaNENWendellInProgress, GSON.toJson(r2));
-  }
-
-  /**
-   * Retrieve assertions for a multi-county contest.
-   */
-  @Test
-  @Transactional
-  @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
-  void retrieveAssertionsMultiCountyContest(){
-    List<Assertion> retrieved = assertionRepository.findByContestName("Multi-County Contest 1");
-    assertEquals(3, retrieved.size());
-
-    final Assertion r1 = retrieved.get(0);
-    assertEquals(NEBAssertion.class, r1.getClass());
-    assertEquals(charlieNEBAlice, GSON.toJson(r1));
-
-    final Assertion r2 = retrieved.get(1);
-    assertEquals(NEBAssertion.class, r2.getClass());
-    assertEquals(aliceNEBAl, GSON.toJson(r2));
-
-    final Assertion r3 = retrieved.get(2);
-    assertEquals(NENAssertion.class, r3.getClass());
-    assertEquals(aliceNENwest, GSON.toJson(r3));
-  }
-
-  /**
-   * Deletion of assertions for an existent contest with one NEB assertion will remove one record.
-   * The contest will then have no associated assertions in the database.
-   */
-  @Test
-  @Transactional
-  @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
-  void deleteAssertionsExistentContestOneNEBAssertion(){
-    long records = assertionRepository.deleteByContestName("One NEB Assertion Contest");
-    assertEquals(1, records);
-
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
-    assertEquals(0, retrieved.size());
-  }
-
-  /**
-   * Deletion of assertions for an existent contest with one NEN assertion will remove one record.
-   * The contest will then have no associated assertions in the database.
-   */
-  @Test
-  @Transactional
-  @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
-  void deleteAssertionsExistentContestOneNENAssertion(){
-    long records = assertionRepository.deleteByContestName("One NEN Assertion Contest");
-    assertEquals(1, records);
-
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEN Assertion Contest");
-    assertEquals(0, retrieved.size());
-  }
-
-  /**
-   * Deletion of assertions for an existent contest with one NEN and one NEB assertion will
-   * remove two record. The contest will then have no associated assertions in the database.
-   */
-  @Test
-  @Transactional
-  @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
-  void deleteAssertionsExistentContestOneNENOneNEBAssertion(){
-    long records = assertionRepository.deleteByContestName("One NEN NEB Assertion Contest");
-    assertEquals(2, records);
-
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEN NEB Assertion Contest");
-    assertEquals(0, retrieved.size());
-  }
-
-  /**
-   * Deletion of assertions for an existent multi-county with three assertions.
-   * The contest will then have no associated assertions in the database.
-   */
-  @Test
-  @Transactional
-  @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
-  void deleteAssertionsMultiCountyContest(){
-    long records = assertionRepository.deleteByContestName("Multi-County Contest 1");
-    assertEquals(3, records);
-
-    List<Assertion> retrieved = assertionRepository.findByContestName("Multi-County Contest 1");
-    assertEquals(0, retrieved.size());
-  }
 
 
   /**
@@ -568,41 +263,6 @@ public class AssertionRepositoryTests {
     assertEquals(aliceNENwest, GSON.toJson(r3));
   }
 
-  /**
-   * Translation and saving of assertions when the database already contains some
-   * assertions. This test is designed to test the incrementing of IDs. The database
-   * will have 7 assertions pre-populated from simple_assertions.sql.
-   */
-  @Test
-  @Transactional
-  @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
-  void testAutoIncrementOfIDs(){
-    String[] candidates = {"A", "B", "CC"};
-    int[] continuing = {0,1,2};
-    AssertionAndDifficulty aadCCNEBA = new AssertionAndDifficulty(
-        new au.org.democracydevelopers.raire.assertions.NotEliminatedBefore(2, 0),
-        5, 25);
-
-    AssertionAndDifficulty aadCCNENB = new AssertionAndDifficulty(
-        new au.org.democracydevelopers.raire.assertions.NotEliminatedNext(2, 1,
-            continuing),2, 100);
-
-    AssertionAndDifficulty[] assertions = {aadCCNEBA, aadCCNENB};
-
-    assertionRepository.translateAndSaveAssertions("Larger Contest",
-        2000, candidates, assertions);
-
-    List<Assertion> retrieved = assertionRepository.findByContestName("Larger Contest");
-    assertEquals(2, retrieved.size());
-
-    Assertion r1 = retrieved.get(0);
-    assertEquals(NEBAssertion.class, r1.getClass());
-    assertEquals(CCNEBA, GSON.toJson(r1));
-
-    Assertion r2 = retrieved.get(1);
-    assertEquals(NENAssertion.class, r2.getClass());
-    assertEquals(CCNENB, GSON.toJson(r2));
-  }
 
   /**
    * Translate and save Alice NEB Bob in contest "One NEB Assertion Contest".
