@@ -25,10 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
+import au.org.democracydevelopers.raireservice.testUtils;
 import java.math.BigDecimal;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -47,6 +50,8 @@ import org.springframework.test.context.ActiveProfiles;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class GetAssertionsRequestTests {
 
+  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsRequestTests.class);
+
   @Autowired
   ContestRepository contestRepository;
 
@@ -55,6 +60,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void validRequestForIRVContestIsValid() {
+    testUtils.log(logger, "validRequestForIRVContestIsValid");
     GetAssertionsRequest validRequest = new GetAssertionsRequest("Ballina Mayoral",
         List.of("Alice"), BigDecimal.valueOf(0.03));
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
@@ -65,6 +71,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void requestForNonexistentContestIsInvalid() {
+    testUtils.log(logger, "requestForNonexistentContestIsInvalid");
     GetAssertionsRequest invalidRequest
         = new GetAssertionsRequest("NonExistentContest", List.of("Alice"),
         BigDecimal.valueOf(0.03));
@@ -79,6 +86,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void validRequestForPluralityContestIsInvalid() {
+    testUtils.log(logger, "validRequestForPluralityContestIsInvalid");
     String pluralityContestName = "Valid Plurality Contest";
     GetAssertionsRequest request
         = new GetAssertionsRequest(pluralityContestName, List.of("Alice"), BigDecimal.valueOf(0.03));
@@ -92,6 +100,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void validRequestForMixedContestTypesIsInvalid() {
+    testUtils.log(logger, "validRequestForMixedContestTypesIsInvalid");
     String mixedContestName = "Invalid Mixed Contest";
     GetAssertionsRequest request
         = new GetAssertionsRequest(mixedContestName, List.of("Alice"), BigDecimal.valueOf(0.03));
@@ -104,6 +113,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void requestWithNullNameIsInvalid() {
+    testUtils.log(logger, "requestWithNullNameIsInvalid");
     GetAssertionsRequest request
         = new GetAssertionsRequest(null, List.of("Alice"), BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
@@ -115,6 +125,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void requestWithEmptyNameIsInvalid() {
+    testUtils.log(logger, "requestWithEmptyNameIsInvalid");
     GetAssertionsRequest request
         = new GetAssertionsRequest("", List.of("Alice"), BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
@@ -126,6 +137,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void requestWithWhitespaceNameIsInvalid() {
+    testUtils.log(logger, "requestWithWhitespaceNameIsInvalid");
     GetAssertionsRequest request
         = new GetAssertionsRequest("   ", List.of("Alice"), BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
@@ -137,6 +149,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void requestWithNullCandidateListIsInvalid() {
+    testUtils.log(logger, "requestWithNullCandidateListIsInvalid");
     GetAssertionsRequest request
         = new GetAssertionsRequest("IRVContestName", null, BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
@@ -148,6 +161,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void requestWithEmptyCandidateListIsInvalid() {
+    testUtils.log(logger, "requestWithEmptyCandidateListIsInvalid");
     GetAssertionsRequest request
         = new GetAssertionsRequest("IRVContestName",  List.of(), BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
@@ -159,6 +173,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void requestWithWhitespaceCandidateNameIsInvalid() {
+    testUtils.log(logger, "requestWithWhitespaceCandidateNameIsInvalid");
     GetAssertionsRequest request
         = new GetAssertionsRequest("IRVContest", List.of("Alice","    "), BigDecimal.valueOf(0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
@@ -170,6 +185,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void requestWithNullRiskLimitIsInvalid() {
+    testUtils.log(logger, "requestWithNullRiskLimitIsInvalid");
     GetAssertionsRequest request
         = new GetAssertionsRequest("Ballina Mayoral", List.of("Alice"), null);
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
@@ -181,6 +197,7 @@ public class GetAssertionsRequestTests {
    */
   @Test
   public void requestWithNegativeRiskLimitIsInvalid() {
+    testUtils.log(logger, "requestWithNegativeRiskLimitIsInvalid");
     GetAssertionsRequest request
         = new GetAssertionsRequest("Ballina Mayoral", List.of("Alice"), BigDecimal.valueOf(-0.03));
     Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));

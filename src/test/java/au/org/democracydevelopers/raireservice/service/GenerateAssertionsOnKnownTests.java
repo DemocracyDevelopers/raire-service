@@ -42,11 +42,14 @@ import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -78,6 +81,8 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GenerateAssertionsOnKnownTests {
+
+  private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsOnKnownTests.class);
 
   @Autowired
   AssertionRepository assertionRepository;
@@ -123,6 +128,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void NEBassertionRetrievalWorks() {
+    testUtils.log(logger, "NEBassertionRetrievalWorks");
     Assertion assertion = assertionRepository.findByContestName(oneNEBAssertionContest).getFirst();
     assertInstanceOf(NEBAssertion.class, assertion);
     assertTrue(correctDBAssertionData(320, 0.32, 1.1, "Alice",
@@ -136,6 +142,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void NENassertionRetrievalWorks() {
+    testUtils.log(logger, "NENassertionRetrievalWorks");
     Assertion assertion = assertionRepository.findByContestName(oneNENAssertionContest).getFirst();
 
     assertTrue(correctDBAssertionData(20, 0.4, 2.5, "Alice",
@@ -152,6 +159,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void tiedWinnersThrowsTiedWinnersError() throws RaireServiceException {
+    testUtils.log(logger, "tiedWinnersThrowsTiedWinnersError");
     RaireResultOrError result = generateAssertionsService.generateAssertions(tiedWinnersRequest);
 
     assertNull(result.Ok);
@@ -172,6 +180,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void testGuideToRaireExample1() throws RaireServiceException {
+    testUtils.log(logger, "testGuideToRaireExample1");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample1,
         27, 5, Arrays.stream(aliceBobChuanDiego).toList());
 
@@ -204,6 +213,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void testGuideToRaireExample2() throws RaireServiceException {
+    testUtils.log(logger, "testGuideToRaireExample2");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample2,
         41, 5, Arrays.stream(aliceChuanBob).toList());
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
@@ -234,6 +244,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   public void simpleContestSingleCounty() throws RaireServiceException {
+    testUtils.log(logger, "simpleContestSingleCounty");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         5, 5, Arrays.stream(aliceChuanBob).toList());
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
@@ -272,6 +283,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   public void simpleContestCrossCounty() throws RaireServiceException {
+    testUtils.log(logger, "simpleContestCrossCounty");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(crossCountySimpleContest,
         5, 5, Arrays.stream(aliceChuanBob).toList());
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
@@ -316,6 +328,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   public void simpleContestSingleCountyDoubleBallots() throws RaireServiceException {
+    testUtils.log(logger, "simpleContestSingleCountyDoubleBallots");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         10, 5, Arrays.stream(aliceChuanBob).toList());
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
@@ -353,6 +366,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   public void simpleContestSingleCountyInsufficientBallotsError() {
+    testUtils.log(logger, "simpleContestSingleCountyInsufficientBallotsError");
     GenerateAssertionsRequest notEnoughBallotsRequest = new GenerateAssertionsRequest(simpleContest,
         2, 5, Arrays.stream(aliceChuanBob).toList());
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
@@ -370,6 +384,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   public void WrongCandidatesThrowsException() {
+    testUtils.log(logger, "WrongCandidatesThrowsException");
     String[] wrongCandidates = {"Alicia", "Chuan", "Boba"};
     GenerateAssertionsRequest wrongCandidatesRequest = new GenerateAssertionsRequest(simpleContest,
         5, 5, Arrays.stream(wrongCandidates).toList());
@@ -386,6 +401,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void testPersistWithNegativeUniverseSize(){
+    testUtils.log(logger, "testPersistWithNegativeUniverseSize");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         -1, 5, Arrays.stream(aliceChuanBob).toList());
 
@@ -408,6 +424,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void testPersistWithZeroUniverseSize(){
+    testUtils.log(logger, "testPersistWithZeroUniverseSize");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         0, 5, Arrays.stream(aliceChuanBob).toList());
 
@@ -430,6 +447,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void testPersistWithNegativeMargin(){
+    testUtils.log(logger, "testPersistWithNegativeMargin");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         100, 5, Arrays.stream(aliceChuanBob).toList());
 
@@ -452,6 +470,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void testPersistWithTooHighMargin(){
+    testUtils.log(logger, "testPersistWithTooHighMargin");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         100, 5, Arrays.stream(aliceChuanBob).toList());
 
@@ -474,6 +493,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void testPersistWithAssertionSameWinnerAndLoser(){
+    testUtils.log(logger, "testPersistWithAssertionSameWinnerAndLoser");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         100, 5, Arrays.stream(aliceChuanBob).toList());
 
@@ -497,6 +517,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void testPersistWithAssertionWinnerNotContinuing(){
+    testUtils.log(logger, "testPersistWithAssertionWinnerNotContinuing");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         100, 5, Arrays.stream(aliceChuanBob).toList());
 
@@ -520,6 +541,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void testPersistWithAssertionLoserNotContinuing(){
+    testUtils.log(logger, "testPersistWithAssertionLoserNotContinuing");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         100, 5, Arrays.stream(aliceChuanBob).toList());
 
@@ -543,6 +565,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void testPersistWithAssertionWinnerOutOfBounds(){
+    testUtils.log(logger, "testPersistWithAssertionWinnerOutOfBounds");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         100, 5, Arrays.stream(aliceChuanBob).toList());
 
@@ -566,6 +589,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void testPersistWithAssertionLoserOutOfBounds(){
+    testUtils.log(logger, "testPersistWithAssertionLoserOutOfBounds");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         100, 5, Arrays.stream(aliceChuanBob).toList());
 
@@ -624,6 +648,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void replaceOneAssertion() throws RaireServiceException {
+    testUtils.log(logger, "replaceOneAssertion");
     // Test replacement of assertions generated by raire-java.
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(oneNEBAssertionContest,
         41, 5, Arrays.stream(aliceChuanBob).toList());
@@ -644,6 +669,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void replaceTwoAssertions() throws RaireServiceException {
+    testUtils.log(logger, "replaceTwoAssertions");
     // Test replacement of assertions generated by raire-java.
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(NEBNENAssertionContest,
         41, 5, Arrays.stream(aliceChuanBob).toList());
@@ -664,6 +690,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void replaceLessAssertions() throws RaireServiceException {
+    testUtils.log(logger, "replaceLessAssertions");
     // Test replacement of assertions generated by raire-java.
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(ThreeAssertionContest,
         41, 5, Arrays.stream(aliceChuanBob).toList());
