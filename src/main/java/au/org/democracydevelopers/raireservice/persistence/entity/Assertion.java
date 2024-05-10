@@ -217,7 +217,7 @@ public abstract class Assertion {
       long universeSize, double difficulty, List<String> assumedContinuing)
       throws IllegalArgumentException
   {
-    final String prefix = "[Assertion:constructor]";
+    final String prefix = "[all args constructor]";
     logger.debug(String.format("%s Parameters: contest name %s; winner %s; loser %s; " +
         "margin %d; universe size %d; difficulty %f; assumed continuing %s.", prefix,
         contestName, winner, loser, margin, universeSize, difficulty, assumedContinuing));
@@ -236,7 +236,8 @@ public abstract class Assertion {
 
     if(margin < 0 || margin > universeSize){
       String msg = String.format("%s An assertion must have a non-negative margin that is " +
-          "less than universe size (margin of %d provided with universe size %d).", prefix,
+          "less than universe size (margin of %d provided with universe size %d). " +
+          "Throwing an IllegalArgumentException.", prefix,
           margin, universeSize);
       logger.error(msg);
       throw new IllegalArgumentException(msg);
@@ -272,4 +273,8 @@ public abstract class Assertion {
   public abstract AssertionAndDifficulty convert(List<String> candidates)
       throws IllegalArgumentException;
 
+  /**
+   * Return a description of the Assertion in a human-readable format.
+   */
+  public abstract String getDescription();
 }

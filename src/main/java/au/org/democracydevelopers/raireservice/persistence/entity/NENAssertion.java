@@ -77,8 +77,17 @@ public class NENAssertion extends Assertion {
     super(contestName, candidates[nen.winner], candidates[nen.loser], margin, universeSize,
         difficulty, Arrays.stream(nen.continuing).mapToObj(i -> candidates[i]).toList());
 
+    final String prefix = "[all args constructor]";
+    logger.debug(String.format("%s Constructed NEN assertion with winner (%d) and loser (%d) " +
+            "indices with respect to candidate list %s: %s. " +
+            "Parameters: contest name %s; margin %d; universe size %d; and difficulty %f.", prefix,
+            nen.winner, nen.loser, Arrays.toString(candidates), this.getDescription(),
+            contestName, margin, universeSize, difficulty));
+
     if(!assumedContinuing.contains(winner) || !assumedContinuing.contains(loser)){
-      String msg = "The winner and loser of an assertion must also be continuing candidates.";
+      String msg = String.format("%s The winner (%s) and loser (%s) of an NEN assertion must " +
+              "also be continuing candidates. Continuing list: %s. " +
+              "Throwing an IllegalArgumentException.", prefix, winner, loser, assumedContinuing);
       logger.error(msg);
       throw new IllegalArgumentException(msg);
     }
@@ -88,22 +97,40 @@ public class NENAssertion extends Assertion {
    * {@inheritDoc}
    */
   public AssertionAndDifficulty convert(List<String> candidates) throws IllegalArgumentException {
+
+    final String prefix = "[convert]";
+    logger.debug(String.format("%s Constructing a raire-java AssertionAndDifficulty for the " +
+        "assertion %s with candidate list parameter %s.", prefix, this.getDescription(), candidates));
+
     int w = candidates.indexOf(winner);
     int l = candidates.indexOf(loser);
     int[] continuing =  assumedContinuing.stream().mapToInt(candidates::indexOf).toArray();
+
+    logger.debug(String.format("%s Winner index %d, Loser index %d, assumed continuing %s",
+        prefix, w, l, Arrays.toString(continuing)));
 
     // Check for validity of the assertion with respect to the given list of candidate names
     if (w != -1 && l != -1 && Arrays.stream(continuing).noneMatch(c -> c == -1)) {
       Map<String,Object> status = new HashMap<>();
       status.put(Metadata.STATUS_RISK, currentRisk);
 
+      logger.debug(String.format("%s Constructing AssertionAndDifficulty, current risk %f.",
+          prefix, currentRisk));
       return new AssertionAndDifficulty(new NotEliminatedNext(w, l, continuing), difficulty,
           margin, status);
     }
     else{
-      final String msg = "Candidate list is inconsistent with assertion.";
-      logger.error("NENAssertion::convert " + msg);
+      final String msg = String.format("%s Candidate list provided as parameter is inconsistent " +
+          "with assertion (winner or loser or some continuing candidate not present).", prefix);
       throw new IllegalArgumentException(msg);
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getDescription(){
+    return String.format("%s NEN %s, assuming candidates %s are continuing, with diluted margin %f",
+        winner, loser, assumedContinuing, dilutedMargin);
   }
 }
