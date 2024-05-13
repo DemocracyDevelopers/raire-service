@@ -8,6 +8,6 @@ spring:
       ddl-auto: none
   sql:
     init:
-      data-locations: classpath:dataload_speedups.sql, classpath:NSW2021Data/*.sql, classpath:undo_dataload_speedups.sql
+      data-locations: classpath:NSW2021Data/*.sql
 test-strategy:
-  run-nsw-tests: false    # change to true if you want to run the NSW-data-loading tests.
+  run-nsw-tests: true    # change to true if you want to run the NSW-data-loading tests.
