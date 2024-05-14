@@ -95,4 +95,12 @@ public class NEBAssertion extends Assertion {
     }
   }
 
+  /**
+   * Print the assertion type. Used for CSV file output.
+   * @return The string "NEB"
+   */
+  @Override
+  public String printAssertionType() {
+    return "NEB";
+  }
 }

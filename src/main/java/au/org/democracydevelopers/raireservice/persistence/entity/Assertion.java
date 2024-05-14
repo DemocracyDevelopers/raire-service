@@ -20,13 +20,18 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
+import static au.org.democracydevelopers.raireservice.persistence.converters.CSVUtils.escapeThenJoin;
+
+import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import jakarta.persistence.*;
 import java.util.Map;
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.ReadOnlyProperty;
@@ -372,4 +377,38 @@ public abstract class Assertion {
   public abstract AssertionAndDifficulty convert(List<String> candidates)
       throws IllegalArgumentException;
 
+  /**
+   * Return as a list of strings intended for a CSV row, in the same order as the csvHeaders in
+   * Metadata.java.
+   * Note that some of these (such as names and numbers > 999) may have commas - the receiving
+   * function needs to apply escapeThenJoin.
+   * Floating-point numbers are formatted to 4 d.p, except the (BigDecimal) current risk, which is
+   * given to its full precision.
+   * @return The assertion data, as a list of csv-escaped strings.
+   */
+  public List<String> asCSVRow() {
+    var fm = new DecimalFormat("0.0###");
+    return List.of(
+        printAssertionType(),
+        winner,
+        loser,
+        escapeThenJoin(assumedContinuing),
+        fm.format(difficulty),
+        margin+"",
+        fm.format(dilutedMargin),
+        currentRisk.toString(),
+        estimatedSamplesToAudit+"",
+        optimisticSamplesToAudit+"",
+        twoVoteOverCount+"",
+        oneVoteOverCount+"",
+        otherCount+"",
+        oneVoteUnderCount+"",
+        twoVoteUnderCount+""
+    );
+  }
+
+  /**
+   * Print the assertion type, either NEN or NEB.
+   */
+  abstract String printAssertionType();
 }

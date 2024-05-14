@@ -20,6 +20,20 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.service;
 
+import static au.org.democracydevelopers.raireservice.service.Metadata.CANDIDATES_HEADER;
+import static au.org.democracydevelopers.raireservice.service.Metadata.CONTEST_NAME_HEADER;
+import static au.org.democracydevelopers.raireservice.service.Metadata.CURRENT_RISK;
+import static au.org.democracydevelopers.raireservice.service.Metadata.DIFFICULTY;
+import static au.org.democracydevelopers.raireservice.service.Metadata.DILUTED_MARGIN;
+import static au.org.democracydevelopers.raireservice.service.Metadata.ESTIMATED_SAMPLES;
+import static au.org.democracydevelopers.raireservice.service.Metadata.MARGIN;
+import static au.org.democracydevelopers.raireservice.service.Metadata.OPTIMISTIC_SAMPLES;
+import static au.org.democracydevelopers.raireservice.service.Metadata.extremumHeaders;
+import static au.org.democracydevelopers.raireservice.service.Metadata.statisticNames;
+import static au.org.democracydevelopers.raireservice.service.Metadata.csvHeaders;
+import static au.org.democracydevelopers.raireservice.persistence.converters.CSVUtils.escapeThenJoin;
+import static au.org.democracydevelopers.raireservice.persistence.converters.CSVUtils.escapeThenJoin;
+
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
@@ -48,19 +62,6 @@ public class GetAssertionsCSVService {
 
   private final AssertionRepository assertionRepository;
 
-  /**
-   * Row descriptors for the statistics for which we are computing max or min.
-   */
-  private final static String MARGIN = "Margin";
-  private final static String DILUTED_MARGIN = "Diluted margin";
-  private final static String DIFFICULTY = "Raire difficulty";
-  private final static String CURRENT_RISK = "Current risk";
-  private final static String OPTIMISTIC_SAMPLES = "Optimistic samples to audit";
-  private final static String ESTIMATED_SAMPLES = "Estimated samples to audit";
-
-  // List of statistics we find the minimum or maximum of.
-  private final static List<String> statisticNames = List.of(MARGIN, DILUTED_MARGIN,
-      DIFFICULTY, CURRENT_RISK, OPTIMISTIC_SAMPLES, ESTIMATED_SAMPLES);
   /**
    * Error allowed when comparing doubles.
    */
@@ -104,7 +105,7 @@ public class GetAssertionsCSVService {
       // Write metadata/summary at the top of the file, then the csv header row, then the assertion data.
       Map<String, List<Integer>> extrema = findExtrema(sortedAssertions);
       String preface = makePreface(request, extrema, sortedAssertions);
-      String headers = makeHeaders();
+      String headers = escapeThenJoin(csvHeaders);
       String contents = makeContents(sortedAssertions);
 
       return preface + "\n\n" + headers + "\n" + contents;
@@ -252,94 +253,57 @@ public class GetAssertionsCSVService {
    */
   private String makePreface(GetAssertionsRequest request, Map<String, List<Integer>> extrema,
       List<Assertion> sortedAssertions) {
-      return "Contest name," + StringEscapeUtils.escapeCsv(request.contestName) + '\n'
-          + "Candidates," + StringEscapeUtils.escapeCsv(String.join(",",
-            request.candidates.stream().map(StringEscapeUtils::escapeCsv).toList())) + "\n\n"
-          + "\"Extreme item\",Value,\"Assertion IDs\"" + '\n'
+      return escapeThenJoin(
+            // The contest name. This gets escaped just in case it contains commas.
+            List.of(CONTEST_NAME_HEADER, StringEscapeUtils.escapeCsv(request.contestName))
+          ) + "\n"
+          + escapeThenJoin(
+            // The list of candidates.
+            List.of(CANDIDATES_HEADER, escapeThenJoin(request.candidates))
+          )  +"\n\n"
+          + escapeThenJoin(extremumHeaders) + "\n"
           // Print out the name of the extremum statistic, the extreme value, and the list of
           // indices meeting the extremum. The list is indexed 0..size-1, but humans want to read
           // lists as 1..size, so add 1 to index values before printing.
-          + MARGIN + ","
-          + sortedAssertions.get(extrema.get(MARGIN).getFirst()).getMargin() + ","
+          + MARGIN + ", "
+          + sortedAssertions.get(extrema.get(MARGIN).getFirst()).getMargin() + ", "
           + StringEscapeUtils.escapeCsv(String.join(", ",
               extrema.get(MARGIN).stream().map(i -> (i+1)+"").toList())) + "\n"
-          + DILUTED_MARGIN + ","
-          + sortedAssertions.get(extrema.get(DILUTED_MARGIN).getFirst()).getDilutedMargin() + ","
+          + DILUTED_MARGIN + ", "
+          + sortedAssertions.get(extrema.get(DILUTED_MARGIN).getFirst()).getDilutedMargin() + ", "
           + StringEscapeUtils.escapeCsv(String.join(", ",
               extrema.get(DILUTED_MARGIN).stream().map(i -> (i+1)+"").toList())) + "\n"
-          + DIFFICULTY + ","
-          + sortedAssertions.get(extrema.get(DIFFICULTY).getFirst()).getDifficulty() + ","
+          + DIFFICULTY + ", "
+          + sortedAssertions.get(extrema.get(DIFFICULTY).getFirst()).getDifficulty() + ", "
           + StringEscapeUtils.escapeCsv(String.join(", ",
               extrema.get(DIFFICULTY).stream().map(i -> (i+1)+"").toList())) + "\n"
-          + CURRENT_RISK + ","
-          + sortedAssertions.get(extrema.get(CURRENT_RISK).getFirst()).getCurrentRisk() + ","
+          + CURRENT_RISK + ", "
+          + sortedAssertions.get(extrema.get(CURRENT_RISK).getFirst()).getCurrentRisk() + ", "
           + StringEscapeUtils.escapeCsv(String.join(", ",
               extrema.get(CURRENT_RISK).stream().map(i -> (i+1)+"").toList())) + "\n"
-          + OPTIMISTIC_SAMPLES + ","
-          + sortedAssertions.get(extrema.get(OPTIMISTIC_SAMPLES).getFirst()).getOptimisticSamplesToAudit() + ","
+          + OPTIMISTIC_SAMPLES + ", "
+          + sortedAssertions.get(extrema.get(OPTIMISTIC_SAMPLES).getFirst()).getOptimisticSamplesToAudit() + ", "
           + StringEscapeUtils.escapeCsv(String.join(", ",
               extrema.get(OPTIMISTIC_SAMPLES).stream().map(i -> (i+1)+"").toList())) + "\n"
-          + ESTIMATED_SAMPLES + ","
-          + sortedAssertions.get(extrema.get(ESTIMATED_SAMPLES).getFirst()).getEstimatedSamplesToAudit() + ","
+          + ESTIMATED_SAMPLES + ", "
+          + sortedAssertions.get(extrema.get(ESTIMATED_SAMPLES).getFirst()).getEstimatedSamplesToAudit() + ", "
           + StringEscapeUtils.escapeCsv(String.join(", ",
               extrema.get(ESTIMATED_SAMPLES).stream().map(i -> (i+1)+"").toList()));
   }
-
-  private String makeHeaders() {
-    return "ID,"
-        + "Type,"
-        + "Winner,"
-        + "Loser,"
-        + "\"Assumed continuing\","
-        + "Difficulty,"
-        + "Margin,"
-        + "\"Diluted margin\","
-        + "Risk,"
-        + "\"Estimated samples to audit\","
-        + "\"Optimistic samples to audit\","
-        + "\"Two vote over count\","
-        + "\"One vote over count\","
-        + "\"Other discrepancy count\","
-        + "\"One vote under count\","
-        + "\"Two vote under count\"";
-  }
-
 
   private String makeContents(List<Assertion> assertions) {
 
     // Write out the data as a string, with a newline at the end of each assertion's data.
     int index = 1;
     StringBuilder contents = new StringBuilder();
-    String assertionType;
     for (Assertion assertion : assertions) {
-       switch (assertion) {
-         case NENAssertion ignored -> assertionType = "NEN";
-         case NEBAssertion ignored -> assertionType = "NEB";
-         // Ideally we would use the 'sealed' concept on the Assertion class to tell the compiler
-         // that there was no need for this default, but that interacted badly with persistence.
-         default -> throw new IllegalStateException("Unexpected value: " + assertion);
-       }
 
-       contents.append(
-           index++ + ","
-           + assertionType + ","
-           + StringEscapeUtils.escapeCsv(assertion.getWinner()) + ","
-           + StringEscapeUtils.escapeCsv(assertion.getLoser()) + ","
-           + StringEscapeUtils.escapeCsv(String.join(", ",
-               assertion.getAssumedContinuing().stream().map(StringEscapeUtils::escapeCsv).toList())) + ","
-           + assertion.getDifficulty() + ","
-           + assertion.getMargin() + ","
-           + assertion.getDilutedMargin() + ","
-           + assertion.getCurrentRisk() + ","
-           + assertion.getEstimatedSamplesToAudit() + ","
-           + assertion.getOptimisticSamplesToAudit() + ","
-           + assertion.getTwoVoteOverCount() + ","
-           + assertion.getOneVoteOverCount() + ","
-           + assertion.getOtherCount() + ","
-           + assertion.getOneVoteUnderCount() + ","
-           + assertion.getTwoVoteUnderCount() + "\n"
-       );
+       List<String> csvRow = new ArrayList<>(List.of("" + index++));
+       csvRow.addAll(assertion.asCSVRow());
+       contents.append(escapeThenJoin(csvRow)+"\n");
     }
     return String.valueOf(contents);
   }
+
+
 }

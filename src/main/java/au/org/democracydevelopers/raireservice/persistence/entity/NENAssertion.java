@@ -106,4 +106,13 @@ public class NENAssertion extends Assertion {
       throw new IllegalArgumentException(msg);
     }
   }
+
+  /**
+   * Print the assertion type. Used for CSV file output.
+   * @return The string "NEN"
+   */
+  @Override
+  public String printAssertionType() {
+    return "NEN";
+  }
 }
