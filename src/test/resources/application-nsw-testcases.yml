@@ -10,4 +10,4 @@ spring:
     init:
       data-locations: classpath:NSW2021Data/*.sql
 test-strategy:
-  run-nsw-tests: true    # change to true if you want to run the NSW-data-loading tests.
+  run-nsw-tests: true    # change to false if you do not want to run the NSW-data-loading tests.
