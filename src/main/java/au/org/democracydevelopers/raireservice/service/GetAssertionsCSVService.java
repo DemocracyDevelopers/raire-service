@@ -40,6 +40,7 @@ import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -117,6 +118,36 @@ public class GetAssertionsCSVService {
     }
   }
 
+  private <T> extremumResult<T> findExtremum(List<Assertion> sortedAssertions,
+      String statisticName, Comparator<T> compare) {
+    if(sortedAssertions.isEmpty()) {
+      throw new RuntimeException("Find extremum called on empty assertions");
+    }
+    return new extremumResult<>("Test statistic", extremumType.MAX, new T(), List.of(1));
+  }
+
+  /**
+   * The result of finding the extremum, for one statistic
+   * @param statisticName the name of the statistic.
+   * @param type whether this is a max or min.
+   * @param value the value of the extremum (max or min).
+   * @param indices the indices of the assertions that attain the extremum.
+   */
+  private record extremumResult<T>(
+      String statisticName,
+      extremumType type,
+      T value,
+      List<Integer> indices
+  ){
+    String toCSVRow() {
+      return escapeThenJoin(List.of(statisticName, value.toString(),
+          String.join(", ", indices.stream().map(Object::toString).toList())));
+    }
+  }
+
+  private enum extremumType {MAX, MIN}
+
+
   /**
    * Find the maximum or minimum (whichever is meaningful) for the important statistics:
    * margin, diluted margin, (Raire estimated) difficulty, optimistic samples to audit,
@@ -133,7 +164,6 @@ public class GetAssertionsCSVService {
     // The map from statistic name to list of indices of sortedAssertions that have the extreme value.
     Map<String, List<Integer>> extrema = new HashMap<>();
 
-
     // If there are no assertions, there are no extreme statistics.
     if(sortedAssertions.isEmpty()) {
       return extrema;
@@ -144,6 +174,10 @@ public class GetAssertionsCSVService {
       extrema.put(s,  new ArrayList<>(List.of(0)));
     }
 
+    extremumResult<Integer> marginResult = new extremumResult<Integer>(MARGIN, extremumType.MIN,
+        sortedAssertions.getFirst().getMargin(),List.of(0));
+
+    extremumResult<Integer> marginResult2 = findExtremum(sortedAssertions, MARGIN, Integer::compare);
     // Starting from the second assertion, compare each assertion's statistics to the current extrema
     // The `extrema' hashmap's keys are the statistic names (margin, difficulty, etc).
     // Its values are the list of assertion indices that meet the extremal value (min or max as
@@ -291,18 +325,23 @@ public class GetAssertionsCSVService {
               extrema.get(ESTIMATED_SAMPLES).stream().map(i -> (i+1)+"").toList()));
   }
 
+  /**
+   * Generate the actual csv data rows for a list of assertions. Each row is prepended with an index
+   * number (not related to the database's index) that begins at 1 and increments by 1 with each
+   * row.
+   * @param assertions a list of assertions
+   * @return their concatenated csv rows.
+   */
   private String makeContents(List<Assertion> assertions) {
 
-    // Write out the data as a string, with a newline at the end of each assertion's data.
     int index = 1;
-    StringBuilder contents = new StringBuilder();
-    for (Assertion assertion : assertions) {
+    List<String> rows = new ArrayList<>();
 
-       List<String> csvRow = new ArrayList<>(List.of("" + index++));
-       csvRow.addAll(assertion.asCSVRow());
-       contents.append(escapeThenJoin(csvRow)+"\n");
+    for (Assertion assertion : assertions) {
+      rows.add(index++ + ", " + escapeThenJoin(assertion.asCSVRow()));
     }
-    return String.valueOf(contents);
+
+    return String.join("\n", rows) + "\n";
   }
 
 

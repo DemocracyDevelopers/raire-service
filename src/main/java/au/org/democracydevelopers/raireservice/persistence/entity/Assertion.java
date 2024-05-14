@@ -280,7 +280,7 @@ public abstract class Assertion {
    * Get the margin. Used for CSV output.
    * @return the margin.
    */
-  public int getMargin() {
+  public Integer getMargin() {
     return margin;
   }
 
