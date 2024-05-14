@@ -31,7 +31,6 @@ import au.org.democracydevelopers.raireservice.persistence.repository.AssertionR
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import java.util.List;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -40,6 +39,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.EnabledIf;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -51,7 +51,8 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-@Disabled("These tests pass but are disabled because loading in the data takes a long time.")
+@EnabledIf(value = "${test-strategy.run-nsw-tests}", loadContext = true)
+// @Disabled("These tests pass but are disabled because loading in the data takes a long time.")
 public class GenerateAssertionsOnNSWTests {
 
   @Autowired
