@@ -29,24 +29,19 @@ import static au.org.democracydevelopers.raireservice.service.Metadata.ESTIMATED
 import static au.org.democracydevelopers.raireservice.service.Metadata.MARGIN;
 import static au.org.democracydevelopers.raireservice.service.Metadata.OPTIMISTIC_SAMPLES;
 import static au.org.democracydevelopers.raireservice.service.Metadata.extremumHeaders;
-import static au.org.democracydevelopers.raireservice.service.Metadata.statisticNames;
 import static au.org.democracydevelopers.raireservice.service.Metadata.csvHeaders;
-import static au.org.democracydevelopers.raireservice.persistence.converters.CSVUtils.escapeThenJoin;
 import static au.org.democracydevelopers.raireservice.persistence.converters.CSVUtils.escapeThenJoin;
 
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
-import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
-import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
-import java.lang.reflect.Method;
+import au.org.democracydevelopers.raireservice.util.DoubleComparator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.function.Function;
 import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,11 +57,6 @@ public class GetAssertionsCSVService {
   private final static Logger logger = LoggerFactory.getLogger(GetAssertionsService.class);
 
   private final AssertionRepository assertionRepository;
-
-  /**
-   * Error allowed when comparing doubles.
-   */
-  private final static double EPS = 0.0000001;
 
   /**
    * All args constructor.
@@ -103,13 +93,14 @@ public class GetAssertionsCSVService {
       List<Assertion> sortedAssertions
           = assertions.stream().sorted(Comparator.comparingLong(Assertion::getId)).toList();
 
-      // Write metadata/summary at the top of the file, then the csv header row, then the assertion data.
-      Map<String, List<Integer>> extrema = findExtrema(sortedAssertions);
-      String preface = makePreface(request, extrema, sortedAssertions);
+      // Write metadata/summary at the top of the file, then the extrema data, then the csv header
+      // row, then the assertion data.
+      String preface = makePreface(request);
+      String extrema = findExtrema(sortedAssertions);
       String headers = escapeThenJoin(csvHeaders);
       String contents = makeContents(sortedAssertions);
 
-      return preface + "\n\n" + headers + "\n" + contents;
+      return preface + extrema + "\n\n" + headers + "\n" + contents;
 
     } catch (Exception e) {
       String msg = "Error retrieving assertions for the contest " + request.contestName;
@@ -118,12 +109,55 @@ public class GetAssertionsCSVService {
     }
   }
 
+  /**
+   * Find a single extremum (min or max) and return the appropriate extremumResult structure
+   * (detailing the value of the extremum and the indices of the assertions that attain it).
+   * @param sortedAssertions the assertions, in the sorted order that the indices will reference.
+   *                         These must be non-empty.
+   * @param statisticName e.g. margin, diluted margin, estimated samples to audit, current risk.
+   * @param type MAX or MIN
+   * @param getter the getter for extracting the relevant statistic from a particular assertion.
+   * @param comparator an appropriate comparator for the type.
+   * @return the extremumResult, including all the data required to make the csv row.
+   * @param <T> the type of the statistic. Can be anything on which an appropriate comparator can
+   *           be defined, but for all the known examples it's a numeric type.
+   * @throws java.util.NoSuchElementException if called on an empty list of assertions.
+   */
   private <T> extremumResult<T> findExtremum(List<Assertion> sortedAssertions,
-      String statisticName, Comparator<T> compare) {
-    if(sortedAssertions.isEmpty()) {
-      throw new RuntimeException("Find extremum called on empty assertions");
+      String statisticName, extremumType type, Function<Assertion,T> getter, Comparator<T> comparator) {
+
+    // Now we know there is at least one assertion. Initialize the extremum with the first
+    // assertion's values. Throws NoSuchElementException if the assertion list is empty.
+    List<Integer> extremalAssertions = new ArrayList<>(List.of(1));
+    T extremalValue = getter.apply(sortedAssertions.getFirst());
+
+    // Starting from the second assertion, compare each assertion's statistics to the current
+    // extremum.
+    for(int i=1 ; i < sortedAssertions.size() ; i++ ) {
+      // Is this assertion's value for this statistic more extremal than our current extreumum?
+      T statistic = getter.apply(sortedAssertions.get(i));
+      var comparison = comparator.compare(statistic, extremalValue);
+
+      // If this assertion has the same value as the current minimum.
+      if (comparison == 0) {
+        // Add it to the list of extremal assertions.
+        // The human-readable indices start at 1, so we have to add 1.
+        extremalAssertions.add(i+1);
+
+        // If we're looking for MAX and this assertion has a higher value than the current max,
+        // or we're looking for MIM and this assertion has a lower value than the current min,
+      } else if ((type == extremumType.MAX && comparison > 0) ||
+                 (type == extremumType.MIN && comparison < 0)) {
+
+        // replace the extremal value and the list of extremal assertions with this one (only) -
+        // it is (so far) the unique extremum.
+        // The human-readable indices start at 1, so we have to add 1.
+        extremalValue = statistic;
+        extremalAssertions = new ArrayList<>(List.of(i+1));
+      }
     }
-    return new extremumResult<>("Test statistic", extremumType.MAX, new T(), List.of(1));
+
+    return new extremumResult<>(statisticName, type, extremalValue, extremalAssertions);
   }
 
   /**
@@ -139,154 +173,77 @@ public class GetAssertionsCSVService {
       T value,
       List<Integer> indices
   ){
+
+    /**
+     * Make the appropriate CSV row: comma-separated statistic name, value, and indices of assertions
+     * that attain it.
+     * @return a CSV row with the relevant data, as a string.
+     */
     String toCSVRow() {
       return escapeThenJoin(List.of(statisticName, value.toString(),
           String.join(", ", indices.stream().map(Object::toString).toList())));
     }
   }
 
+  /**
+   * Extremum type: max or min, so we know whether to search for the biggest or smallest thing.
+   */
   private enum extremumType {MAX, MIN}
 
-
   /**
-   * Find the maximum or minimum (whichever is meaningful) for the important statistics:
-   * margin, diluted margin, (Raire estimated) difficulty, optimistic samples to audit,
-   * estimated samples to audit.
-   * Collect into a map the index numbers (in the sorted list) of the assertions that meet the
-   * extrema. Note that there may be several that are tied.
-   * For example, if there are several assertions with the same least margin, the map will have a
-   * key "Margin" with a value listing the indices of all assertions that have that (minimum) margin.
+   * Find the maximum or minimum (whichever is meaningful) for the important statistics: margin,
+   * diluted margin, (Raire estimated) difficulty, optimistic samples to audit, estimated samples to
+   * audit.
+   *
    * @param sortedAssertions The assertions, assumed to be sorted by ID.
-   * @return a map from the statistic name (margin, difficulty, etc) and the list of indices of
-   * the assertions that have the extremal value for that statistic.
+   * @return the CSV rows for all the extrema: margin, diluted margin, difficulty, etc, along with
+   *         all relevant data (the extremal value and the indices of assertions that attain it).
    */
-  private Map<String, List<Integer>> findExtrema(List<Assertion> sortedAssertions) {
-    // The map from statistic name to list of indices of sortedAssertions that have the extreme value.
-    Map<String, List<Integer>> extrema = new HashMap<>();
+  private String findExtrema(List<Assertion> sortedAssertions) {
 
-    // If there are no assertions, there are no extreme statistics.
-    if(sortedAssertions.isEmpty()) {
-      return extrema;
-    }
+    List<String> csvRows = new ArrayList<>();
+    DoubleComparator doubleComparator = new DoubleComparator();
 
-    // Now we know there is at least one assertion. Initialize all the extrema to the first one.
-    for(String s : statisticNames) {
-      extrema.put(s,  new ArrayList<>(List.of(0)));
-    }
+    extremumResult<Integer> marginResult = findExtremum(sortedAssertions,
+        MARGIN, extremumType.MIN, Assertion::getMargin,  Integer::compare
+    );
+    csvRows.add(marginResult.toCSVRow());
 
-    extremumResult<Integer> marginResult = new extremumResult<Integer>(MARGIN, extremumType.MIN,
-        sortedAssertions.getFirst().getMargin(),List.of(0));
+    extremumResult<Double> dilutedMarginResult = findExtremum(sortedAssertions,
+        DILUTED_MARGIN, extremumType.MIN, Assertion::getDilutedMargin, doubleComparator
+    );
+    csvRows.add(dilutedMarginResult.toCSVRow());
 
-    extremumResult<Integer> marginResult2 = findExtremum(sortedAssertions, MARGIN, Integer::compare);
-    // Starting from the second assertion, compare each assertion's statistics to the current extrema
-    // The `extrema' hashmap's keys are the statistic names (margin, difficulty, etc).
-    // Its values are the list of assertion indices that meet the extremal value (min or max as
-    // appropriate) for that statistic.
-    for(int i=1 ; i < sortedAssertions.size() ; i++ ) {
+    extremumResult<Double> difficultyResult = findExtremum(sortedAssertions,
+        DIFFICULTY, extremumType.MAX, Assertion::getDifficulty, doubleComparator
+    );
+    csvRows.add(difficultyResult.toCSVRow());
 
-      // First see if any of its min statistics are smaller than the current minima
-      // Margin
-      int currentMinMargin = sortedAssertions.get(extrema.get(MARGIN).getFirst()).getMargin();
-      if(sortedAssertions.get(i).getMargin() == currentMinMargin) {
-        // This assertion has the same value as the current minimum. Add it to the list of
-        // extremal assertions.
-        extrema.get(MARGIN).add(i);
-      } else if (sortedAssertions.get(i).getMargin() < currentMinMargin) {
-        // This assertion has a strictly smaller value than the current minimum. Replace the
-        // list of extremal assertions with this one only - it is (so far) the unique minimum.
-        extrema.replace(MARGIN, new ArrayList<>(List.of(i)));
-      }
+    extremumResult<BigDecimal> currentRiskResult = findExtremum(sortedAssertions,
+        CURRENT_RISK, extremumType.MAX, Assertion::getCurrentRisk, BigDecimal::compareTo
+    );
+    csvRows.add(currentRiskResult.toCSVRow());
 
-      // Diluted Margin
-      double currentMinDilutedMargin = sortedAssertions.get(extrema.get(DILUTED_MARGIN).getFirst())
-          .getDilutedMargin();
-      if(Math.abs(sortedAssertions.get(i).getDilutedMargin() - currentMinDilutedMargin) < EPS) {
-        // This assertion has the same value as the current minimum. Add it to the list of
-        // extremal assertions.
-        extrema.get(DILUTED_MARGIN).add(i);
-      } else if (sortedAssertions.get(i).getDilutedMargin() < currentMinDilutedMargin) {
-        // Note the 'else if' is important here, (the 'else' part is redundant for the integer comparisons)
-        // because if the new value is very slightly less than the current min, we only want to add
-        // it once.
+    extremumResult<Integer> optimisticSamplesResult = findExtremum(sortedAssertions,
+        OPTIMISTIC_SAMPLES, extremumType.MAX, Assertion::getOptimisticSamplesToAudit, Integer::compare
+    );
+    csvRows.add(optimisticSamplesResult.toCSVRow());
 
-        // This assertion has a strictly smaller value than the current minimum. Replace the
-        // list of extremal assertions with this one only - it is (so far) the unique minimum.
-        extrema.replace(DILUTED_MARGIN, new ArrayList<>(List.of(i)));
-      }
+    extremumResult<Integer> estimatedSamplesResult = findExtremum(sortedAssertions,
+        ESTIMATED_SAMPLES, extremumType.MAX, Assertion::getEstimatedSamplesToAudit,  Integer::compare
+    );
+    csvRows.add(estimatedSamplesResult.toCSVRow());
 
-      // Difficulty
-      double currentMaxDifficulty = sortedAssertions.get(extrema.get(DIFFICULTY).getFirst())
-          .getDifficulty();
-      if(Math.abs(sortedAssertions.get(i).getDifficulty() - currentMaxDifficulty) < EPS) {
-        // This assertion has the same value as the current maximum. Add it to the list of
-        // extremal assertions.
-        extrema.get(DIFFICULTY).add(i);
-      } else if (sortedAssertions.get(i).getDifficulty() > currentMaxDifficulty) {
-        // Note the 'else if' is important here, (the 'else' part is redundant for the integer comparisons)
-        // because if the new value is very slightly less than the current min, we only want to add
-        // it once.
-
-        // This assertion has a strictly greater value than the current maximum. Replace the
-        // list of extremal assertions with this one only - it is (so far) the unique maximum.
-        extrema.replace(DIFFICULTY, new ArrayList<>(List.of(i)));
-      }
-
-      // Current risk
-      BigDecimal currentRisk = sortedAssertions.get(extrema.get(CURRENT_RISK).getFirst())
-          .getCurrentRisk();
-      if(sortedAssertions.get(i).getCurrentRisk().compareTo(currentRisk) == 0) {
-        // This assertion has the same value as the current maximum. Add it to the list of
-        // extremal assertions.
-        extrema.get(CURRENT_RISK).add(i);
-      } else if (sortedAssertions.get(i).getCurrentRisk().compareTo(currentRisk) > 0) {
-
-        // This assertion has a strictly greater value than the current maximum. Replace the
-        // list of extremal assertions with this one only - it is (so far) the unique maximum.
-        extrema.replace(CURRENT_RISK, new ArrayList<>(List.of(i)));
-      }
-
-      // Optimistic samples to audit
-      double currentMaxOptimistic = sortedAssertions.get(extrema.get(OPTIMISTIC_SAMPLES).getFirst())
-          .getOptimisticSamplesToAudit();
-      if(sortedAssertions.get(i).getOptimisticSamplesToAudit() == currentMaxOptimistic) {
-        // This assertion has the same value as the current maximum. Add it to the list of
-        // extremal assertions.
-        extrema.get(OPTIMISTIC_SAMPLES).add(i);
-      } else if (sortedAssertions.get(i).getOptimisticSamplesToAudit() > currentMaxOptimistic) {
-        // This assertion has a strictly greater value than the current maximum. Replace the
-        // list of extremal assertions with this one only - it is (so far) the unique maximum.
-        extrema.replace(OPTIMISTIC_SAMPLES, new ArrayList<>(List.of(i)));
-      }
-
-      // Estimated samples to audit
-      double currentMaxEstimated = sortedAssertions.get(extrema.get(ESTIMATED_SAMPLES).getFirst())
-          .getEstimatedSamplesToAudit();
-      if(sortedAssertions.get(i).getEstimatedSamplesToAudit() == currentMaxEstimated) {
-        // This assertion has the same value as the current maximum. Add it to the list of
-        // extremal assertions.
-        extrema.get(ESTIMATED_SAMPLES).add(i);
-      } else if (sortedAssertions.get(i).getEstimatedSamplesToAudit() > currentMaxEstimated) {
-        // This assertion has a strictly greater value than the current maximum. Replace the
-        // list of extremal assertions with this one only - it is (so far) the unique maximum.
-        extrema.replace(ESTIMATED_SAMPLES, new ArrayList<>(List.of(i)));
-      }
-    }
-
-    return extrema;
+    return String.join("\n", csvRows);
   }
 
   /**
-   * Construct the preface of the csv file, including contest metadata (name and list of
-   * candidates), along with data about the extreme values in the set of assertions: the maximum
-   * difficulty (as estimated by raire), the minimum margin and diluted margin, the maximum
-   * optimistic samples to audit and estimated samples to audit.
+   * Construct the preface of the csv file, including contest metadata (contest name and list of
+   * candidates), and headers for the extreme values.
    * @param request the GetAssertionsRequest, used for contest name and candidate list.
-   * @param extrema the map from the name of a statistic to the list of indices of assertions that
-   *                meet the extreme value (max or min as appropriate).
    * @return a preface to the CSV file.
    */
-  private String makePreface(GetAssertionsRequest request, Map<String, List<Integer>> extrema,
-      List<Assertion> sortedAssertions) {
+  private String makePreface(GetAssertionsRequest request) {
       return escapeThenJoin(
             // The contest name. This gets escaped just in case it contains commas.
             List.of(CONTEST_NAME_HEADER, StringEscapeUtils.escapeCsv(request.contestName))
@@ -295,34 +252,7 @@ public class GetAssertionsCSVService {
             // The list of candidates.
             List.of(CANDIDATES_HEADER, escapeThenJoin(request.candidates))
           )  +"\n\n"
-          + escapeThenJoin(extremumHeaders) + "\n"
-          // Print out the name of the extremum statistic, the extreme value, and the list of
-          // indices meeting the extremum. The list is indexed 0..size-1, but humans want to read
-          // lists as 1..size, so add 1 to index values before printing.
-          + MARGIN + ", "
-          + sortedAssertions.get(extrema.get(MARGIN).getFirst()).getMargin() + ", "
-          + StringEscapeUtils.escapeCsv(String.join(", ",
-              extrema.get(MARGIN).stream().map(i -> (i+1)+"").toList())) + "\n"
-          + DILUTED_MARGIN + ", "
-          + sortedAssertions.get(extrema.get(DILUTED_MARGIN).getFirst()).getDilutedMargin() + ", "
-          + StringEscapeUtils.escapeCsv(String.join(", ",
-              extrema.get(DILUTED_MARGIN).stream().map(i -> (i+1)+"").toList())) + "\n"
-          + DIFFICULTY + ", "
-          + sortedAssertions.get(extrema.get(DIFFICULTY).getFirst()).getDifficulty() + ", "
-          + StringEscapeUtils.escapeCsv(String.join(", ",
-              extrema.get(DIFFICULTY).stream().map(i -> (i+1)+"").toList())) + "\n"
-          + CURRENT_RISK + ", "
-          + sortedAssertions.get(extrema.get(CURRENT_RISK).getFirst()).getCurrentRisk() + ", "
-          + StringEscapeUtils.escapeCsv(String.join(", ",
-              extrema.get(CURRENT_RISK).stream().map(i -> (i+1)+"").toList())) + "\n"
-          + OPTIMISTIC_SAMPLES + ", "
-          + sortedAssertions.get(extrema.get(OPTIMISTIC_SAMPLES).getFirst()).getOptimisticSamplesToAudit() + ", "
-          + StringEscapeUtils.escapeCsv(String.join(", ",
-              extrema.get(OPTIMISTIC_SAMPLES).stream().map(i -> (i+1)+"").toList())) + "\n"
-          + ESTIMATED_SAMPLES + ", "
-          + sortedAssertions.get(extrema.get(ESTIMATED_SAMPLES).getFirst()).getEstimatedSamplesToAudit() + ", "
-          + StringEscapeUtils.escapeCsv(String.join(", ",
-              extrema.get(ESTIMATED_SAMPLES).stream().map(i -> (i+1)+"").toList()));
+          + escapeThenJoin(extremumHeaders) + "\n";
   }
 
   /**
@@ -343,6 +273,4 @@ public class GetAssertionsCSVService {
 
     return String.join("\n", rows) + "\n";
   }
-
-
 }
