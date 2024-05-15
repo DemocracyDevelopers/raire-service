@@ -70,11 +70,6 @@ public class GetAssertionsInProgressValidAPIRequestTests {
   private final static String oneNENAssertionContest = "One NEN Assertion Contest";
   private final static String oneNEBOneNENAssertionContest = "One NEN NEB Assertion Contest";
 
-  /**
-   * error allowed when comparing doubles.
-   */
-  private static final double EPS = 0.0000001;
-
   @LocalServerPort
   private int port;
 
@@ -106,17 +101,17 @@ public class GetAssertionsInProgressValidAPIRequestTests {
 
     // The metadata has been constructed appropriately
     assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest, 0.1,
-        response.getBody(), EPS));
+        response.getBody()));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertFalse(StringUtils.containsIgnoreCase(response.getBody(), "Error"));
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(320,1.1, 1, response.getBody(),EPS));
+    assertTrue(correctSolutionData(320,1.1, 1, response.getBody()));
 
     // We expect one assertion with the following data.
     assertTrue(correctIndexedAPIAssertionData("NEB", 320, 1.1, 0,
-        1, new ArrayList<>(), 0.5, response.getBody(),0,EPS));
+        1, new ArrayList<>(), 0.5, response.getBody(),0));
 
   }
 
@@ -159,17 +154,17 @@ public class GetAssertionsInProgressValidAPIRequestTests {
     // The metadata has been constructed appropriately
     assertTrue(
         correctMetadata(List.of("Alice", "Bob", "Charlie", "Diego"), oneNENAssertionContest, 0.1,
-            response.getBody(), EPS));
+            response.getBody()));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertFalse(StringUtils.containsIgnoreCase(response.getBody(), "Error"));
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(240, 3.01, 1, response.getBody(), EPS));
+    assertTrue(correctSolutionData(240, 3.01, 1, response.getBody()));
 
     // We expect one assertion with the following data.
     assertTrue(correctIndexedAPIAssertionData("NEN", 240, 3.01, 0, 2,
-        List.of(0, 1, 3, 2), 0.2, response.getBody(), 0, EPS));
+        List.of(0, 1, 3, 2), 0.2, response.getBody(), 0));
   }
 
   /**
@@ -190,28 +185,28 @@ public class GetAssertionsInProgressValidAPIRequestTests {
     // The metadata has been constructed appropriately
     assertTrue(correctMetadata(List.of("Liesl", "Wendell", "Amanda", "Chuan"),
         oneNEBOneNENAssertionContest, 0.05,
-        response.getBody(), EPS));
+        response.getBody()));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertFalse(StringUtils.containsIgnoreCase(response.getBody(), "Error"));
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(112, 3.17, 2, response.getBody(), EPS));
+    assertTrue(correctSolutionData(112, 3.17, 2, response.getBody()));
 
     // We expect two assertions with the following data, but we don't necessarily know what order they're in.
     // So check for their presence at either position.
     assertTrue(
         correctIndexedAPIAssertionData("NEB", 112, 0.1, 2, 0,
-            new ArrayList<>(), 0.08, response.getBody(), 0, EPS) ||
+            new ArrayList<>(), 0.08, response.getBody(), 0) ||
             correctIndexedAPIAssertionData("NEB", 112, 0.1, 2, 0,
-                new ArrayList<>(), 0.08, response.getBody(), 1, EPS)
+                new ArrayList<>(), 0.08, response.getBody(), 1)
     );
 
     assertTrue(
         correctIndexedAPIAssertionData("NEN", 560, 3.17, 2, 1,
-            List.of(0, 1, 2), 0.7, response.getBody(), 0, EPS) ||
+            List.of(0, 1, 2), 0.7, response.getBody(), 0) ||
             correctIndexedAPIAssertionData("NEN", 560, 3.17, 2, 1,
-                List.of(0, 1, 2), 0.7, response.getBody(), 1, EPS)
+                List.of(0, 1, 2), 0.7, response.getBody(), 1)
     );
   }
 }

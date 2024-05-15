@@ -23,7 +23,6 @@ package au.org.democracydevelopers.raireservice.controller;
 import static au.org.democracydevelopers.raireservice.testUtils.correctIndexedAPIAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static au.org.democracydevelopers.raireservice.testUtils.correctSolutionData;
-import static au.org.democracydevelopers.raireservice.util.DoubleComparator.EPS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -123,17 +122,17 @@ public class GetAssertionsValidAPIRequestTests {
 
     // The metadata has been constructed appropriately
     assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest, 0.1,
-        response.getBody(), EPS));
+        response.getBody()));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertFalse(StringUtils.containsIgnoreCase(response.getBody(), "Error"));
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(320,1.1, 1, response.getBody(),EPS));
+    assertTrue(correctSolutionData(320,1.1, 1, response.getBody()));
 
     // We expect one assertion with the following data.
     assertTrue(correctIndexedAPIAssertionData("NEB", 320, 1.1, 0,
-        1, new ArrayList<>(), 1.0, response.getBody(),0,EPS));
+        1, new ArrayList<>(), 1.0, response.getBody(),0));
 
   }
 
@@ -153,17 +152,17 @@ public class GetAssertionsValidAPIRequestTests {
 
     // The metadata has been constructed appropriately
     assertTrue(correctMetadata(List.of("Alice","Bob","Charlie","Diego"),oneNENAssertionContest,
-        0.1, response.getBody(),EPS));
+        0.1, response.getBody()));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertFalse(StringUtils.containsIgnoreCase(response.getBody(), "Error"));
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(240, 3.01, 1, response.getBody(),EPS));
+    assertTrue(correctSolutionData(240, 3.01, 1, response.getBody()));
 
     // We expect one assertion with the following data.
     assertTrue(correctIndexedAPIAssertionData("NEN",240,3.01, 0,
-        2, List.of(0,1,3,2), 1.0, response.getBody(),0, EPS));
+        2, List.of(0,1,3,2), 1.0, response.getBody(),0));
   }
 
   /**

@@ -67,11 +67,6 @@ public class GenerateAssertionsOnNSWTests {
   private static final int DEFAULT_TIME_LIMIT=5;
 
   /**
-   * Error allowed when comparing doubles.
-   */
-  private static final double EPS = 0.0000001;
-
-  /**
    * Expected data for each NSW contest.
    * Difficulties are taken from raire-java::src/test/java/au/org/democracydevelopers/raire/TestNSW
    * which in turn tests against raire-rs.
@@ -376,7 +371,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_1);
-    assertTrue(difficultyMatchesMax(difficultyContest_1, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_1, assertions));
   }
 
   /**
@@ -414,7 +409,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_2);
-    assertTrue(difficultyMatchesMax(difficultyContest_2, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_2, assertions));
   }
 
   /**
@@ -452,7 +447,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_3);
-    assertTrue(difficultyMatchesMax(difficultyContest_3, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_3, assertions));
   }
 
   /**
@@ -490,7 +485,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_4);
-    assertTrue(difficultyMatchesMax(difficultyContest_4, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_4, assertions));
   }
 
   /**
@@ -528,7 +523,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_5);
-    assertTrue(difficultyMatchesMax(difficultyContest_5, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_5, assertions));
   }
 
   /**
@@ -566,7 +561,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_6);
-    assertTrue(difficultyMatchesMax(difficultyContest_6, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_6, assertions));
   }
 
   /**
@@ -604,7 +599,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_7);
-    assertTrue(difficultyMatchesMax(difficultyContest_7, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_7, assertions));
   }
 
   /**
@@ -642,7 +637,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_8);
-    assertTrue(difficultyMatchesMax(difficultyContest_8, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_8, assertions));
   }
 
   /**
@@ -680,7 +675,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_9);
-    assertTrue(difficultyMatchesMax(difficultyContest_9, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_9, assertions));
   }
 
   /**
@@ -718,7 +713,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_10);
-    assertTrue(difficultyMatchesMax(difficultyContest_10, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_10, assertions));
   }
 
   /**
@@ -756,7 +751,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_11);
-    assertTrue(difficultyMatchesMax(difficultyContest_11, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_11, assertions));
   }
 
   /**
@@ -794,7 +789,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_12);
-    assertTrue(difficultyMatchesMax(difficultyContest_12, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_12, assertions));
   }
 
   /**
@@ -832,7 +827,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_13);
-    assertTrue(difficultyMatchesMax(difficultyContest_13, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_13, assertions));
   }
 
   /**
@@ -870,7 +865,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_14);
-    assertTrue(difficultyMatchesMax(difficultyContest_14, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_14, assertions));
   }
 
   /**
@@ -908,7 +903,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_15);
-    assertTrue(difficultyMatchesMax(difficultyContest_15, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_15, assertions));
   }
 
   /**
@@ -946,7 +941,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_16);
-    assertTrue(difficultyMatchesMax(difficultyContest_16, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_16, assertions));
   }
 
   /**
@@ -984,7 +979,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_17);
-    assertTrue(difficultyMatchesMax(difficultyContest_17, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_17, assertions));
   }
 
   /**
@@ -1022,7 +1017,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_18);
-    assertTrue(difficultyMatchesMax(difficultyContest_18, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_18, assertions));
   }
 
   /**
@@ -1060,7 +1055,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_19);
-    assertTrue(difficultyMatchesMax(difficultyContest_19, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_19, assertions));
   }
 
   /**
@@ -1098,7 +1093,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_20);
-    assertTrue(difficultyMatchesMax(difficultyContest_20, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_20, assertions));
   }
 
   /**
@@ -1136,7 +1131,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_21);
-    assertTrue(difficultyMatchesMax(difficultyContest_21, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_21, assertions));
   }
 
   /**
@@ -1174,7 +1169,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_22);
-    assertTrue(difficultyMatchesMax(difficultyContest_22, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_22, assertions));
   }
 
   /**
@@ -1212,7 +1207,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_23);
-    assertTrue(difficultyMatchesMax(difficultyContest_23, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_23, assertions));
   }
 
   /**
@@ -1250,7 +1245,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_24);
-    assertTrue(difficultyMatchesMax(difficultyContest_24, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_24, assertions));
   }
 
   /**
@@ -1288,7 +1283,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_25);
-    assertTrue(difficultyMatchesMax(difficultyContest_25, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_25, assertions));
   }
 
   /**
@@ -1326,7 +1321,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_26);
-    assertTrue(difficultyMatchesMax(difficultyContest_26, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_26, assertions));
   }
 
   /**
@@ -1364,7 +1359,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_27);
-    assertTrue(difficultyMatchesMax(difficultyContest_27, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_27, assertions));
   }
 
   /**
@@ -1402,7 +1397,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_28);
-    assertTrue(difficultyMatchesMax(difficultyContest_28, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_28, assertions));
   }
 
   /**
@@ -1440,7 +1435,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_29);
-    assertTrue(difficultyMatchesMax(difficultyContest_29, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_29, assertions));
   }
 
   /**
@@ -1478,7 +1473,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_30);
-    assertTrue(difficultyMatchesMax(difficultyContest_30, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_30, assertions));
   }
 
   /**
@@ -1516,7 +1511,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_31);
-    assertTrue(difficultyMatchesMax(difficultyContest_31, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_31, assertions));
   }
 
   /**
@@ -1554,7 +1549,7 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_32);
-    assertTrue(difficultyMatchesMax(difficultyContest_32, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_32, assertions));
   }
 
   /**
@@ -1592,6 +1587,6 @@ public class GenerateAssertionsOnNSWTests {
 
     // Check difficulty.
     List<Assertion> assertions = assertionRepository.findByContestName(nameContest_33);
-    assertTrue(difficultyMatchesMax(difficultyContest_33, assertions, EPS));
+    assertTrue(difficultyMatchesMax(difficultyContest_33, assertions));
   }
 }
