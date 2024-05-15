@@ -22,10 +22,13 @@ package au.org.democracydevelopers.raireservice.controller;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -55,11 +58,12 @@ import org.springframework.test.context.ActiveProfiles;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GetAssertionsCSVAPITests {
 
-  private final static HttpHeaders httpHeaders = new HttpHeaders();
+  private static final Logger logger = LoggerFactory.getLogger(
+      GetAssertionsInProgressValidAPIRequestTests.class);
 
+  private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
   private final static String getAssertionsEndpoint = "/raire/get-assertions-csv";
-  private final static List<String> candidates = List.of("Alice", "Bob", "Chuan", "Diego");
   private final static String candidatesAsJson = "\"candidates\":[\"Alice\",\"Bob\",\"Chuan\",\"Diego\"]}";
   private final static List<String> trickyCharacters
       = List.of("Annoying, Alice", "\"Breaking, Bob\"", "Challenging, Chuan", "O'Difficult, Diego");
@@ -86,6 +90,7 @@ public class GetAssertionsCSVAPITests {
    */
   @Test
   public void testValidRequestWithNoAssertions() {
+    testUtils.log(logger, "testValidRequestWithNoAssertions");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =
@@ -131,7 +136,8 @@ public class GetAssertionsCSVAPITests {
    * Test for difficult characters in candidate names, including ' and " and ,
    */
   @Test
-  public void testCharacterEscaping() {
+  public void testCharacterEscapingForCSVExport() {
+    testUtils.log(logger, "testCharacterEscapingForCSVExport");
     String url = baseURL + port + getAssertionsEndpoint;
     String requestAsJson =
         "{\"riskLimit\":0.10,\"contestName\":\"Lots of tricky characters Contest\","
@@ -154,6 +160,7 @@ public class GetAssertionsCSVAPITests {
    */
   @Test
   public void testCSVDemoContest() {
+    testUtils.log(logger, "testCSVDemoContest");
     String url = baseURL + port + getAssertionsEndpoint;
     String requestAsJson =
         "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","

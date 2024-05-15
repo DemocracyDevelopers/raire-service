@@ -22,12 +22,16 @@ package au.org.democracydevelopers.raireservice.service;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import au.org.democracydevelopers.raireservice.controller.GetAssertionsInProgressValidAPIRequestTests;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
+import au.org.democracydevelopers.raireservice.testUtils;
 import java.math.BigDecimal;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -50,6 +54,9 @@ import org.springframework.test.context.ActiveProfiles;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GetAssertionsCSVTests {
 
+  private static final Logger logger = LoggerFactory.getLogger(
+      GetAssertionsInProgressValidAPIRequestTests.class);
+
   @Autowired
   AssertionRepository assertionRepository;
 
@@ -66,6 +73,7 @@ public class GetAssertionsCSVTests {
    */
   @Test
   public void testCSVTies() throws RaireServiceException {
+    testUtils.log(logger, "testCSVTies");
     GetAssertionsRequest request = new GetAssertionsRequest(
         "Lots of assertions with ties Contest", candidates, new BigDecimal("0.10"));
     String output = getAssertionsCSVService.generateCSV(request);
@@ -104,6 +112,7 @@ public class GetAssertionsCSVTests {
    */
   @Test
   public void testCharacterEscaping() throws RaireServiceException {
+    testUtils.log(logger, "testCharacterEscaping");
     GetAssertionsRequest request = new GetAssertionsRequest("Lots of tricky characters Contest",
         trickyCharacters, new BigDecimal("0.10"));
     String output = getAssertionsCSVService.generateCSV(request);
@@ -119,7 +128,8 @@ public class GetAssertionsCSVTests {
    * @throws RaireServiceException if assertion database retrieval fails.
    */
   @Test
-  public void testCSVDemoContest() throws RaireServiceException {
+  public void testCsvDemoContest() throws RaireServiceException {
+    testUtils.log(logger, "testCsvDemoContest");
     GetAssertionsRequest request = new GetAssertionsRequest(
         "CSV Demo Contest", candidates, new BigDecimal("0.10"));
     String output = getAssertionsCSVService.generateCSV(request);

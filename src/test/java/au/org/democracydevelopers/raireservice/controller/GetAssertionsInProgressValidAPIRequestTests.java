@@ -69,9 +69,7 @@ public class GetAssertionsInProgressValidAPIRequestTests {
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
-  private final static String getAssertionsEndpoint = "/raire/get-assertions-json";
-  private final static String getAssertionsCSVEndpoint = "/raire/get-assertions-csv";
-
+  private final static String getAssertionsJsonEndpoint = "/raire/get-assertions-json";
   private final static String oneNEBAssertionContest = "One NEB Assertion Contest";
   private final static String oneNENAssertionContest = "One NEN Assertion Contest";
   private final static String oneNEBOneNENAssertionContest = "One NEN NEB Assertion Contest";
@@ -93,9 +91,9 @@ public class GetAssertionsInProgressValidAPIRequestTests {
    */
   @Test
   @Transactional
-  void retrieveAssertionsExistentContestOneNEBAssertion() {
-    testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertion");
-    String url = baseURL + port + getAssertionsEndpoint;
+  void retrieveAssertionsAsJsonExistentContestOneNEBAssertion() {
+    testUtils.log(logger, "retrieveAssertionsAsJsonExistentContestOneNEBAssertion");
+    String url = baseURL + port + getAssertionsJsonEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
         oneNEBAssertionContest+"\",\"candidates\":[\"Alice\",\"Bob\"]}";
@@ -119,35 +117,14 @@ public class GetAssertionsInProgressValidAPIRequestTests {
 
   }
 
-
-  /**
-   * Retrieve assertions as csv for a contest that has one NEB assertion (audit in progress).
-   * Same as the previous test, but csv.
-   */
-  @Test
-  @Transactional
-  void retrieveAssertionsAsCSVExistentContestOneNEBAssertion() {
-    String url = baseURL + port + getAssertionsCSVEndpoint;
-
-    String requestAsJson =
-        "{\"riskLimit\":0.10,\"contestName\":\"" + oneNEBAssertionContest
-            + "\",\"candidates\":[\"Alice\",\"Bob\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is2xxSuccessful());
-    assertTrue(response.getBody().contains("Bob"));
-  }
-
   /**
    * Retrieve assertions for a contest that has one NEN assertion (audit in progress).
    */
   @Test
   @Transactional
-  void retrieveAssertionsExistentContestOneNENAssertion() {
-    testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertion");
-    String url = baseURL + port + getAssertionsEndpoint;
+  void retrieveAssertionsAsJsonExistentContestOneNENAssertion() {
+    testUtils.log(logger, "retrieveAssertionsAsJsonExistentContestOneNENAssertion");
+    String url = baseURL + port + getAssertionsJsonEndpoint;
 
     String requestAsJson =
         "{\"riskLimit\":0.10,\"contestName\":\"" + oneNENAssertionContest
@@ -177,9 +154,9 @@ public class GetAssertionsInProgressValidAPIRequestTests {
    */
   @Test
   @Transactional
-  void retrieveAssertionsOneNENOneNEBAssertionInProgress() {
-    testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgress");
-    String url = baseURL + port + getAssertionsEndpoint;
+  void retrieveAssertionsAsJsonOneNENOneNEBAssertionInProgress() {
+    testUtils.log(logger, "retrieveAssertionsAsJsonOneNENOneNEBAssertionInProgress");
+    String url = baseURL + port + getAssertionsJsonEndpoint;
 
     String requestAsJson =
         "{\"riskLimit\":0.05,\"contestName\":\"" + oneNEBOneNENAssertionContest
