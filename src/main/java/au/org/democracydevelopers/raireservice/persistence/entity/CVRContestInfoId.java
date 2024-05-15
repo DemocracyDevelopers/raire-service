@@ -24,7 +24,9 @@ import java.io.Serializable;
 
 /**
  * The unique identifier for a CVRContestInfo entity is a CVR Id and a contest Id together.
- * This class defines a composite key for the CVRContestInfo entity.
+ * This class defines a composite key for the CVRContestInfo entity. Note that while IntelliJ might
+ * tell you that the fields in this class are not used, they are used to define a compound primary
+ * key that involves two long attributes when retrieving CVR contest data from the database.
  */
 public class CVRContestInfoId implements Serializable {
 

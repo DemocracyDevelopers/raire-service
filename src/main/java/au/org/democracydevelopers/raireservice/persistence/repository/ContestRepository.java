@@ -22,6 +22,8 @@ package au.org.democracydevelopers.raireservice.persistence.repository;
 
 import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -34,6 +36,8 @@ import java.util.List;
  */
 @Repository
 public interface ContestRepository extends JpaRepository<Contest, Long> {
+
+  Logger logger = LoggerFactory.getLogger(ContestRepository.class);
 
   /**
    * Find and return all contests with a given name from the corla database.
@@ -73,8 +77,13 @@ public interface ContestRepository extends JpaRepository<Contest, Long> {
    */
   @Query
   default boolean isAllIRV(String contestName) {
+    final String prefix = "[isAllIRV]";
+    logger.debug(String.format("%s (Database access) Finding contests by name (%s).",
+        prefix, contestName));
     List<Contest> contests = findByName(contestName);
 
-    return contests.stream().allMatch(contest -> contest.getDescription().equals("IRV"));
+    boolean result = contests.stream().allMatch(contest -> contest.getDescription().equals("IRV"));
+    logger.debug(String.format("%s Result: %b.", prefix, result));
+    return result;
   }
 }

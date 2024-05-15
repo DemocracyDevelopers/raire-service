@@ -35,7 +35,7 @@ import java.beans.ConstructorProperties;
  */
 public abstract class ContestRequest {
 
-  protected final static Logger logger = LoggerFactory.getLogger(ContestRequest.class);
+  private final static Logger logger = LoggerFactory.getLogger(ContestRequest.class);
 
   /**
    * The name of the contest
@@ -66,26 +66,38 @@ public abstract class ContestRequest {
    * @throws RequestValidationException if the request is invalid.
    */
   public void Validate(ContestRepository contestRepository) throws RequestValidationException {
+    final String prefix = "[Validate]";
+    logger.debug(String.format("%s Validating a request to retrieve contest information from the "+
+        "database for contest %s with specified candidates %s.", prefix, contestName, candidates));
 
-      if(contestName == null || contestName.isBlank()) {
-        logger.error("No contest name.");
-        throw new RequestValidationException("No contest name.");
-      }
-
-      if(candidates == null || candidates.isEmpty() || candidates.stream().anyMatch(String::isBlank)) {
-        logger.error("Request for contest "+contestName+
-            ". Bad candidate list: "+(candidates==null ? "" : candidates));
-        throw new RequestValidationException("Bad candidate list.");
-      }
-
-      if(contestRepository.findFirstByName(contestName).isEmpty()) {
-        logger.error("Request for contest "+contestName+ ". No such contest in database.");
-        throw new RequestValidationException("No such contest: "+contestName);
-      }
-
-      if(!contestRepository.isAllIRV(contestName)) {
-        logger.error("Request for contest "+contestName+ ". Not all IRV contests.");
-        throw new RequestValidationException("Not all IRV: "+contestName);
-      }
+    if(contestName == null || contestName.isBlank()) {
+      final String msg = String.format("%s No contest name specified. " +
+          "Throwing a RequestValidationException.", prefix);
+      logger.error(msg);
+      throw new RequestValidationException(msg);
     }
+
+    if(candidates == null || candidates.isEmpty() || candidates.stream().anyMatch(String::isBlank)) {
+      final String msg = String.format("%s Request for contest %s with a bad candidate list %s. " +
+          "Throwing a RequestValidationException.", prefix, contestName, (candidates==null ? "" : candidates));
+      logger.error(msg);
+      throw new RequestValidationException(msg);
+    }
+
+    if(contestRepository.findFirstByName(contestName).isEmpty()) {
+      final String msg = String.format("%s Request for contest %s. No such contest in database. " +
+          "Throwing a RequestValidationException.", prefix, contestName);
+      logger.error(msg);
+      throw new RequestValidationException(msg);
+    }
+
+    if(!contestRepository.isAllIRV(contestName)) {
+      final String msg = String.format("%s Request for contest %s: not comprised of all IRV " +
+          "contests. Throwing a RequestValidationException.", prefix, contestName);
+      logger.error(msg);
+      throw new RequestValidationException(msg);
+    }
+
+    logger.debug(String.format("%s Request for contest information valid.", prefix));
+  }
 }

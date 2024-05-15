@@ -21,8 +21,11 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.persistence.repository;
 
 import au.org.democracydevelopers.raireservice.persistence.entity.Contest;
+import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -38,16 +41,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/*
- * Tests on contest retrieval.
- * Contests are pre-loaded into the database using
- * src/test/resources/data.sql.
+/**
+ * Tests for contest retrieval.
+ * Contests are preloaded into the database using src/test/resources/data.sql.
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class ContestRepositoryTests {
+
+  private static final Logger logger = LoggerFactory.getLogger(ContestRepositoryTests.class);
+
   @Autowired
   ContestRepository contestRepository;
 
@@ -59,6 +64,7 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void retrieveZeroContests() {
+    testUtils.log(logger, "retrieveZeroContests");
     Optional<Contest> retrieved = contestRepository.findFirstByName("nonExistentContest");
     assertTrue(retrieved.isEmpty());
   }
@@ -69,6 +75,7 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void retrieveAllZeroContests() {
+    testUtils.log(logger, "retrieveAllZeroContests");
     List<Contest> retrieved = contestRepository.findByName("nonExistentContest");
     assertTrue(retrieved.isEmpty());
   }
@@ -79,6 +86,7 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void retrieveBallinaMayoral() {
+    testUtils.log(logger, "retrieveBallinaMayoral");
     Optional<Contest> ballina = contestRepository.findFirstByName(ballinaMayoral);
 
     assertTrue(ballina.isPresent());
@@ -93,6 +101,7 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void retrieveAllBallinaMayoral() {
+    testUtils.log(logger, "retrieveAllBallinaMayoral");
     List<Contest> ballina = contestRepository.findByName(ballinaMayoral);
     assertEquals(1, ballina.size());
   }
@@ -103,6 +112,7 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void retrieveAllInvalidMixed() {
+    testUtils.log(logger, "retrieveAllInvalidMixed");
     List<Contest> mixed = contestRepository.findByName("Invalid Mixed Contest");
     assertEquals(2, mixed.size());
   }
@@ -113,6 +123,7 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void retrievePlurality() {
+    testUtils.log(logger, "retrievePlurality");
     Optional<Contest> plurality = contestRepository.findFirstByName("Valid Plurality Contest");
     assertTrue(plurality.isPresent());
     assertEquals("Valid Plurality Contest",plurality.get().getName());
@@ -126,6 +137,7 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void retrieveAllPlurality() {
+    testUtils.log(logger, "retrieveAllPlurality");
     List<Contest> plurality = contestRepository.findByName("Valid Plurality Contest");
     assertEquals(1, plurality.size());
   }
@@ -136,6 +148,7 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void retrieveByCountyAndContestID() {
+    testUtils.log(logger, "retrieveByCountyAndContestID");
     Optional<Contest> byIDs = contestRepository.findByContestAndCountyID(999992L, 8L);
     assertTrue(byIDs.isPresent());
     Contest retrievedContest = byIDs.get();
@@ -148,6 +161,7 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void retrieveWronglyByCountyAndContestID() {
+    testUtils.log(logger, "retrieveWronglyByCountyAndContestID");
     Optional<Contest> byIDs = contestRepository.findByContestAndCountyID(999992L, 1L);
     assertTrue(byIDs.isEmpty());
   }
@@ -158,6 +172,7 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void retrieveWronglyByCountyAndContestID2() {
+    testUtils.log(logger, "retrieveWronglyByCountyAndContestID2");
     Optional<Contest> byIDs = contestRepository.findByContestAndCountyID(888881L, 8L);
     assertTrue(byIDs.isEmpty());
   }
@@ -168,6 +183,7 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void singleIRVIsAllIRV() {
+    testUtils.log(logger, "singleIRVIsAllIRV");
     assertTrue(contestRepository.isAllIRV(ballinaMayoral));
   }
 
@@ -177,6 +193,7 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void multiCountyIRVIsAllIRV() {
+    testUtils.log(logger, "multiCountyIRVIsAllIRV");
     assertTrue(contestRepository.isAllIRV("Non-existent Contest"));
   }
 
@@ -186,6 +203,7 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void SinglePluralityIsNotAllIRV() {
+    testUtils.log(logger, "SinglePluralityIsNotAllIRV");
     assertFalse(contestRepository.isAllIRV("Valid Plurality Contest"));
   }
 
@@ -196,6 +214,7 @@ public class ContestRepositoryTests {
   @Test
   @Transactional
   void MixedDescriptionIsNotAllIRV() {
+    testUtils.log(logger, "MixedDescriptionIsNotAllIRV");
     assertFalse(contestRepository.isAllIRV("Invalid Mixed Contest"));
   }
 }

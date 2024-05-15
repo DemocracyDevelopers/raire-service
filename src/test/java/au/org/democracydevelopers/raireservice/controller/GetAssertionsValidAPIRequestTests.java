@@ -28,11 +28,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -49,20 +53,22 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Tests for get-assertions endpoint. This class automatically fires up the RAIRE Microservice on a random
- * port, then runs a series of tests for correct responses to valid requests.
+ * Tests for get-assertions endpoint. This class automatically fires up the RAIRE Microservice on a
+ * random port, then runs a series of tests for correct responses to valid requests.
  * The list of tests is similar to - and in most cases identical to - the GetAssertionsServiceTests.
- * Note that you have to run the *whole class*. Individual tests do not work separately because they don't
- * initiate the microservice on their own.
- * Contests which will be used for validity testing are pre-loaded into the database using
+ * Note that you have to run the *whole class*. Individual tests do not work separately because they
+ * don't initiate the microservice on their own.
+ * Contests which will be used for validity testing are preloaded into the database using
  * src/test/resources/data.sql.
  */
-
 @ActiveProfiles("simple-assertions")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GetAssertionsValidAPIRequestTests {
+
+  private static final Logger logger = LoggerFactory.getLogger(
+      GetAssertionsValidAPIRequestTests.class);
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
@@ -84,9 +90,6 @@ public class GetAssertionsValidAPIRequestTests {
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
   }
 
-  @Test
-  void contextLoads() {
-  }
 
   /**
    * The getAssertions endpoint, valid request. Currently just checking that the serialization correctly
@@ -94,6 +97,7 @@ public class GetAssertionsValidAPIRequestTests {
    */
   @Test
   public void getAssertionsWithOneNEBContest() {
+    testUtils.log(logger, "getAssertionsWithOneNEBContest");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"" + oneNEBAssertionContest
@@ -112,6 +116,7 @@ public class GetAssertionsValidAPIRequestTests {
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNEBAssertion() {
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertion");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
@@ -142,6 +147,7 @@ public class GetAssertionsValidAPIRequestTests {
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNENAssertion() {
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertion");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
@@ -172,8 +178,8 @@ public class GetAssertionsValidAPIRequestTests {
    */
   @Test
   @Transactional
-  void retrieveAssertionsIncorrectCandidateNamesIsAnError() {
-
+  void retrieveAssertionsIncorrectCandidateNamesIsAnError()  {
+    testUtils.log(logger, "retrieveAssertionsIncorrectCandidateNamesIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
@@ -184,8 +190,8 @@ public class GetAssertionsValidAPIRequestTests {
 
     assertTrue(response.getStatusCode().is5xxServerError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
-        "Candidate list is inconsistent with assertion"));
+        "candidate list provided as parameter is inconsistent"));
     assertEquals(RaireErrorCodes.INTERNAL_ERROR.toString(),
-        response.getHeaders().get("error_code").getFirst());
+        Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
   }
 }

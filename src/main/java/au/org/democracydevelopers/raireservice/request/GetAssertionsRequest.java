@@ -24,6 +24,8 @@ import au.org.democracydevelopers.raireservice.persistence.repository.ContestRep
 import java.beans.ConstructorProperties;
 import java.math.BigDecimal;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Request (expected to be json) identifying the contest for which assertions should be retrieved
@@ -38,6 +40,8 @@ import java.util.List;
  * names are reasonable. GetAssertionsRequest.Validate then checks that the risk limit is non-negative.
  */
 public class GetAssertionsRequest extends ContestRequest {
+
+  private final static Logger logger = LoggerFactory.getLogger(GetAssertionsRequest.class);
 
   /**
    * The risk limit for the audit, expected to be in the range [0,1].
@@ -65,16 +69,22 @@ public class GetAssertionsRequest extends ContestRequest {
    * @throws RequestValidationException if the request is invalid.
    */
   public void Validate(ContestRepository contestRepository) throws RequestValidationException {
-
+    final String prefix = "[Validate]";
+    logger.debug(String.format("%s Validating a Get Assertions Request for contest %s " +
+            "with specified candidates %s and risk limit %s.", prefix, contestName, candidates,
+            riskLimit));
     super.Validate(contestRepository);
 
     // Check for a negative risk limit. Risk limits >1 are vacuous but not illegal.
     // Risk limits of exactly zero are unattainable but will not cause a problem.
     if (riskLimit == null || riskLimit.compareTo(BigDecimal.ZERO) < 0) {
-      logger.error("Request for contest "+contestName+
-          ". Null or negative risk limit: "+(riskLimit==null ? "" : riskLimit));
-      throw new RequestValidationException("Null or negative risk limit.");
+      final String msg = String.format("%s Null or negative risk limit specified in request (%s). "
+          + "Throwing a RequestValidationException.", prefix, riskLimit);
+      logger.error(msg);
+      throw new RequestValidationException(msg);
     }
+
+    logger.debug(String.format("%s Get Assertions Request validated.", prefix));
   }
 }
 

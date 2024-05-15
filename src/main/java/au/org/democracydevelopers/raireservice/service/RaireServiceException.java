@@ -57,22 +57,32 @@ public class RaireServiceException extends Exception {
     super(makeMessage(error, candidates));
     switch (error) {
       case TiedWinners e -> this.errorCode = RaireErrorCodes.TIED_WINNERS;
+
       case TimeoutFindingAssertions e ->
           this.errorCode = RaireErrorCodes.TIMEOUT_FINDING_ASSERTIONS;
+
       case TimeoutTrimmingAssertions e ->
           this.errorCode = RaireErrorCodes.TIMEOUT_TRIMMING_ASSERTIONS;
+
       case TimeoutCheckingWinner e -> this.errorCode = RaireErrorCodes.TIMEOUT_CHECKING_WINNER;
+
       case CouldNotRuleOut e -> this.errorCode = RaireErrorCodes.COULD_NOT_RULE_OUT_ALTERNATIVE;
+
       // This is what we get if the candidate list entered in the request has the
       // right number but wrong names vs the database.
       case InvalidCandidateNumber e -> this.errorCode = RaireErrorCodes.WRONG_CANDIDATE_NAMES;
 
       // Internal coding errors.
       case InvalidTimeout e -> this.errorCode = RaireErrorCodes.INTERNAL_ERROR;
+
       case InternalErrorDidntRuleOutLoser e -> this.errorCode = RaireErrorCodes.INTERNAL_ERROR;
+
       case InternalErrorRuledOutWinner e -> this.errorCode = RaireErrorCodes.INTERNAL_ERROR;
+
       case InternalErrorTrimming e -> this.errorCode = RaireErrorCodes.INTERNAL_ERROR;
+
       case InvalidNumberOfCandidates e -> this.errorCode = RaireErrorCodes.INTERNAL_ERROR;
+
       case WrongWinner e -> this.errorCode = RaireErrorCodes.INTERNAL_ERROR;
     }
   }
@@ -184,8 +194,8 @@ public class RaireServiceException extends Exception {
         message = "Could not rule out alternative elimination order: "+sequence+".";
       }
 
-      // I think this is what we get if the candidate list entered in the request has the
-      // right number but wrong names vs the database.
+      // This is what we get if the candidate list entered in the request has the
+      // right number but wrong names versus the database.
       case InvalidCandidateNumber e -> message = "Candidate list does not match database.";
 
       // Internal coding errors.

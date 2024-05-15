@@ -26,11 +26,14 @@ import static au.org.democracydevelopers.raireservice.testUtils.correctSolutionD
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -61,6 +64,9 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GetAssertionsInProgressValidAPIRequestTests {
 
+  private static final Logger logger = LoggerFactory.getLogger(
+      GetAssertionsInProgressValidAPIRequestTests.class);
+
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
   private final static String getAssertionsEndpoint = "/raire/get-assertions-json";
@@ -81,9 +87,6 @@ public class GetAssertionsInProgressValidAPIRequestTests {
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
   }
 
-  @Test
-  void contextLoads() {
-  }
 
   /**
    * Retrieve assertions for a contest that has one NEB assertion (audit in progress).
@@ -91,6 +94,7 @@ public class GetAssertionsInProgressValidAPIRequestTests {
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNEBAssertion() {
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertion");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
@@ -142,6 +146,7 @@ public class GetAssertionsInProgressValidAPIRequestTests {
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNENAssertion() {
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertion");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =
@@ -173,6 +178,7 @@ public class GetAssertionsInProgressValidAPIRequestTests {
   @Test
   @Transactional
   void retrieveAssertionsOneNENOneNEBAssertionInProgress() {
+    testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgress");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =

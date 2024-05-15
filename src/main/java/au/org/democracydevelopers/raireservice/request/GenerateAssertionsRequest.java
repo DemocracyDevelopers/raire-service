@@ -23,6 +23,8 @@ package au.org.democracydevelopers.raireservice.request;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import java.beans.ConstructorProperties;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Request (expected to be json) identifying the contest for which assertions should be generated.
@@ -38,6 +40,8 @@ import java.util.List;
  * totalAuditableBallots and timeLimitSeconds are positive.
  */
 public class GenerateAssertionsRequest extends ContestRequest {
+
+  private final static Logger logger = LoggerFactory.getLogger(GenerateAssertionsRequest.class);
 
   /**
    * The total number of ballots in the universe under audit.
@@ -75,20 +79,27 @@ public class GenerateAssertionsRequest extends ContestRequest {
    * @throws RequestValidationException if the request is invalid.
    */
   public void Validate(ContestRepository contestRepository) throws RequestValidationException {
+    final String prefix = "[Validate]";
+    logger.debug(String.format("%s Validating a Generate Assertions Request for contest %s " +
+        "with specified candidates %s, total number of auditable ballots %d, and time limit " +
+        "on assertion generation of %fs.", prefix, contestName, candidates, totalAuditableBallots,
+        timeLimitSeconds));
 
     super.Validate(contestRepository);
 
-    final String errorMsgTotalBallots = "Non-positive total auditable ballots";
     if(totalAuditableBallots <= 0) {
-      logger.error("Request for contest "+contestName+ ". "+errorMsgTotalBallots+": "
-          +totalAuditableBallots);
-      throw new RequestValidationException(errorMsgTotalBallots);
+      final String msg = String.format("%s Non-positive total auditable ballots (%d). Throwing a " +
+          "RequestValidationException.", prefix, totalAuditableBallots);
+      logger.error(msg);
+      throw new RequestValidationException(msg);
+    }
+    if(timeLimitSeconds <= 0) {
+      final String msg = String.format("%s Non-positive time limit on assertion generation (%f). " +
+          "Throwing a RequestValidationException.", prefix, timeLimitSeconds);
+      logger.error(msg);
+      throw new RequestValidationException(msg);
     }
 
-    final String errorMsgTimeLimit = "Non-positive time limit";
-    if(timeLimitSeconds <= 0) {
-      logger.error("Request for contest "+contestName+". "+errorMsgTimeLimit+": "+ timeLimitSeconds);
-      throw new RequestValidationException(errorMsgTimeLimit);
-    }
+    logger.debug(String.format("%s Generate Assertions Request validated.", prefix));
   }
 }

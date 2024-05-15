@@ -213,25 +213,34 @@ public abstract class Assertion {
       long universeSize, double difficulty, List<String> assumedContinuing)
       throws IllegalArgumentException
   {
+    final String prefix = "[all args constructor]";
+    logger.debug(String.format("%s Parameters: contest name %s; winner %s; loser %s; " +
+        "margin %d; universe size %d; difficulty %f; assumed continuing %s.", prefix,
+        contestName, winner, loser, margin, universeSize, difficulty, assumedContinuing));
+
     this.contestName = contestName;
     this.winner = winner;
     this.loser = loser;
     this.margin = margin;
 
     if(universeSize <= 0){
-      String msg = "An assertion must have a positive universe size.";
+      String msg = String.format("%s An assertion must have a positive universe size " +
+          "(%d provided). Throwing an IllegalArgumentException.", prefix, universeSize);
       logger.error(msg);
       throw new IllegalArgumentException(msg);
     }
 
     if(margin < 0 || margin > universeSize){
-      String msg = "An assertion must have a non-negative margin that is less than universe size";
+      String msg = String.format("%s An assertion must have a non-negative margin that is " +
+          "less than universe size (margin of %d provided with universe size %d). " +
+          "Throwing an IllegalArgumentException.", prefix, margin, universeSize);
       logger.error(msg);
       throw new IllegalArgumentException(msg);
     }
 
     if(winner.equals(loser)){
-      String msg = "The winner and loser of an assertion must not be the same candidate.";
+      String msg = String.format("%s The winner and loser of an assertion must not be the same " +
+          "candidate (%s provided for both). Throwing an IllegalArgumentException.", prefix, winner);
       logger.error(msg);
       throw new IllegalArgumentException(msg);
     }
@@ -240,6 +249,9 @@ public abstract class Assertion {
 
     this.difficulty = difficulty;
     this.assumedContinuing = assumedContinuing;
+
+    logger.debug(String.format("%s Diluted margin computed: %f. Construction complete.",
+        prefix, dilutedMargin));
   }
 
   /**
@@ -357,6 +369,11 @@ public abstract class Assertion {
         twoVoteUnderCount+""
     );
   }
+
+  /**
+   * Return a description of the Assertion in a human-readable format.
+   */
+  public abstract String getDescription();
 
   /**
    * Print the assertion type, either NEN or NEB.

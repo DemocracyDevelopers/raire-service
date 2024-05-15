@@ -32,6 +32,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
 
 public class testUtils {
 
@@ -45,6 +46,12 @@ public class testUtils {
    * Comparator for doubles within a specific tolerance.
    */
   private static final DoubleComparator doubleComparator = new DoubleComparator();
+  /**
+   * Print log statement indicating that a specific test has started running.
+   */
+  public static void log(Logger logger, String test){
+    logger.debug(String.format("RUNNING TEST: %s.",test));
+  }
 
   /**
    * Utility to check that the API json response to a get assertions request contains the right metadata.

@@ -22,13 +22,11 @@ server:
   error:
     include-message: always
 
-raire:
-
-
 logging:
   level:
     ROOT: WARN
-    org.springframework.web: DEBUG
+    org.springframework.web: WARN
     org.hibernate: ERROR
+    au.org.democracydevelopers: DEBUG
   file:
      name: raire-service.log
