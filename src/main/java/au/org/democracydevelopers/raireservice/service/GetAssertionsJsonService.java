@@ -45,9 +45,9 @@ import org.springframework.stereotype.Service;
  * Assertions are retrieved for a contest as specified in a GetAssertionsRequest.
  */
 @Service
-public class GetAssertionsService {
+public class GetAssertionsJsonService {
 
-  private final static Logger logger = LoggerFactory.getLogger(GetAssertionsService.class);
+  private final static Logger logger = LoggerFactory.getLogger(GetAssertionsJsonService.class);
 
   private final AssertionRepository assertionRepository;
 
@@ -55,7 +55,7 @@ public class GetAssertionsService {
    * All-args constructor.
    * @param assertionRepository Repository for retrieval of assertions from the colorado-rla database.
    */
-  public GetAssertionsService(AssertionRepository assertionRepository){
+  public GetAssertionsJsonService(AssertionRepository assertionRepository){
     this.assertionRepository = assertionRepository;
   }
 

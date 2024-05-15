@@ -23,21 +23,13 @@ package au.org.democracydevelopers.raireservice.response;
 import java.beans.ConstructorProperties;
 
 /**
- * The success response to a GenerateAssertionsRequest.
- * This simply returns the winner, as calculated by raire, along with the
- * name of the contest for which the initial request was made.
+ * The success response to a GenerateAssertionsRequest. This simply returns the winner, as
+ * calculated by raire, along with the name of the contest for which the initial request was made.
+ *
+ * @param contestName The name of the contest.
+ * @param winner      The winner of the contest, as calculated by raire.
  */
-public class GenerateAssertionsResponse {
-
-  /**
-   * The name of the contest.
-   */
-  public final String contestName;
-
-  /**
-   * The winner of the contest, as calculated by raire.
-   */
-  public final String winner;
+public record GenerateAssertionsResponse(String contestName, String winner) {
 
   /**
    * All args constructor.
@@ -46,8 +38,6 @@ public class GenerateAssertionsResponse {
    * @param winner      the name of the winner.
    */
   @ConstructorProperties({"contestName", "winner"})
-  public GenerateAssertionsResponse(String contestName, String winner) {
-    this.contestName = contestName;
-    this.winner = winner;
+  public GenerateAssertionsResponse {
   }
 }

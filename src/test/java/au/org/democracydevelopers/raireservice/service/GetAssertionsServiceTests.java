@@ -76,7 +76,7 @@ public class GetAssertionsServiceTests {
   @Test
   @Transactional
   void existentContestNoAssertions(){
-    GetAssertionsService service = new GetAssertionsService(assertionRepository);
+    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("No CVR Mayoral",
         List.of(), new BigDecimal("0.10"));
 
@@ -93,7 +93,7 @@ public class GetAssertionsServiceTests {
   @Test
   @Transactional
   void nonExistentContestNoAssertions(){
-    GetAssertionsService service = new GetAssertionsService(assertionRepository);
+    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("Non-Existent Contest Name",
         List.of(), new BigDecimal("0.10"));
 
@@ -109,7 +109,7 @@ public class GetAssertionsServiceTests {
   @Transactional
   @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
   void retrieveAssertionsExistentContestOneNEBAssertion() throws RaireServiceException {
-    GetAssertionsService service = new GetAssertionsService(assertionRepository);
+    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEB Assertion Contest",
         List.of("Alice", "Bob"), new BigDecimal("0.10"));
 
@@ -149,7 +149,7 @@ public class GetAssertionsServiceTests {
   @Transactional
   @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
   void retrieveAssertionsExistentContestOneNENAssertion() throws RaireServiceException {
-    GetAssertionsService service = new GetAssertionsService(assertionRepository);
+    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN Assertion Contest",
         List.of("Alice", "Charlie", "Diego", "Bob"), new BigDecimal("0.10"));
 
@@ -192,7 +192,7 @@ public class GetAssertionsServiceTests {
   @Transactional
   @Sql(scripts = {"/simple_assertions_in_progress.sql"}, executionPhase = BEFORE_TEST_METHOD)
   void retrieveAssertionsOneNENOneNEBAssertionInProgress() throws RaireServiceException {
-    GetAssertionsService service = new GetAssertionsService(assertionRepository);
+    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
         List.of("Liesl", "Wendell", "Amanda", "Chuan"), new BigDecimal("0.05"));
 
@@ -243,7 +243,7 @@ public class GetAssertionsServiceTests {
   @Transactional
   @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
   void retrieveAssertionsInconsistentRequest1()  {
-    GetAssertionsService service = new GetAssertionsService(assertionRepository);
+    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
         List.of("Alice", "Charlie", "Diego", "Bob"), new BigDecimal("0.10"));
 
@@ -262,7 +262,7 @@ public class GetAssertionsServiceTests {
   @Transactional
   @Sql(scripts = {"/simple_assertions.sql"}, executionPhase = BEFORE_TEST_METHOD)
   void retrieveAssertionsInconsistentRequest2()  {
-    GetAssertionsService service = new GetAssertionsService(assertionRepository);
+    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
         List.of(), new BigDecimal("0.10"));
 

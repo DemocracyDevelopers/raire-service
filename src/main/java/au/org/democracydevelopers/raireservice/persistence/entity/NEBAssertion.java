@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
  * a higher tally than a candidate _loser_. What this means is that the minimum possible tally
  * that _winner_ will have at any stage of tabulation is greater than the maximum possible
  * tally _loser_ can ever achieve. For more detail on NEB assertions, refer to the Guide to RAIRE.
- *
  * The constructor for this class takes a raire-java NEB assertion construct (NotEliminatedBefore)
  * and translates it into a NEBAssertion entity, suitable for storage in the corla database.
  */
@@ -100,7 +99,7 @@ public class NEBAssertion extends Assertion {
    * @return The string "NEB"
    */
   @Override
-  public String printAssertionType() {
+  public String gettAssertionType() {
     return "NEB";
   }
 }

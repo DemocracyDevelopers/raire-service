@@ -88,13 +88,6 @@ public class Metadata {
    */
   public final static String ESTIMATED_SAMPLES = "Estimated samples to audit";
 
-  /**
-   * List of statistics we find the minimum or maximum of.
-   */
-  public final static List<String> statisticNames = List.of(MARGIN, DILUTED_MARGIN,
-      DIFFICULTY, CURRENT_RISK, OPTIMISTIC_SAMPLES, ESTIMATED_SAMPLES);
-
-
   // Other headers used in parts of the csv
   public final static String CONTEST_NAME_HEADER = "Contest name";
   public final static String CANDIDATES_HEADER = "Candidates";

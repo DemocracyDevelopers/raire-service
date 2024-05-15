@@ -30,7 +30,7 @@ import static au.org.democracydevelopers.raireservice.service.Metadata.MARGIN;
 import static au.org.democracydevelopers.raireservice.service.Metadata.OPTIMISTIC_SAMPLES;
 import static au.org.democracydevelopers.raireservice.service.Metadata.extremumHeaders;
 import static au.org.democracydevelopers.raireservice.service.Metadata.csvHeaders;
-import static au.org.democracydevelopers.raireservice.persistence.converters.CSVUtils.escapeThenJoin;
+import static au.org.democracydevelopers.raireservice.util.CSVUtils.escapeThenJoin;
 
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
@@ -52,9 +52,9 @@ import org.springframework.stereotype.Service;
  * the /get-assertions-csv endpoint.
  */
 @Service
-public class GetAssertionsCSVService {
+public class GetAssertionsCsvService {
 
-  private final static Logger logger = LoggerFactory.getLogger(GetAssertionsService.class);
+  private final static Logger logger = LoggerFactory.getLogger(GetAssertionsJsonService.class);
 
   private final AssertionRepository assertionRepository;
 
@@ -62,7 +62,7 @@ public class GetAssertionsCSVService {
    * All args constructor.
    * @param assertionRepository the assertion repository.
    */
-  public GetAssertionsCSVService(AssertionRepository assertionRepository) {
+  public GetAssertionsCsvService(AssertionRepository assertionRepository) {
     this.assertionRepository = assertionRepository;
   }
 
@@ -102,6 +102,8 @@ public class GetAssertionsCSVService {
 
       return preface + extrema + "\n\n" + headers + "\n" + contents;
 
+    } catch(RaireServiceException ex) {
+      throw ex;
     } catch (Exception e) {
       String msg = "Error retrieving assertions for the contest " + request.contestName;
       logger.error("GetAssertionsCSVService::generateCSV" + msg);
@@ -204,35 +206,35 @@ public class GetAssertionsCSVService {
     List<String> csvRows = new ArrayList<>();
     DoubleComparator doubleComparator = new DoubleComparator();
 
-    extremumResult<Integer> marginResult = findExtremum(sortedAssertions,
+    // Minimum margin.
+    csvRows.add(findExtremum(sortedAssertions,
         MARGIN, extremumType.MIN, Assertion::getMargin,  Integer::compare
-    );
-    csvRows.add(marginResult.toCSVRow());
+    ).toCSVRow());
 
-    extremumResult<Double> dilutedMarginResult = findExtremum(sortedAssertions,
+    // Minimum diluted margin.
+    csvRows.add(findExtremum(sortedAssertions,
         DILUTED_MARGIN, extremumType.MIN, Assertion::getDilutedMargin, doubleComparator
-    );
-    csvRows.add(dilutedMarginResult.toCSVRow());
+    ).toCSVRow());
 
-    extremumResult<Double> difficultyResult = findExtremum(sortedAssertions,
+    // Maximum difficulty.
+    csvRows.add(findExtremum(sortedAssertions,
         DIFFICULTY, extremumType.MAX, Assertion::getDifficulty, doubleComparator
-    );
-    csvRows.add(difficultyResult.toCSVRow());
+    ).toCSVRow());
 
-    extremumResult<BigDecimal> currentRiskResult = findExtremum(sortedAssertions,
+    // Maximum current risk.
+    csvRows.add(findExtremum(sortedAssertions,
         CURRENT_RISK, extremumType.MAX, Assertion::getCurrentRisk, BigDecimal::compareTo
-    );
-    csvRows.add(currentRiskResult.toCSVRow());
+    ).toCSVRow());
 
-    extremumResult<Integer> optimisticSamplesResult = findExtremum(sortedAssertions,
+    // Maximum optimistic samples to audit.
+    csvRows.add(findExtremum(sortedAssertions,
         OPTIMISTIC_SAMPLES, extremumType.MAX, Assertion::getOptimisticSamplesToAudit, Integer::compare
-    );
-    csvRows.add(optimisticSamplesResult.toCSVRow());
+    ).toCSVRow());
 
-    extremumResult<Integer> estimatedSamplesResult = findExtremum(sortedAssertions,
+    // Maximum estimated samples to audit.
+    csvRows.add(findExtremum(sortedAssertions,
         ESTIMATED_SAMPLES, extremumType.MAX, Assertion::getEstimatedSamplesToAudit,  Integer::compare
-    );
-    csvRows.add(estimatedSamplesResult.toCSVRow());
+    ).toCSVRow());
 
     return String.join("\n", csvRows);
   }

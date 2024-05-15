@@ -54,7 +54,7 @@ public class GetAssertionsCSVTests {
   AssertionRepository assertionRepository;
 
   @Autowired
-  GetAssertionsCSVService getAssertionsCSVService;
+  GetAssertionsCsvService getAssertionsCSVService;
   List<String> candidates = List.of("Alice", "Bob", "Chuan", "Diego");
   List<String> trickyCharacters
       = List.of("Annoying, Alice", "\"Breaking, Bob\"", "Challenging, Chuan", "O'Difficult, Diego");

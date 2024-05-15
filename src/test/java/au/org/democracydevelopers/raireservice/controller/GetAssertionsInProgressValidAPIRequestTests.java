@@ -63,7 +63,7 @@ public class GetAssertionsInProgressValidAPIRequestTests {
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
-  private final static String getAssertionsEndpoint = "/raire/get-assertions";
+  private final static String getAssertionsEndpoint = "/raire/get-assertions-json";
   private final static String getAssertionsCSVEndpoint = "/raire/get-assertions-csv";
 
   private final static String oneNEBAssertionContest = "One NEB Assertion Contest";

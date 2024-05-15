@@ -18,12 +18,18 @@ You should have received a copy of the GNU Affero General Public License along w
 raire-service. If not, see <https://www.gnu.org/licenses/>.
 */
 
-package au.org.democracydevelopers.raireservice.persistence.converters;
+package au.org.democracydevelopers.raireservice.util;
 
 import java.util.List;
 import org.apache.commons.text.StringEscapeUtils;
 
+/**
+ * Functions for doing basic string operations useful for turning some data into a row of a csv file.
+ * (csv) escape, then join, is used by the get-assertions-csv endpoint.
+ *
+ */
 public class CSVUtils {
+
   /**
    * Take a list of strings and format them as a csv row, escaping each individually and then
    * joining them all with a comma.
@@ -33,17 +39,5 @@ public class CSVUtils {
    */
   public static String escapeThenJoin(List<String> data) {
     return String.join(", ", data.stream().map(StringEscapeUtils::escapeCsv).toList());
-  }
-
-  /**
-   * Take a list of strings and format them as a csv _cell_, escaping each individually and then
-   * joining them all with a comma, then csv-escaping them so that they're interpeted as a single
-   * entry.
-   * @param data The list of strings to be joined
-   * @return The same data, as an appropriately-escaped csv _cell_, with each element of the input
-   *         list separated by a comma.
-   */
-  public static String escapeThenJoinThenEscape(List<String> data) {
-    return StringEscapeUtils.escapeCsv(escapeThenJoin(data));
   }
 }

@@ -66,7 +66,7 @@ public class GetAssertionsValidAPIRequestTests {
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
-  private final static String getAssertionsEndpoint = "/raire/get-assertions";
+  private final static String getAssertionsEndpoint = "/raire/get-assertions-json";
 
   private final static String oneNEBAssertionContest = "One NEB Assertion Contest";
   private final static String oneNENAssertionContest = "One NEN Assertion Contest";

@@ -27,10 +27,10 @@ import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.RequestValidationException;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
-import au.org.democracydevelopers.raireservice.service.GetAssertionsCSVService;
+import au.org.democracydevelopers.raireservice.service.GetAssertionsCsvService;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException;
 import au.org.democracydevelopers.raireservice.service.GenerateAssertionsService;
-import au.org.democracydevelopers.raireservice.service.GetAssertionsService;
+import au.org.democracydevelopers.raireservice.service.GetAssertionsJsonService;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,8 +64,8 @@ public class AssertionController {
 
   private final GenerateAssertionsService generateAssertionsService;
 
-  private final GetAssertionsService getAssertionsService;
-  private final GetAssertionsCSVService getAssertionsCSVService;
+  private final GetAssertionsJsonService getAssertionsService;
+  private final GetAssertionsCsvService getAssertionsCSVService;
 
   /**
    * The API endpoint for generating assertions, by contest name, and returning the IRV winner as
@@ -179,7 +179,7 @@ public class AssertionController {
    */
   public AssertionController(ContestRepository contestRepository,
       GenerateAssertionsService generateAssertionsService,
-      GetAssertionsService getAssertionsService, GetAssertionsCSVService getAssertionsCSVService) {
+      GetAssertionsJsonService getAssertionsService, GetAssertionsCsvService getAssertionsCSVService) {
     this.contestRepository = contestRepository;
     this.generateAssertionsService = generateAssertionsService;
     this.getAssertionsService = getAssertionsService;

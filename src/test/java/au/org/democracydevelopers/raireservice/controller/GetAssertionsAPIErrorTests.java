@@ -64,7 +64,7 @@ public class GetAssertionsAPIErrorTests {
   private final static HttpHeaders httpHeaders = new HttpHeaders();
 
   private final static String baseURL = "http://localhost:";
-  private final static String getAssertionsEndpoint = "/raire/get-assertions";
+  private final static String getAssertionsEndpoint = "/raire/get-assertions-json";
 
   @LocalServerPort
   private int port;

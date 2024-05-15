@@ -20,9 +20,8 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
-import static au.org.democracydevelopers.raireservice.persistence.converters.CSVUtils.escapeThenJoin;
+import static au.org.democracydevelopers.raireservice.util.CSVUtils.escapeThenJoin;
 
-import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -31,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import jakarta.persistence.*;
 import java.util.Map;
-import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.ReadOnlyProperty;
@@ -195,13 +193,6 @@ public abstract class Assertion {
   protected BigDecimal currentRisk = new BigDecimal("1.00");
 
   /**
-   * Get the difficulty. Used only for testing.
-   */
-  public double getDifficulty() {
-    return difficulty;
-  }
-
-  /**
    * Default no-args constructor (required for persistence).
    */
   public Assertion() {}
@@ -285,11 +276,11 @@ public abstract class Assertion {
   }
 
   /**
-   * Get the list of candidates who are assumed continuing. Used for CSV output.
-   * @return the list of assumed-continuing candidates, by name.
+   * Get the difficulty. Used for CSV output.
+   * @return the difficulty.
    */
-  public List<String> getAssumedContinuing() {
-    return assumedContinuing;
+  public double getDifficulty() {
+    return difficulty;
   }
 
   /**
@@ -314,46 +305,6 @@ public abstract class Assertion {
    */
   public int getOptimisticSamplesToAudit() {
     return optimisticSamplesToAudit;
-  }
-
-  /**
-   * Get the two vote undercount. Used for CSV output.
-   * @return the two vote undercount.
-   */
-  public int getTwoVoteUnderCount() {
-    return twoVoteUnderCount;
-  }
-
-  /**
-   * Get the one vote undercount. Used for CSV output.
-   * @return the one vote undercount.
-   */
-  public int getOneVoteUnderCount() {
-    return oneVoteUnderCount;
-  }
-
-  /**
-   * Get the one vote overcount. Used for CSV output.
-   * @return the one vote overcount.
-   */
-  public int getOneVoteOverCount() {
-    return oneVoteOverCount;
-  }
-
-  /**
-   * Get the two vote overcount. Used for CSV output.
-   * @return the two vote overcount.
-   */
-  public int getTwoVoteOverCount() {
-    return twoVoteOverCount;
-  }
-
-  /**
-   * Get the count of discrepancies that are neither overcounts nor undercounts. Used for CSV output.
-   * @return the count of non-impactful discrepancies.
-   */
-  public int getOtherCount() {
-    return otherCount;
   }
 
   /**
@@ -389,7 +340,7 @@ public abstract class Assertion {
   public List<String> asCSVRow() {
     var fm = new DecimalFormat("0.0###");
     return List.of(
-        printAssertionType(),
+        gettAssertionType(),
         winner,
         loser,
         escapeThenJoin(assumedContinuing),
@@ -410,5 +361,5 @@ public abstract class Assertion {
   /**
    * Print the assertion type, either NEN or NEB.
    */
-  abstract String printAssertionType();
+  abstract String gettAssertionType();
 }
