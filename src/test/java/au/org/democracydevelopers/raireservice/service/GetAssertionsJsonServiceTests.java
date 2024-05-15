@@ -42,17 +42,17 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Tests of assertion retrieval in GetAssertionsService. Data is preloaded into the database
- * using src/test/resources/data.sql. Note that tests of GetAssertionsService have been
+ * Tests of assertion retrieval in GetAssertionsJsonService. Data is preloaded into the database
+ * using src/test/resources/data.sql. Note that tests of GetAssertionsJsonService have been
  * spread across several test classes, each defined with respect to a different test container.
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsServiceTests {
+public class GetAssertionsJsonServiceTests {
 
-  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsServiceTests.class);
+  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsJsonServiceTests.class);
 
   @Autowired
   AssertionRepository assertionRepository;

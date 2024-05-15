@@ -50,19 +50,19 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Tests of assertion retrieval in GetAssertionsService. Assertions and other relevant data is
+ * Tests of assertion retrieval in GetAssertionsJsonService. Assertions and other relevant data is
  * preloaded into the test database from: src/test/resources/assertions_in_progress.sql.
- * Note that tests of GetAssertionsService have been spread across several test classes, each
+ * Note that tests of GetAssertionsJsonService have been spread across several test classes, each
  * defined with respect to a different test container.
  */
 @ActiveProfiles("assertions-in-progress")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsServiceInProgressTests {
+public class GetAssertionsJsonServiceInProgressTests {
 
   private static final Logger logger = LoggerFactory.getLogger(
-      GetAssertionsServiceInProgressTests.class);
+      GetAssertionsJsonServiceInProgressTests.class);
 
   @Autowired
   AssertionRepository assertionRepository;
@@ -81,7 +81,7 @@ public class GetAssertionsServiceInProgressTests {
   @Transactional
   void retrieveAssertionsOneNENOneNEBAssertionInProgress() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgress");
-    GetAssertionsService service = new GetAssertionsService(assertionRepository);
+    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
         List.of("Liesl", "Wendell", "Amanda", "Chuan"), new BigDecimal("0.05"));
 

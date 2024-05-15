@@ -77,14 +77,21 @@ public class GetAssertionsCsvService {
    *         occurs.
    */
   public String generateCSV(GetAssertionsRequest request) throws RaireServiceException {
+    final String prefix = "[generateCSV]";
     try {
+      logger.debug(String.format("%s Preparing to export assertions as CSV for contest %s.",
+          prefix, request.contestName));
+      logger.debug(String.format("%s (Database access) Retrieve all assertions for contest %s.",
+          prefix, request.contestName));
+
       // Retrieve the assertions.
       List<Assertion> assertions = assertionRepository.findByContestName(request.contestName);
 
       // If the contest has no assertions, return an error.
       if (assertions.isEmpty()) {
-        String msg = "No assertions have been generated for the contest " + request.contestName;
-        logger.error("GetAssertionsCSVService::generateCSV" + msg);
+        final String msg = String.format("%s No assertions have been generated for the contest %s.",
+            prefix, request.contestName);
+        logger.error(msg);
         throw new RaireServiceException(msg, RaireErrorCodes.NO_ASSERTIONS_PRESENT);
       }
 
@@ -95,19 +102,24 @@ public class GetAssertionsCsvService {
 
       // Write metadata/summary at the top of the file, then the extrema data, then the csv header
       // row, then the assertion data.
+      logger.debug(String.format("%s Converting %d assertions into csv format.", prefix,
+          assertions.size()));
       String preface = makePreface(request);
       String extrema = findExtrema(sortedAssertions);
       String headers = escapeThenJoin(csvHeaders);
       String contents = makeContents(sortedAssertions);
 
+      logger.debug(String.format("%s %d assertions translated to csv.", prefix, assertions.size()));
       return preface + extrema + "\n\n" + headers + "\n" + contents;
 
     } catch(RaireServiceException ex) {
+      logger.error(String.format("%s RaireServiceException caught. Passing to caller: %s",
+          prefix, ex.getMessage()));
       throw ex;
     } catch (Exception e) {
-      String msg = "Error retrieving assertions for the contest " + request.contestName;
-      logger.error("GetAssertionsCSVService::generateCSV" + msg);
-      throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
+      logger.error(String.format("%s Generic exception caught. Passing to caller: %s",
+          prefix, e.getMessage()));
+      throw new RaireServiceException(e.getMessage(), RaireErrorCodes.INTERNAL_ERROR);
     }
   }
 

@@ -68,14 +68,16 @@ public class GetAssertionsJsonService {
    * @throws RaireServiceException when no assertions exist for the contest, or an error has
    * arisen during retrieval of assertions.
    */
-  public RaireSolution getRaireSolution(GetAssertionsRequest request) throws RaireServiceException
-  {
+  public RaireSolution getRaireSolution(GetAssertionsRequest request)
+      throws RaireServiceException {
     final String prefix = "[getRaireSolution]";
     try {
       logger.debug(String.format("%s Preparing to build a RaireSolution for serialisation into " +
               "assertion visualiser report for contest %s.", prefix, request.contestName));
       logger.debug(String.format("%s (Database access) Retrieve all assertions for contest %s.",
           prefix, request.contestName));
+
+      // Retrieve the assertions.
       List<Assertion> assertions = assertionRepository.findByContestName(request.contestName);
 
       // If the contest has no assertions, return an error.
@@ -102,7 +104,7 @@ public class GetAssertionsJsonService {
       List<AssertionAndDifficulty> translated = assertions.stream().map(
           a -> a.convert(request.candidates)).toList();
 
-      logger.debug(String.format("%s %d assertions translated.", prefix,
+      logger.debug(String.format("%s %d assertions translated to json.", prefix,
           assertions.size()));
       double difficulty = 0;
       int margin = 0;
