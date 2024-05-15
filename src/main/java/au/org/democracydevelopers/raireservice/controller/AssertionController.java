@@ -31,7 +31,6 @@ import au.org.democracydevelopers.raireservice.service.GetAssertionsCSVService;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException;
 import au.org.democracydevelopers.raireservice.service.GenerateAssertionsService;
 import au.org.democracydevelopers.raireservice.service.GetAssertionsService;
-import org.springframework.http.HttpHeaders;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,8 +119,7 @@ public class AssertionController {
 
   /**
    * The API endpoint for finding and returning assertions, by contest name. This endpoint returns
-   * assertions in the form of a JSON Visualiser Report. Thrown exceptions are handled by
-   * ControllerExceptionHandler.
+   * assertions in the form of a JSON Visualiser Report.
    * @param request a GetAssertionsRequest, specifying an IRV contest name for which to retrieve the
    *        assertions.
    * @return the assertions, as JSON (in the case of success) or an error.
@@ -133,7 +131,7 @@ public class AssertionController {
    *         if there are no assertions for the contest.
    * These exceptions are handled by ControllerExceptionHandler.
    */
-  @PostMapping(path = "/get-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(path = "/get-assertions-json", produces = MediaType.APPLICATION_JSON_VALUE)
   @ResponseBody
   public ResponseEntity<RaireSolution> serveJson(@RequestBody GetAssertionsRequest request)
       throws RequestValidationException, RaireServiceException {
@@ -161,19 +159,16 @@ public class AssertionController {
    */
   @PostMapping(path = "/get-assertions-csv")
   @ResponseBody
-  public ResponseEntity<byte []> serveCSV(@RequestBody GetAssertionsRequest request)
+  public ResponseEntity<String> serveCSV(@RequestBody GetAssertionsRequest request)
       throws RequestValidationException, RaireServiceException {
 
+    // Validate the request.
     request.Validate(contestRepository);
 
-    // Extract a RaireSolution containing the assertions that we want, then convert to csv.
-    byte[] csv = getAssertionsCSVService.generateCSV(request).getBytes();
+    // Extract the assertions as csv.
+    String csv = getAssertionsCSVService.generateCSV(request);
 
-    // Set correct headers; return response.
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-    headers.setContentDispositionFormData("attachment", "assertions.csv");
-    return new ResponseEntity<>(csv, headers, HttpStatus.OK);
+    return new ResponseEntity<>(csv, HttpStatus.OK);
   }
 
   /**
