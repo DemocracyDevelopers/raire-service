@@ -25,8 +25,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
+import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -34,16 +38,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
-/*
+/**
  * Tests on GenerateAssertionsRequests, particularly focusing on the validation step.
  * Contests which will be used to test the validity of the GenerateAssertionsRequest are
- * pre-loaded into the database using src/test/resources/data.sql.
+ * preloaded into the database using src/test/resources/data.sql.
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class GenerateAssertionsRequestTests {
+
+  private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsRequestTests.class);
 
   @Autowired
   ContestRepository contestRepository;
@@ -60,6 +66,7 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void validRequestForSingleIRVContestIsValid() {
+    testUtils.log(logger, "validRequestForSingleIRVContestIsValid");
     GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(ballina,
         100, 100, candidates);
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
@@ -70,6 +77,7 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void validRequestForCrossCountyIRVContestIsValid() {
+    testUtils.log(logger, "validRequestForCrossCountyIRVContestIsValid");
     GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(multiCounty,
         100, 100, candidates);
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
@@ -80,11 +88,12 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void requestForNonexistentContestIsInvalid() {
+    testUtils.log(logger, "requestForNonexistentContestIsInvalid");
     GenerateAssertionsRequest invalidRequest = new GenerateAssertionsRequest(
         "NonExistentContest", 100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> invalidRequest.Validate(contestRepository));
-    assertTrue(ex.getMessage().toLowerCase().contains("No such contest".toLowerCase()));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No such contest"));
   }
 
   /**
@@ -93,12 +102,13 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void validRequestForPluralityContestIsInvalid() {
+    testUtils.log(logger, "validRequestForPluralityContestIsInvalid");
     String validPlurality = "Valid Plurality Contest";
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(validPlurality,
         100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().toLowerCase().contains("not all IRV".toLowerCase()));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "not comprised of all IRV"));
   }
 
   /**
@@ -107,12 +117,13 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void validRequestForMixedContestTypesIsInvalid() {
+    testUtils.log(logger, "validRequestForMixedContestTypesIsInvalid");
     String invalidMixed = "Invalid Mixed Contest";
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(invalidMixed,
         100, 100,  candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().toLowerCase().contains("not all IRV".toLowerCase()));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "not comprised of all IRV"));
   }
 
   /**
@@ -120,11 +131,12 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void requestWithNullNameIsInvalid() {
+    testUtils.log(logger, "requestWithNullNameIsInvalid");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(null,
         100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("No contest name"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No contest name specified"));
   }
 
   /**
@@ -132,11 +144,12 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void requestWithEmptyNameIsInvalid() {
+    testUtils.log(logger, "requestWithEmptyNameIsInvalid");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest("",
         100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("No contest name"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No contest name specified"));
   }
 
   /**
@@ -144,11 +157,12 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void requestWithWhitespaceNameIsInvalid() {
+    testUtils.log(logger, "requestWithWhitespaceNameIsInvalid");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest("   ",
         100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("No contest name"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No contest name specified"));
   }
 
   /**
@@ -156,11 +170,12 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void requestWithNullCandidateListIsInvalid() {
+    testUtils.log(logger, "requestWithNullCandidateListIsInvalid");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(ballina,
         100, 100, null);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Bad candidate list"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "bad candidate list"));
   }
 
   /**
@@ -168,11 +183,12 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void requestWithEmptyCandidateListIsInvalid() {
+    testUtils.log(logger, "requestWithEmptyCandidateListIsInvalid");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(ballina,
         100, 100, List.of());
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Bad candidate list"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "bad candidate list"));
   }
 
   /**
@@ -180,11 +196,12 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void requestWithWhitespaceCandidateNameIsInvalid() {
+    testUtils.log(logger, "requestWithWhitespaceCandidateNameIsInvalid");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(ballina,
         50, 50, List.of("Alice","    "));
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Bad candidate list"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "bad candidate list"));
   }
 
   /**
@@ -192,11 +209,13 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void ZeroTotalAuditableBallotsIsInvalid() {
+    testUtils.log(logger, "ZeroTotalAuditableBallotsIsInvalid");
     GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(multiCounty,
         0, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> validRequest.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Non-positive total auditable ballots"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "Non-positive total auditable ballots"));
   }
 
 
@@ -205,11 +224,13 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void negativeTotalAuditableBallotsIsInvalid() {
+    testUtils.log(logger, "negativeTotalAuditableBallotsIsInvalid");
     GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(ballina,
         -10, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> validRequest.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Non-positive total auditable ballots"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "Non-positive total auditable ballots"));
   }
 
   /**
@@ -217,11 +238,12 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void ZeroTimeProvisionForResultIsInvalid() {
+    testUtils.log(logger, "ZeroTimeProvisionForResultIsInvalid");
     GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(ballina,
           100, 0, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> validRequest.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Non-positive time limit"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "Non-positive time limit"));
   }
 
 
@@ -230,10 +252,11 @@ public class GenerateAssertionsRequestTests {
    */
   @Test
   public void negativeTimeProvisionForResultIsInvalid() {
+    testUtils.log(logger, "negativeTimeProvisionForResultIsInvalid");
     GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(ballina,
         100, -100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> validRequest.Validate(contestRepository));
-    assertTrue(ex.getMessage().contains("Non-positive time limit"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "Non-positive time limit"));
   }
 }

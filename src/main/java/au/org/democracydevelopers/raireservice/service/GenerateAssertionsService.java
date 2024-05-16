@@ -82,7 +82,13 @@ public class GenerateAssertionsService {
    */
   public RaireResultOrError generateAssertions(GenerateAssertionsRequest request)
       throws RaireServiceException {
+    final String prefix = "[generateAssertions]";
     try{
+      logger.debug(String.format("%s Preparing to generate assertions for contest %s. Request " +
+          "parameters: candidate list (%s); total auditable ballots (%d); and time limit (%f)",
+          prefix, request.contestName, request.candidates, request.totalAuditableBallots,
+          request.timeLimitSeconds));
+
       // Use raire-java to consolidate the votes, collecting all votes with the same ranking
       // together and representing that collection as a single ranking with an associated number
       // denoting how many votes with that ranking exist.
@@ -91,19 +97,25 @@ public class GenerateAssertionsService {
       // First extract all county level contests matching the contest name in the request. For
       // these contests, extract CVR vote data from the database, and add those votes to the
       // vote consolidator.
+      logger.debug(String.format("%s (Database access) Collecting all vote rankings for contest " +
+          "%s from CVRs in database.", prefix, request.contestName));
       final List<String[]> votes = contestRepository.findByName(request.contestName).stream().map(
           c -> cvrContestInfoRepository.getCVRs(c.getContestID(), c.getCountyID())).
           flatMap(List::stream).toList();
 
       if(votes.size() > request.totalAuditableBallots){
-        final String msg = votes.size() + " votes present for contest " + request.contestName +
-            " but a universe size of " + request.totalAuditableBallots + " ballots has been " +
-            " specified in the assertion generation request.";
-        logger.error("GenerateAssertionsService::generateAssertions " + msg);
+        final String msg = String.format("%s %d votes present for contest %s but a universe size of "
+            + "%d specified in the assertion generation request. Throwing a RaireServiceException.",
+            prefix, votes.size(), request.contestName, request.totalAuditableBallots);
+        logger.error(msg);
         throw new RaireServiceException(msg, RaireErrorCodes.INVALID_TOTAL_AUDITABLE_BALLOTS);
       }
 
+      logger.debug(String.format("%s Adding all extracted rankings to a consolidator to identify " +
+          "unique rankings and their number.", prefix));
       votes.forEach(consolidator::addVoteNames);
+
+      logger.debug(String.format("%s Votes consolidated.", prefix));
 
       // If the extracted votes are valid, get raire-java to generate assertions.
       // First, form a metadata map containing contest details.
@@ -112,34 +124,47 @@ public class GenerateAssertionsService {
       metadata.put(Metadata.CONTEST, request.contestName);
 
       // Create the RaireProblem containing all information raire-java needs.
+      logger.debug(String.format("%s Creating the RaireProblem to provide to raire-java with " +
+          "parameters: candidates (%s); contest name (%s); number of candidates (%d); " +
+          "total auditable ballots (%d); minimize assertions trimming algorithm; and time limit %f.",
+          prefix, request.candidates, request.contestName, request.candidates.size(),
+              request.totalAuditableBallots, request.timeLimitSeconds));
       RaireProblem raireProblem = new RaireProblem(
           metadata, consolidator.getVotes(), request.candidates.size(), null,
           new BallotComparisonOneOnDilutedMargin(request.totalAuditableBallots),
-          TrimAlgorithm.MinimizeAssertions, null,
-          (double) request.timeLimitSeconds
+          TrimAlgorithm.MinimizeAssertions, null, (double) request.timeLimitSeconds
       );
 
       // Tell raire-java to generate assertions, returning a RaireSolutionOrError.
-      return raireProblem.solve().solution;
+      logger.debug(String.format("%s Calling raire-java.", prefix));
+      RaireResultOrError result = raireProblem.solve().solution;
+
+      // Log fact that raire-java returned; more details about result will be logged in the caller.
+      logger.debug(String.format("%s raire-java returned result; passing to controller.", prefix));
+      return result;
     }
     catch (VoteConsolidator.InvalidCandidateName ex) {
-      final String msg = "Invalid vote sent to RAIRE for contest: " + request.contestName + ". " +
-          ex.getMessage();
-      logger.error("GenerateAssertionsService::generateAssertions " + msg);
+      final String msg = String.format("%s Invalid vote sent to RAIRE for contest %s. %s",
+          prefix, request.contestName, ex.getMessage());
+      logger.error(msg);
       throw new RaireServiceException(msg, RaireErrorCodes.WRONG_CANDIDATE_NAMES);
     }
     catch(RaireServiceException ex){
+      final String msg = String.format("%s A RaireServiceException was caught; passing to caller. %s",
+          prefix, ex.getMessage());
+      logger.error(msg);
       throw ex;
     }
     catch(DataAccessException ex){
-      final String msg = "A data access exception arose when extracting CVR/Contest data. " +
-          ex.getMessage();
-      logger.error("GenerateAssertionsService::generateAssertions " + msg);
+      final String msg = String.format("%s A data access exception arose when extracting " +
+              "CVR/Contest data for contest %s. %s", prefix, request.contestName, ex.getMessage());
+      logger.error(msg);
       throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
     }
     catch(Exception ex){
-      final String msg = "An exception arose when generating assertions. " + ex.getMessage();
-      logger.error("GenerateAssertionsService::generateAssertions " + msg);
+      final String msg = String.format("%s An exception arose when generating assertions. %s",
+          prefix, ex.getMessage());
+      logger.error(msg);
       throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
     }
   }
@@ -157,39 +182,47 @@ public class GenerateAssertionsService {
   public void persistAssertions(RaireResult solution, GenerateAssertionsRequest request)
       throws RaireServiceException
   {
+    final String prefix = "[persistAssertions]";
     try{
       // Delete any existing assertions for this contest.
+      logger.debug(String.format("%s (Database access) Proceeding to delete any assertions "+
+          "stored for contest %s (if present).", prefix, request.contestName));
       assertionRepository.deleteByContestName(request.contestName);
 
       // Persist assertions formed by raire-java.
+      logger.debug(String.format("%s Proceeding to translate and save %d assertions to the " +
+              "database for contest %s.", prefix, solution.assertions.length, request.contestName));
       assertionRepository.translateAndSaveAssertions(request.contestName,
-          request.totalAuditableBallots, request.candidates.toArray(String[]::new),
-          solution.assertions);
+          request.totalAuditableBallots, request.candidates.toArray(String[]::new), solution.assertions);
+
+      logger.debug(String.format("%s Assertions persisted.", prefix));
     }
     catch(IllegalArgumentException ex){
-      final String msg = "Invalid arguments were supplied to " +
+      final String msg = String.format("%s Invalid arguments were supplied to " +
           "AssertionRepository::translateAndSaveAssertions. This is likely either a non-positive " +
           "universe size, invalid margin, or invalid combination of winner, loser and list of " +
-          "assumed continuing candidates. " + ex.getMessage();
-      logger.error("GenerateAssertionsService::persistAssertions " + msg);
+          "assumed continuing candidates. %s", prefix, ex.getMessage());
+      logger.error(msg);
       throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
     }
     catch(ArrayIndexOutOfBoundsException ex){
-      final String msg = "Array index out of bounds access in " +
+      final String msg = String.format("%s Array index out of bounds access in " +
           "AssertionRepository::translateAndSaveAssertions. This was likely due to a winner " +
           "or loser index in a raire-java assertion being invalid with respect to the " +
-          "candidates list for the contest. " + ex.getMessage();
-      logger.error("GenerateAssertionsService::persistAssertions " + msg);
+          "candidates list for the contest. %s", prefix, ex.getMessage());
+      logger.error(msg);
       throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
     }
     catch(DataAccessException ex){
-      final String msg = "A data access exception arose when persisting assertions. " + ex.getMessage();
-      logger.error("GenerateAssertionsService::persistAssertions " + msg);
+      final String msg = String.format("%s Data access exception arose when persisting assertions. %s",
+          prefix, ex.getMessage());
+      logger.error(msg);
       throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
     }
     catch(Exception ex){
-      final String msg = "An exception arose when persisting assertions. " + ex.getMessage();
-      logger.error("GenerateAssertionsService::persistAssertions " + msg);
+      final String msg = String.format("%s An exception arose when persisting assertions. %s",
+          prefix, ex.getMessage());
+      logger.error(msg);
       throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
     }
   }

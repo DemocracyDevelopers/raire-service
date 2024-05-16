@@ -22,13 +22,15 @@ package au.org.democracydevelopers.raireservice.controller;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes.TIMEOUT_CHECKING_WINNER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import au.org.democracydevelopers.raireservice.testUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -47,7 +49,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Tests for generate-assertions endpoint. This class automatically fires up the RAIRE Microservice
- * on a random port, then runs a series of (at this stage) very basic tests. Currently we check for
+ * on a random port, then runs a series of (at this stage) very basic tests. Currently, we check for
  * proper input validation, and check that one valid trivial request succeeds.
  * The list of tests is similar to GenerateAssertionsRequestTests.java, and also to
  * GetAssertionsAPITests.java when the same test is relevant to both endpoints. Note that you have
@@ -55,12 +57,13 @@ import org.springframework.test.context.ActiveProfiles;
  * initiate the microservice on their own. Contests which will be used for validity testing are
  * pre-loaded into the database using src/test/resources/data.sql.
  */
-
 @ActiveProfiles("test-containers")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GenerateAssertionsAPITests {
+
+  private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsAPITests.class);
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
@@ -77,10 +80,6 @@ public class GenerateAssertionsAPITests {
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
   }
 
-  @Test
-  void contextLoads() {
-  }
-
   /**
    * This is really just a test that the testing is working.
    * There's no mapping for the plain localhost response, so when the microservice is running it
@@ -88,6 +87,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void testErrorForNonFunctioningEndpoint() {
+    testUtils.log(logger, "testErrorForNonFunctioningEndpoint");
     ResponseEntity<String> response = restTemplate.postForEntity(baseURL + port + "/",
         new HttpEntity<>("", httpHeaders), String.class);
     assertTrue(response.getStatusCode().isSameCodeAs(HttpStatusCode.valueOf(404)));
@@ -98,6 +98,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsNoBodyError() {
+    testUtils.log(logger, "generateAssertionsNoBodyError");
     ResponseEntity<String> response = restTemplate.postForEntity(baseURL + port +
         generateAssertionsEndpoint, new HttpEntity<>("", new HttpHeaders()), String.class);
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -108,6 +109,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void testGenerateAssertionsBadRequest() {
+    testUtils.log(logger, "testGenerateAssertionsBadRequest");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     HttpEntity<String> request = new HttpEntity<>("", httpHeaders);
@@ -122,6 +124,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithNonExistentContestIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithNonExistentContestIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -141,6 +144,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithPluralityContestIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithPluralityContestIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -151,7 +155,7 @@ public class GenerateAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not all IRV"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not comprised of all IRV"));
   }
 
   /**
@@ -160,6 +164,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithMixedIRVPluralityContestIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithMixedIRVPluralityContestIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -170,7 +175,7 @@ public class GenerateAssertionsAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not all IRV"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not comprised of all IRV"));
   }
 
   /**
@@ -178,6 +183,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithMissingContestNameIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithMissingContestNameIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -196,6 +202,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithNullContestNameIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithNullContestNameIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -214,6 +221,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithEmptyContestNameIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithEmptyContestNameIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -233,6 +241,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithWhitespaceContestNameIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithWhitespaceContestNameIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -251,6 +260,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithNullCandidateListIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithNullCandidateListIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -269,6 +279,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithMissingCandidateListIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithMissingCandidateListIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -287,6 +298,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithEmptyCandidateListIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithEmptyCandidateListIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -306,6 +318,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithWhiteSpaceCandidateNameIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithWhiteSpaceCandidateNameIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -325,6 +338,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithNullAuditableBallotsIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithNullAuditableBallotsIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -345,6 +359,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithZeroAuditableBallotsIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithZeroAuditableBallotsIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -365,6 +380,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithNegativeAuditableBallotsIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithNegativeAuditableBallotsIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -386,6 +402,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithNullTimeLimitIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithNullTimeLimitIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -404,6 +421,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithZeroTimeLimitIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithZeroTimeLimitIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -422,6 +440,7 @@ public class GenerateAssertionsAPITests {
    */
   @Test
   public void generateAssertionsWithNegativeTimeLimitIsAnError() {
+    testUtils.log(logger, "generateAssertionsWithNegativeTimeLimitIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
     String requestAsJson =
@@ -440,12 +459,13 @@ public class GenerateAssertionsAPITests {
    * assertionGenerator currently implemented, but will need to be expanded to deal with real
    * error cases.
    * TODO when real AssertionGenerator class is implemented, write tests of each error state,
-   * See Issue https://github.com/DemocracyDevelopers/raire-service/issues/65
+   * See Issue github.com/DemocracyDevelopers/raire-service/issues/65
    * e.g. tied winners. See Issue.
    */
   @Test
   @Disabled
   public void testErrorHeaderResponses() {
+    testUtils.log(logger, "testErrorHeaderResponses");
     String url = "http://localhost:" +port + generateAssertionsEndpoint;
 
     String requestAsJson =

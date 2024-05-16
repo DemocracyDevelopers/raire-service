@@ -18,26 +18,30 @@ You should have received a copy of the GNU Affero General Public License along w
 raire-service. If not, see <https://www.gnu.org/licenses/>.
 */
 
-package au.org.democracydevelopers.raireservice.response;
+package au.org.democracydevelopers.raireservice.util;
 
-import java.beans.ConstructorProperties;
+import java.util.Comparator;
 
 /**
- * The success response to a GenerateAssertionsRequest. This simply returns the winner, as
- * calculated by raire, along with the name of the contest for which the initial request was made.
- *
- * @param contestName The name of the contest.
- * @param winner      The winner of the contest, as calculated by raire.
+ * A double comparison with EPS precision. Useful when finding extrema for assertions.
+ * Returns
+ * 0 when x and y are within EPS,
+ * -1 when x < y (by more than EPS),
+ * +1 when x > y (by more than EPS).
  */
-public record GenerateAssertionsResponse(String contestName, String winner) {
+public class DoubleComparator implements Comparator<Double> {
 
   /**
-   * All args constructor.
-   *
-   * @param contestName the name of the contest.
-   * @param winner      the name of the winner.
+   * Error allowed when comparing doubles.
    */
-  @ConstructorProperties({"contestName", "winner"})
-  public GenerateAssertionsResponse {
+  public static final double EPS = 0.0000001;
+
+  public int compare(Double x, Double y) {
+    if(Math.abs(x - y) < EPS) {
+      return 0;
+    } else if (x < y) {
+      return -1;
+    }
+    return 1;
   }
 }

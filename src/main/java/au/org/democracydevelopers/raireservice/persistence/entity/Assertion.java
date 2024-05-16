@@ -20,8 +20,11 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
+import static au.org.democracydevelopers.raireservice.util.CSVUtils.escapeThenJoin;
+
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -190,13 +193,6 @@ public abstract class Assertion {
   protected BigDecimal currentRisk = new BigDecimal("1.00");
 
   /**
-   * Get the difficulty. Used only for testing.
-   */
-  public double getDifficulty() {
-    return difficulty;
-  }
-
-  /**
    * Default no-args constructor (required for persistence).
    */
   public Assertion() {}
@@ -217,25 +213,34 @@ public abstract class Assertion {
       long universeSize, double difficulty, List<String> assumedContinuing)
       throws IllegalArgumentException
   {
+    final String prefix = "[all args constructor]";
+    logger.debug(String.format("%s Parameters: contest name %s; winner %s; loser %s; " +
+        "margin %d; universe size %d; difficulty %f; assumed continuing %s.", prefix,
+        contestName, winner, loser, margin, universeSize, difficulty, assumedContinuing));
+
     this.contestName = contestName;
     this.winner = winner;
     this.loser = loser;
     this.margin = margin;
 
     if(universeSize <= 0){
-      String msg = "An assertion must have a positive universe size.";
+      String msg = String.format("%s An assertion must have a positive universe size " +
+          "(%d provided). Throwing an IllegalArgumentException.", prefix, universeSize);
       logger.error(msg);
       throw new IllegalArgumentException(msg);
     }
 
     if(margin < 0 || margin > universeSize){
-      String msg = "An assertion must have a non-negative margin that is less than universe size";
+      String msg = String.format("%s An assertion must have a non-negative margin that is " +
+          "less than universe size (margin of %d provided with universe size %d). " +
+          "Throwing an IllegalArgumentException.", prefix, margin, universeSize);
       logger.error(msg);
       throw new IllegalArgumentException(msg);
     }
 
     if(winner.equals(loser)){
-      String msg = "The winner and loser of an assertion must not be the same candidate.";
+      String msg = String.format("%s The winner and loser of an assertion must not be the same " +
+          "candidate (%s provided for both). Throwing an IllegalArgumentException.", prefix, winner);
       logger.error(msg);
       throw new IllegalArgumentException(msg);
     }
@@ -244,6 +249,82 @@ public abstract class Assertion {
 
     this.difficulty = difficulty;
     this.assumedContinuing = assumedContinuing;
+
+    logger.debug(String.format("%s Diluted margin computed: %f. Construction complete.",
+        prefix, dilutedMargin));
+  }
+
+  /**
+   * Get the id. Used for sorting when assertions are output as csv.
+   * @return the id.
+   */
+  public long getId() {
+    return id;
+  }
+
+
+  /**
+   * Get the winner by name. Used for CSV output.
+   * @return the winner.
+   */
+  public String getWinner() {
+    return winner;
+  }
+
+  /**
+   * Get the loser by name. Used for CSV output.
+   * @return the loser.
+   */
+  public String getLoser() {
+    return loser;
+  }
+
+  /**
+   * Get the margin. Used for CSV output.
+   * @return the margin.
+   */
+  public Integer getMargin() {
+    return margin;
+  }
+
+  /**
+   * Get the difficulty. Used for CSV output.
+   * @return the difficulty.
+   */
+  public double getDifficulty() {
+    return difficulty;
+  }
+
+  /**
+   * Get the diluted margin. Used for CSV output.
+   * @return the diluted margin.
+   */
+  public double getDilutedMargin() {
+    return dilutedMargin;
+  }
+
+  /**
+   * Get the estimated samples to audit. Used for CSV output.
+   * @return the estimated samples to audit.
+   */
+  public int getEstimatedSamplesToAudit() {
+    return estimatedSamplesToAudit;
+  }
+
+  /**
+   * Get the optimistic samples to audit. Used for CSV output.
+   * @return the optimistic samples to audit.
+   */
+  public int getOptimisticSamplesToAudit() {
+    return optimisticSamplesToAudit;
+  }
+
+  /**
+   * Get the current risk calculation. Used for CSV output.
+   * @return the risk.
+   */
+  public BigDecimal getCurrentRisk() {
+    return currentRisk;
   }
 
   /**
@@ -259,4 +340,43 @@ public abstract class Assertion {
   public abstract AssertionAndDifficulty convert(List<String> candidates)
       throws IllegalArgumentException;
 
+  /**
+   * Return as a list of strings intended for a CSV row, in the same order as the csvHeaders in
+   * Metadata.java.
+   * Note that some of these (such as names and numbers > 999) may have commas - the receiving
+   * function needs to apply escapeThenJoin.
+   * Floating-point numbers are formatted to 4 d.p, except the (BigDecimal) current risk, which is
+   * given to its full precision.
+   * @return The assertion data, as a list of csv-escaped strings.
+   */
+  public List<String> asCSVRow() {
+    var fm = new DecimalFormat("0.0###");
+    return List.of(
+        gettAssertionType(),
+        winner,
+        loser,
+        escapeThenJoin(assumedContinuing),
+        fm.format(difficulty),
+        margin+"",
+        fm.format(dilutedMargin),
+        currentRisk.toString(),
+        estimatedSamplesToAudit+"",
+        optimisticSamplesToAudit+"",
+        twoVoteOverCount+"",
+        oneVoteOverCount+"",
+        otherCount+"",
+        oneVoteUnderCount+"",
+        twoVoteUnderCount+""
+    );
+  }
+
+  /**
+   * Return a description of the Assertion in a human-readable format.
+   */
+  public abstract String getDescription();
+
+  /**
+   * Print the assertion type, either NEN or NEB.
+   */
+  abstract String gettAssertionType();
 }

@@ -27,9 +27,13 @@ import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 
+import au.org.democracydevelopers.raireservice.service.RaireServiceException;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -41,6 +45,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface AssertionRepository extends JpaRepository<Assertion, Long> {
+
+  Logger logger = LoggerFactory.getLogger(AssertionRepository.class);
 
   /**
    * Retrieve all Assertions from the database belonging to the contest with the given name.
@@ -78,17 +84,53 @@ public interface AssertionRepository extends JpaRepository<Assertion, Long> {
       AssertionAndDifficulty[] assertions)
       throws IllegalArgumentException, ArrayIndexOutOfBoundsException
   {
-      List<Assertion> translated = Arrays.stream(assertions).map(a -> {
-        if (a.assertion.isNEB()) {
-          return new NEBAssertion(contestName, universeSize, a.margin, a.difficulty,
-              candidates, (NotEliminatedBefore) a.assertion);
-        } else {
-          return new NENAssertion(contestName, universeSize, a.margin, a.difficulty,
-              candidates, (NotEliminatedNext) a.assertion);
-        }
-      }).toList();
+    final String prefix = "[translateAndSaveAssertions]";
+    logger.debug(String.format("%s Translating and saving %s raire-java assertions to the " +
+        "database. Additional parameters: contest name %s; universe size %d; and candidates %s.",
+        prefix, assertions.length, contestName, universeSize, Arrays.toString(candidates)));
 
-      this.saveAll(translated);
+    List<Assertion> translated = Arrays.stream(assertions).map(a -> {
+      if (a.assertion.isNEB()) {
+        return new NEBAssertion(contestName, universeSize, a.margin, a.difficulty,
+            candidates, (NotEliminatedBefore) a.assertion);
+      } else {
+        return new NENAssertion(contestName, universeSize, a.margin, a.difficulty,
+            candidates, (NotEliminatedNext) a.assertion);
+      }
+    }).toList();
+
+    logger.debug(String.format("%s Translation complete.", prefix));
+    logger.debug(String.format("%s (Database access) Proceeding to save generated assertions.",prefix));
+    this.saveAll(translated);
+
+    logger.debug(String.format("%s Save all complete.", prefix));
   }
 
+  /**
+   * Find and return the list of assertions generated for the given contest, throwing a
+   * RaireServiceException with error code NO_ASSERTIONS_PRESENT when no assertions have been
+   * generated for the contest.
+   * @param contestName Name of the contest for which to return assertions.
+   * @return The list of assertions generated for the contest with name 'contestName'
+   * @throws RaireServiceException when no assertions have been generated for the given contest.
+   */
+  @Query
+  default List<Assertion> getAssertionsThrowError(String contestName) throws RaireServiceException {
+    final String prefix = "[getAssertionsThrowError]";
+    logger.debug(String.format("%s (Database access) Retrieve all assertions for contest %s.",
+        prefix, contestName));
+
+    // Retrieve the assertions.
+    List<Assertion> assertions = findByContestName(contestName);
+
+    // If the contest has no assertions, return an error.
+    if (assertions.isEmpty()) {
+      final String msg = String.format("%s No assertions have been generated for the contest %s.",
+          prefix, contestName);
+      logger.error(msg);
+      throw new RaireServiceException(msg, RaireErrorCodes.NO_ASSERTIONS_PRESENT);
+    }
+
+    return assertions;
+  }
 }

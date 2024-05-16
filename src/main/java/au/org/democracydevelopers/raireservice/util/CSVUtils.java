@@ -18,26 +18,26 @@ You should have received a copy of the GNU Affero General Public License along w
 raire-service. If not, see <https://www.gnu.org/licenses/>.
 */
 
-package au.org.democracydevelopers.raireservice.response;
+package au.org.democracydevelopers.raireservice.util;
 
-import java.beans.ConstructorProperties;
+import java.util.List;
+import org.apache.commons.text.StringEscapeUtils;
 
 /**
- * The success response to a GenerateAssertionsRequest. This simply returns the winner, as
- * calculated by raire, along with the name of the contest for which the initial request was made.
+ * Functions for doing basic string operations useful for turning some data into a row of a csv file.
+ * (csv) escape, then join, is used by the get-assertions-csv endpoint.
  *
- * @param contestName The name of the contest.
- * @param winner      The winner of the contest, as calculated by raire.
  */
-public record GenerateAssertionsResponse(String contestName, String winner) {
+public class CSVUtils {
 
   /**
-   * All args constructor.
-   *
-   * @param contestName the name of the contest.
-   * @param winner      the name of the winner.
+   * Take a list of strings and format them as a csv row, escaping each individually and then
+   * joining them all with a comma.
+   * @param data The list of strings to be joined
+   * @return The same data, as an appropriately-escaped csv row, with each element of the input list
+   *         in one cell.
    */
-  @ConstructorProperties({"contestName", "winner"})
-  public GenerateAssertionsResponse {
+  public static String escapeThenJoin(List<String> data) {
+    return String.join(", ", data.stream().map(StringEscapeUtils::escapeCsv).toList());
   }
 }

@@ -30,11 +30,14 @@ import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.service.Metadata;
+import au.org.democracydevelopers.raireservice.testUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
@@ -55,8 +58,12 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class AssertionRepositorySimpleAssertionsTests {
 
+  private static final Logger logger = LoggerFactory.getLogger(
+      AssertionRepositorySimpleAssertionsTests.class);
+
   @Autowired
   AssertionRepository assertionRepository;
+
 
   /**
    * To facilitate easier checking of retrieved/saved assertion content.
@@ -164,6 +171,7 @@ public class AssertionRepositorySimpleAssertionsTests {
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNEBAssertion(){
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertion");
     List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
     assertEquals(1, retrieved.size());
 
@@ -178,6 +186,7 @@ public class AssertionRepositorySimpleAssertionsTests {
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNENAssertion(){
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertion");
     List<Assertion> retrieved = assertionRepository.findByContestName("One NEN Assertion Contest");
     assertEquals(1, retrieved.size());
 
@@ -192,6 +201,7 @@ public class AssertionRepositorySimpleAssertionsTests {
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNENAssertionConvert(){
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertionConvert");
     List<Assertion> retrieved = assertionRepository.findByContestName("One NEN Assertion Contest");
     assertEquals(1, retrieved.size());
 
@@ -217,6 +227,7 @@ public class AssertionRepositorySimpleAssertionsTests {
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNENOneNEBAssertion(){
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNENOneNEBAssertion");
     List<Assertion> retrieved = assertionRepository.findByContestName("One NEN NEB Assertion Contest");
     assertEquals(2, retrieved.size());
 
@@ -236,6 +247,7 @@ public class AssertionRepositorySimpleAssertionsTests {
   @Test
   @Transactional
   void retrieveAssertionsMultiCountyContest(){
+    testUtils.log(logger, "retrieveAssertionsMultiCountyContest");
     List<Assertion> retrieved = assertionRepository.findByContestName("Multi-County Contest 1");
     assertEquals(3, retrieved.size());
 
@@ -259,6 +271,7 @@ public class AssertionRepositorySimpleAssertionsTests {
   @Test
   @Transactional
   void deleteAssertionsExistentContestOneNEBAssertion(){
+    testUtils.log(logger, "deleteAssertionsExistentContestOneNEBAssertion");
     long records = assertionRepository.deleteByContestName("One NEB Assertion Contest");
     assertEquals(1, records);
 
@@ -273,6 +286,7 @@ public class AssertionRepositorySimpleAssertionsTests {
   @Test
   @Transactional
   void deleteAssertionsExistentContestOneNENAssertion(){
+    testUtils.log(logger, "deleteAssertionsExistentContestOneNENAssertion");
     long records = assertionRepository.deleteByContestName("One NEN Assertion Contest");
     assertEquals(1, records);
 
@@ -287,6 +301,7 @@ public class AssertionRepositorySimpleAssertionsTests {
   @Test
   @Transactional
   void deleteAssertionsExistentContestOneNENOneNEBAssertion(){
+    testUtils.log(logger, "deleteAssertionsExistentContestOneNENOneNEBAssertion");
     long records = assertionRepository.deleteByContestName("One NEN NEB Assertion Contest");
     assertEquals(2, records);
 
@@ -301,6 +316,7 @@ public class AssertionRepositorySimpleAssertionsTests {
   @Test
   @Transactional
   void deleteAssertionsMultiCountyContest(){
+    testUtils.log(logger, "deleteAssertionsMultiCountyContest");
     long records = assertionRepository.deleteByContestName("Multi-County Contest 1");
     assertEquals(3, records);
 
@@ -316,6 +332,7 @@ public class AssertionRepositorySimpleAssertionsTests {
   @Test
   @Transactional
   void testAutoIncrementOfIDs(){
+    testUtils.log(logger, "testAutoIncrementOfIDs");
     String[] candidates = {"A", "B", "CC"};
     int[] continuing = {0,1,2};
     AssertionAndDifficulty aadCCNEBA = new AssertionAndDifficulty(

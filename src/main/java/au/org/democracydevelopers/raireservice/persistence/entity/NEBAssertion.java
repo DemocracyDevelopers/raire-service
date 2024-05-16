@@ -26,6 +26,7 @@ import au.org.democracydevelopers.raireservice.service.Metadata;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,6 @@ import org.slf4j.LoggerFactory;
  * a higher tally than a candidate _loser_. What this means is that the minimum possible tally
  * that _winner_ will have at any stage of tabulation is greater than the maximum possible
  * tally _loser_ can ever achieve. For more detail on NEB assertions, refer to the Guide to RAIRE.
- *
  * The constructor for this class takes a raire-java NEB assertion construct (NotEliminatedBefore)
  * and translates it into a NEBAssertion entity, suitable for storage in the corla database.
  */
@@ -73,26 +73,57 @@ public class NEBAssertion extends Assertion {
   {
     super(contestName, candidates[neb.winner], candidates[neb.loser], margin, universeSize,
         difficulty, new ArrayList<>());
+
+    final String prefix = "[all args constructor]";
+    logger.debug(String.format("%s Constructed NEB assertion with winner (%d) and loser (%d) " +
+            "indices with respect to candidate list %s: %s. " +
+            "Parameters: contest name %s; margin %d; universe size %d; and difficulty %f.", prefix,
+            neb.winner, neb.loser, Arrays.toString(candidates), this.getDescription(),
+            contestName, margin, universeSize, difficulty));
   }
 
   /**
    * {@inheritDoc}
    */
   public AssertionAndDifficulty convert(List<String> candidates) throws IllegalArgumentException {
+
+    final String prefix = "[convert]";
+    logger.debug(String.format("%s Constructing a raire-java AssertionAndDifficulty for the " +
+        "assertion %s with candidate list parameter %s.", prefix, this.getDescription(), candidates));
+
     int w = candidates.indexOf(winner);
     int l = candidates.indexOf(loser);
 
+    logger.debug(String.format("%s Winner index %d, Loser index %d.", prefix, w, l));
     if(w != -1 && l != -1) {
       Map<String,Object> status = new HashMap<>();
       status.put(Metadata.STATUS_RISK, currentRisk);
 
+      logger.debug(String.format("%s Constructing AssertionAndDifficulty, current risk %f.",
+          prefix, currentRisk));
       return new AssertionAndDifficulty(new NotEliminatedBefore(w, l), difficulty, margin, status);
     }
     else{
-      final String msg = "Candidate list is inconsistent with assertion.";
-      logger.error("NEBAssertion::convert " + msg);
+      final String msg = String.format("%s Candidate list provided as parameter is inconsistent " +
+              "with assertion (winner or loser not present).", prefix);
+      logger.error(msg);
       throw new IllegalArgumentException(msg);
     }
   }
 
+  /**
+   * Print the assertion type. Used for CSV file output.
+   * @return The string "NEB"
+   */
+  @Override
+  public String gettAssertionType() {
+    return "NEB";
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public String getDescription(){
+    return String.format("%s NEB %s with diluted margin %f", winner, loser, dilutedMargin);
+  }
 }

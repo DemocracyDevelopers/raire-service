@@ -23,6 +23,7 @@ package au.org.democracydevelopers.raireservice;
 import static java.util.Collections.max;
 
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
+import au.org.democracydevelopers.raireservice.util.DoubleComparator;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -31,6 +32,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
 
 public class testUtils {
 
@@ -40,6 +42,16 @@ public class testUtils {
   private static final Gson GSON =
       new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
 
+  /**
+   * Comparator for doubles within a specific tolerance.
+   */
+  private static final DoubleComparator doubleComparator = new DoubleComparator();
+  /**
+   * Print log statement indicating that a specific test has started running.
+   */
+  public static void log(Logger logger, String test){
+    logger.debug(String.format("RUNNING TEST: %s.",test));
+  }
 
   /**
    * Utility to check that the API json response to a get assertions request contains the right metadata.
@@ -47,12 +59,11 @@ public class testUtils {
    * @param contestName the expected contest name
    * @param riskLimit the expected risk limit
    * @param APIResponseBody the body of the response
-   * @param eps margin of error for floating-point comparisons
    * @return true if the response json contains a 'metadata' field, with fields matching the candidates,
    * contestname and riskLimit.
    */
   public static boolean correctMetadata(List<String> candidates, String contestName, double riskLimit,
-      String APIResponseBody, double eps) {
+      String APIResponseBody) {
     JsonObject data =  GSON.fromJson(APIResponseBody, JsonObject.class);
     JsonObject metadataElement = data.get("metadata").getAsJsonObject();
 
@@ -65,7 +76,7 @@ public class testUtils {
     }
 
     return contestName.equals(retrievedContestName)
-        && Math.abs(riskLimit - retrievedRiskLimit) < eps
+        && doubleComparator.compare(riskLimit, retrievedRiskLimit) == 0
         && setsNoDupesEqual(candidates, retrievedCandidates);
   }
 
@@ -74,18 +85,17 @@ public class testUtils {
    * @param margin expected margin
    * @param difficulty expected difficulty
    * @param APIResponseBody the body of the response
-   * @param eps margin of error for floating-point comparisons
    * @return true if the APIResponseBody's data matches the expected values.
    */
   public static boolean correctSolutionData(int margin, double difficulty, int numAssertions,
-      String APIResponseBody, double eps) {
+      String APIResponseBody) {
     JsonObject data =  GSON.fromJson(APIResponseBody, JsonObject.class);
     JsonObject solutionElement = (JsonObject) data.get("solution").getAsJsonObject().get("Ok");
     int retrievedMargin = solutionElement.get("margin").getAsInt();
     double retrievedDifficulty = solutionElement.get("difficulty").getAsDouble();
     JsonArray assertions = solutionElement.getAsJsonArray("assertions");
     return retrievedMargin == margin
-        && Math.abs(retrievedDifficulty - difficulty) < eps
+        && doubleComparator.compare(retrievedDifficulty, difficulty) == 0
         && assertions.size() == numAssertions;
   }
 
@@ -104,12 +114,12 @@ public class testUtils {
    */
   public static boolean correctIndexedAPIAssertionData(String type, int margin, double difficulty,
       int winner, int loser, List<Integer> assumedContinuing, double risk, String APIResponseBody,
-      int index, double eps) {
+      int index) {
     JsonObject data =  GSON.fromJson(APIResponseBody, JsonObject.class);
     String assertion = data.get("solution").getAsJsonObject().get("Ok").getAsJsonObject()
         .get("assertions").getAsJsonArray().get(index).getAsJsonObject().toString();
     return correctAPIAssertionData(type, margin, difficulty, winner, loser, assumedContinuing, risk,
-        assertion, eps);
+        assertion);
   }
 
   /**
@@ -124,12 +134,10 @@ public class testUtils {
    *                          to be continuing.
    * @param risk the current risk estimate.
    * @param assertionAsJson the assertion to be tested, as a json string.
-   * @param eps the error tolerance for floating-point comparisons.
    * @return true if the input data matches the data extracted from the assertion as json.
    */
   public static boolean correctAPIAssertionData(String type, int margin, double difficulty,
-      int winner, int loser, List<Integer> assumedContinuing, double risk, String assertionAsJson,
-      double eps) {
+      int winner, int loser, List<Integer> assumedContinuing, double risk, String assertionAsJson) {
     // It makes no sense to call this with NEB and a nonempty assumedContinuing.
     assert (type.equals("NEN") || assumedContinuing.isEmpty());
 
@@ -160,10 +168,10 @@ public class testUtils {
 
     return type.equals(retrievedType)
         && margin == retrievedMargin
-        && Math.abs(difficulty - difficultyElement) < eps
+        && doubleComparator.compare(difficulty, difficultyElement) == 0
         && loser == retrievedLoser
         && winner == retrievedWinner
-        && Math.abs(risk - retrievedRisk) < eps
+        && doubleComparator.compare(risk, retrievedRisk) == 0
         && assumedContinuingRight;
   }
 
@@ -179,7 +187,7 @@ public class testUtils {
    * @return true if the assertion's data match all the expected values.
    */
   public static boolean correctDBAssertionData(int margin, double dilutedMargin, double difficulty,
-      String winner, String loser, Assertion assertion, double eps) {
+      String winner, String loser, Assertion assertion) {
     String assertionAsJson = GSON.toJson(assertion);
     JsonObject data = GSON.fromJson(assertionAsJson, JsonObject.class);
 
@@ -190,8 +198,8 @@ public class testUtils {
     String retrievedWinner = data.get("winner").getAsString();
 
     return margin == retrievedMargin
-        && Math.abs(difficulty - retrievedDifficulty) < eps
-        && Math.abs(dilutedMargin - retrievedDilutedMargin) < eps
+        && doubleComparator.compare(difficulty, retrievedDifficulty) == 0
+        && doubleComparator.compare(dilutedMargin, retrievedDilutedMargin) == 0
         && loser.equals(retrievedLoser)
         && winner.equals(retrievedWinner);
   }
@@ -217,13 +225,11 @@ public class testUtils {
    * Check that the max difficulty of a list of assertions matches the expected difficulty.
    * @param expectedDifficulty the expected difficulty, generated by raire-java and raire-rs directly.
    * @param assertions the assertions to be tested
-   * @param eps the margin of error allowed for equality-comparison.
    * @return true iff the maximum difficulty among the assertions equals expectedDifficulty.
    */
-  public static boolean difficultyMatchesMax(double expectedDifficulty, List<Assertion> assertions,
-      double eps) {
+  public static boolean difficultyMatchesMax(double expectedDifficulty, List<Assertion> assertions) {
     double assertionDifficultyMax = max(assertions.stream().map(Assertion::getDifficulty).toList());
-    return Math.abs(assertionDifficultyMax - expectedDifficulty) < eps;
+    return doubleComparator.compare(assertionDifficultyMax, expectedDifficulty) == 0;
   }
 
   /**
