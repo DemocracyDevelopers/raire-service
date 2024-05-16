@@ -41,6 +41,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.function.Function;
 import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
@@ -54,7 +55,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class GetAssertionsCsvService {
 
-  private final static Logger logger = LoggerFactory.getLogger(GetAssertionsJsonService.class);
+  private final static Logger logger = LoggerFactory.getLogger(GetAssertionsCsvService.class);
 
   private final AssertionRepository assertionRepository;
 
@@ -67,7 +68,7 @@ public class GetAssertionsCsvService {
   }
 
   /**
-   * Generate CSV, main function. The csv includes
+   * Generate CSV, main function. The csv includes:
    * - a preface, with metadata about the contest and the assertions
    * - the header row for the csv columns
    * - the actual csv data, one row for each assertion
@@ -81,19 +82,9 @@ public class GetAssertionsCsvService {
     try {
       logger.debug(String.format("%s Preparing to export assertions as CSV for contest %s.",
           prefix, request.contestName));
-      logger.debug(String.format("%s (Database access) Retrieve all assertions for contest %s.",
-          prefix, request.contestName));
 
       // Retrieve the assertions.
-      List<Assertion> assertions = assertionRepository.findByContestName(request.contestName);
-
-      // If the contest has no assertions, return an error.
-      if (assertions.isEmpty()) {
-        final String msg = String.format("%s No assertions have been generated for the contest %s.",
-            prefix, request.contestName);
-        logger.error(msg);
-        throw new RaireServiceException(msg, RaireErrorCodes.NO_ASSERTIONS_PRESENT);
-      }
+      List<Assertion> assertions = assertionRepository.getAssertionsThrowError(request.contestName);
 
       // Sort the assertions by ID. This may be redundant, but it guarantees that they are arranged
       // in a consistent order over multiple csv requests.
@@ -137,8 +128,9 @@ public class GetAssertionsCsvService {
    *           be defined, but for all the known examples it's a numeric type.
    * @throws java.util.NoSuchElementException if called on an empty list of assertions.
    */
-  private <T> extremumResult<T> findExtremum(List<Assertion> sortedAssertions,
-      String statisticName, extremumType type, Function<Assertion,T> getter, Comparator<T> comparator) {
+  private <T> extremumResult<T> findExtremum(List<Assertion> sortedAssertions, String statisticName,
+      extremumType type, Function<Assertion,T> getter, Comparator<T> comparator)
+      throws NoSuchElementException {
 
     // Now we know there is at least one assertion. Initialize the extremum with the first
     // assertion's values. Throws NoSuchElementException if the assertion list is empty.
@@ -147,8 +139,8 @@ public class GetAssertionsCsvService {
 
     // Starting from the second assertion, compare each assertion's statistics to the current
     // extremum.
-    for(int i=1 ; i < sortedAssertions.size() ; i++ ) {
-      // Is this assertion's value for this statistic more extremal than our current extreumum?
+    for(int i=1 ; i < sortedAssertions.size() ; i++) {
+      // Is this assertion's value for this statistic more extremal than our current extremum?
       T statistic = getter.apply(sortedAssertions.get(i));
       var comparison = comparator.compare(statistic, extremalValue);
 
@@ -175,7 +167,7 @@ public class GetAssertionsCsvService {
   }
 
   /**
-   * The result of finding the extremum, for one statistic
+   * The result of finding the extremum, for one statistic.
    * @param statisticName the name of the statistic.
    * @param type whether this is a max or min.
    * @param value the value of the extremum (max or min).
@@ -189,8 +181,8 @@ public class GetAssertionsCsvService {
   ){
 
     /**
-     * Make the appropriate CSV row: comma-separated statistic name, value, and indices of assertions
-     * that attain it.
+     * Make the appropriate CSV row for the extremum result: comma-separated statistic name, value,
+     * and indices of assertions that produced the extremum.
      * @return a CSV row with the relevant data, as a string.
      */
     String toCSVRow() {
@@ -206,8 +198,8 @@ public class GetAssertionsCsvService {
 
   /**
    * Find the maximum or minimum (whichever is meaningful) for the important statistics: margin,
-   * diluted margin, (Raire estimated) difficulty, optimistic samples to audit, estimated samples to
-   * audit.
+   * diluted margin, (raire-java estimated) difficulty, optimistic samples to audit, estimated
+   * samples to audit.
    *
    * @param sortedAssertions The assertions, assumed to be sorted by ID.
    * @return the CSV rows for all the extrema: margin, diluted margin, difficulty, etc, along with
@@ -271,8 +263,7 @@ public class GetAssertionsCsvService {
 
   /**
    * Generate the actual csv data rows for a list of assertions. Each row is prepended with an index
-   * number (not related to the database's index) that begins at 1 and increments by 1 with each
-   * row.
+   * number (not related to the database's index) that begins at 1 and increments by 1 with each row.
    * @param assertions a list of assertions
    * @return their concatenated csv rows.
    */

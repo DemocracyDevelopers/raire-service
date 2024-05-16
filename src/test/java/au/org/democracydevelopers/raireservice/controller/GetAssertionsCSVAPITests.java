@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raireservice.testUtils;
@@ -48,18 +49,16 @@ import org.springframework.test.context.ActiveProfiles;
  * RAIRE Microservice on a random port, then runs a series of tests.
  * The tests are essentially the same as those in GetAssertionsCSVTests.java, but we're checking for
  * correct API output rather than checking the service directly.
- * Contests which will be used for validity testing are pre-loaded into the database using
+ * Contests which will be used for validity testing are preloaded into the database using
  * src/test/resources/simple_assertions_csv_challenges.sql.
  */
-
 @ActiveProfiles("csv-challenges")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GetAssertionsCSVAPITests {
 
-  private static final Logger logger = LoggerFactory.getLogger(
-      GetAssertionsInProgressValidAPIRequestTests.class);
+  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsCSVAPITests.class);
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
@@ -70,7 +69,6 @@ public class GetAssertionsCSVAPITests {
 
   private final static String trickyCharactersAsJson =
       "\"candidates\":[\"Annoying, Alice\",\"Breaking, Bob\",\"Challenging, Chuan\",\"O'Difficult, Diego\"]}";
-      // "\"candidates\":[\"Annoying, Alice\",\"\"Breaking, Bob\"\",\"Challenging, Chuan\",\"O'Difficult, Diego\"]}";
 
   @LocalServerPort
   private int port;
@@ -103,6 +101,7 @@ public class GetAssertionsCSVAPITests {
     assertTrue(response.getStatusCode().is2xxSuccessful());
     String output = response.getBody();
 
+    assertNotNull(output);
     assertTrue(output.contains("Contest name, Lots of assertions with ties Contest\n"));
     assertTrue(output.contains("Candidates, \"Alice, Bob, Chuan, Diego\"\n\n"));
     assertTrue(output.contains("Extreme item, Value, Assertion IDs"));
@@ -149,6 +148,7 @@ public class GetAssertionsCSVAPITests {
     assertTrue(response.getStatusCode().is2xxSuccessful());
     String output = response.getBody();
 
+    assertNotNull(output);
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(0)));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(1)));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(2)));
@@ -170,6 +170,7 @@ public class GetAssertionsCSVAPITests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
     String output = response.getBody();
 
+    assertNotNull(output);
     assertTrue(output.contains("Contest name, CSV Demo Contest\n"));
     assertTrue(output.contains("Candidates, \"Alice, Bob, Chuan, Diego\"\n\n"));
     assertTrue(output.contains("Extreme item, Value, Assertion IDs\n"));
