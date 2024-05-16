@@ -83,7 +83,7 @@ public class GetAssertionsJsonServiceSimpleAssertionsTests {
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNEBAssertion() throws RaireServiceException {
-    testUtils.log(logger, "");
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertion");
     GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEB Assertion Contest",
         List.of("Alice", "Bob"), new BigDecimal("0.10"));
@@ -123,7 +123,7 @@ public class GetAssertionsJsonServiceSimpleAssertionsTests {
   @Test
   @Transactional
   void retrieveAssertionsExistentContestOneNENAssertion() throws RaireServiceException {
-    testUtils.log(logger, "");
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertion");
     GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN Assertion Contest",
         List.of("Alice", "Charlie", "Diego", "Bob"), new BigDecimal("0.10"));

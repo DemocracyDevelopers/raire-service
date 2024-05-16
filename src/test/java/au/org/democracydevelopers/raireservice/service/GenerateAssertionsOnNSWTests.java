@@ -55,7 +55,6 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @EnabledIf(value = "${test-strategy.run-nsw-tests}", loadContext = true)
-// @Disabled("These tests pass but are disabled because loading in the data takes a long time.")
 public class GenerateAssertionsOnNSWTests {
 
   private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsOnNSWTests.class);
@@ -76,7 +75,7 @@ public class GenerateAssertionsOnNSWTests {
    * Difficulties are taken from raire-java::src/test/java/au/org/democracydevelopers/raire/TestNSW
    * which in turn tests against raire-rs.
    * Winners are taken from the New South Wales official election results at
-   * pastvtr.elections.nsw.gov.au/LG2101/status/mayoral
+   * https://pastvtr.elections.nsw.gov.au/LG2101/status/mayoral
    * The ballotCounts are derived from the data, but double-checked for exact match with the
    * NSWEC website.
    */
