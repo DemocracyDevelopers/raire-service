@@ -116,7 +116,7 @@ public class NEBAssertion extends Assertion {
    * @return The string "NEB"
    */
   @Override
-  public String gettAssertionType() {
+  public String getAssertionType() {
     return "NEB";
   }
 

@@ -328,6 +328,55 @@ public abstract class Assertion {
   }
 
   /**
+   * Get the number of two vote understatements.
+   * @return the number of two vote understatements.
+   */
+  public int getTwoVoteUnderCount(){ return twoVoteUnderCount; }
+
+  /**
+   * Get the number of two vote overstatements.
+   * @return the number of two vote overstatements.
+   */
+  public int getTwoVoteOverCount(){ return twoVoteOverCount; }
+
+  /**
+   * Get the number of one vote understatements.
+   * @return the number of one vote understatements.
+   */
+  public int getOneVoteUnderCount(){ return oneVoteUnderCount; }
+
+  /**
+   * Get the number of one vote overstatements.
+   * @return the number of one vote overstatements.
+   */
+  public int getOneVoteOverCount(){ return oneVoteOverCount; }
+
+  /**
+   * Get the number of 'other' discrepancies (not over or understatements with respect to this
+   * assertion).
+   * @return the number of 'other' vote overstatements.
+   */
+  public int getOtherCount(){ return otherCount; }
+
+  /**
+   * Get the mapping of CVR id to the discrepancy associated with that CVR (for this assertion).
+   * @return a mapping of CVR id to discrepancy with respect to this assertion.
+   */
+  public Map<Long,Integer> getCvrDiscrepancy() { return cvrDiscrepancy; }
+
+  /**
+   * Get the list of assumed continuing candidates for this assertion.
+   * @return the list of assumed continuing candidates for this assertion.
+   */
+  public List<String> getAssumedContinuing() { return assumedContinuing; }
+
+  /**
+   * Get the name of the contest to which this assertion belongs.
+   * @return the assertion's contest (name).
+   */
+  public String getContestName() { return contestName; }
+
+  /**
    * Construct and return a raire-java representation of this Assertion. This utility is
    * ultimately used to construct an assertions report export in the same format that raire-java
    * exports. This report is formed by serialising a RaireSolution object which itself contains
@@ -352,7 +401,7 @@ public abstract class Assertion {
   public List<String> asCSVRow() {
     var fm = new DecimalFormat("0.0###");
     return List.of(
-        gettAssertionType(),
+        getAssertionType(),
         winner,
         loser,
         escapeThenJoin(assumedContinuing),
@@ -378,5 +427,5 @@ public abstract class Assertion {
   /**
    * Print the assertion type, either NEN or NEB.
    */
-  abstract String gettAssertionType();
+  abstract String getAssertionType();
 }

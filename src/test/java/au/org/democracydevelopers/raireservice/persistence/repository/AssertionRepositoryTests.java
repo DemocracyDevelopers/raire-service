@@ -26,8 +26,8 @@ import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.testUtils;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
@@ -42,6 +42,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import static au.org.democracydevelopers.raireservice.testUtils.correctDBAssertionData;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -61,13 +62,6 @@ public class AssertionRepositoryTests {
   @Autowired
   AssertionRepository assertionRepository;
 
-
-  /**
-   * To facilitate easier checking of retrieved/saved assertion content.
-   */
-  private static final Gson GSON =
-      new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
-
   /**
    * Array of candidates: Alice, Charlie, Diego, Bob.
    */
@@ -77,80 +71,6 @@ public class AssertionRepositoryTests {
    * Array of candidates: Alice, Charlie, Bob.
    */
   private static final String[] aliceCharlieBob =  {"Alice", "Charlie", "Bob"};
-
-  /**
-   * Test assertion: Alice NEB Bob in the contest "One NEB Assertion Contest".
-   */
-  private final static String aliceNEBBob = "{\"id\":1,\"version\":0,\"contestName\":" +
-      "\"One NEB Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Bob\",\"margin\":320," +
-      "\"difficulty\":1.1,\"assumedContinuing\":[],\"dilutedMargin\":0.32,\"cvrDiscrepancy\":{}," +
-      "\"estimatedSamplesToAudit\":0,\"optimisticSamplesToAudit\":0,\"twoVoteUnderCount\":0," +
-      "\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0," +
-      "\"currentRisk\":1.00}";
-
-  /**
-   * Test assertion: Alice NEN Charlie assuming Alice, Charlie, Diego and Bob are continuing,
-   * for the contest "One NEN Assertion Contest".
-   */
-  private final static String aliceNENCharlie = "{\"id\":2,\"version\":0,\"contestName\":" +
-      "\"One NEN Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Charlie\",\"margin\":240," +
-      "\"difficulty\":3.01,\"assumedContinuing\":[\"Alice\",\"Charlie\",\"Diego\",\"Bob\"]," +
-      "\"dilutedMargin\":0.12,\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0," +
-      "\"optimisticSamplesToAudit\":0,\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0," +
-      "\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
-
-  /**
-   * Test assertion: Amanda NEB Liesl in the contest "One NEN NEB Assertion Contest".
-   */
-  private final static String amandaNEBLiesl = "{\"id\":3,\"version\":0,\"contestName\":" +
-      "\"One NEN NEB Assertion Contest\",\"winner\":\"Amanda\",\"loser\":\"Liesl\",\"margin\":112,"+
-      "\"difficulty\":0.1,\"assumedContinuing\":[],\"dilutedMargin\":0.1," +
-      "\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0,\"optimisticSamplesToAudit\":0," +
-      "\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0," +
-      "\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
-
-  /**
-   * Test assertion: Amanda NEN Wendell assuming Liesl, Wendell and Amanda are continuing,
-   * for the contest "One NEN NEB Assertion Contest".
-   */
-  private final static String amandaNENWendell = "{\"id\":4,\"version\":0,\"contestName\":" +
-      "\"One NEN NEB Assertion Contest\",\"winner\":\"Amanda\",\"loser\":\"Wendell\"," +
-      "\"margin\":560,\"difficulty\":3.17,\"assumedContinuing\":[\"Liesl\",\"Wendell\"," +
-      "\"Amanda\"],\"dilutedMargin\":0.5,\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0," +
-      "\"optimisticSamplesToAudit\":0,\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0," +
-      "\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
-
-  /**
-   * Test assertion: Charlie C. Chaplin NEB Alice P. Mangrove in "Multi-County Contest 1".
-   */
-  private final static String charlieNEBAlice = "{\"id\":5,\"version\":0,\"contestName\":" +
-      "\"Multi-County Contest 1\",\"winner\":\"Charlie C. Chaplin\",\"loser\":\"Alice P. Mangrove\"," +
-      "\"margin\":310,\"difficulty\":2.1,\"assumedContinuing\":[],\"dilutedMargin\":0.01," +
-      "\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0,\"optimisticSamplesToAudit\":0," +
-      "\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0," +
-      "\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
-
-  /**
-   * Test assertion: Alice P. Mangrove NEB Al (Bob) Jones in "Multi-County Contest 1".
-   */
-  private final static String aliceNEBAl = "{\"id\":6,\"version\":0,\"contestName\":" +
-      "\"Multi-County Contest 1\",\"winner\":\"Alice P. Mangrove\",\"loser\":\"Al (Bob) Jones\"," +
-      "\"margin\":2170,\"difficulty\":0.9,\"assumedContinuing\":[],\"dilutedMargin\":0.07," +
-      "\"cvrDiscrepancy\":{},\"estimatedSamplesToAudit\":0,\"optimisticSamplesToAudit\":0," +
-      "\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0," +
-      "\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":1.00}";
-
-  /**
-   * Test assertion: Alice P. Mangrove NEN West W. Westerson in "Multi-County Contest 1"
-   * assuming only these two candidates remain standing.
-   */
-  private final static String aliceNENwest = "{\"id\":7,\"version\":0,\"contestName\":" +
-      "\"Multi-County Contest 1\",\"winner\":\"Alice P. Mangrove\",\"loser\":\"West W. Westerson\"," +
-      "\"margin\":31,\"difficulty\":5.0,\"assumedContinuing\":[\"West W. Westerson\"," +
-      "\"Alice P. Mangrove\"],\"dilutedMargin\":0.001,\"cvrDiscrepancy\":{}," +
-      "\"estimatedSamplesToAudit\":0,\"optimisticSamplesToAudit\":0,\"twoVoteUnderCount\":0," +
-      "\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0," +
-      "\"currentRisk\":1.00}";
 
   /**
    * Retrieval of assertions for an existing contest with no associated assertions will return an
@@ -230,48 +150,84 @@ public class AssertionRepositoryTests {
     List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
     assertEquals(1, retrieved.size());
 
+    // Alice NEB Bob
     Assertion r = retrieved.get(0);
     assertEquals(NEBAssertion.class, r.getClass());
-    assertEquals(aliceNEBBob, GSON.toJson(r));
+
+    assertTrue(correctDBAssertionData(1, 320, 0.32, 1.1,
+        "Alice", "Bob", List.of(), Collections.emptyMap(), 0,
+        0, 0, 0, 0,
+        0, 0, BigDecimal.valueOf(1),
+        "One NEB Assertion Contest", r));
 
     saveAssertionsOneNENContest();
 
     retrieved = assertionRepository.findByContestName("One NEN Assertion Contest");
     assertEquals(1, retrieved.size());
 
+    // Alice NEN Charlie given Alice, Charlie, Diego and Bob remain.
     r = retrieved.get(0);
     assertEquals(NENAssertion.class, r.getClass());
-    assertEquals(aliceNENCharlie, GSON.toJson(r));
+    assertTrue(correctDBAssertionData(2, 240, 0.12, 3.01,
+        "Alice", "Charlie", List.of("Alice", "Charlie", "Diego", "Bob"),
+        Collections.emptyMap(), 0, 0, 0,
+        0, 0, 0, 0,
+        BigDecimal.valueOf(1), "One NEN Assertion Contest", r));
 
     saveAssertionsOneNENOneNEBContest();
 
     retrieved = assertionRepository.findByContestName("One NEN NEB Assertion Contest");
     assertEquals(2, retrieved.size());
 
+    // Amanda NEB Liesel
     Assertion r1 = retrieved.get(0);
     assertEquals(NEBAssertion.class, r1.getClass());
-    assertEquals(amandaNEBLiesl, GSON.toJson(r1));
+    assertTrue(correctDBAssertionData(3, 112, 0.1, 0.1,
+        "Amanda", "Liesl", List.of(), Collections.emptyMap(), 0,
+        0, 0, 0, 0,
+        0, 0, BigDecimal.valueOf(1),
+        "One NEN NEB Assertion Contest", r1));
 
+    // Amanda NEN Wendell given Amanda, Wendell and Liesl are continuing.
     Assertion r2 = retrieved.get(1);
     assertEquals(NENAssertion.class, r2.getClass());
-    assertEquals(amandaNENWendell, GSON.toJson(r2));
+    assertTrue(correctDBAssertionData(4, 560, 0.5, 3.17,
+        "Amanda", "Wendell", List.of("Liesl", "Wendell", "Amanda"),
+        Collections.emptyMap(), 0, 0, 0,
+        0, 0, 0, 0,
+        BigDecimal.valueOf(1), "One NEN NEB Assertion Contest", r2));
 
     saveAssertionsMultiCountyContest();
 
     retrieved = assertionRepository.findByContestName("Multi-County Contest 1");
     assertEquals(3, retrieved.size());
 
+    // Charlie C. Chaplin NEB Alice P. Mangrove
     r1 = retrieved.get(0);
     assertEquals(NEBAssertion.class, r1.getClass());
-    assertEquals(charlieNEBAlice, GSON.toJson(r1));
+    assertTrue(correctDBAssertionData(5, 310, 0.01, 2.1,
+        "Charlie C. Chaplin", "Alice P. Mangrove", List.of(), Collections.emptyMap(),
+        0, 0, 0, 0,
+        0, 0, 0, BigDecimal.valueOf(1),
+        "Multi-County Contest 1", r1));
 
     r2 = retrieved.get(1);
     assertEquals(NEBAssertion.class, r2.getClass());
-    assertEquals(aliceNEBAl, GSON.toJson(r2));
+    assertTrue(correctDBAssertionData(6, 2170, 0.07, 0.9,
+        "Alice P. Mangrove", "Al (Bob) Jones", List.of(), Collections.emptyMap(),
+        0, 0, 0, 0,
+        0, 0, 0, BigDecimal.valueOf(1),
+        "Multi-County Contest 1", r2));
 
+    // Alice P. Mangrove NEN West W. Westerson given only they remain.
     Assertion r3 = retrieved.get(2);
     assertEquals(NENAssertion.class, r3.getClass());
-    assertEquals(aliceNENwest, GSON.toJson(r3));
+    assertTrue(correctDBAssertionData(7, 31, 0.001, 5.0,
+        "Alice P. Mangrove", "West W. Westerson", List.of("West W. Westerson",
+            "Alice P. Mangrove"), Collections.emptyMap(), 0,
+        0, 0, 0, 0,
+        0, 0, BigDecimal.valueOf(1),
+        "Multi-County Contest 1", r3));
   }
 
 

@@ -29,11 +29,15 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 
+/**
+ * A class
+ */
 public class testUtils {
 
   /**
@@ -46,6 +50,7 @@ public class testUtils {
    * Comparator for doubles within a specific tolerance.
    */
   private static final DoubleComparator doubleComparator = new DoubleComparator();
+
   /**
    * Print log statement indicating that a specific test has started running.
    */
@@ -127,7 +132,7 @@ public class testUtils {
    * get-assertions API) matches the data entered as function parameters.
    * @param type the assertion type (NEB or NEN).
    * @param margin the absolute margin
-   * @param difficulty raire's estimated difficulty
+   * @param difficulty raire-java estimated difficulty
    * @param winner the assertion winner's index in the candidate list
    * @param loser the assertion loser's index in the candidate list
    * @param assumedContinuing if NEB, blank; if NEN, the list of indices of the candidates assumed
@@ -138,7 +143,7 @@ public class testUtils {
    */
   public static boolean correctAPIAssertionData(String type, int margin, double difficulty,
       int winner, int loser, List<Integer> assumedContinuing, double risk, String assertionAsJson) {
-    // It makes no sense to call this with NEB and a nonempty assumedContinuing.
+    // It makes no sense to call this with NEN and a nonempty assumedContinuing.
     assert (type.equals("NEN") || assumedContinuing.isEmpty());
 
     JsonObject data = GSON.fromJson(assertionAsJson, JsonObject.class);
@@ -177,7 +182,7 @@ public class testUtils {
 
 
   /**
-   * Utility to check the relevant assertion data values from json.
+   * Utility to check the relevant assertion attributes against expected values.
    * @param margin the expected raw margin
    * @param dilutedMargin the expected diluted margin - optional
    * @param difficulty the expected difficulty
@@ -188,20 +193,58 @@ public class testUtils {
    */
   public static boolean correctDBAssertionData(int margin, double dilutedMargin, double difficulty,
       String winner, String loser, Assertion assertion) {
-    String assertionAsJson = GSON.toJson(assertion);
-    JsonObject data = GSON.fromJson(assertionAsJson, JsonObject.class);
 
-    int retrievedMargin = data.get("margin").getAsInt();
-    double retrievedDilutedMargin = data.get("dilutedMargin").getAsDouble();
-    double retrievedDifficulty = data.get("difficulty").getAsDouble();
-    String retrievedLoser = data.get("loser").getAsString();
-    String retrievedWinner = data.get("winner").getAsString();
+    return margin == assertion.getMargin()
+        && doubleComparator.compare(difficulty, assertion.getDifficulty()) == 0
+        && doubleComparator.compare(dilutedMargin, assertion.getDilutedMargin()) == 0
+        && loser.equals(assertion.getLoser())
+        && winner.equals(assertion.getWinner());
+  }
 
-    return margin == retrievedMargin
-        && doubleComparator.compare(difficulty, retrievedDifficulty) == 0
-        && doubleComparator.compare(dilutedMargin, retrievedDilutedMargin) == 0
-        && loser.equals(retrievedLoser)
-        && winner.equals(retrievedWinner);
+  /**
+   * Returns true if the attributes of the given assertion are equal to those provided as input
+   * to this method.
+   * @param id Expected assertion id.
+   * @param margin Expected assertion (raw) margin.
+   * @param dilutedMargin Expected assertion diluted margin.
+   * @param difficulty Expected assertion difficulty.
+   * @param winner Expected assertion winner.
+   * @param loser Expected assertion loser.
+   * @param assumedContinuing Expected assumed continuing candidates.
+   * @param cvrDiscrepancies Expected map of CVR id to assertion discrepancies.
+   * @param estimatedSamplesToAudit Expected number of estimated samples to audit.
+   * @param optimisticSamplesToAudit Expected number of optimistic samples to audit.
+   * @param twoVoteUnderCount Expected number of two vote understatements.
+   * @param oneVoteUnderCount Expected number of one vote understatements.
+   * @param oneVoteOverCount Expected number of one vote overstatements.
+   * @param twoVoteOverCount Expected number of two vote overstatements.
+   * @param otherCount Expected number of 'other' discrepancies.
+   * @param currentRisk Expected current risk.
+   * @param contestName Expected name of the assertion's contest.
+   * @param assertion Assertion to be checked.
+   * @return True if the given assertion's attributes are as expected.
+   */
+  public static boolean correctDBAssertionData(long id, int margin, double dilutedMargin,
+      double difficulty, String winner, String loser, List<String> assumedContinuing,
+      Map<Long,Integer> cvrDiscrepancies, int estimatedSamplesToAudit, int optimisticSamplesToAudit,
+      int twoVoteUnderCount, int oneVoteUnderCount, int oneVoteOverCount, int twoVoteOverCount,
+      int otherCount, BigDecimal currentRisk, String contestName, Assertion assertion){
+
+    boolean test = correctDBAssertionData(margin, dilutedMargin, difficulty, winner,
+        loser, assertion);
+
+    return test && assertion.getEstimatedSamplesToAudit() == estimatedSamplesToAudit &&
+        assertion.getOptimisticSamplesToAudit() == optimisticSamplesToAudit &&
+        assertion.getOneVoteUnderCount() == oneVoteUnderCount &&
+        assertion.getOneVoteOverCount() == oneVoteOverCount &&
+        assertion.getTwoVoteUnderCount() == twoVoteUnderCount &&
+        assertion.getTwoVoteOverCount() == twoVoteOverCount &&
+        assertion.getOtherCount() == otherCount &&
+        assertion.getCurrentRisk().compareTo(currentRisk) == 0 &&
+        correctAssumedContinuing(assumedContinuing, assertion) &&
+        assertion.getCvrDiscrepancy().equals(cvrDiscrepancies) &&
+        assertion.getId() == id &&
+        assertion.getContestName().equals(contestName);
   }
 
 
@@ -213,12 +256,7 @@ public class testUtils {
    * @return true if the NEN assertion's 'assumed continuing' list matches expectedNames, ignoring order.
    */
   public static boolean correctAssumedContinuing(List<String> expectedNames, Assertion assertion) {
-    String retrievedString = GSON.toJson(assertion);
-    JsonObject data = GSON.fromJson(retrievedString, JsonObject.class);
-    JsonElement assumedContinuingElement = data.get("assumedContinuing");
-    List<String> assertionContinuing
-        = GSON.fromJson(assumedContinuingElement, new TypeToken<List<String>>(){}.getType());
-    return setsNoDupesEqual(assertionContinuing, expectedNames);
+    return setsNoDupesEqual(assertion.getAssumedContinuing(), expectedNames);
   }
 
   /**
