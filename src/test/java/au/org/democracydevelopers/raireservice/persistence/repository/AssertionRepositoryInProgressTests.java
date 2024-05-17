@@ -30,6 +30,7 @@ import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.service.Metadata;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -70,9 +71,10 @@ public class AssertionRepositoryInProgressTests {
    */
   @Test
   @Transactional
-  void retrieveAssertionsOneNEBAssertionInProgress(){
+  void retrieveAssertionsOneNEBAssertionInProgress() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNEBAssertionInProgress");
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
+    List<Assertion> retrieved = assertionRepository.getAssertionsThrowError(
+        "One NEB Assertion Contest");
     assertEquals(1, retrieved.size());
 
     final Assertion r = retrieved.get(0);
@@ -90,9 +92,10 @@ public class AssertionRepositoryInProgressTests {
    */
   @Test
   @Transactional
-  void retrieveAssertionsOneNEBAssertionConvert(){
+  void retrieveAssertionsOneNEBAssertionConvert() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNEBAssertionConvert");
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
+    List<Assertion> retrieved = assertionRepository.getAssertionsThrowError(
+        "One NEB Assertion Contest");
     assertEquals(1, retrieved.size());
 
     final Assertion r = retrieved.get(0);
@@ -115,9 +118,10 @@ public class AssertionRepositoryInProgressTests {
    */
   @Test
   @Transactional
-  void retrieveAssertionsOneNENAssertionInProgress(){
+  void retrieveAssertionsOneNENAssertionInProgress() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNENAssertionInProgress");
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEN Assertion Contest");
+    List<Assertion> retrieved = assertionRepository.getAssertionsThrowError(
+        "One NEN Assertion Contest");
     assertEquals(1, retrieved.size());
 
     final Assertion r = retrieved.get(0);
@@ -138,9 +142,10 @@ public class AssertionRepositoryInProgressTests {
    */
   @Test
   @Transactional
-  void retrieveAssertionsOneNENOneNEBAssertionInProgress(){
+  void retrieveAssertionsOneNENOneNEBAssertionInProgress() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgress");
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEN NEB Assertion Contest");
+    List<Assertion> retrieved = assertionRepository.getAssertionsThrowError(
+        "One NEN NEB Assertion Contest");
     assertEquals(2, retrieved.size());
 
     final Assertion r1 = retrieved.get(0);

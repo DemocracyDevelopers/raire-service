@@ -25,6 +25,8 @@ import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -73,8 +75,104 @@ public class AssertionRepositoryTests {
   private static final String[] aliceCharlieBob =  {"Alice", "Charlie", "Bob"};
 
   /**
-   * Retrieval of assertions for an existing contest with no associated assertions will return an
-   * empty list.
+   * Verify that the given assertion Alice NEB Bob has all the right attributes.
+   * @param r Assertion Alice NEB Bob.
+   */
+  public static void verifyAliceNEBBob(Assertion r){
+    assertEquals(NEBAssertion.class, r.getClass());
+
+    assertTrue(correctDBAssertionData(1, 320, 0.32, 1.1,
+        "Alice", "Bob", List.of(), Collections.emptyMap(), 0,
+        0, 0, 0, 0,
+        0, 0, BigDecimal.valueOf(1),
+        "One NEB Assertion Contest", r));
+  }
+
+  /**
+   * Verify that the given assertion Alice NEN Charlie has all the right attributes.
+   * @param r Assertion Alice NEN Charlie.
+   */
+  public static void verifyAliceNENCharlie(Assertion r){
+    assertEquals(NENAssertion.class, r.getClass());
+    assertTrue(correctDBAssertionData(2, 240, 0.12, 3.01,
+        "Alice", "Charlie", List.of("Alice", "Charlie", "Diego", "Bob"),
+        Collections.emptyMap(), 0, 0, 0,
+        0, 0, 0, 0,
+        BigDecimal.valueOf(1), "One NEN Assertion Contest", r));
+  }
+
+  /**
+   * Verify that the given assertion Amanda NEB Liesl has all the right attributes.
+   * @param r Assertion Amanda NEB Liesl.
+   */
+  public static void verifyAmandaNEBLiesl(Assertion r){
+    assertEquals(NEBAssertion.class, r.getClass());
+    assertTrue(correctDBAssertionData(3, 112, 0.1, 0.1,
+        "Amanda", "Liesl", List.of(), Collections.emptyMap(), 0,
+        0, 0, 0, 0,
+        0, 0, BigDecimal.valueOf(1),
+        "One NEN NEB Assertion Contest", r));
+  }
+
+  /**
+   * Verify that the given assertion Amanda NEN Wendell has all the right attributes.
+   * @param r Assertion Amanda NEN Wendell.
+   */
+  public static void verifyAmandaNENWendell(Assertion r){
+    assertEquals(NENAssertion.class, r.getClass());
+    assertTrue(correctDBAssertionData(4, 560, 0.5, 3.17,
+        "Amanda", "Wendell", List.of("Liesl", "Wendell", "Amanda"),
+        Collections.emptyMap(), 0, 0, 0,
+        0, 0, 0, 0,
+        BigDecimal.valueOf(1), "One NEN NEB Assertion Contest", r));
+  }
+
+  /**
+   * Verify that the given assertion Charlie C. Chaplin NEB Alice P. Mangrove has all the right
+   * attributes.
+   * @param r Assertion Charlie C. Chaplin NEB Alice P. Mangrove.
+   */
+  public static void verifyCharlieCNEBAliceM(Assertion r){
+    assertEquals(NEBAssertion.class, r.getClass());
+    assertTrue(correctDBAssertionData(5, 310, 0.01, 2.1,
+        "Charlie C. Chaplin", "Alice P. Mangrove", List.of(), Collections.emptyMap(),
+        0, 0, 0, 0,
+        0, 0, 0, BigDecimal.valueOf(1),
+        "Multi-County Contest 1", r));
+  }
+
+  /**
+   * Verify that the given assertion Alice P. Mangrove NEB Al (Bob) Jones has all the right
+   * attributes.
+   * @param r Assertion Alice P. Mangrove NEB Al (Bob) Jones.
+   */
+  public static void verifyAliceMNEBAlJones(Assertion r){
+    assertEquals(NEBAssertion.class, r.getClass());
+    assertTrue(correctDBAssertionData(6, 2170, 0.07, 0.9,
+        "Alice P. Mangrove", "Al (Bob) Jones", List.of(), Collections.emptyMap(),
+        0, 0, 0, 0,
+        0, 0, 0, BigDecimal.valueOf(1),
+        "Multi-County Contest 1", r));
+  }
+
+  /**
+   * Verify that the given assertion Alice P. Mangrove NEN West W. Westerson has all the right
+   * attributes.
+   * @param r Assertion Alice P. Mangrove NEN West W. Westerson Jones.
+   */
+  public static void verifyAliceMNENWestW(Assertion r){
+    assertEquals(NENAssertion.class, r.getClass());
+    assertTrue(correctDBAssertionData(7, 31, 0.001, 5.0,
+        "Alice P. Mangrove", "West W. Westerson", List.of("West W. Westerson",
+            "Alice P. Mangrove"), Collections.emptyMap(), 0,
+        0, 0, 0, 0,
+        0, 0, BigDecimal.valueOf(1),
+        "Multi-County Contest 1", r));
+  }
+
+  /**
+   * Retrieval of assertions (via findByContestName) for an existing contest with no associated
+   * assertions will return an empty list.
    */
   @Test
   @Transactional
@@ -83,6 +181,7 @@ public class AssertionRepositoryTests {
     List<Assertion> retrieved = assertionRepository.findByContestName("No CVR Mayoral");
     assertEquals(0, retrieved.size());
   }
+
 
   /**
    * Retrieval of assertions for a non-existent contest will return an empty list.
@@ -93,6 +192,33 @@ public class AssertionRepositoryTests {
     testUtils.log(logger, "nonExistentContestNoAssertions");
     List<Assertion> retrieved = assertionRepository.findByContestName("Non-Existent Contest Name");
     assertEquals(0, retrieved.size());
+  }
+
+  /**
+   * Retrieval of assertions (via getAssertionsThrowError) for an existing contest with no
+   * associated assertions will throw a RaireServiceException.
+   */
+  @Test
+  @Transactional
+  void existentContestNoAssertionsThrowError(){
+    testUtils.log(logger, "existentContestNoAssertionsThrowError");
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
+        assertionRepository.getAssertionsThrowError("No CVR Mayoral"));
+    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+  }
+
+
+  /**
+   * Retrieval of assertions (via getAssertionsThrowError) for a non-existent contest will
+   * throw a RaireServiceException.
+   */
+  @Test
+  @Transactional
+  void nonExistentContestNoAssertionsThrowError(){
+    testUtils.log(logger, "nonExistentContestNoAssertionsThrowError");
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
+        assertionRepository.getAssertionsThrowError("Non-Existent Contest Name"));
+    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
@@ -130,104 +256,95 @@ public class AssertionRepositoryTests {
     assertionRepository.translateAndSaveAssertions("Ballina Mayoral", 11000,
         candidates, empty);
 
-    List<Assertion> retrieved = assertionRepository.findByContestName("Ballina Mayoral");
-    assertEquals(0, retrieved.size());
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
+        assertionRepository.getAssertionsThrowError("Ballina Mayoral"));
+    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
-   * Test translation and saving of assertions for a succession of contests:
+   * Test retrieval of assertions for a succession of contests:
    * - "One NEB Assertion Contest"
    * - "One NEN Assertion Contest"
    * - "One NEN NEB Assertion Contest"
    * - "Multi-County Contest 1"
+   * Note that this test is not designed to pass on its own, it is designed to be run
+   * after translateAndSaveAssertions.
    */
   @Test
   @Transactional
-  void translateAndSaveAssertions(){
+  void translateAndSaveAssertions() throws RaireServiceException {
     testUtils.log(logger, "translateAndSaveAssertions");
     saveAssertionsOneNEBContest();
-
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
+    List<Assertion> retrieved = assertionRepository.getAssertionsThrowError(
+        "One NEB Assertion Contest");
     assertEquals(1, retrieved.size());
+
+    List<Assertion> retrieved1 = assertionRepository.findByContestName("One NEB Assertion Contest");
+    assertEquals(1, retrieved1.size());
 
     // Alice NEB Bob
-    Assertion r = retrieved.get(0);
-    assertEquals(NEBAssertion.class, r.getClass());
-
-    assertTrue(correctDBAssertionData(1, 320, 0.32, 1.1,
-        "Alice", "Bob", List.of(), Collections.emptyMap(), 0,
-        0, 0, 0, 0,
-        0, 0, BigDecimal.valueOf(1),
-        "One NEB Assertion Contest", r));
+    verifyAliceNEBBob(retrieved.get(0));
+    verifyAliceNEBBob(retrieved1.get(0));
 
     saveAssertionsOneNENContest();
-
-    retrieved = assertionRepository.findByContestName("One NEN Assertion Contest");
+    retrieved = assertionRepository.getAssertionsThrowError("One NEN Assertion Contest");
     assertEquals(1, retrieved.size());
 
+    retrieved1 = assertionRepository.findByContestName("One NEN Assertion Contest");
+    assertEquals(1, retrieved1.size());
+
     // Alice NEN Charlie given Alice, Charlie, Diego and Bob remain.
-    r = retrieved.get(0);
-    assertEquals(NENAssertion.class, r.getClass());
-    assertTrue(correctDBAssertionData(2, 240, 0.12, 3.01,
-        "Alice", "Charlie", List.of("Alice", "Charlie", "Diego", "Bob"),
-        Collections.emptyMap(), 0, 0, 0,
-        0, 0, 0, 0,
-        BigDecimal.valueOf(1), "One NEN Assertion Contest", r));
+    verifyAliceNENCharlie(retrieved.get(0));
+    verifyAliceNENCharlie(retrieved1.get(0));
 
     saveAssertionsOneNENOneNEBContest();
-
-    retrieved = assertionRepository.findByContestName("One NEN NEB Assertion Contest");
+    retrieved = assertionRepository.getAssertionsThrowError("One NEN NEB Assertion Contest");
     assertEquals(2, retrieved.size());
+
+    retrieved1 = assertionRepository.findByContestName("One NEN NEB Assertion Contest");
+    assertEquals(2, retrieved1.size());
 
     // Amanda NEB Liesel
     Assertion r1 = retrieved.get(0);
-    assertEquals(NEBAssertion.class, r1.getClass());
-    assertTrue(correctDBAssertionData(3, 112, 0.1, 0.1,
-        "Amanda", "Liesl", List.of(), Collections.emptyMap(), 0,
-        0, 0, 0, 0,
-        0, 0, BigDecimal.valueOf(1),
-        "One NEN NEB Assertion Contest", r1));
+    verifyAmandaNEBLiesl(r1);
+
+    r1 = retrieved1.get(0);
+    verifyAmandaNEBLiesl(r1);
 
     // Amanda NEN Wendell given Amanda, Wendell and Liesl are continuing.
     Assertion r2 = retrieved.get(1);
-    assertEquals(NENAssertion.class, r2.getClass());
-    assertTrue(correctDBAssertionData(4, 560, 0.5, 3.17,
-        "Amanda", "Wendell", List.of("Liesl", "Wendell", "Amanda"),
-        Collections.emptyMap(), 0, 0, 0,
-        0, 0, 0, 0,
-        BigDecimal.valueOf(1), "One NEN NEB Assertion Contest", r2));
+    verifyAmandaNENWendell(r2);
+
+    r2 = retrieved1.get(1);
+    verifyAmandaNENWendell(r2);
 
     saveAssertionsMultiCountyContest();
+    retrieved = assertionRepository.getAssertionsThrowError("Multi-County Contest 1");
+    assertEquals(3, retrieved.size());
 
-    retrieved = assertionRepository.findByContestName("Multi-County Contest 1");
+    retrieved1 = assertionRepository.findByContestName("Multi-County Contest 1");
     assertEquals(3, retrieved.size());
 
     // Charlie C. Chaplin NEB Alice P. Mangrove
     r1 = retrieved.get(0);
-    assertEquals(NEBAssertion.class, r1.getClass());
-    assertTrue(correctDBAssertionData(5, 310, 0.01, 2.1,
-        "Charlie C. Chaplin", "Alice P. Mangrove", List.of(), Collections.emptyMap(),
-        0, 0, 0, 0,
-        0, 0, 0, BigDecimal.valueOf(1),
-        "Multi-County Contest 1", r1));
+    verifyCharlieCNEBAliceM(r1);
 
+    r1 = retrieved1.get(0);
+    verifyCharlieCNEBAliceM(r1);
+
+    // Alice P. Mangrove NEB Al (Bob) Jones
     r2 = retrieved.get(1);
-    assertEquals(NEBAssertion.class, r2.getClass());
-    assertTrue(correctDBAssertionData(6, 2170, 0.07, 0.9,
-        "Alice P. Mangrove", "Al (Bob) Jones", List.of(), Collections.emptyMap(),
-        0, 0, 0, 0,
-        0, 0, 0, BigDecimal.valueOf(1),
-        "Multi-County Contest 1", r2));
+    verifyAliceMNEBAlJones(r2);
+
+    r2 = retrieved1.get(1);
+    verifyAliceMNEBAlJones(r2);
 
     // Alice P. Mangrove NEN West W. Westerson given only they remain.
     Assertion r3 = retrieved.get(2);
-    assertEquals(NENAssertion.class, r3.getClass());
-    assertTrue(correctDBAssertionData(7, 31, 0.001, 5.0,
-        "Alice P. Mangrove", "West W. Westerson", List.of("West W. Westerson",
-            "Alice P. Mangrove"), Collections.emptyMap(), 0,
-        0, 0, 0, 0,
-        0, 0, BigDecimal.valueOf(1),
-        "Multi-County Contest 1", r3));
+    verifyAliceMNENWestW(r3);
+
+    r3 = retrieved1.get(2);
+    verifyAliceMNENWestW(r3);
   }
 
 
@@ -512,7 +629,8 @@ public class AssertionRepositoryTests {
         assertionRepository.translateAndSaveAssertions("One NEB Assertion Contest",
             1000, aliceCharlieBob, assertions));
 
-    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "must not be the same candidate"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "must not be the same candidate"));
   }
 
   /**
@@ -531,7 +649,8 @@ public class AssertionRepositoryTests {
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             2000, aliceCharlieDiegoBob, assertions));
 
-    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "must not be the same candidate"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "must not be the same candidate"));
   }
 
   /**
@@ -573,7 +692,7 @@ public class AssertionRepositoryTests {
   }
 
   /**
-   * Test translateAndSaveAssertions when passed invalid data: winner index is outside of the bounds
+   * Test translateAndSaveAssertions when passed invalid data: winner index is outside the bounds
    * of the candidate array (NEB). An IllegalArgumentException should be thrown.
    */
   @Test
@@ -589,7 +708,7 @@ public class AssertionRepositoryTests {
   }
 
   /**
-   * Test translateAndSaveAssertions when passed invalid data: winner index is outside of the bounds
+   * Test translateAndSaveAssertions when passed invalid data: winner index is outside the bounds
    * of the candidate array (NEN). An IllegalArgumentException should be thrown.
    */
   @Test
@@ -606,7 +725,7 @@ public class AssertionRepositoryTests {
   }
 
   /**
-   * Test translateAndSaveAssertions when passed invalid data: loser index is outside of the bounds
+   * Test translateAndSaveAssertions when passed invalid data: loser index is outside the bounds
    * of the candidate array (NEB). An IllegalArgumentException should be thrown.
    */
   @Test
@@ -622,7 +741,7 @@ public class AssertionRepositoryTests {
   }
 
   /**
-   * Test translateAndSaveAssertions when passed invalid data: loser index is outside of the bounds
+   * Test translateAndSaveAssertions when passed invalid data: loser index is outside the bounds
    * of the candidate array (NEN). An IllegalArgumentException should be thrown.
    */
   @Test
