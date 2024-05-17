@@ -36,7 +36,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 
 /**
- * A class
+ * Utility methods for use in test classes.
  */
 public class testUtils {
 
