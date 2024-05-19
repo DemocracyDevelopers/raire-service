@@ -354,7 +354,7 @@ public abstract class Assertion {
   /**
    * Get the number of 'other' discrepancies (not over or understatements with respect to this
    * assertion).
-   * @return the number of 'other' vote overstatements.
+   * @return the number of 'other' discrepancies.
    */
   public int getOtherCount(){ return otherCount; }
 
