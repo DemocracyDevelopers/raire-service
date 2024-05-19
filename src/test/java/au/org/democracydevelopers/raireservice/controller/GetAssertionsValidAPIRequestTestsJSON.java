@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes.WRONG_CANDIDATE_NAMES;
 import static au.org.democracydevelopers.raireservice.testUtils.correctIndexedAPIAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static au.org.democracydevelopers.raireservice.testUtils.correctSolutionData;
@@ -65,10 +66,10 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsValidAPIRequestTests {
+public class GetAssertionsValidAPIRequestTestsJSON {
 
   private static final Logger logger = LoggerFactory.getLogger(
-      GetAssertionsValidAPIRequestTests.class);
+      GetAssertionsValidAPIRequestTestsJSON.class);
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
@@ -193,5 +194,25 @@ public class GetAssertionsValidAPIRequestTests {
         "candidate list provided as parameter is inconsistent"));
     assertEquals(RaireErrorCodes.INTERNAL_ERROR.toString(),
         Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
+  }
+
+
+  /**
+   * A request with candidates who are inconsistent with the assertions in the database is an error.
+   */
+  @Test
+  public void wrongCandidatesIsAnError() {
+    testUtils.log(logger, "wrongCandidatesIsAnError");
+    String url = baseURL + port + getAssertionsEndpoint;
+
+    String requestAsJson =
+        "{\"riskLimit\":0.05,\"contestName\":\"One NEB Assertion Contest\",\"candidates\":[\"Chuan\",\"Diego\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertEquals(WRONG_CANDIDATE_NAMES.toString(),
+        response.getHeaders().getFirst("error_code"));
   }
 }

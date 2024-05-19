@@ -22,7 +22,6 @@ package au.org.democracydevelopers.raireservice.service;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.controller.GetAssertionsInProgressValidAPIRequestTests;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;

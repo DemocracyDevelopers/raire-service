@@ -20,6 +20,8 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes.WRONG_CANDIDATE_NAMES;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -56,9 +58,9 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsCSVAPITests {
+public class GetAssertionsValidAPIRequestTestsCSV {
 
-  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsCSVAPITests.class);
+  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsValidAPIRequestTestsCSV.class);
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
@@ -162,9 +164,8 @@ public class GetAssertionsCSVAPITests {
   public void testCSVDemoContest() {
     testUtils.log(logger, "testCSVDemoContest");
     String url = baseURL + port + getAssertionsEndpoint;
-    String requestAsJson =
-        "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
-            + candidatesAsJson;
+    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
+        + candidatesAsJson;
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -189,5 +190,24 @@ public class GetAssertionsCSVAPITests {
     assertTrue(output.contains(
         "2, NEN, Diego, Chuan, \"Alice, Chuan, Diego\", 6.1, 100, 0.1, 0.05, 45, 45, 0, 0, 0, 0, 0\n"
     ));
+  }
+
+  /**
+   * A request with candidates who are inconsistent with the assertions in the database is an error.
+   */
+  @Test
+  public void wrongCandidatesIsAnError() {
+    testUtils.log(logger, "wrongCandidatesIsAnError");
+    String url = baseURL + port + getAssertionsEndpoint;
+
+    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
+        + "\"candidates\":[\"Alicia\",\"Boba\",\"Chuan\",\"Diego\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertEquals(WRONG_CANDIDATE_NAMES.toString(),
+        response.getHeaders().getFirst("error_code"));
   }
 }
