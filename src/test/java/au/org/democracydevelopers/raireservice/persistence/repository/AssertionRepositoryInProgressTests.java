@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.repository;
 
+import static au.org.democracydevelopers.raireservice.testUtils.correctDBAssertionData;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,11 +30,12 @@ import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.service.Metadata;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException;
 import au.org.democracydevelopers.raireservice.testUtils;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,74 +66,25 @@ public class AssertionRepositoryInProgressTests {
   AssertionRepository assertionRepository;
 
   /**
-   * To facilitate easier checking of retrieved/saved assertion content.
-   */
-  private static final Gson GSON =
-      new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
-
-
-  /**
-   * Test assertion: Alice NEB Bob in the contest "One NEB Assertion Contest" when the audit is
-   * in progress and some discrepancies have been found.
-   */
-  private final static String aliceNEBBobInProgress = "{\"id\":1,\"version\":0,\"contestName\":" +
-      "\"One NEB Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Bob\",\"margin\":320," +
-      "\"difficulty\":1.1,\"assumedContinuing\":[],\"dilutedMargin\":0.32,\"cvrDiscrepancy\":{}," +
-      "\"estimatedSamplesToAudit\":111,\"optimisticSamplesToAudit\":111,\"twoVoteUnderCount\":0," +
-      "\"oneVoteUnderCount\":0,\"oneVoteOverCount\":0,\"twoVoteOverCount\":0,\"otherCount\":0," +
-      "\"currentRisk\":0.50}";
-
-  /**
-   * Test assertion: Alice NEN Charlie assuming Alice, Charlie, Diego and Bob are continuing,
-   * for the contest "One NEN Assertion Contest" when the audit is in progress and some
-   * discrepancies have been found.
-   */
-  private final static String aliceNENCharlieInProgress = "{\"id\":2,\"version\":0,\"contestName\":" +
-      "\"One NEN Assertion Contest\",\"winner\":\"Alice\",\"loser\":\"Charlie\",\"margin\":240," +
-      "\"difficulty\":3.01,\"assumedContinuing\":[\"Alice\",\"Charlie\",\"Diego\",\"Bob\"]," +
-      "\"dilutedMargin\":0.12,\"cvrDiscrepancy\":{\"13\":1,\"14\":0,\"15\":0}," +
-      "\"estimatedSamplesToAudit\":245,\"optimisticSamplesToAudit\":201,\"twoVoteUnderCount\":0," +
-      "\"oneVoteUnderCount\":0,\"oneVoteOverCount\":1,\"twoVoteOverCount\":0,\"otherCount\":2," +
-      "\"currentRisk\":0.20}";
-
-  /**
-   * Test assertion: Amanda NEB Liesl in the contest "One NEN NEB Assertion Contest" when the audit
-   * is in progress and some discrepancies have been found.
-   */
-  private final static String amandaNEBLieslInProgress = "{\"id\":3,\"version\":0,\"contestName\":" +
-      "\"One NEN NEB Assertion Contest\",\"winner\":\"Amanda\",\"loser\":\"Liesl\",\"margin\":112,"+
-      "\"difficulty\":0.1,\"assumedContinuing\":[],\"dilutedMargin\":0.1," +
-      "\"cvrDiscrepancy\":{\"13\":-1,\"14\":2,\"15\":2},\"estimatedSamplesToAudit\":27," +
-      "\"optimisticSamplesToAudit\":20,\"twoVoteUnderCount\":0,\"oneVoteUnderCount\":1," +
-      "\"oneVoteOverCount\":0,\"twoVoteOverCount\":2,\"otherCount\":0,\"currentRisk\":0.08}";
-
-  /**
-   * Test assertion: Amanda NEN Wendell assuming Liesl, Wendell and Amanda are continuing,
-   * for the contest "One NEN NEB Assertion Contest" when the audit is in progress and some
-   * discrepancies have been found.
-   */
-  private final static String amandaNENWendellInProgress = "{\"id\":4,\"version\":0," +
-      "\"contestName\":\"One NEN NEB Assertion Contest\",\"winner\":\"Amanda\"," +
-      "\"loser\":\"Wendell\",\"margin\":560,\"difficulty\":3.17," +
-      "\"assumedContinuing\":[\"Liesl\",\"Wendell\",\"Amanda\"],\"dilutedMargin\":0.5," +
-      "\"cvrDiscrepancy\":{\"13\":1,\"14\":1,\"15\":-2},\"estimatedSamplesToAudit\":300," +
-      "\"optimisticSamplesToAudit\":200,\"twoVoteUnderCount\":1,\"oneVoteUnderCount\":0," +
-      "\"oneVoteOverCount\":2,\"twoVoteOverCount\":0,\"otherCount\":0,\"currentRisk\":0.70}";
-
-  /**
    * Retrieve assertions for a contest that has one NEB assertion (audit in progress with no
    * discrepancies observed).
    */
   @Test
   @Transactional
-  void retrieveAssertionsOneNEBAssertionInProgress(){
+  void retrieveAssertionsOneNEBAssertionInProgress() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNEBAssertionInProgress");
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
+    List<Assertion> retrieved = assertionRepository.getAssertionsThrowError(
+        "One NEB Assertion Contest");
     assertEquals(1, retrieved.size());
 
     final Assertion r = retrieved.get(0);
     assertEquals(NEBAssertion.class, r.getClass());
-    assertEquals(aliceNEBBobInProgress, GSON.toJson(r));
+
+    assertTrue(correctDBAssertionData(1, 320, 0.32, 1.1,
+        "Alice", "Bob", List.of(), Collections.emptyMap(), 111,
+        111, 0, 0, 0,
+        0, 0, BigDecimal.valueOf(0.5),
+        "One NEB Assertion Contest", r));
   }
 
   /**
@@ -139,9 +92,10 @@ public class AssertionRepositoryInProgressTests {
    */
   @Test
   @Transactional
-  void retrieveAssertionsOneNEBAssertionConvert(){
+  void retrieveAssertionsOneNEBAssertionConvert() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNEBAssertionConvert");
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
+    List<Assertion> retrieved = assertionRepository.getAssertionsThrowError(
+        "One NEB Assertion Contest");
     assertEquals(1, retrieved.size());
 
     final Assertion r = retrieved.get(0);
@@ -153,7 +107,8 @@ public class AssertionRepositoryInProgressTests {
     assertEquals(1, ((NotEliminatedBefore)aad.assertion).loser);
 
     // Check that current risk is 0.5
-    assertEquals(new BigDecimal("0.50"), aad.status.get(Metadata.STATUS_RISK));
+    assertEquals(0, BigDecimal.valueOf(0.50).compareTo(
+        ((BigDecimal)aad.status.get(Metadata.STATUS_RISK))));
   }
 
 
@@ -163,14 +118,21 @@ public class AssertionRepositoryInProgressTests {
    */
   @Test
   @Transactional
-  void retrieveAssertionsOneNENAssertionInProgress(){
+  void retrieveAssertionsOneNENAssertionInProgress() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNENAssertionInProgress");
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEN Assertion Contest");
+    List<Assertion> retrieved = assertionRepository.getAssertionsThrowError(
+        "One NEN Assertion Contest");
     assertEquals(1, retrieved.size());
 
     final Assertion r = retrieved.get(0);
     assertEquals(NENAssertion.class, r.getClass());
-    assertEquals(aliceNENCharlieInProgress, GSON.toJson(r));
+
+    assertTrue(correctDBAssertionData(2, 240, 0.12, 3.01,
+        "Alice", "Charlie", List.of("Alice", "Charlie", "Diego", "Bob"),
+        Map.of(13L, 1, 14L, 0, 15L, 0), 245,
+        201, 0, 0, 1,
+        0, 2, BigDecimal.valueOf(0.20),
+        "One NEN Assertion Contest", r));
   }
 
 
@@ -180,17 +142,26 @@ public class AssertionRepositoryInProgressTests {
    */
   @Test
   @Transactional
-  void retrieveAssertionsOneNENOneNEBAssertionInProgress(){
+  void retrieveAssertionsOneNENOneNEBAssertionInProgress() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgress");
-    List<Assertion> retrieved = assertionRepository.findByContestName("One NEN NEB Assertion Contest");
+    List<Assertion> retrieved = assertionRepository.getAssertionsThrowError(
+        "One NEN NEB Assertion Contest");
     assertEquals(2, retrieved.size());
 
     final Assertion r1 = retrieved.get(0);
-    assertEquals(NEBAssertion.class, r1.getClass());
-    assertEquals(amandaNEBLieslInProgress, GSON.toJson(r1));
+    assertTrue(correctDBAssertionData(3, 112, 0.1, 0.1,
+        "Amanda", "Liesl", List.of(), Map.of(13L, -1, 14L, 2, 15L, 2),
+        27, 20, 0, 1,
+        0, 2, 0, BigDecimal.valueOf(0.08),
+        "One NEN NEB Assertion Contest", r1));
 
     final Assertion r2 = retrieved.get(1);
     assertEquals(NENAssertion.class, r2.getClass());
-    assertEquals(amandaNENWendellInProgress, GSON.toJson(r2));
+    assertTrue(correctDBAssertionData(4, 560, 0.5, 3.17,
+        "Amanda", "Wendell", List.of("Liesl", "Wendell", "Amanda"),
+        Map.of(13L, 1, 14L, 1, 15L, -2), 300,
+        200, 1, 0, 2,
+        0, 0, BigDecimal.valueOf(0.70),
+        "One NEN NEB Assertion Contest", r2));
   }
 }
