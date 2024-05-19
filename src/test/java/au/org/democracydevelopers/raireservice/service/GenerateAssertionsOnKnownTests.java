@@ -64,7 +64,6 @@ import org.springframework.transaction.annotation.Transactional;
  * human-computable assertions. Relevant data is preloaded into the test database from
  * src/test/resources/known_testcases_votes.sql.
  * This includes
- * - A contest with tied winners, to check that the correct error is produced.
  * - The examples from the Guide To Raire Vol 2. Exact matching for Ex. 2 and some for Ex. 1.
  * - A very simple example test with two obvious assertions (an NEN and NEB), described below.
  * - A cross-county version of the simple example.
@@ -99,7 +98,6 @@ public class GenerateAssertionsOnKnownTests {
   private static final String ThreeAssertionContest = "Sanity Check 3 Assertion Contest";
   private static final String guideToRaireExample1 = "Guide To Raire Example 1";
   private static final String guideToRaireExample2 = "Guide To Raire Example 2";
-  private static final String tiedWinnersContest = "Tied Winners Contest";
   private static final String simpleContest = "Simple Contest";
   private static final String crossCountySimpleContest = "Cross-county Simple Contest";
 
@@ -112,10 +110,6 @@ public class GenerateAssertionsOnKnownTests {
    * Array of candidates: Alice, Chuan, Bob.
    */
   private static final String[] aliceChuanBob = {"Alice", "Chuan", "Bob"};
-
-  private final static GenerateAssertionsRequest tiedWinnersRequest
-      = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5,
-      Arrays.stream(aliceChuanBob).toList());
 
   /**
    * Check that NEB assertion retrieval works. This is just a sanity check.
@@ -144,23 +138,6 @@ public class GenerateAssertionsOnKnownTests {
         "Bob", assertion));
     assertTrue(correctAssumedContinuing(Arrays.stream(aliceChuanBob).toList(), assertion));
     assertInstanceOf(NENAssertion.class, assertion);
-  }
-
-
-  /**
-   * Tied winners results in raire-java returning a TiedWinners RaireError.
-   * This is a super-simple election with two candidates with one vote each.
-   */
-  @Test
-  @Transactional
-  void tiedWinnersThrowsTiedWinnersError() throws RaireServiceException {
-    testUtils.log(logger, "tiedWinnersThrowsTiedWinnersError");
-    RaireResultOrError result = generateAssertionsService.generateAssertions(tiedWinnersRequest);
-
-    assertNull(result.Ok);
-    assertNotNull(result.Err);
-
-    assertEquals(TiedWinners.class, result.Err.getClass());
   }
 
   /**

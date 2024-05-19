@@ -52,10 +52,9 @@ import org.springframework.test.context.ActiveProfiles;
  * on a random port, then runs a series of (at this stage) very basic tests. Currently, we check for
  * proper input validation, and check that one valid trivial request succeeds.
  * The list of tests is similar to GenerateAssertionsRequestTests.java, and also to
- * GetAssertionsAPITests.java when the same test is relevant to both endpoints. Note that you have
- * to run the *whole class*. Individual tests do not work separately because they don't
- * initiate the microservice on their own. Contests which will be used for validity testing are
- * pre-loaded into the database using src/test/resources/data.sql.
+ * GetAssertionsAPITests.java when the same test is relevant to both endpoints.
+ * Contests which will be used for validity testing are
+ * preloaded into the database using src/test/resources/data.sql.
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
