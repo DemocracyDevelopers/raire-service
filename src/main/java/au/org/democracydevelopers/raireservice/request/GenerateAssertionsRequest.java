@@ -53,7 +53,7 @@ public class GenerateAssertionsRequest extends ContestRequest {
   /**
    * The elapsed time allowed to raire to generate the assertions, in seconds.
    */
-  public final float timeLimitSeconds;
+  public final double timeLimitSeconds;
 
   /**
    * All args constructor.
@@ -64,7 +64,7 @@ public class GenerateAssertionsRequest extends ContestRequest {
    */
   @ConstructorProperties({"contestName", "totalAuditableBallots", "timeLimitSeconds","candidates"})
   public GenerateAssertionsRequest(String contestName, int totalAuditableBallots,
-      float timeLimitSeconds, List<String> candidates) {
+      double timeLimitSeconds, List<String> candidates) {
     super(contestName, candidates);
     this.totalAuditableBallots = totalAuditableBallots;
     this.timeLimitSeconds = timeLimitSeconds;

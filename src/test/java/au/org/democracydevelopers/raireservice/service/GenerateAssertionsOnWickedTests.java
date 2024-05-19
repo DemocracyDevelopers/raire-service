@@ -21,32 +21,19 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.service;
 
 
-import static au.org.democracydevelopers.raireservice.testUtils.correctAssumedContinuing;
-import static au.org.democracydevelopers.raireservice.testUtils.correctDBAssertionData;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raire.RaireError.TiedWinners;
+import au.org.democracydevelopers.raire.RaireError.TimeoutCheckingWinner;
+import au.org.democracydevelopers.raire.RaireError.TimeoutFindingAssertions;
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
-import au.org.democracydevelopers.raire.algorithm.RaireResult;
-import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
-import au.org.democracydevelopers.raire.time.TimeTaken;
-import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
-import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
-import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
 import au.org.democracydevelopers.raireservice.testUtils;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,9 +50,11 @@ import org.springframework.transaction.annotation.Transactional;
  * Tests to validate the behavior of Assertion generation on a collection of particularly nasty
  * test cases designed to elicit errors. Relevant data is preloaded into the test database from
  * src/test/resources/known_testcases_votes.sql.
- * These are generally derived from the Wicked test cases in raire-java.
  * This includes
- * FIXME
+ * - a contest with tied winners,
+ * - a contest that times out trying to find the winners (there are 20 and they are all tied),
+ * - a contest (Byron Mayor '21) that has enough candidates to time out generating assertions (when
+ *   given a very short timeout).
  */
 @ActiveProfiles("known-testcases")
 @SpringBootTest
@@ -86,23 +75,37 @@ public class GenerateAssertionsOnWickedTests {
    * Names of contests, to match preloaded data.
    */
   private static final String tiedWinnersContest = "Tied Winners Contest";
-
-  private static final String oneNEBAssertionContest = "Sanity Check NEB Assertion Contest";
-  private static final String oneNENAssertionContest = "Sanity Check NEN Assertion Contest";
+  private static final String ByronMayoral = "Byron Mayoral";
+  private static final String timeOutCheckingWinnersContest = "Time out checking winners contest";
 
   /**
-   * Array of candidates: Alice, Chuan, Bob.
+   * Candidate lists for the preloaded contests.
    */
-  private static final String[] aliceChuanBob = {"Alice", "Chuan", "Bob"};
+  private static final List<String> aliceChuanBob = List.of("Alice", "Chuan", "Bob");
+  private static final List<String> choicesByron = List.of("HUNTER Alan","CLARKE Bruce",
+      "COOREY Cate","ANDERSON John","MCILRATH Christopher","LYON Michael","DEY Duncan",
+      "PUGH Asren","SWIVEL Mark");
+  private static final List<String> timeoutCheckingWinnersChoices = List.of("A","B","C","D","E",
+      "F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T");
 
+
+  /**
+   * The API requests appropriate for each preloaded contest. Those intended to produce a timeout
+   * have a particularly small timeLimit.
+   */
   private final static GenerateAssertionsRequest tiedWinnersRequest
       = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5,
-      Arrays.stream(aliceChuanBob).toList());
+      aliceChuanBob);
+  private final static GenerateAssertionsRequest ByronShortTimeoutRequest
+      = new GenerateAssertionsRequest(ByronMayoral, 18165, 0.001,
+      choicesByron);
+  private final static GenerateAssertionsRequest checkingWinnersTimeoutRequest
+      = new GenerateAssertionsRequest(timeOutCheckingWinnersContest, 20,
+      0.001, timeoutCheckingWinnersChoices);
 
   /**
    * Tied winners results in raire-java returning a TiedWinners RaireError. This is a super-simple
    * election with two candidates with one vote each.
-   * FIXME - decide whether tied winners goes here or in 'Known '
    */
   @Test
   @Transactional
@@ -113,6 +116,38 @@ public class GenerateAssertionsOnWickedTests {
     assertNull(result.Ok);
     assertNotNull(result.Err);
 
-    assertEquals(TiedWinners.class, result.Err.getClass());
+    assertInstanceOf(TiedWinners.class, result.Err);
+  }
+
+  /**
+   * Tied winners results in raire-java returning a TiedWinners RaireError. This is a super-simple
+   * election with two candidates with one vote each.
+   */
+  @Test
+  @Transactional
+  void twentyTiedWinnersThrowsTimeOutCheckingWinnersError() throws RaireServiceException {
+    testUtils.log(logger, "twentyTiedWinnersThrowsTimeOutCheckingWinnersError");
+    RaireResultOrError result = generateAssertionsService
+        .generateAssertions(checkingWinnersTimeoutRequest);
+
+    assertNull(result.Ok);
+    assertNotNull(result.Err);
+
+    assertInstanceOf(TimeoutCheckingWinner.class, result.Err);
+  }
+
+  /**
+   * Byron Mayoral times out generating assertions when given a very very short timeout.
+   */
+  @Test
+  @Transactional
+  void ByronWithShortTimeoutThrowsTimeoutGeneratingAssertionsError() throws RaireServiceException {
+    testUtils.log(logger, "ByronWithShortTimeoutThrowsTimeoutGeneratingAssertionsError");
+    RaireResultOrError result = generateAssertionsService.generateAssertions(ByronShortTimeoutRequest);
+
+    assertNull(result.Ok);
+    assertNotNull(result.Err);
+
+    assertInstanceOf(TimeoutFindingAssertions.class, result.Err);
   }
 }

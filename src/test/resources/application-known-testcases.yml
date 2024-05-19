@@ -8,4 +8,5 @@ spring:
       ddl-auto: none
   sql:
     init:
-      data-locations: classpath:known_testcases_votes.sql
+      data-locations: classpath:known_testcases_votes.sql, classpath:NSW2021Data/Byron_Mayoral.sql,
+                      classpath:NSW2021Data/Byron_Mayoral_cvr_contest_info.sql
