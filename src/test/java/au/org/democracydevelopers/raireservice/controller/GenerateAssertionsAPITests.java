@@ -49,7 +49,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Tests for generate-assertions endpoint. This class automatically fires up the RAIRE Microservice
- * on a random port, then runs a series of (at this stage) very basic tests. Currently we check for
+ * on a random port, then runs a series of (at this stage) very basic tests. Currently, we check for
  * proper input validation, and check that one valid trivial request succeeds.
  * The list of tests is similar to GenerateAssertionsRequestTests.java, and also to
  * GetAssertionsAPITests.java when the same test is relevant to both endpoints. Note that you have

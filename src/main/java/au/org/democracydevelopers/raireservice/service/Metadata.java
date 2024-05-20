@@ -83,7 +83,7 @@ public class Metadata {
 
 
   /**
-   * The estimated samples to audit. Colorado-rla calculates this and we retrieve it from the
+   * The estimated samples to audit. Colorado-rla calculates this, and we retrieve it from the
    * database.
    */
   public final static String ESTIMATED_SAMPLES = "Estimated samples to audit";

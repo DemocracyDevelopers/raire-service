@@ -136,7 +136,7 @@ public class NENAssertion extends Assertion {
    * @return The string "NEN"
    */
   @Override
-  public String gettAssertionType() {
+  public String getAssertionType() {
     return "NEN";
   }
 }

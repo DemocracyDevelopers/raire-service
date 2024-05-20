@@ -27,6 +27,8 @@ import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 
+import au.org.democracydevelopers.raireservice.service.RaireServiceException;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
 import java.util.Arrays;
 import java.util.List;
 
@@ -104,4 +106,31 @@ public interface AssertionRepository extends JpaRepository<Assertion, Long> {
     logger.debug(String.format("%s Save all complete.", prefix));
   }
 
+  /**
+   * Find and return the list of assertions generated for the given contest, throwing a
+   * RaireServiceException with error code NO_ASSERTIONS_PRESENT when no assertions have been
+   * generated for the contest.
+   * @param contestName Name of the contest for which to return assertions.
+   * @return The list of assertions generated for the contest with name 'contestName'
+   * @throws RaireServiceException when no assertions have been generated for the given contest.
+   */
+  @Query
+  default List<Assertion> getAssertionsThrowError(String contestName) throws RaireServiceException {
+    final String prefix = "[getAssertionsThrowError]";
+    logger.debug(String.format("%s (Database access) Retrieve all assertions for contest %s.",
+        prefix, contestName));
+
+    // Retrieve the assertions.
+    List<Assertion> assertions = findByContestName(contestName);
+
+    // If the contest has no assertions, return an error.
+    if (assertions.isEmpty()) {
+      final String msg = String.format("%s No assertions have been generated for the contest %s.",
+          prefix, contestName);
+      logger.error(msg);
+      throw new RaireServiceException(msg, RaireErrorCodes.NO_ASSERTIONS_PRESENT);
+    }
+
+    return assertions;
+  }
 }

@@ -74,19 +74,9 @@ public class GetAssertionsJsonService {
     try {
       logger.debug(String.format("%s Preparing to build a RaireSolution for serialisation into " +
               "assertion visualiser report for contest %s.", prefix, request.contestName));
-      logger.debug(String.format("%s (Database access) Retrieve all assertions for contest %s.",
-          prefix, request.contestName));
 
       // Retrieve the assertions.
-      List<Assertion> assertions = assertionRepository.findByContestName(request.contestName);
-
-      // If the contest has no assertions, return an error.
-      if (assertions.isEmpty()) {
-        final String msg = String.format("%s No assertions have been generated for the contest %s.",
-            prefix, request.contestName);
-        logger.error(msg);
-        throw new RaireServiceException(msg, RaireErrorCodes.NO_ASSERTIONS_PRESENT);
-      }
+      List<Assertion> assertions = assertionRepository.getAssertionsThrowError(request.contestName);
 
       // Create contest metadata map, supplied as input when creating a RaireResult.
       logger.debug(String.format("%s Creating contest metadata map (candidates: %s), " +

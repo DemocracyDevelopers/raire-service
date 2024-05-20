@@ -41,9 +41,9 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * Test cases for csv generation, including
+ * Test cases for csv generation, including:
  * - a basic, simple test case with two assertions (NEN and NEB),
- * - a test case with lots of ties, to test that extremum-calculationn is correct,
+ * - a test case with lots of ties, to test that extremum-calculation is correct,
  * - a test case with difficult characters, such as " and ' and , in the candidate names.
  * TODO Note that there are assumptions about how these characters are represented in the database,
  * which need to be validated on real data.
@@ -54,22 +54,22 @@ import org.springframework.test.context.ActiveProfiles;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GetAssertionsCSVTests {
 
-  private static final Logger logger = LoggerFactory.getLogger(
-      GetAssertionsInProgressValidAPIRequestTests.class);
+  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsCSVTests.class);
 
   @Autowired
   AssertionRepository assertionRepository;
 
   @Autowired
   GetAssertionsCsvService getAssertionsCSVService;
+
   List<String> candidates = List.of("Alice", "Bob", "Chuan", "Diego");
-  List<String> trickyCharacters
-      = List.of("Annoying, Alice", "\"Breaking, Bob\"", "Challenging, Chuan", "O'Difficult, Diego");
+  List<String> trickyCharacters = List.of("Annoying, Alice", "\"Breaking, Bob\"",
+      "Challenging, Chuan", "O'Difficult, Diego");
 
   /**
    * Test proper csv file generation of assertions when those assertions have lots of ties. These
    * maxima and minima have been manually computed to make sure they're correct.
-   * @throws RaireServiceException if assertion database retrieval fails
+   * @throws RaireServiceException if assertion database retrieval fails.
    */
   @Test
   public void testCSVTies() throws RaireServiceException {

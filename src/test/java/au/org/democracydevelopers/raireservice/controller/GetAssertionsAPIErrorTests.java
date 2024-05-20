@@ -54,7 +54,7 @@ import org.apache.commons.lang3.StringUtils;
  * when the same test is relevant to both endpoints.
  * Note that you have to run the *whole class*. Individual tests do not work separately because they don't
  * initiate the microservice on their own.
- * Contests which will be used for validity testing are pre-loaded into the database using
+ * Contests which will be used for validity testing are preloaded into the database using
  * src/test/resources/data.sql.
  */
 @ActiveProfiles("test-containers")
