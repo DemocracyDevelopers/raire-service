@@ -189,16 +189,19 @@ public class testUtils {
    * @param winner the expected winner
    * @param loser the expected loser
    * @param assertion the assertion to be checked (either as an Assertion or as json)
+   * @param assumedContinuing the list of candidate names expected to be in the
+   *                          'assumed continuing' field.
    * @return true if the assertion's data match all the expected values.
    */
   public static boolean correctDBAssertionData(int margin, double dilutedMargin, double difficulty,
-      String winner, String loser, Assertion assertion) {
+      String winner, String loser, List<String> assumedContinuing, Assertion assertion) {
 
     return margin == assertion.getMargin()
         && doubleComparator.compare(difficulty, assertion.getDifficulty()) == 0
         && doubleComparator.compare(dilutedMargin, assertion.getDilutedMargin()) == 0
         && loser.equals(assertion.getLoser())
-        && winner.equals(assertion.getWinner());
+        && winner.equals(assertion.getWinner())
+        && setsNoDupesEqual(assertion.getAssumedContinuing(), assumedContinuing);
   }
 
   /**
@@ -231,7 +234,7 @@ public class testUtils {
       int otherCount, BigDecimal currentRisk, String contestName, Assertion assertion){
 
     boolean test = correctDBAssertionData(margin, dilutedMargin, difficulty, winner,
-        loser, assertion);
+        loser, assumedContinuing, assertion);
 
     return test && assertion.getEstimatedSamplesToAudit() == estimatedSamplesToAudit &&
         assertion.getOptimisticSamplesToAudit() == optimisticSamplesToAudit &&
@@ -241,22 +244,9 @@ public class testUtils {
         assertion.getTwoVoteOverCount() == twoVoteOverCount &&
         assertion.getOtherCount() == otherCount &&
         assertion.getCurrentRisk().compareTo(currentRisk) == 0 &&
-        correctAssumedContinuing(assumedContinuing, assertion) &&
         assertion.getCvrDiscrepancy().equals(cvrDiscrepancies) &&
         assertion.getId() == id &&
         assertion.getContestName().equals(contestName);
-  }
-
-
-  /**
-   * Utility to check that the expected assumedContinuing list matches the one in the assertion,
-   * ignoring order.
-   * @param expectedNames the list of candidate names expected to be in the 'assumed continuing' field.
-   * @param assertion the assertion to be checked.
-   * @return true if the NEN assertion's 'assumed continuing' list matches expectedNames, ignoring order.
-   */
-  public static boolean correctAssumedContinuing(List<String> expectedNames, Assertion assertion) {
-    return setsNoDupesEqual(assertion.getAssumedContinuing(), expectedNames);
   }
 
   /**
