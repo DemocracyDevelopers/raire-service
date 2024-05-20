@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.math.BigDecimal;
 import java.util.List;
@@ -50,9 +50,9 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsJsonServiceTests {
+public class GetAssertionsJsonServiceErrorTests {
 
-  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsJsonServiceTests.class);
+  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsJsonServiceErrorTests.class);
 
   @Autowired
   AssertionRepository assertionRepository;
@@ -71,7 +71,7 @@ public class GetAssertionsJsonServiceTests {
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         service.getRaireSolution(request));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
@@ -89,7 +89,8 @@ public class GetAssertionsJsonServiceTests {
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         service.getRaireSolution(request));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
+
 
 }

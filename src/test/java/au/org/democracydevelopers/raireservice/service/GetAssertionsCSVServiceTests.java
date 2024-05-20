@@ -20,6 +20,10 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.service;
 
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
@@ -51,9 +55,9 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsCSVTests {
+public class GetAssertionsCSVServiceTests {
 
-  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsCSVTests.class);
+  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsCSVServiceTests.class);
 
   @Autowired
   AssertionRepository assertionRepository;
@@ -123,7 +127,7 @@ public class GetAssertionsCSVTests {
   }
 
   /**
-   * A simple test for correct generation on a simple test case with one assertion of each type.
+   * Test for correct generation on a simple test case with one assertion of each type.
    * @throws RaireServiceException if assertion database retrieval fails.
    */
   @Test
@@ -150,5 +154,24 @@ public class GetAssertionsCSVTests {
     assertTrue(output.contains(
         "2, NEN, Diego, Chuan, \"Alice, Chuan, Diego\", 6.1, 100, 0.1, 0.05, 45, 45, 0, 0, 0, 0, 0\n"
     ));
+  }
+
+  /**
+   * A candidate list that is inconsistent with the stored assertions throws a RaireServiceException
+   * with WRONG_CANDIDATE_NAMES error code.
+   */
+  @Test
+  public void wrongCandidatesIsAnError() {
+    testUtils.log(logger, "wrongCandidatesIsAnError");
+
+    GetAssertionsRequest request = new GetAssertionsRequest(
+        "CSV Demo Contest", List.of("Alicia", "Boba", "Chuan"), new BigDecimal("0.05")
+    );
+
+    RaireServiceException ex = assertThrows(RaireServiceException.class,
+        () -> getAssertionsCSVService.generateCSV(request)
+    );
+    assertSame(ex.errorCode, WRONG_CANDIDATE_NAMES);
+
   }
 }

@@ -23,6 +23,8 @@ package au.org.democracydevelopers.raireservice.persistence.entity;
 import static au.org.democracydevelopers.raireservice.util.CSVUtils.escapeThenJoin;
 
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -387,7 +389,7 @@ public abstract class Assertion {
    *                                  data stored in the assertion.
    */
   public abstract AssertionAndDifficulty convert(List<String> candidates)
-      throws IllegalArgumentException;
+      throws RaireServiceException;
 
   /**
    * Return as a list of strings intended for a CSV row, in the same order as the csvHeaders in
@@ -397,26 +399,38 @@ public abstract class Assertion {
    * Floating-point numbers are formatted to 4 d.p, except the (BigDecimal) current risk, which is
    * given to its full precision.
    * @return The assertion data, as a list of csv-escaped strings.
+   * @throws RaireServiceException with error code WRONG_CANDIDATE_NAMES if the winner, loser or any of
+   *         the assumed_continuing candidates are not in the input candidate list.
    */
-  public List<String> asCSVRow() {
-    var fm = new DecimalFormat("0.0###");
-    return List.of(
-        getAssertionType(),
-        winner,
-        loser,
-        escapeThenJoin(assumedContinuing),
-        fm.format(difficulty),
-        margin+"",
-        fm.format(dilutedMargin),
-        currentRisk.toString(),
-        estimatedSamplesToAudit+"",
-        optimisticSamplesToAudit+"",
-        twoVoteOverCount+"",
-        oneVoteOverCount+"",
-        otherCount+"",
-        oneVoteUnderCount+"",
-        twoVoteUnderCount+""
-    );
+  public List<String> asCSVRow(List<String> candidates) throws RaireServiceException {
+    final String prefix = "[asCSVRow]";
+    final DecimalFormat fm = new DecimalFormat("0.0###");
+
+    if(candidates.contains(winner) && candidates.contains(loser)
+        && candidates.containsAll(assumedContinuing) ) {
+      return List.of(
+          getAssertionType(),
+          winner,
+          loser,
+          escapeThenJoin(assumedContinuing),
+          fm.format(difficulty),
+          margin + "",
+          fm.format(dilutedMargin),
+          currentRisk.toString(),
+          estimatedSamplesToAudit + "",
+          optimisticSamplesToAudit + "",
+          twoVoteOverCount + "",
+          oneVoteOverCount + "",
+          otherCount + "",
+          oneVoteUnderCount + "",
+          twoVoteUnderCount + ""
+      );
+    } else {
+      final String msg = String.format("%s Candidate list provided as parameter is inconsistent " +
+          "with assertion (winner or loser or some continuing candidate not present).", prefix);
+      logger.error(msg);
+      throw new RaireServiceException(msg, RaireErrorCode.WRONG_CANDIDATE_NAMES);
+    }
   }
 
   /**

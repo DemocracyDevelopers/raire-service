@@ -20,7 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
-import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes.WRONG_CANDIDATE_NAMES;
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
 import static au.org.democracydevelopers.raireservice.testUtils.correctIndexedAPIAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static au.org.democracydevelopers.raireservice.testUtils.correctSolutionData;
@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -192,27 +192,7 @@ public class GetAssertionsValidAPIRequestTestsJSON {
     assertTrue(response.getStatusCode().is5xxServerError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
         "candidate list provided as parameter is inconsistent"));
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR.toString(),
-        Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
-  }
-
-
-  /**
-   * A request with candidates who are inconsistent with the assertions in the database is an error.
-   */
-  @Test
-  public void wrongCandidatesIsAnError() {
-    testUtils.log(logger, "wrongCandidatesIsAnError");
-    String url = baseURL + port + getAssertionsEndpoint;
-
-    String requestAsJson =
-        "{\"riskLimit\":0.05,\"contestName\":\"One NEB Assertion Contest\",\"candidates\":[\"Chuan\",\"Diego\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is5xxServerError());
     assertEquals(WRONG_CANDIDATE_NAMES.toString(),
-        response.getHeaders().getFirst("error_code"));
+        Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
   }
 }

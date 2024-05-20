@@ -31,7 +31,7 @@ import au.org.democracydevelopers.raireservice.service.GetAssertionsCsvService;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException;
 import au.org.democracydevelopers.raireservice.service.GenerateAssertionsService;
 import au.org.democracydevelopers.raireservice.service.GetAssertionsJsonService;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -121,7 +121,7 @@ public class AssertionController {
     if(solution.Err == null){
       final String msg = "An error occurred in raire-java, yet no error information was returned.";
       logger.error(String.format("%s %s", prefix, msg));
-      throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
+      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
     }
 
     // raire-java returned error information, form and throw an exception using that data. (Note:

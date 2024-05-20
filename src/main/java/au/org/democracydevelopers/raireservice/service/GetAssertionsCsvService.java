@@ -35,7 +35,7 @@ import static au.org.democracydevelopers.raireservice.util.CSVUtils.escapeThenJo
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.util.DoubleComparator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -98,7 +98,7 @@ public class GetAssertionsCsvService {
       String preface = makePreface(request);
       String extrema = findExtrema(sortedAssertions);
       String headers = escapeThenJoin(csvHeaders);
-      String contents = makeContents(sortedAssertions);
+      String contents = makeContents(sortedAssertions, request.candidates);
 
       logger.debug(String.format("%s %d assertions translated to csv.", prefix, assertions.size()));
       return preface + extrema + "\n\n" + headers + "\n" + contents;
@@ -110,7 +110,7 @@ public class GetAssertionsCsvService {
     } catch (Exception e) {
       logger.error(String.format("%s Generic exception caught. Passing to caller: %s",
           prefix, e.getMessage()));
-      throw new RaireServiceException(e.getMessage(), RaireErrorCodes.INTERNAL_ERROR);
+      throw new RaireServiceException(e.getMessage(), RaireErrorCode.INTERNAL_ERROR);
     }
   }
 
@@ -266,14 +266,17 @@ public class GetAssertionsCsvService {
    * number (not related to the database's index) that begins at 1 and increments by 1 with each row.
    * @param assertions a list of assertions
    * @return their concatenated csv rows.
+   * @throws RaireServiceException if the candidate names in any of the assertions are inconsistent
+   *         with the request's candidate list.
    */
-  private String makeContents(List<Assertion> assertions) {
+  private String makeContents(List<Assertion> assertions, List<String> candidates)
+      throws RaireServiceException {
 
     int index = 1;
     List<String> rows = new ArrayList<>();
 
     for (Assertion assertion : assertions) {
-      rows.add(index++ + ", " + escapeThenJoin(assertion.asCSVRow()));
+      rows.add(index++ + ", " + escapeThenJoin(assertion.asCSVRow(candidates)));
     }
 
     return String.join("\n", rows) + "\n";

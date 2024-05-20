@@ -38,7 +38,7 @@ import au.org.democracydevelopers.raire.RaireError.TimeoutFindingAssertions;
 import au.org.democracydevelopers.raire.RaireError.TimeoutTrimmingAssertions;
 import au.org.democracydevelopers.raire.RaireError.WrongWinner;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -81,7 +81,7 @@ public class RaireServiceExceptionTests {
     assertTrue(StringUtils.containsIgnoreCase(msg,"Bob"));
     assertFalse(StringUtils.containsIgnoreCase(msg,"Chuan"));
     assertFalse(StringUtils.containsIgnoreCase(msg,"Diego"));
-    assertEquals(RaireErrorCodes.TIED_WINNERS, e.errorCode);
+    assertEquals(RaireErrorCode.TIED_WINNERS, e.errorCode);
   }
 
   /**
@@ -94,7 +94,7 @@ public class RaireServiceExceptionTests {
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Time out finding assertions"));
-    assertEquals(RaireErrorCodes.TIMEOUT_FINDING_ASSERTIONS, e.errorCode);
+    assertEquals(RaireErrorCode.TIMEOUT_FINDING_ASSERTIONS, e.errorCode);
   }
 
   /**
@@ -107,7 +107,7 @@ public class RaireServiceExceptionTests {
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Time out trimming assertions"));
-    assertEquals(RaireErrorCodes.TIMEOUT_TRIMMING_ASSERTIONS, e.errorCode);
+    assertEquals(RaireErrorCode.TIMEOUT_TRIMMING_ASSERTIONS, e.errorCode);
   }
 
   /**
@@ -120,7 +120,7 @@ public class RaireServiceExceptionTests {
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Time out checking winner"));
-    assertEquals(RaireErrorCodes.TIMEOUT_CHECKING_WINNER, e.errorCode);
+    assertEquals(RaireErrorCode.TIMEOUT_CHECKING_WINNER, e.errorCode);
   }
 
   /**
@@ -133,7 +133,7 @@ public class RaireServiceExceptionTests {
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Candidate list does not match database"));
-    assertEquals(RaireErrorCodes.WRONG_CANDIDATE_NAMES, e.errorCode);
+    assertEquals(RaireErrorCode.WRONG_CANDIDATE_NAMES, e.errorCode);
   }
 
   /**
@@ -150,7 +150,7 @@ public class RaireServiceExceptionTests {
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Bob, Diego, Alice, Chuan"));
-    assertEquals(RaireErrorCodes.COULD_NOT_RULE_OUT_ALTERNATIVE, e.errorCode);
+    assertEquals(RaireErrorCode.COULD_NOT_RULE_OUT_ALTERNATIVE, e.errorCode);
   }
 
   /**
@@ -164,7 +164,7 @@ public class RaireServiceExceptionTests {
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Internal error"));
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, e.errorCode);
   }
 
   /**
@@ -179,7 +179,7 @@ public class RaireServiceExceptionTests {
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Internal error"));
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, e.errorCode);
   }
 
   /**
@@ -194,7 +194,7 @@ public class RaireServiceExceptionTests {
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Internal error"));
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, e.errorCode);
   }
 
   /**
@@ -207,7 +207,7 @@ public class RaireServiceExceptionTests {
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Internal error"));
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, e.errorCode);
   }
 
   /**
@@ -221,7 +221,7 @@ public class RaireServiceExceptionTests {
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Internal error"));
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, e.errorCode);
   }
 
   /**
@@ -236,7 +236,7 @@ public class RaireServiceExceptionTests {
     RaireServiceException e = new RaireServiceException(raireError, candidates);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Internal error"));
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, e.errorCode);
   }
 
   /**
@@ -249,10 +249,10 @@ public class RaireServiceExceptionTests {
     testUtils.log(logger, "genericErrorIsAnInternalError");
     RaireServiceException e
         = new RaireServiceException("Total Auditable Ballots less than actual ballots",
-        RaireErrorCodes.INTERNAL_ERROR);
+        RaireErrorCode.INTERNAL_ERROR);
     String msg = e.getMessage();
     assertTrue(StringUtils.containsIgnoreCase(msg, "Auditable Ballots"));
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, e.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, e.errorCode);
 
   }
 }

@@ -47,7 +47,7 @@ public class RaireServiceException extends Exception {
    * The error code - an enum used to describe what went wrong. Returned in the http response for
    * colorado-rla to interpret for the user.
    */
-  public RaireErrorCodes errorCode;
+  public RaireErrorCode errorCode;
 
   /**
    * Main constructor, for translating a RaireError into a RaireServiceException.
@@ -56,34 +56,34 @@ public class RaireServiceException extends Exception {
   public RaireServiceException(RaireError error, List<String> candidates) {
     super(makeMessage(error, candidates));
     switch (error) {
-      case TiedWinners e -> this.errorCode = RaireErrorCodes.TIED_WINNERS;
+      case TiedWinners e -> this.errorCode = RaireErrorCode.TIED_WINNERS;
 
       case TimeoutFindingAssertions e ->
-          this.errorCode = RaireErrorCodes.TIMEOUT_FINDING_ASSERTIONS;
+          this.errorCode = RaireErrorCode.TIMEOUT_FINDING_ASSERTIONS;
 
       case TimeoutTrimmingAssertions e ->
-          this.errorCode = RaireErrorCodes.TIMEOUT_TRIMMING_ASSERTIONS;
+          this.errorCode = RaireErrorCode.TIMEOUT_TRIMMING_ASSERTIONS;
 
-      case TimeoutCheckingWinner e -> this.errorCode = RaireErrorCodes.TIMEOUT_CHECKING_WINNER;
+      case TimeoutCheckingWinner e -> this.errorCode = RaireErrorCode.TIMEOUT_CHECKING_WINNER;
 
-      case CouldNotRuleOut e -> this.errorCode = RaireErrorCodes.COULD_NOT_RULE_OUT_ALTERNATIVE;
+      case CouldNotRuleOut e -> this.errorCode = RaireErrorCode.COULD_NOT_RULE_OUT_ALTERNATIVE;
 
       // This is what we get if the candidate list entered in the request has the
       // right number but wrong names vs the database.
-      case InvalidCandidateNumber e -> this.errorCode = RaireErrorCodes.WRONG_CANDIDATE_NAMES;
+      case InvalidCandidateNumber e -> this.errorCode = RaireErrorCode.WRONG_CANDIDATE_NAMES;
 
       // Internal coding errors.
-      case InvalidTimeout e -> this.errorCode = RaireErrorCodes.INTERNAL_ERROR;
+      case InvalidTimeout e -> this.errorCode = RaireErrorCode.INTERNAL_ERROR;
 
-      case InternalErrorDidntRuleOutLoser e -> this.errorCode = RaireErrorCodes.INTERNAL_ERROR;
+      case InternalErrorDidntRuleOutLoser e -> this.errorCode = RaireErrorCode.INTERNAL_ERROR;
 
-      case InternalErrorRuledOutWinner e -> this.errorCode = RaireErrorCodes.INTERNAL_ERROR;
+      case InternalErrorRuledOutWinner e -> this.errorCode = RaireErrorCode.INTERNAL_ERROR;
 
-      case InternalErrorTrimming e -> this.errorCode = RaireErrorCodes.INTERNAL_ERROR;
+      case InternalErrorTrimming e -> this.errorCode = RaireErrorCode.INTERNAL_ERROR;
 
-      case InvalidNumberOfCandidates e -> this.errorCode = RaireErrorCodes.INTERNAL_ERROR;
+      case InvalidNumberOfCandidates e -> this.errorCode = RaireErrorCode.INTERNAL_ERROR;
 
-      case WrongWinner e -> this.errorCode = RaireErrorCodes.INTERNAL_ERROR;
+      case WrongWinner e -> this.errorCode = RaireErrorCode.INTERNAL_ERROR;
     }
   }
 
@@ -92,9 +92,9 @@ public class RaireServiceException extends Exception {
    * during assertion generation, for example a database error.
    *
    * @param message a human-readable message for the exception.
-   * @param code a RaireErrorCodes code to indicate the type of error that has arisen.
+   * @param code a RaireErrorCode code to indicate the type of error that has arisen.
    */
-  public RaireServiceException(String message, RaireErrorCodes code) {
+  public RaireServiceException(String message, RaireErrorCode code) {
     super(message);
     this.errorCode = code;
   }
@@ -102,7 +102,7 @@ public class RaireServiceException extends Exception {
   /**
    * Error codes describing what went wrong, for returning via http to colorado-rla.
    */
-  public enum RaireErrorCodes {
+  public enum RaireErrorCode {
 
     // Errors that the user can do something about.
 

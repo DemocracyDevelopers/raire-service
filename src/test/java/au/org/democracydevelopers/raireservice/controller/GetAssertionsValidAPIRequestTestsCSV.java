@@ -20,7 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
-import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes.WRONG_CANDIDATE_NAMES;
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -70,7 +70,7 @@ public class GetAssertionsValidAPIRequestTestsCSV {
       = List.of("Annoying, Alice", "\"Breaking, Bob\"", "Challenging, Chuan", "O'Difficult, Diego");
 
   private final static String trickyCharactersAsJson =
-      "\"candidates\":[\"Annoying, Alice\",\"Breaking, Bob\",\"Challenging, Chuan\",\"O'Difficult, Diego\"]}";
+      "\"candidates\":[\"Annoying, Alice\",\"\\\"Breaking, Bob\\\"\",\"Challenging, Chuan\",\"O'Difficult, Diego\"]}";
 
   @LocalServerPort
   private int port;

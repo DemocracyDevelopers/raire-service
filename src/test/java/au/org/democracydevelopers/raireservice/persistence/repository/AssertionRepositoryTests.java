@@ -26,7 +26,7 @@ import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -204,7 +204,7 @@ public class AssertionRepositoryTests {
     testUtils.log(logger, "existentContestNoAssertionsThrowError");
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.getAssertionsThrowError("No CVR Mayoral"));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
 
@@ -218,7 +218,7 @@ public class AssertionRepositoryTests {
     testUtils.log(logger, "nonExistentContestNoAssertionsThrowError");
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.getAssertionsThrowError("Non-Existent Contest Name"));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
@@ -258,7 +258,7 @@ public class AssertionRepositoryTests {
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.getAssertionsThrowError("Ballina Mayoral"));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**

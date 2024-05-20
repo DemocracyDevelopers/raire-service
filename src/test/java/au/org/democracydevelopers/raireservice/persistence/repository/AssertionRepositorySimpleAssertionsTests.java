@@ -34,7 +34,7 @@ import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.service.Metadata;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -251,7 +251,7 @@ public class AssertionRepositorySimpleAssertionsTests {
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.getAssertionsThrowError("One NEB Assertion Contest"));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
@@ -270,7 +270,7 @@ public class AssertionRepositorySimpleAssertionsTests {
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.getAssertionsThrowError("One NEN Assertion Contest"));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
@@ -289,7 +289,7 @@ public class AssertionRepositorySimpleAssertionsTests {
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.getAssertionsThrowError("One NEN NEB Assertion Contest"));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
@@ -308,7 +308,7 @@ public class AssertionRepositorySimpleAssertionsTests {
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.getAssertionsThrowError("Multi-County Contest 1"));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
