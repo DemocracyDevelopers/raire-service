@@ -38,6 +38,24 @@ public class CSVUtils {
    *         in one cell.
    */
   public static String escapeThenJoin(List<String> data) {
-    return String.join(", ", data.stream().map(StringEscapeUtils::escapeCsv).toList());
+    return String.join(",", data.stream().map(StringEscapeUtils::escapeCsv).toList());
+  }
+
+  /**
+   * Turn a list of integers into a pretty-printed string intended for a csv cell. This puts quotes
+   * around everything, including a singleton list, so that it is interpreted as a string by the
+   * spreadsheet/csv reader.
+   * @param data a list of Integers.
+   * @return the list as a pretty-printed comma-separated string with explicit quotes around it.
+   */
+  public static String intListToString(List<Integer> data) {
+    if(data.size() == 1) {
+      // Put quotes around it so it will be interpreted as a string by the csv parser
+      return "\""+data.getFirst()+"\"";
+    } else {
+      // This will return an empty string for an empty input list, otherwise a string with the data
+      // items comma-separated.
+      return "\""+String.join(", ", data.stream().map(Object::toString).toList())+"\"";
+    }
   }
 }
