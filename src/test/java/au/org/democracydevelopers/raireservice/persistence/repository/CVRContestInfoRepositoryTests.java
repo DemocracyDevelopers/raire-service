@@ -115,7 +115,7 @@ public class CVRContestInfoRepositoryTests {
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999998, 8);
     assertEquals(1, retrieved.size());
     String[] choices = {"Alice", "Bob", "Charlie"};
-    assertArrayEquals(choices, retrieved.get(0));
+    assertArrayEquals(choices, retrieved.getFirst());
   }
 
   /**
@@ -128,7 +128,7 @@ public class CVRContestInfoRepositoryTests {
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999988, 10);
     assertEquals(1, retrieved.size());
     String[] choices = {"Harold Holt","Wendy Squires","(B)(C)(D)"};
-    assertArrayEquals(choices, retrieved.get(0));
+    assertArrayEquals(choices, retrieved.getFirst());
   }
 
   /**
@@ -142,7 +142,7 @@ public class CVRContestInfoRepositoryTests {
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999997, 8);
     assertEquals(1, retrieved.size());
     String[] choices = {"Laurie M.", "Bonny Smith", "Thomas D'Angelo"};
-    assertArrayEquals(choices, retrieved.get(0));
+    assertArrayEquals(choices, retrieved.getFirst());
   }
 
 
@@ -251,7 +251,7 @@ public class CVRContestInfoRepositoryTests {
     testUtils.log(logger, "blankVoteChoiceString");
     List<String[]> retrieved = cvrContestInfoRepository.getCVRs(999985, 11);
     assertEquals(1, retrieved.size());
-    assertEquals(0, retrieved.get(0).length);
+    assertEquals(0, retrieved.getFirst().length);
   }
 
   /**

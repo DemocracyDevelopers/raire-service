@@ -77,7 +77,7 @@ public class AssertionRepositoryInProgressTests {
         "One NEB Assertion Contest");
     assertEquals(1, retrieved.size());
 
-    final Assertion r = retrieved.get(0);
+    final Assertion r = retrieved.getFirst();
     assertEquals(NEBAssertion.class, r.getClass());
 
     assertTrue(correctDBAssertionData(1, 320, 0.32, 1.1,
@@ -98,7 +98,7 @@ public class AssertionRepositoryInProgressTests {
         "One NEB Assertion Contest");
     assertEquals(1, retrieved.size());
 
-    final Assertion r = retrieved.get(0);
+    final Assertion r = retrieved.getFirst();
     AssertionAndDifficulty aad = r.convert(List.of("Alice", "Bob"));
     assertEquals(1.1, aad.difficulty);
     assertEquals(320, aad.margin);
@@ -124,7 +124,7 @@ public class AssertionRepositoryInProgressTests {
         "One NEN Assertion Contest");
     assertEquals(1, retrieved.size());
 
-    final Assertion r = retrieved.get(0);
+    final Assertion r = retrieved.getFirst();
     assertEquals(NENAssertion.class, r.getClass());
 
     assertTrue(correctDBAssertionData(2, 240, 0.12, 3.01,
