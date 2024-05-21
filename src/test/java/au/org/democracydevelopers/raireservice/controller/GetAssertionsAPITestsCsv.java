@@ -90,8 +90,8 @@ public class GetAssertionsAPITestsCsv {
    * maxima and minima have been manually computed to make sure they're correct.
    */
   @Test
-  public void testValidRequestWithNoAssertions() {
-    testUtils.log(logger, "testValidRequestWithNoAssertions");
+  public void testValidRequestWithLotsOfTies() {
+    testUtils.log(logger, "testValidRequestWithLotsOfTies");
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson =

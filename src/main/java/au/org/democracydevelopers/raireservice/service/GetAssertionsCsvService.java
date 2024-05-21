@@ -276,7 +276,7 @@ public class GetAssertionsCsvService {
     List<String> rows = new ArrayList<>();
 
     for (Assertion assertion : assertions) {
-      rows.add(index++ + ", " + escapeThenJoin(assertion.asCSVRow(candidates)));
+      rows.add(index++ + "," + escapeThenJoin(assertion.asCSVRow(candidates)));
     }
 
     return String.join("\n", rows) + "\n";

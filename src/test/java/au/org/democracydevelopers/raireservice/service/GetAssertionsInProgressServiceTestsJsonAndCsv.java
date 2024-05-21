@@ -54,6 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
  * preloaded into the test database from: src/test/resources/assertions_in_progress.sql.
  * Note that tests of GetAssertionsJsonService have been spread across several test classes, each
  * defined with respect to a different test container.
+ * There is a json version and a csv version of the same test.
  */
 @ActiveProfiles("assertions-in-progress")
 @SpringBootTest
@@ -143,31 +144,24 @@ public class GetAssertionsInProgressServiceTestsJsonAndCsv {
 
     String csv = getAssertionsCsvService.generateCSV(request);
 
-    assertTrue(csv.contains("Contest name, One NEN NEB Assertion Contest\n"));
-    assertTrue(csv.contains("Candidates, \"Liesl, Wendell, Amanda, Chuan\""));
-    assertTrue(csv.contains("Extreme item, Value, Assertion IDs\n"));
-    // Remove quotes around singleton extremum list when csvRefinements is merged.
-    //assertTrue(csv.contains("Margin, 112, \"1\"\n"));
-    assertTrue(csv.contains("Margin, 112, 1\n"));
-    //assertTrue(csv.contains("Diluted margin, 0.1, \"1\"\n"));
-    assertTrue(csv.contains("Diluted margin, 0.1, 1\n"));
-    //assertTrue(csv.contains("Raire difficulty, 3.17, \"2\"\n"));
-    assertTrue(csv.contains("Raire difficulty, 3.17, 2\n"));
-    //assertTrue(csv.contains("Current risk, 0.70, \"2\"\n"));
-    assertTrue(csv.contains("Current risk, 0.70, 2\n"));
-    //assertTrue(csv.contains("Optimistic samples to audit, 200, \"2\"\n"));
-    assertTrue(csv.contains("Optimistic samples to audit, 200, 2\n"));
-    //assertTrue(csv.contains("Estimated samples to audit, 300, \"2\"\n"));
-    assertTrue(csv.contains("Estimated samples to audit, 300, 2\n"));
+    assertTrue(csv.contains("Contest name,One NEN NEB Assertion Contest\n"));
+    assertTrue(csv.contains("Candidates,\"Liesl,Wendell,Amanda,Chuan\""));
+    assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
+    assertTrue(csv.contains("Margin,112,\"1\"\n"));
+    assertTrue(csv.contains("Diluted margin,0.1,\"1\"\n"));
+    assertTrue(csv.contains("Raire difficulty,3.17,\"2\"\n"));
+    assertTrue(csv.contains("Current risk,0.70,\"2\"\n"));
+    assertTrue(csv.contains("Optimistic samples to audit,200,\"2\"\n"));
+    assertTrue(csv.contains("Estimated samples to audit,300,\"2\"\n"));
     assertTrue(csv.contains(
-        "ID, Type, Winner, Loser, Assumed continuing, Difficulty, Margin, Diluted margin, Risk, "
-            + "Estimated samples to audit, Optimistic samples to audit, Two vote over count, "
-            + "One vote over count, Other discrepancy count, One vote under count, "
+        "ID,Type,Winner,Loser,Assumed continuing,Difficulty,Margin,Diluted margin,Risk,"
+            + "Estimated samples to audit,Optimistic samples to audit,Two vote over count,"
+            + "One vote over count,Other discrepancy count,One vote under count,"
             + "Two vote under count\n"));
-    assertTrue(csv.contains("1,NEB,Amanda,Liesl,,0.10,112,0.100,0.08,27,20,2,0,0,1,0\n"));
-    // assertTrue(csv.contains(
-        // "2, NEN, Diego, Chuan, \"Alice, Chuan, Diego\", 6.1, 100, 0.1, 0.05, 45, 45, 0, 0, 0, 0, 0\n"
-    // ));
+    assertTrue(csv.contains("1,NEB,Amanda,Liesl,,0.1,112,0.1,0.08,27,20,2,0,0,1,0\n"));
+    assertTrue(csv.contains(
+        "2,NEN,Amanda,Wendell,\"Liesl,Wendell,Amanda\",3.17,560,0.5,0.70,300,200,0,2,0,0,1\n"
+    ));
   }
 
 }

@@ -70,6 +70,7 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
   private final static String getAssertionsJsonEndpoint = "/raire/get-assertions-json";
+  private final static String getAssertionsCsvEndpoint = "/raire/get-assertions-csv";
   private final static String oneNEBAssertionContest = "One NEB Assertion Contest";
   private final static String oneNENAssertionContest = "One NEN Assertion Contest";
   private final static String oneNEBOneNENAssertionContest = "One NEN NEB Assertion Contest";
@@ -87,12 +88,12 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
 
 
   /**
-   * Retrieve assertions for a contest that has one NEB assertion (audit in progress).
+   * Retrieve assertions for a contest that has one NEB assertion (audit in progress). (JSON)
    */
   @Test
   @Transactional
-  void retrieveAssertionsAsJsonExistentContestOneNEBAssertion() {
-    testUtils.log(logger, "retrieveAssertionsAsJsonExistentContestOneNEBAssertion");
+  void retrieveAssertionsExistentContestOneNEBAssertionJSON() {
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertionJSON");
     String url = baseURL + port + getAssertionsJsonEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
@@ -118,12 +119,44 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
   }
 
   /**
-   * Retrieve assertions for a contest that has one NEN assertion (audit in progress).
+   * Retrieve assertions for a contest that has one NEB assertion (audit in progress). (CSV)
    */
   @Test
   @Transactional
-  void retrieveAssertionsAsJsonExistentContestOneNENAssertion() {
-    testUtils.log(logger, "retrieveAssertionsAsJsonExistentContestOneNENAssertion");
+  void retrieveAssertionsExistentContestOneNEBAssertionCSV() {
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertionCSV");
+    String url = baseURL + port + getAssertionsCsvEndpoint;
+
+    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
+        oneNEBAssertionContest+"\",\"candidates\":[\"Alice\",\"Bob\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    String csv = restTemplate.postForEntity(url, request, String.class).getBody();
+
+    assertTrue(csv.contains("Contest name,One NEB Assertion Contest\n"));
+    assertTrue(csv.contains("Candidates,\"Alice,Bob\""));
+    assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
+    assertTrue(csv.contains("Margin,320,\"1\"\n"));
+    assertTrue(csv.contains("Diluted margin,0.32,\"1\"\n"));
+    assertTrue(csv.contains("Raire difficulty,1.1,\"1\"\n"));
+    assertTrue(csv.contains("Current risk,0.50,\"1\"\n"));
+    assertTrue(csv.contains("Optimistic samples to audit,111,\"1\"\n"));
+    assertTrue(csv.contains("Estimated samples to audit,111,\"1\"\n"));
+    assertTrue(csv.contains(
+        "ID,Type,Winner,Loser,Assumed continuing,Difficulty,Margin,Diluted margin,Risk,"
+            + "Estimated samples to audit,Optimistic samples to audit,Two vote over count,"
+            + "One vote over count,Other discrepancy count,One vote under count,"
+            + "Two vote under count\n"));
+    assertTrue(csv.contains("1,NEB,Alice,Bob,,1.1,320,0.32,0.50,111,111,0,0,0,0,0\n"));
+  }
+
+  /**
+   * Retrieve assertions for a contest that has one NEN assertion (audit in progress). (JSON)
+   */
+  @Test
+  @Transactional
+  void retrieveAssertionsExistentContestOneNENAssertionJSON() {
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertionJSON");
     String url = baseURL + port + getAssertionsJsonEndpoint;
 
     String requestAsJson =
@@ -150,12 +183,48 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
   }
 
   /**
-   * Retrieve assertions for a contest that has one NEN and one NEB assertion (audit in progress).
+   * Retrieve assertions for a contest that has one NEN assertion (audit in progress). (CSV)
    */
   @Test
   @Transactional
-  void retrieveAssertionsAsJsonOneNENOneNEBAssertionInProgress() {
-    testUtils.log(logger, "retrieveAssertionsAsJsonOneNENOneNEBAssertionInProgress");
+  void retrieveAssertionsExistentContestOneNENAssertionCSV() {
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertionCSV");
+    String url = baseURL + port + getAssertionsCsvEndpoint;
+
+    String requestAsJson =
+        "{\"riskLimit\":0.10,\"contestName\":\"" + oneNENAssertionContest
+            + "\",\"candidates\":[\"Alice\",\"Bob\",\"Charlie\",\"Diego\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    String csv = restTemplate.postForEntity(url, request, String.class).getBody();
+
+    assertTrue(csv.contains("Contest name,One NEN Assertion Contest\n"));
+    assertTrue(csv.contains("Candidates,\"Alice,Bob,Charlie,Diego\""));
+    assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
+    assertTrue(csv.contains("Margin,240,\"1\"\n"));
+    assertTrue(csv.contains("Diluted margin,0.12,\"1\"\n"));
+    assertTrue(csv.contains("Raire difficulty,3.01,\"1\"\n"));
+    assertTrue(csv.contains("Current risk,0.20,\"1\"\n"));
+    assertTrue(csv.contains("Optimistic samples to audit,201,\"1\"\n"));
+    assertTrue(csv.contains("Estimated samples to audit,245,\"1\"\n"));
+    assertTrue(csv.contains(
+      "ID,Type,Winner,Loser,Assumed continuing,Difficulty,Margin,Diluted margin,Risk,"
+      + "Estimated samples to audit,Optimistic samples to audit,Two vote over count,"
+      + "One vote over count,Other discrepancy count,One vote under count,"
+      + "Two vote under count\n"));
+    assertTrue(csv.contains(
+      "1,NEN,Alice,Charlie,\"Alice,Charlie,Diego,Bob\",3.01,240,0.12,0.20,245,201,0,1,2,0,0\n"
+    ));
+  }
+
+  /**
+   * Retrieve assertions for a contest that has one NEN and one NEB assertion (audit in progress).
+   * (JSON)
+   */
+  @Test
+  @Transactional
+  void retrieveAssertionsOneNENOneNEBAssertionInProgressJSON() {
+    testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressJSON");
     String url = baseURL + port + getAssertionsJsonEndpoint;
 
     String requestAsJson =
@@ -191,5 +260,42 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
             correctIndexedAPIAssertionData("NEN", 560, 3.17, 2, 1,
                 List.of(0, 1, 2), 0.7, response.getBody(), 1)
     );
+  }
+
+  /**
+   * Retrieve assertions for a contest that has one NEN and one NEB assertion (audit in progress).
+   * (CSV)
+   */
+  @Test
+  @Transactional
+  void retrieveAssertionsOneNENOneNEBAssertionInProgressCSV() {
+    testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressCSV");
+    String url = baseURL + port + getAssertionsCsvEndpoint;
+
+    String requestAsJson =
+        "{\"riskLimit\":0.05,\"contestName\":\"" + oneNEBOneNENAssertionContest
+            + "\",\"candidates\":[\"Liesl\",\"Wendell\",\"Amanda\",\"Chuan\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    String csv = restTemplate.postForEntity(url, request, String.class).getBody();
+
+    assertTrue(csv.contains("Contest name,One NEN NEB Assertion Contest\n"));
+    assertTrue(csv.contains("Candidates,\"Liesl,Wendell,Amanda,Chuan\""));
+    assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
+    assertTrue(csv.contains("Margin,112,\"1\"\n"));
+    assertTrue(csv.contains("Diluted margin,0.1,\"1\"\n"));
+    assertTrue(csv.contains("Raire difficulty,3.17,\"2\"\n"));
+    assertTrue(csv.contains("Current risk,0.70,\"2\"\n"));
+    assertTrue(csv.contains("Optimistic samples to audit,200,\"2\"\n"));
+    assertTrue(csv.contains("Estimated samples to audit,300,\"2\"\n"));
+    assertTrue(csv.contains(
+        "ID,Type,Winner,Loser,Assumed continuing,Difficulty,Margin,Diluted margin,Risk,"
+            + "Estimated samples to audit,Optimistic samples to audit,Two vote over count,"
+            + "One vote over count,Other discrepancy count,One vote under count,"
+            + "Two vote under count\n"));
+    assertTrue(csv.contains("1,NEB,Amanda,Liesl,,0.1,112,0.1,0.08,27,20,2,0,0,1,0\n"));
+    assertTrue(csv.contains(
+        "2,NEN,Amanda,Wendell,\"Liesl,Wendell,Amanda\",3.17,560,0.5,0.70,300,200,0,2,0,0,1\n"
+    ));
   }
 }
