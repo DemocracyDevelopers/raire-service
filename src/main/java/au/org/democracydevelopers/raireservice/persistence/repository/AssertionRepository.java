@@ -28,7 +28,7 @@ import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 
 import au.org.democracydevelopers.raireservice.service.RaireServiceException;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import java.util.Arrays;
 import java.util.List;
 
@@ -128,7 +128,7 @@ public interface AssertionRepository extends JpaRepository<Assertion, Long> {
       final String msg = String.format("%s No assertions have been generated for the contest %s.",
           prefix, contestName);
       logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCodes.NO_ASSERTIONS_PRESENT);
+      throw new RaireServiceException(msg, RaireErrorCode.NO_ASSERTIONS_PRESENT);
     }
 
     return assertions;

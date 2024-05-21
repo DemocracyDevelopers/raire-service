@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
 import static au.org.democracydevelopers.raireservice.testUtils.correctIndexedAPIAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static au.org.democracydevelopers.raireservice.testUtils.correctSolutionData;
@@ -27,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,10 +65,10 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsValidAPIRequestTests {
+public class GetAssertionsValidAPIRequestTestsJson {
 
   private static final Logger logger = LoggerFactory.getLogger(
-      GetAssertionsValidAPIRequestTests.class);
+      GetAssertionsValidAPIRequestTestsJson.class);
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
@@ -191,7 +191,7 @@ public class GetAssertionsValidAPIRequestTests {
     assertTrue(response.getStatusCode().is5xxServerError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
         "candidate list provided as parameter is inconsistent"));
-    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(),
+    assertEquals(WRONG_CANDIDATE_NAMES.toString(),
         Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
   }
 }

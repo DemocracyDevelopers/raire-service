@@ -23,7 +23,7 @@ package au.org.democracydevelopers.raireservice.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.Objects;
 import org.junit.jupiter.api.BeforeAll;
@@ -98,7 +98,7 @@ public class GetAssertionsAPIErrorTests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is5xxServerError());
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT.toString(),
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT.toString(),
         Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
         "No assertions have been generated for the contest"));

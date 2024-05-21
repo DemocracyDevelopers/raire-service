@@ -33,7 +33,7 @@ import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -174,7 +174,7 @@ public class GetAssertionsJsonServiceSimpleAssertionsTests {
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         service.getRaireSolution(request));
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
         "Candidate list provided as parameter is inconsistent"));
   }
@@ -193,7 +193,7 @@ public class GetAssertionsJsonServiceSimpleAssertionsTests {
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         service.getRaireSolution(request));
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
         "Candidate list provided as parameter is inconsistent"));
   }

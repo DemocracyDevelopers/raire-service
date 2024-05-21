@@ -28,7 +28,7 @@ import au.org.democracydevelopers.raireservice.response.RaireResultMixIn;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +133,7 @@ public class GetAssertionsJsonService {
     catch(Exception ex){
       logger.error(String.format("%s Generic exception caught. Passing to caller: %s",
           prefix, ex.getMessage()));
-      throw new RaireServiceException(ex.getMessage(), RaireErrorCodes.INTERNAL_ERROR);
+      throw new RaireServiceException(ex.getMessage(), RaireErrorCode.INTERNAL_ERROR);
     }
   }
 }

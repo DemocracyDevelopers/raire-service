@@ -36,7 +36,7 @@ import static au.org.democracydevelopers.raireservice.util.CSVUtils.intListToStr
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.util.DoubleComparator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -111,7 +111,7 @@ public class GetAssertionsCsvService {
     } catch (Exception e) {
       logger.error(String.format("%s Generic exception caught. Passing to caller: %s",
           prefix, e.getMessage()));
-      throw new RaireServiceException(e.getMessage(), RaireErrorCodes.INTERNAL_ERROR);
+      throw new RaireServiceException(e.getMessage(), RaireErrorCode.INTERNAL_ERROR);
     }
   }
 
