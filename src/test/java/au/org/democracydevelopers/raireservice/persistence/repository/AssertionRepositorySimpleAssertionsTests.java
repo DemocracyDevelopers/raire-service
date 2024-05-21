@@ -34,7 +34,7 @@ import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.service.Metadata;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -79,7 +79,7 @@ public class AssertionRepositorySimpleAssertionsTests {
         "One NEB Assertion Contest");
     assertEquals(1, retrieved.size());
 
-    final Assertion r = retrieved.get(0);
+    final Assertion r = retrieved.getFirst();
     AssertionRepositoryTests.verifyAliceNEBBob(r);
   }
 
@@ -94,7 +94,7 @@ public class AssertionRepositorySimpleAssertionsTests {
     List<Assertion> retrieved = assertionRepository.findByContestName("One NEB Assertion Contest");
     assertEquals(1, retrieved.size());
 
-    final Assertion r = retrieved.get(0);
+    final Assertion r = retrieved.getFirst();
     AssertionRepositoryTests.verifyAliceNEBBob(r);
   }
 
@@ -109,7 +109,7 @@ public class AssertionRepositorySimpleAssertionsTests {
         "One NEN Assertion Contest");
     assertEquals(1, retrieved.size());
 
-    final Assertion r = retrieved.get(0);
+    final Assertion r = retrieved.getFirst();
     AssertionRepositoryTests.verifyAliceNENCharlie(r);
   }
 
@@ -124,7 +124,7 @@ public class AssertionRepositorySimpleAssertionsTests {
     List<Assertion> retrieved = assertionRepository.findByContestName("One NEN Assertion Contest");
     assertEquals(1, retrieved.size());
 
-    final Assertion r = retrieved.get(0);
+    final Assertion r = retrieved.getFirst();
     AssertionRepositoryTests.verifyAliceNENCharlie(r);
   }
 
@@ -139,7 +139,7 @@ public class AssertionRepositorySimpleAssertionsTests {
         "One NEN Assertion Contest");
     assertEquals(1, retrieved.size());
 
-    final Assertion r = retrieved.get(0);
+    final Assertion r = retrieved.getFirst();
     AssertionAndDifficulty aad = r.convert(List.of("Alice", "Charlie", "Diego", "Bob"));
     assertEquals(3.01, aad.difficulty);
     assertEquals(240, aad.margin);
@@ -251,7 +251,7 @@ public class AssertionRepositorySimpleAssertionsTests {
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.getAssertionsThrowError("One NEB Assertion Contest"));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
@@ -270,7 +270,7 @@ public class AssertionRepositorySimpleAssertionsTests {
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.getAssertionsThrowError("One NEN Assertion Contest"));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
@@ -289,7 +289,7 @@ public class AssertionRepositorySimpleAssertionsTests {
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.getAssertionsThrowError("One NEN NEB Assertion Contest"));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
@@ -308,7 +308,7 @@ public class AssertionRepositorySimpleAssertionsTests {
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.getAssertionsThrowError("Multi-County Contest 1"));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
@@ -338,7 +338,7 @@ public class AssertionRepositorySimpleAssertionsTests {
     List<Assertion> retrieved = assertionRepository.getAssertionsThrowError("Larger Contest");
     assertEquals(2, retrieved.size());
 
-    Assertion r1 = retrieved.get(0);
+    Assertion r1 = retrieved.getFirst();
     assertEquals(NEBAssertion.class, r1.getClass());
     assertTrue(correctDBAssertionData(8, 25, 0.0125, 5.0,
         "CC", "A", List.of(), Collections.emptyMap(),

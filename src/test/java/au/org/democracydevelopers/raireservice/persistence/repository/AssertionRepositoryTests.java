@@ -26,7 +26,7 @@ import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -204,7 +204,7 @@ public class AssertionRepositoryTests {
     testUtils.log(logger, "existentContestNoAssertionsThrowError");
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.getAssertionsThrowError("No CVR Mayoral"));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
 
@@ -218,7 +218,7 @@ public class AssertionRepositoryTests {
     testUtils.log(logger, "nonExistentContestNoAssertionsThrowError");
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.getAssertionsThrowError("Non-Existent Contest Name"));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
@@ -258,7 +258,7 @@ public class AssertionRepositoryTests {
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.getAssertionsThrowError("Ballina Mayoral"));
-    assertEquals(RaireErrorCodes.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
@@ -283,8 +283,8 @@ public class AssertionRepositoryTests {
     assertEquals(1, retrieved1.size());
 
     // Alice NEB Bob
-    verifyAliceNEBBob(retrieved.get(0));
-    verifyAliceNEBBob(retrieved1.get(0));
+    verifyAliceNEBBob(retrieved.getFirst());
+    verifyAliceNEBBob(retrieved1.getFirst());
 
     saveAssertionsOneNENContest();
     retrieved = assertionRepository.getAssertionsThrowError("One NEN Assertion Contest");
@@ -294,8 +294,8 @@ public class AssertionRepositoryTests {
     assertEquals(1, retrieved1.size());
 
     // Alice NEN Charlie given Alice, Charlie, Diego and Bob remain.
-    verifyAliceNENCharlie(retrieved.get(0));
-    verifyAliceNENCharlie(retrieved1.get(0));
+    verifyAliceNENCharlie(retrieved.getFirst());
+    verifyAliceNENCharlie(retrieved1.getFirst());
 
     saveAssertionsOneNENOneNEBContest();
     retrieved = assertionRepository.getAssertionsThrowError("One NEN NEB Assertion Contest");
@@ -305,10 +305,10 @@ public class AssertionRepositoryTests {
     assertEquals(2, retrieved1.size());
 
     // Amanda NEB Liesel
-    Assertion r1 = retrieved.get(0);
+    Assertion r1 = retrieved.getFirst();
     verifyAmandaNEBLiesl(r1);
 
-    r1 = retrieved1.get(0);
+    r1 = retrieved1.getFirst();
     verifyAmandaNEBLiesl(r1);
 
     // Amanda NEN Wendell given Amanda, Wendell and Liesl are continuing.
@@ -326,10 +326,10 @@ public class AssertionRepositoryTests {
     assertEquals(3, retrieved.size());
 
     // Charlie C. Chaplin NEB Alice P. Mangrove
-    r1 = retrieved.get(0);
+    r1 = retrieved.getFirst();
     verifyCharlieCNEBAliceM(r1);
 
-    r1 = retrieved1.get(0);
+    r1 = retrieved1.getFirst();
     verifyCharlieCNEBAliceM(r1);
 
     // Alice P. Mangrove NEB Al (Bob) Jones

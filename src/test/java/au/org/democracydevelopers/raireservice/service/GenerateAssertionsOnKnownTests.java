@@ -40,7 +40,7 @@ import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.Arrays;
 import java.util.List;
@@ -365,7 +365,7 @@ public class GenerateAssertionsOnKnownTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.generateAssertions(notEnoughBallotsRequest)
     );
-    assertSame(ex.errorCode, RaireErrorCodes.INVALID_TOTAL_AUDITABLE_BALLOTS);
+    assertSame(ex.errorCode, RaireErrorCode.INVALID_TOTAL_AUDITABLE_BALLOTS);
   }
 
   /**
@@ -384,7 +384,7 @@ public class GenerateAssertionsOnKnownTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.generateAssertions(wrongCandidatesRequest)
     );
-    assertSame(ex.errorCode, RaireErrorCodes.WRONG_CANDIDATE_NAMES);
+    assertSame(ex.errorCode, RaireErrorCode.WRONG_CANDIDATE_NAMES);
   }
 
   /**
@@ -403,7 +403,7 @@ public class GenerateAssertionsOnKnownTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.persistAssertions(result, request));
 
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "invalid arguments"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
@@ -426,7 +426,7 @@ public class GenerateAssertionsOnKnownTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.persistAssertions(result, request));
 
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "invalid arguments"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
@@ -449,7 +449,7 @@ public class GenerateAssertionsOnKnownTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.persistAssertions(result, request));
 
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "non-negative margin"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
@@ -472,7 +472,7 @@ public class GenerateAssertionsOnKnownTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.persistAssertions(result, request));
 
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "less than universe size"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
@@ -495,7 +495,7 @@ public class GenerateAssertionsOnKnownTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.persistAssertions(result, request));
 
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "must not be the same candidate"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
@@ -519,7 +519,7 @@ public class GenerateAssertionsOnKnownTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.persistAssertions(result, request));
 
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "must also be continuing"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
@@ -543,7 +543,7 @@ public class GenerateAssertionsOnKnownTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.persistAssertions(result, request));
 
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "must also be continuing"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
@@ -567,7 +567,7 @@ public class GenerateAssertionsOnKnownTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.persistAssertions(result, request));
 
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "index out of bounds"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
@@ -591,7 +591,7 @@ public class GenerateAssertionsOnKnownTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.persistAssertions(result, request));
 
-    assertEquals(RaireErrorCodes.INTERNAL_ERROR, ex.errorCode);
+    assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "index out of bounds"));
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);

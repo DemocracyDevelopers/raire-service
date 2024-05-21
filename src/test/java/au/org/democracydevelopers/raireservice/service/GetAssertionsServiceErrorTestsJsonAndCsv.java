@@ -45,14 +45,16 @@ import org.springframework.transaction.annotation.Transactional;
  * Tests of assertion retrieval in GetAssertionsJsonService. Data is preloaded into the database
  * using src/test/resources/data.sql. Note that tests of GetAssertionsJsonService have been
  * spread across several test classes, each defined with respect to a different test container.
+ * FIXME Add CSV
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsJsonServiceTests {
+public class GetAssertionsServiceErrorTestsJsonAndCsv {
 
-  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsJsonServiceTests.class);
+  private static final Logger logger = LoggerFactory.getLogger(
+      GetAssertionsServiceErrorTestsJsonAndCsv.class);
 
   @Autowired
   AssertionRepository assertionRepository;
@@ -91,5 +93,6 @@ public class GetAssertionsJsonServiceTests {
         service.getRaireSolution(request));
     assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
+
 
 }

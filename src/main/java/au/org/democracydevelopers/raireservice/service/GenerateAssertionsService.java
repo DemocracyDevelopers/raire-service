@@ -30,7 +30,7 @@ import au.org.democracydevelopers.raireservice.persistence.repository.AssertionR
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import jakarta.transaction.Transactional;
 import java.util.HashMap;
 import java.util.List;
@@ -108,7 +108,7 @@ public class GenerateAssertionsService {
             + "%d specified in the assertion generation request. Throwing a RaireServiceException.",
             prefix, votes.size(), request.contestName, request.totalAuditableBallots);
         logger.error(msg);
-        throw new RaireServiceException(msg, RaireErrorCodes.INVALID_TOTAL_AUDITABLE_BALLOTS);
+        throw new RaireServiceException(msg, RaireErrorCode.INVALID_TOTAL_AUDITABLE_BALLOTS);
       }
 
       logger.debug(String.format("%s Adding all extracted rankings to a consolidator to identify " +
@@ -147,7 +147,7 @@ public class GenerateAssertionsService {
       final String msg = String.format("%s Invalid vote sent to RAIRE for contest %s. %s",
           prefix, request.contestName, ex.getMessage());
       logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCodes.WRONG_CANDIDATE_NAMES);
+      throw new RaireServiceException(msg, RaireErrorCode.WRONG_CANDIDATE_NAMES);
     }
     catch(RaireServiceException ex){
       final String msg = String.format("%s A RaireServiceException was caught; passing to caller. %s",
@@ -159,13 +159,13 @@ public class GenerateAssertionsService {
       final String msg = String.format("%s A data access exception arose when extracting " +
               "CVR/Contest data for contest %s. %s", prefix, request.contestName, ex.getMessage());
       logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
+      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
     }
     catch(Exception ex){
       final String msg = String.format("%s An exception arose when generating assertions. %s",
           prefix, ex.getMessage());
       logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
+      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
     }
   }
 
@@ -203,7 +203,7 @@ public class GenerateAssertionsService {
           "universe size, invalid margin, or invalid combination of winner, loser and list of " +
           "assumed continuing candidates. %s", prefix, ex.getMessage());
       logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
+      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
     }
     catch(ArrayIndexOutOfBoundsException ex){
       final String msg = String.format("%s Array index out of bounds access in " +
@@ -211,19 +211,19 @@ public class GenerateAssertionsService {
           "or loser index in a raire-java assertion being invalid with respect to the " +
           "candidates list for the contest. %s", prefix, ex.getMessage());
       logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
+      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
     }
     catch(DataAccessException ex){
       final String msg = String.format("%s Data access exception arose when persisting assertions. %s",
           prefix, ex.getMessage());
       logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
+      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
     }
     catch(Exception ex){
       final String msg = String.format("%s An exception arose when persisting assertions. %s",
           prefix, ex.getMessage());
       logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCodes.INTERNAL_ERROR);
+      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
     }
   }
 }

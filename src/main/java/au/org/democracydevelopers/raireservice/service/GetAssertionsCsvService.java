@@ -31,11 +31,12 @@ import static au.org.democracydevelopers.raireservice.service.Metadata.OPTIMISTI
 import static au.org.democracydevelopers.raireservice.service.Metadata.extremumHeaders;
 import static au.org.democracydevelopers.raireservice.service.Metadata.csvHeaders;
 import static au.org.democracydevelopers.raireservice.util.CSVUtils.escapeThenJoin;
+import static au.org.democracydevelopers.raireservice.util.CSVUtils.intListToString;
 
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCodes;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.util.DoubleComparator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -110,7 +111,7 @@ public class GetAssertionsCsvService {
     } catch (Exception e) {
       logger.error(String.format("%s Generic exception caught. Passing to caller: %s",
           prefix, e.getMessage()));
-      throw new RaireServiceException(e.getMessage(), RaireErrorCodes.INTERNAL_ERROR);
+      throw new RaireServiceException(e.getMessage(), RaireErrorCode.INTERNAL_ERROR);
     }
   }
 
@@ -186,8 +187,7 @@ public class GetAssertionsCsvService {
      * @return a CSV row with the relevant data, as a string.
      */
     String toCSVRow() {
-      return escapeThenJoin(List.of(statisticName, value.toString(),
-          String.join(", ", indices.stream().map(Object::toString).toList())));
+      return escapeThenJoin(List.of(statisticName, value.toString()))+","+intListToString(indices);
     }
   }
 
@@ -273,7 +273,7 @@ public class GetAssertionsCsvService {
     List<String> rows = new ArrayList<>();
 
     for (Assertion assertion : assertions) {
-      rows.add(index++ + ", " + escapeThenJoin(assertion.asCSVRow()));
+      rows.add(index++ + "," + escapeThenJoin(assertion.asCSVRow()));
     }
 
     return String.join("\n", rows) + "\n";
