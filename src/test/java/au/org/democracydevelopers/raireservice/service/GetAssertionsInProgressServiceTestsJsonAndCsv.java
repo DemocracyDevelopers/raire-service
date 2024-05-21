@@ -59,13 +59,16 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsJsonServiceInProgressTests {
+public class GetAssertionsInProgressServiceTestsJsonAndCsv {
 
   private static final Logger logger = LoggerFactory.getLogger(
-      GetAssertionsJsonServiceInProgressTests.class);
+      GetAssertionsInProgressServiceTestsJsonAndCsv.class);
 
   @Autowired
-  AssertionRepository assertionRepository;
+  GetAssertionsJsonService getAssertionsJsonService;
+
+  @Autowired
+  GetAssertionsCsvService getAssertionsCsvService;
 
   /**
    * To facilitate easier checking of retrieved/saved assertion content.
@@ -76,16 +79,16 @@ public class GetAssertionsJsonServiceInProgressTests {
 
   /**
    * Retrieve assertions for a contest that has one NEN and one NEB assertion (audit in progress).
+   * (JSON).
    */
   @Test
   @Transactional
-  void retrieveAssertionsOneNENOneNEBAssertionInProgress() throws RaireServiceException {
-    testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgress");
-    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
+  void retrieveAssertionsOneNENOneNEBAssertionInProgressJSON() throws RaireServiceException {
+    testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressJSON");
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
         List.of("Liesl", "Wendell", "Amanda", "Chuan"), new BigDecimal("0.05"));
 
-    RaireSolution solution = service.getRaireSolution(request);
+    RaireSolution solution = getAssertionsJsonService.getRaireSolution(request);
 
     // Check that the metadata has been constructed appropriately
     final String metadata = "{\"candidates\":[\"Liesl\",\"Wendell\",\"Amanda\",\"Chuan\"]," +
@@ -122,6 +125,49 @@ public class GetAssertionsJsonServiceInProgressTests {
     assertArrayEquals(continuing, ((NotEliminatedNext)aad2.assertion).continuing);
 
     assertEquals(new BigDecimal("0.70"), aad2.status.get(Metadata.STATUS_RISK));
+  }
+
+  /**
+   * Retrieve assertions for a contest that has one NEN and one NEB assertion (audit in progress).
+   * (CSV)
+   * For the csv files, we _do_ expect consistent ordering of the assertions, so this test requests
+   * exact matches with expected strings that give the assertions in a particular order and the
+   * extrema with particular indices.
+   */
+  @Test
+  @Transactional
+  void retrieveAssertionsOneNENOneNEBAssertionInProgressCSV() throws RaireServiceException {
+    testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressCSV");
+    GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
+        List.of("Liesl", "Wendell", "Amanda", "Chuan"), new BigDecimal("0.05"));
+
+    String csv = getAssertionsCsvService.generateCSV(request);
+
+    assertTrue(csv.contains("Contest name, One NEN NEB Assertion Contest\n"));
+    assertTrue(csv.contains("Candidates, \"Liesl, Wendell, Amanda, Chuan\""));
+    assertTrue(csv.contains("Extreme item, Value, Assertion IDs\n"));
+    // Remove quotes around singleton extremum list when csvRefinements is merged.
+    //assertTrue(csv.contains("Margin, 112, \"1\"\n"));
+    assertTrue(csv.contains("Margin, 112, 1\n"));
+    //assertTrue(csv.contains("Diluted margin, 0.1, \"1\"\n"));
+    assertTrue(csv.contains("Diluted margin, 0.1, 1\n"));
+    //assertTrue(csv.contains("Raire difficulty, 3.17, \"2\"\n"));
+    assertTrue(csv.contains("Raire difficulty, 3.17, 2\n"));
+    //assertTrue(csv.contains("Current risk, 0.70, \"2\"\n"));
+    assertTrue(csv.contains("Current risk, 0.70, 2\n"));
+    //assertTrue(csv.contains("Optimistic samples to audit, 200, \"2\"\n"));
+    assertTrue(csv.contains("Optimistic samples to audit, 200, 2\n"));
+    //assertTrue(csv.contains("Estimated samples to audit, 300, \"2\"\n"));
+    assertTrue(csv.contains("Estimated samples to audit, 300, 2\n"));
+    assertTrue(csv.contains(
+        "ID, Type, Winner, Loser, Assumed continuing, Difficulty, Margin, Diluted margin, Risk, "
+            + "Estimated samples to audit, Optimistic samples to audit, Two vote over count, "
+            + "One vote over count, Other discrepancy count, One vote under count, "
+            + "Two vote under count\n"));
+    assertTrue(csv.contains("1,NEB,Amanda,Liesl,,0.10,112,0.100,0.08,27,20,2,0,0,1,0\n"));
+    // assertTrue(csv.contains(
+        // "2, NEN, Diego, Chuan, \"Alice, Chuan, Diego\", 6.1, 100, 0.1, 0.05, 45, 45, 0, 0, 0, 0, 0\n"
+    // ));
   }
 
 }

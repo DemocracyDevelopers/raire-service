@@ -55,9 +55,9 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsCSVServiceTests {
+public class GetAssertionsServiceTestsCsv {
 
-  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsCSVServiceTests.class);
+  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsServiceTestsCsv.class);
 
   @Autowired
   AssertionRepository assertionRepository;

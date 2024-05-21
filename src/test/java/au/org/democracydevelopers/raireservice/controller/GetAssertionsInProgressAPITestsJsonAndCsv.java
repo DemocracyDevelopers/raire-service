@@ -52,20 +52,20 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Tests for get-assertions endpoint. This class automatically fires up the RAIRE Microservice on a random
  * port, then runs a series of tests for correct responses to valid requests.
- * The list of tests is similar to - and in most cases identical to - the GetAssertionsJsonServiceTests.
- * Note that you have to run the *whole class*. Individual tests do not work separately because they don't
- * initiate the microservice on their own.
+ * The list of tests is similar to - and in most cases identical to - the tests in
+ * GetAssertionsInProgressServiceTestsJsonAndCsv.java.
  * Contests which will be used for validity testing are pre-loaded into the database using
  * src/test/resources/data.sql.
+ * FIXME Add csv.
  */
 @ActiveProfiles("assertions-in-progress")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsInProgressValidAPIRequestTestsJsonAndCsv {
+public class GetAssertionsInProgressAPITestsJsonAndCsv {
 
   private static final Logger logger = LoggerFactory.getLogger(
-      GetAssertionsInProgressValidAPIRequestTestsJsonAndCsv.class);
+      GetAssertionsInProgressAPITestsJsonAndCsv.class);
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";

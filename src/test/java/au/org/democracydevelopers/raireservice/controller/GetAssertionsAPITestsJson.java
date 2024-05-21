@@ -20,15 +20,18 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
 import static au.org.democracydevelopers.raireservice.testUtils.correctIndexedAPIAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static au.org.democracydevelopers.raireservice.testUtils.correctSolutionData;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -50,29 +53,31 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Tests for get-assertions endpoint. This class automatically fires up the RAIRE Microservice on a random
- * port, then runs a series of tests for correct responses to valid requests.
+ * Tests for get-assertions endpoint. This class automatically fires up the RAIRE Microservice on a
+ * random port, then runs a series of tests for correct responses to valid requests.
  * The list of tests is similar to - and in most cases identical to - the GetAssertionsJsonServiceTests.
- * Note that you have to run the *whole class*. Individual tests do not work separately because they don't
- * initiate the microservice on their own.
- * Contests which will be used for validity testing are pre-loaded into the database using
+ * Note that you have to run the *whole class*. Individual tests do not work separately because they
+ * don't initiate the microservice on their own.
+ * Contests which will be used for validity testing are preloaded into the database using
  * src/test/resources/data.sql.
  */
-@ActiveProfiles("assertions-in-progress")
+@ActiveProfiles("simple-assertions")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsInProgressValidAPIRequestTestsCSVAndJSON {
+public class GetAssertionsAPITestsJson {
 
   private static final Logger logger = LoggerFactory.getLogger(
-      GetAssertionsInProgressValidAPIRequestTestsCSVAndJSON.class);
+      GetAssertionsAPITestsJson.class);
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
-  private final static String getAssertionsJsonEndpoint = "/raire/get-assertions-json";
+  private final static String getAssertionsEndpoint = "/raire/get-assertions-json";
+
   private final static String oneNEBAssertionContest = "One NEB Assertion Contest";
   private final static String oneNENAssertionContest = "One NEN Assertion Contest";
   private final static String oneNEBOneNENAssertionContest = "One NEN NEB Assertion Contest";
+
 
   @LocalServerPort
   private int port;
@@ -87,13 +92,32 @@ public class GetAssertionsInProgressValidAPIRequestTestsCSVAndJSON {
 
 
   /**
-   * Retrieve assertions for a contest that has one NEB assertion (audit in progress).
+   * The getAssertions endpoint, valid request. Currently just checking that the serialization correctly
+   * ignores time_to_find_assertions.
+   */
+  @Test
+  public void getAssertionsWithOneNEBContest() {
+    testUtils.log(logger, "getAssertionsWithOneNEBContest");
+    String url = baseURL + port + getAssertionsEndpoint;
+
+    String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"" + oneNEBAssertionContest
+        +"\",\"candidates\":[\"Alice\",\"Bob\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertFalse(StringUtils.containsIgnoreCase(response.getBody(), "time_to_find_assertions"));
+  }
+
+  /**
+   * Retrieve assertions for a contest that has one NEB assertion.
    */
   @Test
   @Transactional
-  void retrieveAssertionsAsJsonExistentContestOneNEBAssertion() {
-    testUtils.log(logger, "retrieveAssertionsAsJsonExistentContestOneNEBAssertion");
-    String url = baseURL + port + getAssertionsJsonEndpoint;
+  void retrieveAssertionsExistentContestOneNEBAssertion() {
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertion");
+    String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
         oneNEBAssertionContest+"\",\"candidates\":[\"Alice\",\"Bob\"]}";
@@ -113,30 +137,28 @@ public class GetAssertionsInProgressValidAPIRequestTestsCSVAndJSON {
 
     // We expect one assertion with the following data.
     assertTrue(correctIndexedAPIAssertionData("NEB", 320, 1.1, 0,
-        1, new ArrayList<>(), 0.5, response.getBody(),0));
+        1, new ArrayList<>(), 1.0, response.getBody(),0));
 
   }
 
   /**
-   * Retrieve assertions for a contest that has one NEN assertion (audit in progress).
+   * Retrieve assertions for a contest that has one NEN assertion.
    */
   @Test
   @Transactional
-  void retrieveAssertionsAsJsonExistentContestOneNENAssertion() {
-    testUtils.log(logger, "retrieveAssertionsAsJsonExistentContestOneNENAssertion");
-    String url = baseURL + port + getAssertionsJsonEndpoint;
+  void retrieveAssertionsExistentContestOneNENAssertion() {
+    testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertion");
+    String url = baseURL + port + getAssertionsEndpoint;
 
-    String requestAsJson =
-        "{\"riskLimit\":0.10,\"contestName\":\"" + oneNENAssertionContest
-            + "\",\"candidates\":[\"Alice\",\"Bob\",\"Charlie\",\"Diego\"]}";
+    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
+        oneNENAssertionContest+"\",\"candidates\":[\"Alice\",\"Bob\",\"Charlie\",\"Diego\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     // The metadata has been constructed appropriately
-    assertTrue(
-        correctMetadata(List.of("Alice", "Bob", "Charlie", "Diego"), oneNENAssertionContest, 0.1,
-            response.getBody()));
+    assertTrue(correctMetadata(List.of("Alice","Bob","Charlie","Diego"),oneNENAssertionContest,
+        0.1, response.getBody()));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertFalse(StringUtils.containsIgnoreCase(response.getBody(), "Error"));
@@ -145,51 +167,31 @@ public class GetAssertionsInProgressValidAPIRequestTestsCSVAndJSON {
     assertTrue(correctSolutionData(240, 3.01, 1, response.getBody()));
 
     // We expect one assertion with the following data.
-    assertTrue(correctIndexedAPIAssertionData("NEN", 240, 3.01, 0, 2,
-        List.of(0, 1, 3, 2), 0.2, response.getBody(), 0));
+    assertTrue(correctIndexedAPIAssertionData("NEN",240,3.01, 0,
+        2, List.of(0,1,3,2), 1.0, response.getBody(),0));
   }
 
   /**
-   * Retrieve assertions for a contest that has one NEN and one NEB assertion (audit in progress).
+   * Retrieve assertions for a contest where the request has been set up with incorrect
+   * candidate names for the given contest.
+   * This is a valid request in the sense that it passes Request.Validate(), but should later fail.
    */
   @Test
   @Transactional
-  void retrieveAssertionsAsJsonOneNENOneNEBAssertionInProgress() {
-    testUtils.log(logger, "retrieveAssertionsAsJsonOneNENOneNEBAssertionInProgress");
-    String url = baseURL + port + getAssertionsJsonEndpoint;
+  void retrieveAssertionsIncorrectCandidateNamesIsAnError()  {
+    testUtils.log(logger, "retrieveAssertionsIncorrectCandidateNamesIsAnError");
+    String url = baseURL + port + getAssertionsEndpoint;
 
-    String requestAsJson =
-        "{\"riskLimit\":0.05,\"contestName\":\"" + oneNEBOneNENAssertionContest
-            + "\",\"candidates\":[\"Liesl\",\"Wendell\",\"Amanda\",\"Chuan\"]}";
+    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
+        oneNEBOneNENAssertionContest+"\",\"candidates\":[\"Alice\",\"Bob\",\"Charlie\",\"Diego\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
-    // The metadata has been constructed appropriately
-    assertTrue(correctMetadata(List.of("Liesl", "Wendell", "Amanda", "Chuan"),
-        oneNEBOneNENAssertionContest, 0.05,
-        response.getBody()));
-
-    // The RaireSolution contains a RaireResultOrError, but the error should be null.
-    assertFalse(StringUtils.containsIgnoreCase(response.getBody(), "Error"));
-
-    // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(112, 3.17, 2, response.getBody()));
-
-    // We expect two assertions with the following data, but we don't necessarily know what order they're in.
-    // So check for their presence at either position.
-    assertTrue(
-        correctIndexedAPIAssertionData("NEB", 112, 0.1, 2, 0,
-            new ArrayList<>(), 0.08, response.getBody(), 0) ||
-            correctIndexedAPIAssertionData("NEB", 112, 0.1, 2, 0,
-                new ArrayList<>(), 0.08, response.getBody(), 1)
-    );
-
-    assertTrue(
-        correctIndexedAPIAssertionData("NEN", 560, 3.17, 2, 1,
-            List.of(0, 1, 2), 0.7, response.getBody(), 0) ||
-            correctIndexedAPIAssertionData("NEN", 560, 3.17, 2, 1,
-                List.of(0, 1, 2), 0.7, response.getBody(), 1)
-    );
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
+        "candidate list provided as parameter is inconsistent"));
+    assertEquals(WRONG_CANDIDATE_NAMES.toString(),
+        Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
   }
 }
