@@ -33,7 +33,6 @@ import au.org.democracydevelopers.raireservice.response.GenerateAssertionsRespon
 import au.org.democracydevelopers.raireservice.testUtils;
 import au.org.democracydevelopers.raireservice.util.DoubleComparator;
 import java.math.BigDecimal;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +42,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -81,8 +78,9 @@ public class GenerateAssertionsAPINSWTests {
 
   /**
    * Iterate through all the NSW example data,
-   * - request the assertions,
+   * - request assertion generation through the API,
    * - check for the right winner,
+   * - request the assertion data through the get-assertions API (JSON)
    * - verify the expected difficulty.
    */
   @Test
