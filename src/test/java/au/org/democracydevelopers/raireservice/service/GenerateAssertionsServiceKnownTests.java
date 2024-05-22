@@ -138,18 +138,18 @@ public class GenerateAssertionsServiceKnownTests {
   }
 
   /**
-   * Some tests of the assertions described in the Guide to Raire Example 1.
+   * Some tests of the assertions described in the Guide to Raire, Part 2, Example 1.
    * The test data has 1/500 of the votes, so divide margins by 500.
    * The difficulties should be the same, because both numerator and denominator should be divided by 500.
    * We do not test the NEN assertions because the ones in the Guide have some redundancy.
-   * Test assertion: Alice NEB Bob.
+   * Test assertion: Chuan NEB Bob.
    * Margin is 4000, but data is divided by 500, so 8. Difficulty is 3.375 as in the Guide.
    * Diluted margin is 8/27 = 0.296...
    */
   @Test
   @Transactional
-  void testGuideToRaireExample1() throws RaireServiceException {
-    testUtils.log(logger, "testGuideToRaireExample1");
+  void testGuideToRairePart2Example1() throws RaireServiceException {
+    testUtils.log(logger, "testGuideToRairePart2Example1");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample1,
         27, 5, Arrays.stream(aliceBobChuanDiego).toList());
 

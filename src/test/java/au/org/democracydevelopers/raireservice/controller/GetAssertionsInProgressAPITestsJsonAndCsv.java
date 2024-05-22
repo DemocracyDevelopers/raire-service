@@ -20,16 +20,19 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
-import static au.org.democracydevelopers.raireservice.testUtils.correctIndexedAPIAssertionData;
+import static au.org.democracydevelopers.raireservice.testUtils.correctAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static au.org.democracydevelopers.raireservice.testUtils.correctSolutionData;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import au.org.democracydevelopers.raire.RaireSolution;
+import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -50,13 +53,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Tests for get-assertions endpoint. This class automatically fires up the RAIRE Microservice on a random
- * port, then runs a series of tests for correct responses to valid requests.
+ * Tests for get-assertions endpoint. This class automatically fires up the RAIRE Microservice on a
+ * random port, then runs a series of tests for correct responses to valid requests.
  * The list of tests is similar to - and in most cases identical to - the tests in
  * GetAssertionsInProgressServiceTestsJsonAndCsv.java.
- * Contests which will be used for validity testing are pre-loaded into the database using
+ * Contests which will be used for validity testing are preloaded into the database using
  * src/test/resources/data.sql.
- * FIXME Add csv.
  */
 @ActiveProfiles("assertions-in-progress")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -96,25 +98,27 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertionJSON");
     String url = baseURL + port + getAssertionsJsonEndpoint;
 
-    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
-        oneNEBAssertionContest+"\",\"candidates\":[\"Alice\",\"Bob\"]}";
+    GetAssertionsRequest request = new GetAssertionsRequest(oneNEBAssertionContest,
+        List.of("Alice","Bob"), BigDecimal.valueOf(0.1));
 
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+    ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request,
+        RaireSolution.class);
 
     // The metadata has been constructed appropriately
+    assertNotNull(response.getBody());
     assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest, 0.1,
-        response.getBody()));
+        response.getBody().metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
-    assertFalse(StringUtils.containsIgnoreCase(response.getBody(), "Error"));
+    assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(320,1.1, 1, response.getBody()));
+    assertTrue(correctSolutionData(320,1.1, 1,
+        response.getBody().solution.Ok));
 
-    // We expect one assertion with the following data.
-    assertTrue(correctIndexedAPIAssertionData("NEB", 320, 1.1, 0,
-        1, new ArrayList<>(), 0.5, response.getBody(),0));
+    // We expect one NEB assertion with the following data.
+    assertTrue(correctAssertionData("NEB", 320, 1.1, 0, 1,
+        new ArrayList<>(), 0.5, response.getBody().solution.Ok.assertions[0]));
 
   }
 
@@ -133,6 +137,7 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     String csv = restTemplate.postForEntity(url, request, String.class).getBody();
 
+    assertNotNull(csv);
     assertTrue(csv.contains("Contest name,One NEB Assertion Contest\n"));
     assertTrue(csv.contains("Candidates,\"Alice,Bob\""));
     assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
@@ -159,27 +164,27 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertionJSON");
     String url = baseURL + port + getAssertionsJsonEndpoint;
 
-    String requestAsJson =
-        "{\"riskLimit\":0.10,\"contestName\":\"" + oneNENAssertionContest
-            + "\",\"candidates\":[\"Alice\",\"Bob\",\"Charlie\",\"Diego\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+    GetAssertionsRequest request = new GetAssertionsRequest(oneNENAssertionContest,
+        List.of("Alice","Bob","Charlie","Diego"), BigDecimal.valueOf(0.1));
+    ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request,
+        RaireSolution.class);
 
     // The metadata has been constructed appropriately
+    assertNotNull(response.getBody());
     assertTrue(
         correctMetadata(List.of("Alice", "Bob", "Charlie", "Diego"), oneNENAssertionContest, 0.1,
-            response.getBody()));
+            response.getBody().metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
-    assertFalse(StringUtils.containsIgnoreCase(response.getBody(), "Error"));
+    assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(240, 3.01, 1, response.getBody()));
+    assertTrue(correctSolutionData(240, 3.01, 1,
+        response.getBody().solution.Ok));
 
     // We expect one assertion with the following data.
-    assertTrue(correctIndexedAPIAssertionData("NEN", 240, 3.01, 0, 2,
-        List.of(0, 1, 3, 2), 0.2, response.getBody(), 0));
+    assertTrue(correctAssertionData("NEN", 240, 3.01, 0, 2,
+        List.of(0, 1, 3, 2), 0.2, response.getBody().solution.Ok.assertions[0]));
   }
 
   /**
@@ -227,38 +232,38 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
     testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressJSON");
     String url = baseURL + port + getAssertionsJsonEndpoint;
 
-    String requestAsJson =
-        "{\"riskLimit\":0.05,\"contestName\":\"" + oneNEBOneNENAssertionContest
-            + "\",\"candidates\":[\"Liesl\",\"Wendell\",\"Amanda\",\"Chuan\"]}";
+    // Make the request.
+    GetAssertionsRequest request = new GetAssertionsRequest(oneNEBOneNENAssertionContest,
+        List.of("Liesl","Wendell","Amanda","Chuan"), BigDecimal.valueOf(0.05));
+    ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request,
+        RaireSolution.class);
 
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    // The metadata has been constructed appropriately
+    // The metadata has been constructed appropriately.
+    assertNotNull(response.getBody());
     assertTrue(correctMetadata(List.of("Liesl", "Wendell", "Amanda", "Chuan"),
-        oneNEBOneNENAssertionContest, 0.05,
-        response.getBody()));
+        oneNEBOneNENAssertionContest, 0.05, response.getBody().metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
-    assertFalse(StringUtils.containsIgnoreCase(response.getBody(), "Error"));
+    assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(112, 3.17, 2, response.getBody()));
+    assertTrue(correctSolutionData(112, 3.17, 2,
+        response.getBody().solution.Ok));
 
-    // We expect two assertions with the following data, but we don't necessarily know what order they're in.
-    // So check for their presence at either position.
+    // We expect two assertions with the following data, but we don't necessarily know what order
+    // they're in. So check for their presence at either position.
     assertTrue(
-        correctIndexedAPIAssertionData("NEB", 112, 0.1, 2, 0,
-            new ArrayList<>(), 0.08, response.getBody(), 0) ||
-            correctIndexedAPIAssertionData("NEB", 112, 0.1, 2, 0,
-                new ArrayList<>(), 0.08, response.getBody(), 1)
+        correctAssertionData("NEB", 112, 0.1, 2, 0,
+            new ArrayList<>(), 0.08, response.getBody().solution.Ok.assertions[0]) ||
+            correctAssertionData("NEB", 112, 0.1, 2, 0,
+                new ArrayList<>(), 0.08, response.getBody().solution.Ok.assertions[1])
     );
 
     assertTrue(
-        correctIndexedAPIAssertionData("NEN", 560, 3.17, 2, 1,
-            List.of(0, 1, 2), 0.7, response.getBody(), 0) ||
-            correctIndexedAPIAssertionData("NEN", 560, 3.17, 2, 1,
-                List.of(0, 1, 2), 0.7, response.getBody(), 1)
+        correctAssertionData("NEN", 560, 3.17, 2, 1,
+            List.of(0, 1, 2), 0.7, response.getBody().solution.Ok.assertions[0]) ||
+            correctAssertionData("NEN", 560, 3.17, 2, 1,
+                List.of(0, 1, 2), 0.7, response.getBody().solution.Ok.assertions[1])
     );
   }
 

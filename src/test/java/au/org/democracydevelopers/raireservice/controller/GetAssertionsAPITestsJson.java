@@ -21,14 +21,19 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.controller;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
-import static au.org.democracydevelopers.raireservice.testUtils.correctIndexedAPIAssertionData;
+import static au.org.democracydevelopers.raireservice.testUtils.correctAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static au.org.democracydevelopers.raireservice.testUtils.correctSolutionData;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import au.org.democracydevelopers.raire.RaireSolution;
+import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -92,8 +97,8 @@ public class GetAssertionsAPITestsJson {
 
 
   /**
-   * The getAssertions endpoint, valid request. Currently just checking that the serialization correctly
-   * ignores time_to_find_assertions.
+   * The getAssertions endpoint, valid request. Currently just checking that the serialization
+   * correctly ignores time_to_find_assertions.
    */
   @Test
   public void getAssertionsWithOneNEBContest() {
@@ -119,26 +124,26 @@ public class GetAssertionsAPITestsJson {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertion");
     String url = baseURL + port + getAssertionsEndpoint;
 
-    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
-        oneNEBAssertionContest+"\",\"candidates\":[\"Alice\",\"Bob\"]}";
+    // Make the request.
+    GetAssertionsRequest request = new GetAssertionsRequest(oneNEBAssertionContest,
+        List.of("Alice","Bob"), BigDecimal.valueOf(0.1));
+    ResponseEntity<RaireSolution> response
+        = restTemplate.postForEntity(url, request, RaireSolution.class);
 
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    // The metadata has been constructed appropriately
+    // The metadata has been constructed appropriately.
+    assertNotNull(response.getBody());
     assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest, 0.1,
-        response.getBody()));
+        response.getBody().metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
-    assertFalse(StringUtils.containsIgnoreCase(response.getBody(), "Error"));
+    assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(320,1.1, 1, response.getBody()));
+    assertTrue(correctSolutionData(320,1.1, 1, response.getBody().solution.Ok));
 
-    // We expect one assertion with the following data.
-    assertTrue(correctIndexedAPIAssertionData("NEB", 320, 1.1, 0,
-        1, new ArrayList<>(), 1.0, response.getBody(),0));
-
+    // We expect one NEB assertion with the following data.
+    assertTrue(correctAssertionData("NEB", 320, 1.1, 0,
+        1, new ArrayList<>(), 1.0, response.getBody().solution.Ok.assertions[0]));
   }
 
   /**
@@ -150,25 +155,24 @@ public class GetAssertionsAPITestsJson {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertion");
     String url = baseURL + port + getAssertionsEndpoint;
 
-    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
-        oneNENAssertionContest+"\",\"candidates\":[\"Alice\",\"Bob\",\"Charlie\",\"Diego\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+    GetAssertionsRequest request =  new GetAssertionsRequest(oneNENAssertionContest,
+        List.of("Alice","Bob","Charlie","Diego"),BigDecimal.valueOf(0.1));
+    ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request, RaireSolution.class);
 
     // The metadata has been constructed appropriately
+    assertNotNull(response.getBody());
     assertTrue(correctMetadata(List.of("Alice","Bob","Charlie","Diego"),oneNENAssertionContest,
-        0.1, response.getBody()));
+        0.1, response.getBody().metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
-    assertFalse(StringUtils.containsIgnoreCase(response.getBody(), "Error"));
+    assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(240, 3.01, 1, response.getBody()));
+    assertTrue(correctSolutionData(240, 3.01, 1, response.getBody().solution.Ok));
 
-    // We expect one assertion with the following data.
-    assertTrue(correctIndexedAPIAssertionData("NEN",240,3.01, 0,
-        2, List.of(0,1,3,2), 1.0, response.getBody(),0));
+    // We expect one NEN assertion with the following data.
+    assertTrue(correctAssertionData("NEN",240,3.01, 0,
+        2, List.of(0,1,3,2), 1.0, response.getBody().solution.Ok.assertions[0]));
   }
 
   /**
@@ -182,11 +186,10 @@ public class GetAssertionsAPITestsJson {
     testUtils.log(logger, "retrieveAssertionsIncorrectCandidateNamesIsAnError");
     String url = baseURL + port + getAssertionsEndpoint;
 
-    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
-        oneNEBOneNENAssertionContest+"\",\"candidates\":[\"Alice\",\"Bob\",\"Charlie\",\"Diego\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+    GetAssertionsRequest request =  new GetAssertionsRequest(oneNEBOneNENAssertionContest,
+        List.of("Alice","Bob","Charlie","Diego"),BigDecimal.valueOf(0.1));
+    ResponseEntity<String> response
+        = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is5xxServerError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
