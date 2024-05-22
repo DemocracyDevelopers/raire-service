@@ -30,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raire.RaireError.TiedWinners;
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
 import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
@@ -78,9 +77,9 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GenerateAssertionsOnKnownTests {
+public class GenerateAssertionsServiceKnownTests {
 
-  private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsOnKnownTests.class);
+  private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsServiceKnownTests.class);
 
   @Autowired
   AssertionRepository assertionRepository;

@@ -55,9 +55,9 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @EnabledIf(value = "${test-strategy.run-nsw-tests}", loadContext = true)
-public class GenerateAssertionsOnNSWTests {
+public class GenerateAssertionsServiceNSWTests {
 
-  private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsOnNSWTests.class);
+  private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsServiceNSWTests.class);
 
   @Autowired
   private CVRContestInfoRepository cvrContestInfoRepository;
