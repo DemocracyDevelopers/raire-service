@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.service;
 
+import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -35,8 +36,6 @@ import au.org.democracydevelopers.raireservice.persistence.repository.AssertionR
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.math.BigDecimal;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -71,13 +70,6 @@ public class GetAssertionsServiceTestsJson {
   AssertionRepository assertionRepository;
 
   /**
-   * To facilitate easier checking of retrieved/saved assertion content.
-   */
-  private static final Gson GSON =
-      new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
-
-
-  /**
    * Retrieve assertions for a contest that has one NEB assertion.
    */
   @Test
@@ -91,10 +83,8 @@ public class GetAssertionsServiceTestsJson {
     RaireSolution solution = service.getRaireSolution(request);
 
     // Check that the metadata has been constructed appropriately
-    final String metadata = "{\"candidates\":[\"Alice\",\"Bob\"]," +
-        "\"contest\":\"One NEB Assertion Contest\",\"risk_limit\":0.10}";
-
-    assertEquals(metadata, GSON.toJson(solution.metadata));
+    assertTrue(correctMetadata(List.of("Alice","Bob"), "One NEB Assertion Contest",
+        0.1, solution.metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(solution.solution.Err);
@@ -131,10 +121,8 @@ public class GetAssertionsServiceTestsJson {
     RaireSolution solution = service.getRaireSolution(request);
 
     // Check that the metadata has been constructed appropriately
-    final String metadata = "{\"candidates\":[\"Alice\",\"Charlie\",\"Diego\",\"Bob\"]," +
-        "\"contest\":\"One NEN Assertion Contest\",\"risk_limit\":0.10}";
-
-    assertEquals(metadata, GSON.toJson(solution.metadata));
+    assertTrue(correctMetadata(List.of("Alice","Charlie","Diego","Bob"),
+        "One NEN Assertion Contest", 0.1, solution.metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(solution.solution.Err);

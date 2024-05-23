@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.service;
 
+import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -32,8 +33,6 @@ import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -71,13 +70,6 @@ public class GetAssertionsInProgressServiceTestsJsonAndCsv {
   GetAssertionsCsvService getAssertionsCsvService;
 
   /**
-   * To facilitate easier checking of retrieved/saved assertion content.
-   */
-  private static final Gson GSON =
-      new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
-
-
-  /**
    * Retrieve assertions for a contest that has one NEN and one NEB assertion (audit in progress).
    * (JSON).
    */
@@ -91,10 +83,8 @@ public class GetAssertionsInProgressServiceTestsJsonAndCsv {
     RaireSolution solution = getAssertionsJsonService.getRaireSolution(request);
 
     // Check that the metadata has been constructed appropriately
-    final String metadata = "{\"candidates\":[\"Liesl\",\"Wendell\",\"Amanda\",\"Chuan\"]," +
-        "\"contest\":\"One NEN NEB Assertion Contest\",\"risk_limit\":0.05}";
-
-    assertEquals(metadata, GSON.toJson(solution.metadata));
+    assertTrue(correctMetadata(List.of("Liesl","Wendell","Amanda","Chuan"),
+        "One NEN NEB Assertion Contest",0.05, solution.metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(solution.solution.Err);

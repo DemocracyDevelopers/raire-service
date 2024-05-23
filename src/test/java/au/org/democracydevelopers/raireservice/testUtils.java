@@ -61,7 +61,7 @@ public class testUtils {
    */
   public static boolean correctMetadata(List<String> candidates, String contestName,
       double riskLimit, Map<String, Object> metadata) throws ClassCastException {
-    double retrievedRiskLimit = (double) metadata.get(Metadata.RISK_LIMIT);
+    double retrievedRiskLimit = ((BigDecimal) metadata.get(Metadata.RISK_LIMIT)).doubleValue();
     String retrievedContestName = metadata.get(Metadata.CONTEST).toString();
     List<String> retrievedCandidates = (List<String>) metadata.get(Metadata.CANDIDATES);
 
