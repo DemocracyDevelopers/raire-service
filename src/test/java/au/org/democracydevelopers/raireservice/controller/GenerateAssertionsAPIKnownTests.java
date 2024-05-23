@@ -61,7 +61,7 @@ import org.springframework.transaction.annotation.Transactional;
  * src/test/resources/known_testcases_votes.sql.
  * The test are the same as those in GenerateAssertionsServiceKnownTests.java. They include
  * - The examples from the Guide To Raire Vol 2. Exact matching for Ex. 2 and some for Ex. 1.
- * - A very simple example test with two obvious assertions (an NEN and NEB), described below.
+ * - TODO A very simple example test with two obvious assertions (an NEN and NEB), described below.
  * - A cross-county version of the simple example.
  * - A request for the simple example with twice the totalAuditableBallots as ballots in the database,
  *   to test that the diluted margin and difficulties change by a factor of 2, but absolute margin
@@ -70,6 +70,10 @@ import org.springframework.transaction.annotation.Transactional;
  *   to check that there's an appropriate error response.
  * - A request for the simple example with the wrong candidate names, to check that there's an
  *   appropriate error response.
+ * TODO The GenerateAssertionsServiceTest contains tests of proper overwriting when assertion
+ * generation is requested but assertions are already in the database. This is not yet complete in
+ * this case, pending a decision about how to block assertion regeneration when appropriate
+ * see (https://github.com/DemocracyDevelopers/raire-service/issues/70)
  * In each case, the test
  * - makes a request for assertion generation through the API,
  * - checks for the right winner,
