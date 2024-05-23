@@ -27,11 +27,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raire.RaireSolution;
+import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException;
 import au.org.democracydevelopers.raireservice.testUtils;
 import au.org.democracydevelopers.raireservice.util.DoubleComparator;
 import java.math.BigDecimal;
@@ -155,7 +157,7 @@ public class GenerateAssertionsAPIKnownTests {
         RaireSolution.class);
 
     // Check for the right metadata
-    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertTrue(getResponse.getStatusCode().is2xxSuccessful());
     assertNotNull(getResponse.getBody());
     assertTrue(correctMetadata(Arrays.stream(aliceBobChuanDiego).toList(), guideToRaireExample1,
         DEFAULT_RISK_LIMIT.doubleValue(), getResponse.getBody().metadata));
@@ -169,5 +171,75 @@ public class GenerateAssertionsAPIKnownTests {
         nebMaybeAssertion.get()));
   }
 
-  // TODO Add Example 2 and the simple contests.
+  /**
+   * Exact matching of the assertions described in the Guide to Raire Example 2.
+   * The test data has 1/1000 of the votes, so divide margins by 1000.
+   * The difficulties should be the same, because both numerator and denominator should be divided by 1000.
+   */
+  @Test
+  @Transactional
+  void testGuideToRairePart2Example2() throws RaireServiceException {
+    testUtils.log(logger, "testGuideToRairePart2Example2");
+    String generateUrl = baseURL + port + generateAssertionsEndpoint;
+    String getUrl = baseURL + port + getAssertionsEndpoint;
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample2,
+        41, 5, Arrays.stream(aliceChuanBob).toList());
+
+    // Request for the assertions to be generated.
+    ResponseEntity<GenerateAssertionsResponse> response
+        = restTemplate.postForEntity(generateUrl, request, GenerateAssertionsResponse.class);
+
+    // Check that the response is successful and we got the right winner.
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertNotNull(response.getBody());
+    assertEquals(response.getBody().winner(), "Chuan");
+
+    // Request the assertions
+    GetAssertionsRequest getRequest = new GetAssertionsRequest(guideToRaireExample2,
+        Arrays.stream(aliceChuanBob).toList(), DEFAULT_RISK_LIMIT);
+    ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
+        RaireSolution.class);
+
+    // Check for the right metadata.
+    assertTrue(getResponse.getStatusCode().is2xxSuccessful());
+    assertNotNull(getResponse.getBody());
+    assertTrue(correctMetadata(Arrays.stream(aliceChuanBob).toList(), guideToRaireExample2,
+        DEFAULT_RISK_LIMIT.doubleValue(), getResponse.getBody().metadata));
+
+    // Check for the right results: two assertions, margin 9 and difficulty 4.6.
+    RaireResult raireResult = getResponse.getBody().solution.Ok;
+    AssertionAndDifficulty[] assertions = raireResult.assertions;
+    assertEquals(9, raireResult.margin);
+    assertEquals(0, doubleComparator.compare(41.0/9, raireResult.difficulty));
+    checkGuideToRaireExample2Assertions(assertions);
+  }
+
+  /**
+   * Checks for exact match with the Guide To Raire Part 2, example 2.
+   * Same as GenerateAssertionsServiceKnownTests::checkGuideToRaireExample2Assertions, except that
+   * it inputs an array of raire-java::AssertionAndDifficulty.
+   */
+  void checkGuideToRaireExample2Assertions(AssertionAndDifficulty[] assertionAndDifficulties) {
+    assertEquals(2, assertionAndDifficulties.length);
+    int nebIndex;
+
+    if(assertionAndDifficulties[0].assertion instanceof NotEliminatedBefore) {
+      nebIndex = 0;
+    } else {
+      nebIndex = 1;
+    }
+
+    // There should be one NEB assertion: Chaun NEB Alice
+    // Margin is 10,000, but data is divided by 1000, so 10. Difficulty is 4.1 as in the Guide.
+    // Diluted Margin is 10/41.
+    assertTrue(correctAssertionData("NEB", 10, 4.1,
+        1,0, List.of(), 1.0, assertionAndDifficulties[nebIndex]));
+
+    // There should be one NEN assertion: Chuan > Bob if only {Chuan,Bob} remain.
+    // Margin is 9,000, but data is divided by 1000, so 9. Difficulty is 41/9 = 4.5555...,
+    // rounded to 4.6 in the Guide.
+    // Diluted margin is 9/41 = 0.219512195...
+    assertTrue(correctAssertionData("NEN", 9, 41.0/9,
+        1, 2, List.of(1,2), 1.0, assertionAndDifficulties[1-nebIndex]));
+  }
 }

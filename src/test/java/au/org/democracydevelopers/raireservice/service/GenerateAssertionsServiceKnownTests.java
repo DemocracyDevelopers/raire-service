@@ -182,7 +182,7 @@ public class GenerateAssertionsServiceKnownTests {
   @Test
   @Transactional
   void testGuideToRaireExample2() throws RaireServiceException {
-    testUtils.log(logger, "testGuideToRaireExample2");
+    testUtils.log(logger, "testGuideToRairePart2Example2");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample2,
         41, 5, Arrays.stream(aliceChuanBob).toList());
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
@@ -701,6 +701,8 @@ public class GenerateAssertionsServiceKnownTests {
     assertTrue(correctDBAssertionData(9, 9/41.0, 41.0/9,
         "Chuan", "Bob", List.of("Chuan","Bob"), nenAssertion));
   }
+
+
 
   /**
    * Create and return a RaireResult containing assertions that would be generated for second
