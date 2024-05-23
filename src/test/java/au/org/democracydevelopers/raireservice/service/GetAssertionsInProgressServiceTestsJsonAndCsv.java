@@ -84,7 +84,8 @@ public class GetAssertionsInProgressServiceTestsJsonAndCsv {
 
     // Check that the metadata has been constructed appropriately
     assertTrue(correctMetadata(List.of("Liesl","Wendell","Amanda","Chuan"),
-        "One NEN NEB Assertion Contest",0.05, solution.metadata));
+        "One NEN NEB Assertion Contest", BigDecimal.valueOf(0.05),
+        solution.metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(solution.solution.Err);

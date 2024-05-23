@@ -60,13 +60,13 @@ public class testUtils {
    * @return true if the response's metadata fields match the candidates, contestname and riskLimit.
    */
   public static boolean correctMetadata(List<String> candidates, String contestName,
-      double riskLimit, Map<String, Object> metadata) throws ClassCastException {
-    double retrievedRiskLimit = (double) metadata.get(Metadata.RISK_LIMIT);
+      BigDecimal riskLimit, Map<String, Object> metadata) throws ClassCastException {
+    BigDecimal retrievedRiskLimit = (BigDecimal) metadata.get(Metadata.RISK_LIMIT);
     String retrievedContestName = metadata.get(Metadata.CONTEST).toString();
     List<String> retrievedCandidates = (List<String>) metadata.get(Metadata.CANDIDATES);
 
     return contestName.equals(retrievedContestName)
-        && doubleComparator.compare(riskLimit, retrievedRiskLimit) == 0
+        && riskLimit.equals(retrievedRiskLimit)
         && setsNoDupesEqual(candidates, retrievedCandidates);
 
   }

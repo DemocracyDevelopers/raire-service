@@ -78,13 +78,13 @@ public class GetAssertionsServiceTestsJson {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertion");
     GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEB Assertion Contest",
-        List.of("Alice", "Bob"), new BigDecimal("0.10"));
+        List.of("Alice", "Bob"), new BigDecimal("0.1"));
 
     RaireSolution solution = service.getRaireSolution(request);
 
     // Check that the metadata has been constructed appropriately
     assertTrue(correctMetadata(List.of("Alice","Bob"), "One NEB Assertion Contest",
-        0.1, solution.metadata));
+        BigDecimal.valueOf(0.1), solution.metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(solution.solution.Err);
@@ -122,7 +122,8 @@ public class GetAssertionsServiceTestsJson {
 
     // Check that the metadata has been constructed appropriately
     assertTrue(correctMetadata(List.of("Alice","Charlie","Diego","Bob"),
-        "One NEN Assertion Contest", 0.1, solution.metadata));
+        "One NEN Assertion Contest", new BigDecimal("0.1"),
+        solution.metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(solution.solution.Err);

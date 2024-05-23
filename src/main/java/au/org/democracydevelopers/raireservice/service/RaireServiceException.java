@@ -44,6 +44,10 @@ import java.util.List;
 public class RaireServiceException extends Exception {
 
   /**
+   * The string "error_code" - used for retrieving it from json etc.
+   */
+  public static String errorCodeString = "error_code";
+  /**
    * The error code - an enum used to describe what went wrong. Returned in the http response for
    * colorado-rla to interpret for the user.
    */

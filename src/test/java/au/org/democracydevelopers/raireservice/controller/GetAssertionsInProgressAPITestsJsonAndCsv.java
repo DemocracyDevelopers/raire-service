@@ -106,8 +106,8 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
 
     // The metadata has been constructed appropriately
     assertNotNull(response.getBody());
-    assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest, 0.1,
-        response.getBody().metadata));
+    assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest,
+        BigDecimal.valueOf(0.1), response.getBody().metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(response.getBody().solution.Err);
@@ -172,7 +172,8 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
     // The metadata has been constructed appropriately
     assertNotNull(response.getBody());
     assertTrue(
-        correctMetadata(List.of("Alice", "Bob", "Charlie", "Diego"), oneNENAssertionContest, 0.1,
+        correctMetadata(List.of("Alice", "Bob", "Charlie", "Diego"), oneNENAssertionContest,
+            BigDecimal.valueOf(0.1),
             response.getBody().metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
@@ -241,7 +242,7 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
     // The metadata has been constructed appropriately.
     assertNotNull(response.getBody());
     assertTrue(correctMetadata(List.of("Liesl", "Wendell", "Amanda", "Chuan"),
-        oneNEBOneNENAssertionContest, 0.05, response.getBody().metadata));
+        oneNEBOneNENAssertionContest, BigDecimal.valueOf(0.05), response.getBody().metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(response.getBody().solution.Err);

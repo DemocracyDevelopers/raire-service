@@ -132,7 +132,7 @@ public class GetAssertionsAPITestsJson {
 
     // The metadata has been constructed appropriately.
     assertNotNull(response.getBody());
-    assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest, 0.1,
+    assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest, BigDecimal.valueOf(0.1),
         response.getBody().metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
@@ -162,7 +162,7 @@ public class GetAssertionsAPITestsJson {
     // The metadata has been constructed appropriately
     assertNotNull(response.getBody());
     assertTrue(correctMetadata(List.of("Alice","Bob","Charlie","Diego"),oneNENAssertionContest,
-        0.1, response.getBody().metadata));
+        BigDecimal.valueOf(0.1), response.getBody().metadata));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(response.getBody().solution.Err);

@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.errorCodeString;
 import static au.org.democracydevelopers.raireservice.testUtils.correctAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +34,7 @@ import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
 import au.org.democracydevelopers.raireservice.util.DoubleComparator;
 import java.math.BigDecimal;
@@ -59,21 +60,21 @@ import org.springframework.transaction.annotation.Transactional;
  * Tests to validate the behaviour of the Assertion generation API on a collection of simple contest with
  * human-computable assertions. Relevant data is preloaded into the test database from
  * src/test/resources/known_testcases_votes.sql.
- * The test are the same as those in GenerateAssertionsServiceKnownTests.java. They include
+ * The test are a subset of those in GenerateAssertionsServiceKnownTests.java. They include
  * - The examples from the Guide To Raire Vol 2. Exact matching for Ex. 2 and some for Ex. 1.
- * - TODO A very simple example test with two obvious assertions (an NEN and NEB), described below.
  * - A cross-county version of the simple example.
  * - A request for the simple example with twice the totalAuditableBallots as ballots in the database,
  *   to test that the diluted margin and difficulties change by a factor of 2, but absolute margin
  *   stays the same
  * - A request for the simple example with fewer totalAuditableBallots than there are in the database,
  *   to check that there's an appropriate error response.
- * - A request for the simple example with the wrong candidate names, to check that there's an
- *   appropriate error response.
+ * Note for anyone comparing this directly with GenerateAssertionsServiceKnownTests: the
+ * test for wrong candidate names is in GenerateAssertionsAPIErrorTests, along with various other
+ * tests involving invalid request data.
  * TODO The GenerateAssertionsServiceTest contains tests of proper overwriting when assertion
  * generation is requested but assertions are already in the database. This is not yet complete in
- * this case, pending a decision about how to block assertion regeneration when appropriate
- * see (https://github.com/DemocracyDevelopers/raire-service/issues/70)
+ * this class, pending a decision about how to block assertion regeneration when appropriate.
+ * See (https://github.com/DemocracyDevelopers/raire-service/issues/70)
  * In each case, the test
  * - makes a request for assertion generation through the API,
  * - checks for the right winner,
@@ -164,7 +165,7 @@ public class GenerateAssertionsAPIKnownTests {
     assertTrue(getResponse.getStatusCode().is2xxSuccessful());
     assertNotNull(getResponse.getBody());
     assertTrue(correctMetadata(Arrays.stream(aliceBobChuanDiego).toList(), guideToRaireExample1,
-        DEFAULT_RISK_LIMIT.doubleValue(), getResponse.getBody().metadata));
+        DEFAULT_RISK_LIMIT, getResponse.getBody().metadata));
 
     // There should be one NEB assertion: Chaun NEB Bob
     List<AssertionAndDifficulty> assertions = Arrays.stream(getResponse.getBody().solution.Ok.assertions).toList();
@@ -182,7 +183,7 @@ public class GenerateAssertionsAPIKnownTests {
    */
   @Test
   @Transactional
-  void testGuideToRairePart2Example2() throws RaireServiceException {
+  void testGuideToRairePart2Example2() {
     testUtils.log(logger, "testGuideToRairePart2Example2");
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
     String getUrl = baseURL + port + getAssertionsEndpoint;
@@ -208,7 +209,7 @@ public class GenerateAssertionsAPIKnownTests {
     assertTrue(getResponse.getStatusCode().is2xxSuccessful());
     assertNotNull(getResponse.getBody());
     assertTrue(correctMetadata(Arrays.stream(aliceChuanBob).toList(), guideToRaireExample2,
-        DEFAULT_RISK_LIMIT.doubleValue(), getResponse.getBody().metadata));
+        DEFAULT_RISK_LIMIT, getResponse.getBody().metadata));
 
     // Check for the right results: two assertions, margin 9 and difficulty 4.6.
     RaireResult raireResult = getResponse.getBody().solution.Ok;
@@ -216,6 +217,209 @@ public class GenerateAssertionsAPIKnownTests {
     assertEquals(9, raireResult.margin);
     assertEquals(0, doubleComparator.compare(41.0/9, raireResult.difficulty));
     checkGuideToRaireExample2Assertions(assertions);
+  }
+
+  /**
+   * Simple contest. The votes are
+   * 2 (A,B)
+   * 2 (B)
+   * 1 (C,A).
+   * The assertions should be
+   * A NEB C
+   * - Margin 1, diluted margin 1/5 = 0.2, difficulty 5/1 = 5.
+   * A NEN B | {A,B} continuing.
+   * - Margin 1, diluted margin 1/5 = 0.2, difficulty 5/1 = 5.
+   * Note that A NEB B is not true.
+   * This is the single-county case.
+   */
+  @Test
+  @Transactional
+  public void simpleContestSingleCounty() {
+    testUtils.log(logger, "simpleContestSingleCounty");
+    String generateUrl = baseURL + port + generateAssertionsEndpoint;
+    String getUrl = baseURL + port + getAssertionsEndpoint;
+
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
+        5, 5, Arrays.stream(aliceChuanBob).toList());
+
+    // Request for the assertions to be generated.
+    ResponseEntity<GenerateAssertionsResponse> response
+        = restTemplate.postForEntity(generateUrl, request, GenerateAssertionsResponse.class);
+
+    // Check that the response is successful and we got the right winner.
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertNotNull(response.getBody());
+    assertEquals(response.getBody().winner(), "Alice");
+
+    // Request the assertions
+    GetAssertionsRequest getRequest = new GetAssertionsRequest(simpleContest,
+        Arrays.stream(aliceChuanBob).toList(), DEFAULT_RISK_LIMIT);
+    ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
+        RaireSolution.class);
+
+    // Check for the right metadata.
+    assertTrue(getResponse.getStatusCode().is2xxSuccessful());
+    assertNotNull(getResponse.getBody());
+    assertTrue(correctMetadata(Arrays.stream(aliceChuanBob).toList(), simpleContest,
+        DEFAULT_RISK_LIMIT, getResponse.getBody().metadata));
+
+    // Check for the right results: two assertions, margin 9 and difficulty 4.6.
+    RaireResult raireResult = getResponse.getBody().solution.Ok;
+    AssertionAndDifficulty[] assertions = raireResult.assertions;
+    assertEquals(1, raireResult.margin);
+    assertEquals(0, doubleComparator.compare(5.0, raireResult.difficulty));
+    checkSimpleContestAssertions(assertions, 1);
+  }
+
+  /**
+   * The same simple contest, but across two counties. Nothing should change.
+   */
+  @Test
+  @Transactional
+  public void simpleContestCrossCounty() {
+    testUtils.log(logger, "simpleContestCrossCounty");
+    String generateUrl = baseURL + port + generateAssertionsEndpoint;
+    String getUrl = baseURL + port + getAssertionsEndpoint;
+
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(crossCountySimpleContest,
+        5, 5, Arrays.stream(aliceChuanBob).toList());
+
+    // Request for the assertions to be generated.
+    ResponseEntity<GenerateAssertionsResponse> response
+        = restTemplate.postForEntity(generateUrl, request, GenerateAssertionsResponse.class);
+
+    // Check that the response is successful and we got the right winner.
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertNotNull(response.getBody());
+    assertEquals(response.getBody().winner(), "Alice");
+
+    // Request the assertions
+    GetAssertionsRequest getRequest = new GetAssertionsRequest(crossCountySimpleContest,
+        Arrays.stream(aliceChuanBob).toList(), DEFAULT_RISK_LIMIT);
+    ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
+        RaireSolution.class);
+
+    // Check for the right metadata.
+    assertTrue(getResponse.getStatusCode().is2xxSuccessful());
+    assertNotNull(getResponse.getBody());
+    assertTrue(correctMetadata(Arrays.stream(aliceChuanBob).toList(), crossCountySimpleContest,
+        DEFAULT_RISK_LIMIT, getResponse.getBody().metadata));
+
+    // Check for the right results: two assertions, margin 9 and difficulty 4.6.
+    RaireResult raireResult = getResponse.getBody().solution.Ok;
+    AssertionAndDifficulty[] assertions = raireResult.assertions;
+    assertEquals(1, raireResult.margin);
+    assertEquals(0, doubleComparator.compare(5.0, raireResult.difficulty));
+    checkSimpleContestAssertions(assertions, 1);
+  }
+
+  /**
+   * Single-county simple contest again.
+   * Doubling the totalAuditableBallots to 10 doubles the difficulty, and halves the diluted margin,
+   * but does not change the absolute margins.
+   * The actual test data is still the same, with 5 ballots - we just set totalAuditableBallots in
+   * the request to 10.
+   * We now have 10 totalAuditableBallots, so we expect:
+   * A NEB B: Margin 1, diluted margin 1/10 = 0.1, difficulty 10/1 = 10.
+   * A NEN B | {A,B} continuing: Margin 1, diluted margin 1/10 = 0.1, difficulty 10/1 = 10.
+   * Exactly the same as the simpleContest test above, but now we have 10 totalAuditableBallots
+   * and a difficultyFactor=2 in the call to checkSimpleContestAssertions.
+   */
+  @Test
+  @Transactional
+  public void simpleContestSingleCountyDoubleBallots() {
+    testUtils.log(logger, "simpleContestSingleCountyDoubleBallots");
+    String generateUrl = baseURL + port + generateAssertionsEndpoint;
+    String getUrl = baseURL + port + getAssertionsEndpoint;
+
+     // Tell raire that the totalAuditableBallots is double the number in the database
+     // for this contest.
+     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
+         10, 5, Arrays.stream(aliceChuanBob).toList());
+
+     // Request for the assertions to be generated.
+     ResponseEntity<GenerateAssertionsResponse> response
+         = restTemplate.postForEntity(generateUrl, request, GenerateAssertionsResponse.class);
+
+     // Check that the response is successful and we got the right winner.
+     assertTrue(response.getStatusCode().is2xxSuccessful());
+     assertNotNull(response.getBody());
+     assertEquals(response.getBody().winner(), "Alice");
+
+     // Request the assertions
+     GetAssertionsRequest getRequest = new GetAssertionsRequest(simpleContest,
+         Arrays.stream(aliceChuanBob).toList(), DEFAULT_RISK_LIMIT);
+     ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
+         RaireSolution.class);
+
+     // Check for the right metadata.
+     assertTrue(getResponse.getStatusCode().is2xxSuccessful());
+     assertNotNull(getResponse.getBody());
+     assertTrue(correctMetadata(Arrays.stream(aliceChuanBob).toList(), simpleContest,
+         DEFAULT_RISK_LIMIT, getResponse.getBody().metadata));
+
+     // Check for the right results: two assertions, margin 9 and difficulty 4.6.
+     RaireResult raireResult = getResponse.getBody().solution.Ok;
+     AssertionAndDifficulty[] assertions = raireResult.assertions;
+     assertEquals(1, raireResult.margin);
+     assertEquals(0, doubleComparator.compare(10.0, raireResult.difficulty));
+
+     // Difficulty factor 2 to match the doubled totalAuditableBallots.
+     checkSimpleContestAssertions(assertions, 2);
+  }
+
+  /**
+   * Insufficient totalAuditableBallots causes the right raire error to be returned.
+   * This test case has 5 ballots, so 2 totalAuditableBallots is an error.
+   */
+  @Test
+  @Transactional
+  public void simpleContestSingleCountyInsufficientBallotsError() {
+    testUtils.log(logger, "simpleContestSingleCountyInsufficientBallotsError");
+    String generateUrl = baseURL + port + generateAssertionsEndpoint;
+
+    GenerateAssertionsRequest notEnoughBallotsRequest = new GenerateAssertionsRequest(simpleContest,
+        2, 5, Arrays.stream(aliceChuanBob).toList());
+
+    // Request for the assertions to be generated.
+    ResponseEntity<String> response
+        = restTemplate.postForEntity(generateUrl, notEnoughBallotsRequest, String.class);
+
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertEquals(RaireErrorCode.INVALID_TOTAL_AUDITABLE_BALLOTS.toString(),
+        response.getHeaders().getFirst(errorCodeString));
+  }
+
+  /**
+    * Check the data for the simple contests. Note that the winner and loser indices
+    * are dependent on the order of the input candidate list, which in all the test
+    * that use it are Alice, Chuan, Bob.
+    * @param assertionAndDifficulties the assertions returned by API
+    * @param difficultyFactor factor by which the difficulty should be multiplied (because of larger
+    *                         universe size).
+    */
+  private void checkSimpleContestAssertions(AssertionAndDifficulty[] assertionAndDifficulties,
+      double difficultyFactor) {
+    assertEquals(2, assertionAndDifficulties.length);
+    int nebIndex;
+
+    if(assertionAndDifficulties[0].assertion instanceof NotEliminatedBefore) {
+      nebIndex = 0;
+    } else {
+      nebIndex = 1;
+    }
+
+    // There should be one NEB assertion: Alice NEB Chuan
+    // Margin 1, diluted margin 0.2, difficulty 5.
+    assertTrue(correctAssertionData("NEB", 1, 5*difficultyFactor,
+        0,1, List.of(), 1.0, assertionAndDifficulties[nebIndex]));
+
+    // There should be one NEN assertion: Chuan > Bob if only {Chuan,Bob} remain.
+    // Margin is 9,000, but data is divided by 1000, so 9. Difficulty is 41/9 = 4.5555...,
+    // rounded to 4.6 in the Guide.
+    // Diluted margin is 9/41 = 0.219512195...
+    assertTrue(correctAssertionData("NEN", 1, 5*difficultyFactor,
+        0, 2, List.of(0,2), 1.0, assertionAndDifficulties[1-nebIndex]));
   }
 
   /**
