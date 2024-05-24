@@ -20,7 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
-import static au.org.democracydevelopers.raireservice.service.RaireServiceException.errorCodeString;
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.ERROR_CODE_KEY;
 import static au.org.democracydevelopers.raireservice.testUtils.correctAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -387,7 +387,7 @@ public class GenerateAssertionsAPIKnownTests {
 
     assertTrue(response.getStatusCode().is5xxServerError());
     assertEquals(RaireErrorCode.INVALID_TOTAL_AUDITABLE_BALLOTS.toString(),
-        response.getHeaders().getFirst(errorCodeString));
+        response.getHeaders().getFirst(ERROR_CODE_KEY));
   }
 
   /**

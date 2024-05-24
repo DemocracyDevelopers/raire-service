@@ -23,14 +23,12 @@ package au.org.democracydevelopers.raireservice.controller;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.TIED_WINNERS;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.TIMEOUT_CHECKING_WINNER;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.TIMEOUT_FINDING_ASSERTIONS;
-import static au.org.democracydevelopers.raireservice.service.RaireServiceException.errorCodeString;
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.ERROR_CODE_KEY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
-import au.org.democracydevelopers.raireservice.util.DoubleComparator;
-import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -125,7 +123,7 @@ public class GenerateAssertionsAPIWickedTests {
 
     // Check that generation is successful and we got the right winner.
     assertTrue(response.getStatusCode().is5xxServerError());
-    assertEquals(TIED_WINNERS.toString(), response.getHeaders().getFirst(errorCodeString));
+    assertEquals(TIED_WINNERS.toString(), response.getHeaders().getFirst(ERROR_CODE_KEY));
   }
 
    /**
@@ -145,7 +143,7 @@ public class GenerateAssertionsAPIWickedTests {
 
     // Check that generation is successful and we got the right winner.
     assertTrue(response.getStatusCode().is5xxServerError());
-    assertEquals(TIMEOUT_CHECKING_WINNER.toString(), response.getHeaders().getFirst(errorCodeString));
+    assertEquals(TIMEOUT_CHECKING_WINNER.toString(), response.getHeaders().getFirst(ERROR_CODE_KEY));
   }
 
    /**
@@ -163,6 +161,6 @@ public class GenerateAssertionsAPIWickedTests {
 
     // Check that generation is successful and we got the right winner.
     assertTrue(response.getStatusCode().is5xxServerError());
-    assertEquals(TIMEOUT_FINDING_ASSERTIONS.toString(), response.getHeaders().getFirst(errorCodeString));
+    assertEquals(TIMEOUT_FINDING_ASSERTIONS.toString(), response.getHeaders().getFirst(ERROR_CODE_KEY));
   }
 }
