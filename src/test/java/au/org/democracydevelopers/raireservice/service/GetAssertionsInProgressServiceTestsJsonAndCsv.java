@@ -78,14 +78,14 @@ public class GetAssertionsInProgressServiceTestsJsonAndCsv {
   void retrieveAssertionsOneNENOneNEBAssertionInProgressJSON() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressJSON");
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
-        List.of("Liesl", "Wendell", "Amanda", "Chuan"), new BigDecimal("0.05"));
+        List.of("Liesl", "Wendell", "Amanda", "Chuan"), BigDecimal.valueOf(0.05));
 
     RaireSolution solution = getAssertionsJsonService.getRaireSolution(request);
 
     // Check that the metadata has been constructed appropriately
     assertTrue(correctMetadata(List.of("Liesl","Wendell","Amanda","Chuan"),
-        "One NEN NEB Assertion Contest", BigDecimal.valueOf(0.05),
-        solution.metadata));
+        "One NEN NEB Assertion Contest", BigDecimal.valueOf(0.05), solution.metadata,
+        BigDecimal.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(solution.solution.Err);
@@ -100,7 +100,7 @@ public class GetAssertionsInProgressServiceTestsJsonAndCsv {
     AssertionAndDifficulty aad1 = assertions[0];
     assertEquals(0.1, aad1.difficulty);
     assertEquals(112, aad1.margin);
-    assertEquals(new BigDecimal("0.08"), aad1.status.get(Metadata.STATUS_RISK));
+    assertEquals(BigDecimal.valueOf(0.08), aad1.status.get(Metadata.STATUS_RISK));
     assertTrue(aad1.assertion.isNEB());
     assertEquals(2, ((NotEliminatedBefore)aad1.assertion).winner);
     assertEquals(0, ((NotEliminatedBefore)aad1.assertion).loser);
@@ -115,7 +115,8 @@ public class GetAssertionsInProgressServiceTestsJsonAndCsv {
     int[] continuing = {0, 1, 2};
     assertArrayEquals(continuing, ((NotEliminatedNext)aad2.assertion).continuing);
 
-    assertEquals(new BigDecimal("0.70"), aad2.status.get(Metadata.STATUS_RISK));
+    var risk = (BigDecimal) aad2.status.get(Metadata.STATUS_RISK);
+    assertEquals(0, risk.compareTo(BigDecimal.valueOf(0.7)));
   }
 
   /**
@@ -130,7 +131,7 @@ public class GetAssertionsInProgressServiceTestsJsonAndCsv {
   void retrieveAssertionsOneNENOneNEBAssertionInProgressCSV() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressCSV");
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
-        List.of("Liesl", "Wendell", "Amanda", "Chuan"), new BigDecimal("0.05"));
+        List.of("Liesl", "Wendell", "Amanda", "Chuan"), BigDecimal.valueOf(0.05));
 
     String csv = getAssertionsCsvService.generateCSV(request);
 

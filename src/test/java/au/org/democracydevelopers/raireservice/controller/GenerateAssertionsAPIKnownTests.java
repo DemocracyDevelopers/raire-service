@@ -165,7 +165,7 @@ public class GenerateAssertionsAPIKnownTests {
     assertTrue(getResponse.getStatusCode().is2xxSuccessful());
     assertNotNull(getResponse.getBody());
     assertTrue(correctMetadata(Arrays.stream(aliceBobChuanDiego).toList(), guideToRaireExample1,
-        DEFAULT_RISK_LIMIT, getResponse.getBody().metadata));
+        DEFAULT_RISK_LIMIT, getResponse.getBody().metadata, Double.class));
 
     // There should be one NEB assertion: Chaun NEB Bob
     List<AssertionAndDifficulty> assertions = Arrays.stream(getResponse.getBody().solution.Ok.assertions).toList();
@@ -209,7 +209,7 @@ public class GenerateAssertionsAPIKnownTests {
     assertTrue(getResponse.getStatusCode().is2xxSuccessful());
     assertNotNull(getResponse.getBody());
     assertTrue(correctMetadata(Arrays.stream(aliceChuanBob).toList(), guideToRaireExample2,
-        DEFAULT_RISK_LIMIT, getResponse.getBody().metadata));
+        DEFAULT_RISK_LIMIT, getResponse.getBody().metadata, Double.class));
 
     // Check for the right results: two assertions, margin 9 and difficulty 4.6.
     RaireResult raireResult = getResponse.getBody().solution.Ok;
@@ -261,7 +261,7 @@ public class GenerateAssertionsAPIKnownTests {
     assertTrue(getResponse.getStatusCode().is2xxSuccessful());
     assertNotNull(getResponse.getBody());
     assertTrue(correctMetadata(Arrays.stream(aliceChuanBob).toList(), simpleContest,
-        DEFAULT_RISK_LIMIT, getResponse.getBody().metadata));
+        DEFAULT_RISK_LIMIT, getResponse.getBody().metadata, Double.class));
 
     // Check for the right results: two assertions, margin 9 and difficulty 4.6.
     RaireResult raireResult = getResponse.getBody().solution.Ok;
@@ -303,7 +303,7 @@ public class GenerateAssertionsAPIKnownTests {
     assertTrue(getResponse.getStatusCode().is2xxSuccessful());
     assertNotNull(getResponse.getBody());
     assertTrue(correctMetadata(Arrays.stream(aliceChuanBob).toList(), crossCountySimpleContest,
-        DEFAULT_RISK_LIMIT, getResponse.getBody().metadata));
+        DEFAULT_RISK_LIMIT, getResponse.getBody().metadata, Double.class));
 
     // Check for the right results: two assertions, margin 9 and difficulty 4.6.
     RaireResult raireResult = getResponse.getBody().solution.Ok;
@@ -356,7 +356,7 @@ public class GenerateAssertionsAPIKnownTests {
      assertTrue(getResponse.getStatusCode().is2xxSuccessful());
      assertNotNull(getResponse.getBody());
      assertTrue(correctMetadata(Arrays.stream(aliceChuanBob).toList(), simpleContest,
-         DEFAULT_RISK_LIMIT, getResponse.getBody().metadata));
+         DEFAULT_RISK_LIMIT, getResponse.getBody().metadata, Double.class));
 
      // Check for the right results: two assertions, margin 9 and difficulty 4.6.
      RaireResult raireResult = getResponse.getBody().solution.Ok;

@@ -71,7 +71,7 @@ public class GetAssertionsServiceErrorTestsJsonAndCsv {
   void existentContestNoAssertionsJSON(){
     testUtils.log(logger, "existentContestNoAssertionsJSON");
     GetAssertionsRequest request = new GetAssertionsRequest("No CVR Mayoral",
-        List.of(), new BigDecimal("0.10"));
+        List.of(), BigDecimal.valueOf(0.1));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         getAssertionsJsonService.getRaireSolution(request));
@@ -87,7 +87,7 @@ public class GetAssertionsServiceErrorTestsJsonAndCsv {
   void existentContestNoAssertionsCSV(){
     testUtils.log(logger, "existentContestNoAssertionsCSV");
     GetAssertionsRequest request = new GetAssertionsRequest("No CVR Mayoral",
-        List.of(), new BigDecimal("0.10"));
+        List.of(), BigDecimal.valueOf(0.1));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         getAssertionsCsvService.generateCSV(request));
@@ -104,7 +104,7 @@ public class GetAssertionsServiceErrorTestsJsonAndCsv {
   void nonExistentContestNoAssertionsJSON(){
     testUtils.log(logger, "nonExistentContestNoAssertionsJSON");
     GetAssertionsRequest request = new GetAssertionsRequest("Non-Existent Contest Name",
-        List.of(), new BigDecimal("0.10"));
+        List.of(), BigDecimal.valueOf(0.1));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         getAssertionsJsonService.getRaireSolution(request));
@@ -121,7 +121,7 @@ public class GetAssertionsServiceErrorTestsJsonAndCsv {
   void nonExistentContestNoAssertionsCSV(){
     testUtils.log(logger, "nonExistentContestNoAssertionsCSV");
     GetAssertionsRequest request = new GetAssertionsRequest("Non-Existent Contest Name",
-        List.of(), new BigDecimal("0.10"));
+        List.of(), BigDecimal.valueOf(0.1));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         getAssertionsCsvService.generateCSV(request));

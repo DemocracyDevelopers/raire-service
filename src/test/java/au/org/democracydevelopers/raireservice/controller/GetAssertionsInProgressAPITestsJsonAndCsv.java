@@ -107,7 +107,7 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
     // The metadata has been constructed appropriately
     assertNotNull(response.getBody());
     assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest,
-        BigDecimal.valueOf(0.1), response.getBody().metadata));
+        BigDecimal.valueOf(0.1), response.getBody().metadata, Double.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(response.getBody().solution.Err);
@@ -173,8 +173,7 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
     assertNotNull(response.getBody());
     assertTrue(
         correctMetadata(List.of("Alice", "Bob", "Charlie", "Diego"), oneNENAssertionContest,
-            BigDecimal.valueOf(0.1),
-            response.getBody().metadata));
+            BigDecimal.valueOf(0.1), response.getBody().metadata, Double.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(response.getBody().solution.Err);
@@ -204,6 +203,7 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     String csv = restTemplate.postForEntity(url, request, String.class).getBody();
 
+    assertNotNull(csv);
     assertTrue(csv.contains("Contest name,One NEN Assertion Contest\n"));
     assertTrue(csv.contains("Candidates,\"Alice,Bob,Charlie,Diego\""));
     assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
@@ -242,7 +242,8 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
     // The metadata has been constructed appropriately.
     assertNotNull(response.getBody());
     assertTrue(correctMetadata(List.of("Liesl", "Wendell", "Amanda", "Chuan"),
-        oneNEBOneNENAssertionContest, BigDecimal.valueOf(0.05), response.getBody().metadata));
+        oneNEBOneNENAssertionContest, BigDecimal.valueOf(0.05), response.getBody().metadata,
+        Double.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(response.getBody().solution.Err);
@@ -285,6 +286,7 @@ public class GetAssertionsInProgressAPITestsJsonAndCsv {
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     String csv = restTemplate.postForEntity(url, request, String.class).getBody();
 
+    assertNotNull(csv);
     assertTrue(csv.contains("Contest name,One NEN NEB Assertion Contest\n"));
     assertTrue(csv.contains("Candidates,\"Liesl,Wendell,Amanda,Chuan\""));
     assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));

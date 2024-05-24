@@ -78,13 +78,13 @@ public class GetAssertionsServiceTestsJson {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertion");
     GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEB Assertion Contest",
-        List.of("Alice", "Bob"), new BigDecimal("0.1"));
+        List.of("Alice", "Bob"), BigDecimal.valueOf(0.1));
 
     RaireSolution solution = service.getRaireSolution(request);
 
     // Check that the metadata has been constructed appropriately
     assertTrue(correctMetadata(List.of("Alice","Bob"), "One NEB Assertion Contest",
-        BigDecimal.valueOf(0.1), solution.metadata));
+        BigDecimal.valueOf(0.1), solution.metadata, BigDecimal.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(solution.solution.Err);
@@ -103,8 +103,9 @@ public class GetAssertionsServiceTestsJson {
     assertEquals(0, ((NotEliminatedBefore)aad.assertion).winner);
     assertEquals(1, ((NotEliminatedBefore)aad.assertion).loser);
 
-    // Check that current risk is 1.00
-    assertEquals(new BigDecimal("1.00"), aad.status.get(Metadata.STATUS_RISK));
+    // Check that current risk is 1.
+    BigDecimal risk = (BigDecimal) aad.status.get(Metadata.STATUS_RISK);
+    assertEquals(0, risk.compareTo(BigDecimal.valueOf(1)));
   }
 
   /**
@@ -116,14 +117,14 @@ public class GetAssertionsServiceTestsJson {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertion");
     GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN Assertion Contest",
-        List.of("Alice", "Charlie", "Diego", "Bob"), new BigDecimal("0.10"));
+        List.of("Alice", "Charlie", "Diego", "Bob"), BigDecimal.valueOf(0.1));
 
     RaireSolution solution = service.getRaireSolution(request);
 
     // Check that the metadata has been constructed appropriately
     assertTrue(correctMetadata(List.of("Alice","Charlie","Diego","Bob"),
-        "One NEN Assertion Contest", new BigDecimal("0.1"),
-        solution.metadata));
+        "One NEN Assertion Contest", BigDecimal.valueOf(0.1), solution.metadata,
+        BigDecimal.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(solution.solution.Err);
@@ -145,8 +146,9 @@ public class GetAssertionsServiceTestsJson {
     int[] continuing = {0, 1, 2, 3};
     assertArrayEquals(continuing, ((NotEliminatedNext)aad.assertion).continuing);
 
-    // Check that current risk is 1.00
-    assertEquals(new BigDecimal("1.00"), aad.status.get(Metadata.STATUS_RISK));
+    // Check that current risk is 1.
+    BigDecimal risk = (BigDecimal) aad.status.get(Metadata.STATUS_RISK);
+    assertEquals(0, risk.compareTo(BigDecimal.valueOf(1)));
   }
 
   /**
@@ -159,7 +161,7 @@ public class GetAssertionsServiceTestsJson {
     testUtils.log(logger, "retrieveAssertionsInconsistentRequest1");
     GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
-        List.of("Alice", "Charlie", "Diego", "Bob"), new BigDecimal("0.10"));
+        List.of("Alice", "Charlie", "Diego", "Bob"), BigDecimal.valueOf(0.1));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         service.getRaireSolution(request));
@@ -178,7 +180,7 @@ public class GetAssertionsServiceTestsJson {
     testUtils.log(logger, "retrieveAssertionsInconsistentRequest2");
     GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
-        List.of(), new BigDecimal("0.10"));
+        List.of(), BigDecimal.valueOf(0.1));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         service.getRaireSolution(request));

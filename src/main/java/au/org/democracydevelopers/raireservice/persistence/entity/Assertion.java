@@ -192,7 +192,7 @@ public abstract class Assertion {
    */
   @Column(name = "current_risk", updatable = false, nullable = false)
   @ReadOnlyProperty
-  protected BigDecimal currentRisk = new BigDecimal("1.00");
+  protected BigDecimal currentRisk = BigDecimal.valueOf(1);
 
   /**
    * Default no-args constructor (required for persistence).

@@ -28,6 +28,7 @@ import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.service.Metadata;
 import au.org.democracydevelopers.raireservice.util.DoubleComparator;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
@@ -52,23 +53,38 @@ public class testUtils {
   }
 
   /**
-   * Utility to check that the response to a get assertions request contains the right metadata.
-   * @param candidates the expected list of candidate names
+   * Utility to check that the response to a get assertions request contains the right metadata. Use
+   * this one for API tests, where the value has been serialized & deserialized.
+   *
+   * @param candidates  the expected list of candidate names
    * @param contestName the expected contest name
-   * @param riskLimit the expected risk limit
-   * @param metadata the metadata from the response
+   * @param riskLimit   the expected risk limit
+   * @param metadata    the metadata from the response, in which the riskLimit is interpreted as a
+   *                    double by the deserializer.
+   * @param riskLimitClass the class in which the risk limit is expressed. Use BigDecimal for things
+   *                       derived directly from the service, double for values that have been
+   *                       serialized and deserialized via the API.
    * @return true if the response's metadata fields match the candidates, contestname and riskLimit.
    */
   public static boolean correctMetadata(List<String> candidates, String contestName,
-      BigDecimal riskLimit, Map<String, Object> metadata) throws ClassCastException {
-    BigDecimal retrievedRiskLimit = (BigDecimal) metadata.get(Metadata.RISK_LIMIT);
+      BigDecimal riskLimit, Map<String, Object> metadata, Type riskLimitClass) throws ClassCastException {
+
+    BigDecimal retrievedRiskLimit;
+    if(riskLimitClass == Double.class) {
+      retrievedRiskLimit = BigDecimal.valueOf((double) metadata.get(Metadata.RISK_LIMIT));
+    } else if (riskLimitClass == BigDecimal.class) {
+      retrievedRiskLimit = (BigDecimal) metadata.get(Metadata.RISK_LIMIT);
+    } else {
+      // We can only deal with doubles and BigDecimals.
+      return false;
+    }
+
     String retrievedContestName = metadata.get(Metadata.CONTEST).toString();
     List<String> retrievedCandidates = (List<String>) metadata.get(Metadata.CANDIDATES);
 
     return contestName.equals(retrievedContestName)
-        && riskLimit.equals(retrievedRiskLimit)
+        && riskLimit.compareTo(retrievedRiskLimit) == 0
         && setsNoDupesEqual(candidates, retrievedCandidates);
-
   }
 
   /**
