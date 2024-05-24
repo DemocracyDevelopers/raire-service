@@ -64,10 +64,10 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsInProgressAPITestsJsonAndCsv {
+public class GetAssertionsInProgressAPIJsonAndCsvTests {
 
   private static final Logger logger = LoggerFactory.getLogger(
-      GetAssertionsInProgressAPITestsJsonAndCsv.class);
+      GetAssertionsInProgressAPIJsonAndCsvTests.class);
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";

@@ -58,10 +58,10 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsInProgressServiceTestsJsonAndCsv {
+public class GetAssertionsInProgressServiceJsonAndCsvTests {
 
   private static final Logger logger = LoggerFactory.getLogger(
-      GetAssertionsInProgressServiceTestsJsonAndCsv.class);
+      GetAssertionsInProgressServiceJsonAndCsvTests.class);
 
   @Autowired
   GetAssertionsJsonService getAssertionsJsonService;

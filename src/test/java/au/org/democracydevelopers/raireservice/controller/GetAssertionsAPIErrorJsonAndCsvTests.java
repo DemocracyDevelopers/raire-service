@@ -60,9 +60,9 @@ import org.apache.commons.lang3.StringUtils;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsAPIErrorTestsJsonAndCsv {
+public class GetAssertionsAPIErrorJsonAndCsvTests {
 
-  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsAPIErrorTestsJsonAndCsv.class);
+  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsAPIErrorJsonAndCsvTests.class);
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
 

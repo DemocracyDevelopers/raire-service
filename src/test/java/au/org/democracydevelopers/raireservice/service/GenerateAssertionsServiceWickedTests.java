@@ -46,8 +46,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Tests to validate the behavior of Assertion generation on a collection of particularly nasty
- * test cases designed to elicit errors. Relevant data is preloaded into the test database from
- * src/test/resources/known_testcases_votes.sql.
+ * test cases designed to elicit errors. These kinds of errors _are_ expected to happen occasionally
+ * in normal operation, if the input data is particularly challenging.
+ * This has the same tests as GenerateAssertionsAPIWickedTests.java. Relevant data is preloaded into
+ * the test database from src/test/resources/known_testcases_votes.sql.
  * This includes
  * - a contest with tied winners,
  * - a contest that times out trying to find the winners (there are 20 and they are all tied),
@@ -118,8 +120,8 @@ public class GenerateAssertionsServiceWickedTests {
   }
 
   /**
-   * Tied winners results in raire-java returning a TiedWinners RaireError. This is a super-simple
-   * election with two candidates with one vote each.
+   * A huge number of tied winners results in raire-java returning a TimeOutCheckingWinners
+   * RaireError. This election has 20 candidates who are all tied.
    */
   @Test
   @Transactional

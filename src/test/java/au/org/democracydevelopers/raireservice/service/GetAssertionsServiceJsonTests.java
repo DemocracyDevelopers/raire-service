@@ -61,10 +61,10 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsServiceTestsJson {
+public class GetAssertionsServiceJsonTests {
 
   private static final Logger logger = LoggerFactory.getLogger(
-      GetAssertionsServiceTestsJson.class);
+      GetAssertionsServiceJsonTests.class);
 
   @Autowired
   AssertionRepository assertionRepository;

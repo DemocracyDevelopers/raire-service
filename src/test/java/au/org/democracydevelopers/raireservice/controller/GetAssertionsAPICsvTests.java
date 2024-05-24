@@ -18,19 +18,17 @@ You should have received a copy of the GNU Affero General Public License along w
 raire-service. If not, see <https://www.gnu.org/licenses/>.
 */
 
-package au.org.democracydevelopers.raireservice.service;
+package au.org.democracydevelopers.raireservice.controller;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
-import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
-import java.math.BigDecimal;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,47 +36,75 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * Test cases for csv generation, including:
- * - a basic, simple test case with two assertions (NEN and NEB),
- * - a test case with lots of ties, to test that extremum-calculation is correct,
- * - a test case with difficult characters, such as " and ' and , in the candidate names.
- * TODO Note that there are assumptions about how these characters are represented in the database,
- * which need to be validated on real data.
+ * Tests for get-assertions endpoint with the csv request. This class automatically fires up the
+ * RAIRE Microservice on a random port, then runs a series of tests.
+ * The tests are essentially the same as those in GetAssertionsCSVTests.java, but we're checking for
+ * correct API output rather than checking the service directly.
+ * Contests which will be used for validity testing are preloaded into the database using
+ * src/test/resources/simple_assertions_csv_challenges.sql.
  */
+
 @ActiveProfiles("csv-challenges")
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsServiceTestsCsv {
+public class GetAssertionsAPICsvTests {
 
-  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsServiceTestsCsv.class);
+  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsAPICsvTests.class);
+
+  private final static HttpHeaders httpHeaders = new HttpHeaders();
+  private final static String baseURL = "http://localhost:";
+  private final static String getAssertionsEndpoint = "/raire/get-assertions-csv";
+  private final static String candidatesAsJson = "\"candidates\":[\"Alice\",\"Bob\",\"Chuan\",\"Diego\"]}";
+  private final static List<String> trickyCharacters
+      = List.of("Annoying, Alice", "\"Breaking, Bob\"", "Challenging, Chuan", "O'Difficult, Diego");
+
+  private final static String trickyCharactersAsJson =
+      "\"candidates\":[\"Annoying, Alice\",\"\\\"Breaking, Bob\\\"\",\"Challenging, Chuan\",\"O'Difficult, Diego\"]}";
+
+  @LocalServerPort
+  private int port;
+
 
   @Autowired
-  AssertionRepository assertionRepository;
+  private TestRestTemplate restTemplate;
 
-  @Autowired
-  GetAssertionsCsvService getAssertionsCSVService;
-
-  List<String> candidates = List.of("Alice", "Bob", "Chuan", "Diego");
-  List<String> trickyCharacters = List.of("Annoying, Alice", "\"Breaking, Bob\"",
-      "Challenging, Chuan", "O'Difficult, Diego");
+  @BeforeAll
+  public static void before() {
+    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+  }
 
   /**
    * Test proper csv file generation of assertions when those assertions have lots of ties. These
    * maxima and minima have been manually computed to make sure they're correct.
-   * @throws RaireServiceException if assertion database retrieval fails.
    */
   @Test
-  public void testCSVTies() throws RaireServiceException {
-    testUtils.log(logger, "testCSVTies");
-    GetAssertionsRequest request = new GetAssertionsRequest(
-        "Lots of assertions with ties Contest", candidates, BigDecimal.valueOf(0.1));
-    String output = getAssertionsCSVService.generateCSV(request);
+  public void testValidRequestWithLotsOfTies() {
+    testUtils.log(logger, "testValidRequestWithLotsOfTies");
+    String url = baseURL + port + getAssertionsEndpoint;
+
+    String requestAsJson =
+        "{\"riskLimit\":0.10,\"contestName\":\"Lots of assertions with ties Contest\","
+            + candidatesAsJson;
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    String output = response.getBody();
+
+    assertNotNull(output);
     assertTrue(output.contains("Contest name,Lots of assertions with ties Contest\n"));
     assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n\n"));
     assertTrue(output.contains("Extreme item,Value,Assertion IDs"));
@@ -109,32 +135,44 @@ public class GetAssertionsServiceTestsCsv {
   }
 
   /**
-   * Test for difficult characters in candidate names,including ' and " and ,
-   * @throws RaireServiceException if assertion database retrieval fails.
+   * Test for difficult characters in candidate names, including ' and " and ,
    */
   @Test
-  public void testCharacterEscaping() throws RaireServiceException {
-    testUtils.log(logger,"testCharacterEscaping");
-    GetAssertionsRequest request = new GetAssertionsRequest("Lots of tricky characters Contest",
-        trickyCharacters, BigDecimal.valueOf(0.1));
-    String output = getAssertionsCSVService.generateCSV(request);
+  public void testCharacterEscapingForCSVExport() {
+    testUtils.log(logger, "testCharacterEscapingForCSVExport");
+    String url = baseURL + port + getAssertionsEndpoint;
+    String requestAsJson =
+        "{\"riskLimit\":0.10,\"contestName\":\"Lots of tricky characters Contest\","
+            + trickyCharactersAsJson;
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    String output = response.getBody();
+
+    assertNotNull(output);
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(0)));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(1)));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(2)));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(3)));
-
   }
 
   /**
-   * Test for correct generation on a simple test case with one assertion of each type.
-   * @throws RaireServiceException if assertion database retrieval fails.
+   * A simple test for correct generation on a simple test case with one assertion of each type.
    */
   @Test
-  public void testCsvDemoContest() throws RaireServiceException {
-    testUtils.log(logger,"testCsvDemoContest");
-    GetAssertionsRequest request = new GetAssertionsRequest(
-        "CSV Demo Contest", candidates, BigDecimal.valueOf(0.1));
-    String output = getAssertionsCSVService.generateCSV(request);
+  public void testCSVDemoContest() {
+    testUtils.log(logger, "testCSVDemoContest");
+    String url = baseURL + port + getAssertionsEndpoint;
+    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
+        + candidatesAsJson;
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+    String output = response.getBody();
+
+    assertNotNull(output);
     assertTrue(output.contains("Contest name,CSV Demo Contest\n"));
     assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n\n"));
     assertTrue(output.contains("Extreme item,Value,Assertion IDs\n"));
@@ -156,21 +194,21 @@ public class GetAssertionsServiceTestsCsv {
   }
 
   /**
-   * A candidate list that is inconsistent with the stored assertions throws a RaireServiceException
-   * with WRONG_CANDIDATE_NAMES error code.
+   * A request with candidates who are inconsistent with the assertions in the database is an error.
    */
   @Test
   public void wrongCandidatesIsAnError() {
     testUtils.log(logger, "wrongCandidatesIsAnError");
+    String url = baseURL + port + getAssertionsEndpoint;
 
-    GetAssertionsRequest request = new GetAssertionsRequest(
-        "CSV Demo Contest", List.of("Alicia", "Boba", "Chuan"), BigDecimal.valueOf(0.05)
-    );
+    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
+        + "\"candidates\":[\"Alicia\",\"Boba\",\"Chuan\",\"Diego\"]}";
 
-    RaireServiceException ex = assertThrows(RaireServiceException.class,
-        () -> getAssertionsCSVService.generateCSV(request)
-    );
-    assertSame(ex.errorCode, WRONG_CANDIDATE_NAMES);
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertEquals(WRONG_CANDIDATE_NAMES.toString(),
+        response.getHeaders().getFirst("error_code"));
   }
 }
