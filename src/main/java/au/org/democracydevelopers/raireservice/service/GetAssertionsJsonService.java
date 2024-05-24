@@ -29,6 +29,7 @@ import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,8 +92,10 @@ public class GetAssertionsJsonService {
       // keeping track of the maximum difficulty and minimum margin.
       logger.debug(String.format("%s Converting %d assertions into raire-java format.", prefix,
           assertions.size()));
-      List<AssertionAndDifficulty> translated = assertions.stream().map(
-          a -> a.convert(request.candidates)).toList();
+      List<AssertionAndDifficulty> translated = new ArrayList<>();
+      for(Assertion a : assertions) {
+        translated.add(a.convert(request.candidates));
+      }
 
       logger.debug(String.format("%s %d assertions translated to json.", prefix,
           assertions.size()));

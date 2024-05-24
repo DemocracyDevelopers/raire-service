@@ -6,6 +6,9 @@ INSERT INTO county (id, name) values (8, 'TiedWinnersCounty');
 INSERT INTO county (id, name) values (9, 'GuideToRaireCounty');
 INSERT INTO county (id, name) values (10, 'SimpleCounty1');
 INSERT INTO county (id, name) values (11, 'SimpleCounty2');
+-- leave a space for Byron, 12, from the NSW2021Data directory
+INSERT INTO county (id, name) values (13, 'TimeoutCheckingWinnersCounty');
+
 
 -- A test assertion to allow for some basic sanity checking.
 INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values ('NEB', 'Sanity Check NEB Assertion Contest', 1.1, 0.32, 'Bob', 320, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Alice');
@@ -36,6 +39,7 @@ INSERT INTO contest (county_id, id, version, description, name, sequence_number,
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (10, 999993, 0, 'IRV', 'Simple Contest', 5, 3, 1);
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (10, 999994, 0, 'IRV', 'Cross-county Simple Contest', 7, 3, 1);
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (11, 999995, 0, 'IRV', 'Cross-county Simple Contest', 8, 3, 1);
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) values (13, 999996, 0, 'IRV', 'Time out checking winners contest', 9, 20, 1);
 
 -- CVRs
 
@@ -251,3 +255,46 @@ INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) val
 -- 1 (C,A) in county 11.
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (30012, 12, 'Type 1', 1, 10, '3-1-12', 12, 'UPLOADED', 3);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (30012, 11, '["Chuan","Alice"]', 999995, 0);
+
+-- A contest designed to make it time out checking winners. There are 20 candidates and 20 votes,
+-- all the same except for a cyclical offset.
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40001, 1, 'Type 1', 1, 13, '1-1-1', 1, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40001, 13, '["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40002, 2, 'Type 1', 1, 13, '1-1-2', 2, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40002, 13, '["B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","A"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40003, 3, 'Type 1', 1, 13, '1-1-3', 3, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40003, 13, '["C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","A","B"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40004, 4, 'Type 1', 1, 13, '1-1-4', 4, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40004, 13, '["D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","A","B","C"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40005, 5, 'Type 1', 1, 13, '1-1-5', 5, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40005, 13, '["E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","A","B","C","D"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40006, 6, 'Type 1', 1, 13, '1-1-6', 6, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40006, 13, '["F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","A","B","C","D","E"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40007, 7, 'Type 1', 1, 13, '1-1-7', 7, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40007, 13, '["G","H","I","J","K","L","M","N","O","P","Q","R","S","T","A","B","C","D","E","F"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40008, 8, 'Type 1', 1, 13, '1-1-8', 8, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40008, 13, '["H","I","J","K","L","M","N","O","P","Q","R","S","T","A","B","C","D","E","F","G"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40009, 9, 'Type 1', 1, 13, '1-1-9', 9, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40009, 13, '["I","J","K","L","M","N","O","P","Q","R","S","T","A","B","C","D","E","F","G","H"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40010, 10, 'Type 1', 1, 13, '1-1-10', 10, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40010, 13, '["J","K","L","M","N","O","P","Q","R","S","T","A","B","C","D","E","F","G","H","I"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40011, 11, 'Type 1', 1, 13, '1-1-11', 11, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40011, 13, '["K","L","M","N","O","P","Q","R","S","T","A","B","C","D","E","F","G","H","I","J"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40012, 12, 'Type 1', 1, 13, '1-1-12', 12, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40012, 13, '["L","M","N","O","P","Q","R","S","T","A","B","C","D","E","F","G","H","I","J","K"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40013, 13, 'Type 1', 1, 13, '1-1-13', 13, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40013, 13, '["M","N","O","P","Q","R","S","T","A","B","C","D","E","F","G","H","I","J","K","L"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40014, 14, 'Type 1', 1, 13, '1-1-14', 14, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40014, 13, '["N","O","P","Q","R","S","T","A","B","C","D","E","F","G","H","I","J","K","L","M"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40015, 15, 'Type 1', 1, 13, '1-1-14', 15, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40015, 13, '["O","P","Q","R","S","T","A","B","C","D","E","F","G","H","I","J","K","L","M","N"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40016, 16, 'Type 1', 1, 13, '1-1-16', 16, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40016, 13, '["P","Q","R","S","T","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40017, 17, 'Type 1', 1, 13, '1-1-17', 17, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40017, 13, '["Q","R","S","T","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40018, 18, 'Type 1', 1, 13, '1-1-18', 18, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40018, 13, '["R","S","T","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40019, 19, 'Type 1', 1, 13, '1-1-19', 19, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40019, 13, '["S","T","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R"]', 999996, 0);
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (40020, 20, 'Type 1', 1, 13, '1-1-20', 20, 'UPLOADED', 3);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (40020, 13, '["T","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S"]', 999996, 0);

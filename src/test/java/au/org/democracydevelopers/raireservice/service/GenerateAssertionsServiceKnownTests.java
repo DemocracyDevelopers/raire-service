@@ -30,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raire.RaireError.TiedWinners;
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
 import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
@@ -63,7 +62,6 @@ import org.springframework.transaction.annotation.Transactional;
  * human-computable assertions. Relevant data is preloaded into the test database from
  * src/test/resources/known_testcases_votes.sql.
  * This includes
- * - A contest with tied winners, to check that the correct error is produced.
  * - The examples from the Guide To Raire Vol 2. Exact matching for Ex. 2 and some for Ex. 1.
  * - A very simple example test with two obvious assertions (an NEN and NEB), described below.
  * - A cross-county version of the simple example.
@@ -79,9 +77,9 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GenerateAssertionsOnKnownTests {
+public class GenerateAssertionsServiceKnownTests {
 
-  private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsOnKnownTests.class);
+  private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsServiceKnownTests.class);
 
   @Autowired
   AssertionRepository assertionRepository;
@@ -98,7 +96,6 @@ public class GenerateAssertionsOnKnownTests {
   private static final String ThreeAssertionContest = "Sanity Check 3 Assertion Contest";
   private static final String guideToRaireExample1 = "Guide To Raire Example 1";
   private static final String guideToRaireExample2 = "Guide To Raire Example 2";
-  private static final String tiedWinnersContest = "Tied Winners Contest";
   private static final String simpleContest = "Simple Contest";
   private static final String crossCountySimpleContest = "Cross-county Simple Contest";
 
@@ -111,10 +108,6 @@ public class GenerateAssertionsOnKnownTests {
    * Array of candidates: Alice, Chuan, Bob.
    */
   private static final String[] aliceChuanBob = {"Alice", "Chuan", "Bob"};
-
-  private final static GenerateAssertionsRequest tiedWinnersRequest
-      = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5,
-      Arrays.stream(aliceChuanBob).toList());
 
   /**
    * Check that NEB assertion retrieval works. This is just a sanity check.
@@ -144,36 +137,19 @@ public class GenerateAssertionsOnKnownTests {
     assertInstanceOf(NENAssertion.class, assertion);
   }
 
-
   /**
-   * Tied winners results in raire-java returning a TiedWinners RaireError.
-   * This is a super-simple election with two candidates with one vote each.
-   */
-  @Test
-  @Transactional
-  void tiedWinnersThrowsTiedWinnersError() throws RaireServiceException {
-    testUtils.log(logger, "tiedWinnersThrowsTiedWinnersError");
-    RaireResultOrError result = generateAssertionsService.generateAssertions(tiedWinnersRequest);
-
-    assertNull(result.Ok);
-    assertNotNull(result.Err);
-
-    assertEquals(TiedWinners.class, result.Err.getClass());
-  }
-
-  /**
-   * Some tests of the assertions described in the Guide to Raire Example 1.
+   * Some tests of the assertions described in the Guide to Raire, Part 2, Example 1.
    * The test data has 1/500 of the votes, so divide margins by 500.
    * The difficulties should be the same, because both numerator and denominator should be divided by 500.
    * We do not test the NEN assertions because the ones in the Guide have some redundancy.
-   * Test assertion: Alice NEB Bob.
+   * Test assertion: Chuan NEB Bob.
    * Margin is 4000, but data is divided by 500, so 8. Difficulty is 3.375 as in the Guide.
    * Diluted margin is 8/27 = 0.296...
    */
   @Test
   @Transactional
-  void testGuideToRaireExample1() throws RaireServiceException {
-    testUtils.log(logger, "testGuideToRaireExample1");
+  void testGuideToRairePart2Example1() throws RaireServiceException {
+    testUtils.log(logger, "testGuideToRairePart2Example1");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample1,
         27, 5, Arrays.stream(aliceBobChuanDiego).toList());
 
@@ -206,7 +182,7 @@ public class GenerateAssertionsOnKnownTests {
   @Test
   @Transactional
   void testGuideToRaireExample2() throws RaireServiceException {
-    testUtils.log(logger, "testGuideToRaireExample2");
+    testUtils.log(logger, "testGuideToRairePart2Example2");
     GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample2,
         41, 5, Arrays.stream(aliceChuanBob).toList());
     RaireResultOrError response = generateAssertionsService.generateAssertions(request);
@@ -725,6 +701,8 @@ public class GenerateAssertionsOnKnownTests {
     assertTrue(correctDBAssertionData(9, 9/41.0, 41.0/9,
         "Chuan", "Bob", List.of("Chuan","Bob"), nenAssertion));
   }
+
+
 
   /**
    * Create and return a RaireResult containing assertions that would be generated for second

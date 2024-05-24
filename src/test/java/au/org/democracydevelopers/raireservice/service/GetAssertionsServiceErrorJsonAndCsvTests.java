@@ -23,7 +23,6 @@ package au.org.democracydevelopers.raireservice.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
@@ -42,54 +41,90 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Tests of assertion retrieval in GetAssertionsJsonService. Data is preloaded into the database
- * using src/test/resources/data.sql. Note that tests of GetAssertionsJsonService have been
+ * Tests of assertion retrieval causing errors in GetAssertionsJsonService and GetAssertionsCsvService.
+ * Data is preloaded into the database using src/test/resources/data.sql. Note that tests of
+ * GetAssertionsJsonService and GetAssertionsCsvService have been
  * spread across several test classes, each defined with respect to a different test container.
+ * The tests for WRONG_CANDIDATE_NAMES are in the respective format-specific class.
+ * There is a json version and a csv version of each test.
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsJsonServiceTests {
+public class GetAssertionsServiceErrorJsonAndCsvTests {
 
-  private static final Logger logger = LoggerFactory.getLogger(GetAssertionsJsonServiceTests.class);
+  private static final Logger logger = LoggerFactory.getLogger(
+      GetAssertionsServiceErrorJsonAndCsvTests.class);
 
   @Autowired
-  AssertionRepository assertionRepository;
+  GetAssertionsJsonService getAssertionsJsonService;
+  @Autowired
+  GetAssertionsCsvService getAssertionsCsvService;
 
   /**
    * Retrieval of assertions for an existing contest with no associated assertions will throw
-   * a RaireServiceException with error code NO_ASSERTIONS_PRESENT.
+   * a RaireServiceException with error code NO_ASSERTIONS_PRESENT. (JSON)
    */
   @Test
   @Transactional
-  void existentContestNoAssertions(){
-    testUtils.log(logger, "existentContestNoAssertions");
-    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
+  void existentContestNoAssertionsJSON(){
+    testUtils.log(logger, "existentContestNoAssertionsJSON");
     GetAssertionsRequest request = new GetAssertionsRequest("No CVR Mayoral",
-        List.of(), new BigDecimal("0.10"));
+        List.of(), BigDecimal.valueOf(0.1));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
-        service.getRaireSolution(request));
+        getAssertionsJsonService.getRaireSolution(request));
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
+  }
+
+  /**
+   * Retrieval of assertions for an existing contest with no associated assertions will throw
+   * a RaireServiceException with error code NO_ASSERTIONS_PRESENT. (CSV)
+   */
+  @Test
+  @Transactional
+  void existentContestNoAssertionsCSV(){
+    testUtils.log(logger, "existentContestNoAssertionsCSV");
+    GetAssertionsRequest request = new GetAssertionsRequest("No CVR Mayoral",
+        List.of(), BigDecimal.valueOf(0.1));
+
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
+        getAssertionsCsvService.generateCSV(request));
     assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
   /**
    * Retrieval of assertions for a non-existent contest will throw a RaireServiceException
-   * with error code NO_ASSERTIONS_PRESENT.
+   * with error code NO_ASSERTIONS_PRESENT. (JSON)
    * Note that this should not happen because it should be caught by request validation.
    */
   @Test
   @Transactional
-  void nonExistentContestNoAssertions(){
-    testUtils.log(logger, "nonExistentContestNoAssertions");
-    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
+  void nonExistentContestNoAssertionsJSON(){
+    testUtils.log(logger, "nonExistentContestNoAssertionsJSON");
     GetAssertionsRequest request = new GetAssertionsRequest("Non-Existent Contest Name",
-        List.of(), new BigDecimal("0.10"));
+        List.of(), BigDecimal.valueOf(0.1));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
-        service.getRaireSolution(request));
+        getAssertionsJsonService.getRaireSolution(request));
     assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
   }
 
+  /**
+   * Retrieval of assertions for a non-existent contest will throw a RaireServiceException
+   * with error code NO_ASSERTIONS_PRESENT. (CSV)
+   * Note that this should not happen because it should be caught by request validation.
+   */
+  @Test
+  @Transactional
+  void nonExistentContestNoAssertionsCSV(){
+    testUtils.log(logger, "nonExistentContestNoAssertionsCSV");
+    GetAssertionsRequest request = new GetAssertionsRequest("Non-Existent Contest Name",
+        List.of(), BigDecimal.valueOf(0.1));
+
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
+        getAssertionsCsvService.generateCSV(request));
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
+  }
 }

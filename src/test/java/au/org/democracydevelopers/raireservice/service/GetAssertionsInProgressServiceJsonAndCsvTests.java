@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.service;
 
+import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -30,11 +31,8 @@ import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
-import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -54,44 +52,40 @@ import org.springframework.transaction.annotation.Transactional;
  * preloaded into the test database from: src/test/resources/assertions_in_progress.sql.
  * Note that tests of GetAssertionsJsonService have been spread across several test classes, each
  * defined with respect to a different test container.
+ * There is a json version and a csv version of the same test.
  */
 @ActiveProfiles("assertions-in-progress")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class GetAssertionsJsonServiceInProgressTests {
+public class GetAssertionsInProgressServiceJsonAndCsvTests {
 
   private static final Logger logger = LoggerFactory.getLogger(
-      GetAssertionsJsonServiceInProgressTests.class);
+      GetAssertionsInProgressServiceJsonAndCsvTests.class);
 
   @Autowired
-  AssertionRepository assertionRepository;
+  GetAssertionsJsonService getAssertionsJsonService;
 
-  /**
-   * To facilitate easier checking of retrieved/saved assertion content.
-   */
-  private static final Gson GSON =
-      new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
-
+  @Autowired
+  GetAssertionsCsvService getAssertionsCsvService;
 
   /**
    * Retrieve assertions for a contest that has one NEN and one NEB assertion (audit in progress).
+   * (JSON).
    */
   @Test
   @Transactional
-  void retrieveAssertionsOneNENOneNEBAssertionInProgress() throws RaireServiceException {
-    testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgress");
-    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
+  void retrieveAssertionsOneNENOneNEBAssertionInProgressJSON() throws RaireServiceException {
+    testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressJSON");
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
-        List.of("Liesl", "Wendell", "Amanda", "Chuan"), new BigDecimal("0.05"));
+        List.of("Liesl", "Wendell", "Amanda", "Chuan"), BigDecimal.valueOf(0.05));
 
-    RaireSolution solution = service.getRaireSolution(request);
+    RaireSolution solution = getAssertionsJsonService.getRaireSolution(request);
 
     // Check that the metadata has been constructed appropriately
-    final String metadata = "{\"candidates\":[\"Liesl\",\"Wendell\",\"Amanda\",\"Chuan\"]," +
-        "\"contest\":\"One NEN NEB Assertion Contest\",\"risk_limit\":0.05}";
-
-    assertEquals(metadata, GSON.toJson(solution.metadata));
+    assertTrue(correctMetadata(List.of("Liesl","Wendell","Amanda","Chuan"),
+        "One NEN NEB Assertion Contest", BigDecimal.valueOf(0.05), solution.metadata,
+        BigDecimal.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(solution.solution.Err);
@@ -106,7 +100,7 @@ public class GetAssertionsJsonServiceInProgressTests {
     AssertionAndDifficulty aad1 = assertions[0];
     assertEquals(0.1, aad1.difficulty);
     assertEquals(112, aad1.margin);
-    assertEquals(new BigDecimal("0.08"), aad1.status.get(Metadata.STATUS_RISK));
+    assertEquals(BigDecimal.valueOf(0.08), aad1.status.get(Metadata.STATUS_RISK));
     assertTrue(aad1.assertion.isNEB());
     assertEquals(2, ((NotEliminatedBefore)aad1.assertion).winner);
     assertEquals(0, ((NotEliminatedBefore)aad1.assertion).loser);
@@ -121,7 +115,44 @@ public class GetAssertionsJsonServiceInProgressTests {
     int[] continuing = {0, 1, 2};
     assertArrayEquals(continuing, ((NotEliminatedNext)aad2.assertion).continuing);
 
-    assertEquals(new BigDecimal("0.70"), aad2.status.get(Metadata.STATUS_RISK));
+    var risk = (BigDecimal) aad2.status.get(Metadata.STATUS_RISK);
+    assertEquals(0, risk.compareTo(BigDecimal.valueOf(0.7)));
+  }
+
+  /**
+   * Retrieve assertions for a contest that has one NEN and one NEB assertion (audit in progress).
+   * (CSV)
+   * For the csv files, we _do_ expect consistent ordering of the assertions, so this test requests
+   * exact matches with expected strings that give the assertions in a particular order and the
+   * extrema with particular indices.
+   */
+  @Test
+  @Transactional
+  void retrieveAssertionsOneNENOneNEBAssertionInProgressCSV() throws RaireServiceException {
+    testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressCSV");
+    GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
+        List.of("Liesl", "Wendell", "Amanda", "Chuan"), BigDecimal.valueOf(0.05));
+
+    String csv = getAssertionsCsvService.generateCSV(request);
+
+    assertTrue(csv.contains("Contest name,One NEN NEB Assertion Contest\n"));
+    assertTrue(csv.contains("Candidates,\"Liesl,Wendell,Amanda,Chuan\""));
+    assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
+    assertTrue(csv.contains("Margin,112,\"1\"\n"));
+    assertTrue(csv.contains("Diluted margin,0.1,\"1\"\n"));
+    assertTrue(csv.contains("Raire difficulty,3.17,\"2\"\n"));
+    assertTrue(csv.contains("Current risk,0.70,\"2\"\n"));
+    assertTrue(csv.contains("Optimistic samples to audit,200,\"2\"\n"));
+    assertTrue(csv.contains("Estimated samples to audit,300,\"2\"\n"));
+    assertTrue(csv.contains(
+        "ID,Type,Winner,Loser,Assumed continuing,Difficulty,Margin,Diluted margin,Risk,"
+            + "Estimated samples to audit,Optimistic samples to audit,Two vote over count,"
+            + "One vote over count,Other discrepancy count,One vote under count,"
+            + "Two vote under count\n"));
+    assertTrue(csv.contains("1,NEB,Amanda,Liesl,,0.1,112,0.1,0.08,27,20,2,0,0,1,0\n"));
+    assertTrue(csv.contains(
+        "2,NEN,Amanda,Wendell,\"Liesl,Wendell,Amanda\",3.17,560,0.5,0.70,300,200,0,2,0,0,1\n"
+    ));
   }
 
 }
