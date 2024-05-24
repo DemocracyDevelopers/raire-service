@@ -23,6 +23,8 @@ package au.org.democracydevelopers.raireservice.persistence.entity;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
 import au.org.democracydevelopers.raireservice.service.Metadata;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException;
+import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import java.util.ArrayList;
@@ -85,7 +87,7 @@ public class NEBAssertion extends Assertion {
   /**
    * {@inheritDoc}
    */
-  public AssertionAndDifficulty convert(List<String> candidates) throws IllegalArgumentException {
+  public AssertionAndDifficulty convert(List<String> candidates) throws RaireServiceException {
 
     final String prefix = "[convert]";
     logger.debug(String.format("%s Constructing a raire-java AssertionAndDifficulty for the " +
@@ -107,7 +109,7 @@ public class NEBAssertion extends Assertion {
       final String msg = String.format("%s Candidate list provided as parameter is inconsistent " +
               "with assertion (winner or loser not present).", prefix);
       logger.error(msg);
-      throw new IllegalArgumentException(msg);
+      throw new RaireServiceException(msg, RaireErrorCode.WRONG_CANDIDATE_NAMES);
     }
   }
 

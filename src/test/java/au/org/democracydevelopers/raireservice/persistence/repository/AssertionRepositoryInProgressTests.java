@@ -107,7 +107,7 @@ public class AssertionRepositoryInProgressTests {
     assertEquals(1, ((NotEliminatedBefore)aad.assertion).loser);
 
     // Check that current risk is 0.5
-    assertEquals(0, BigDecimal.valueOf(0.50).compareTo(
+    assertEquals(0, BigDecimal.valueOf(0.5).compareTo(
         ((BigDecimal)aad.status.get(Metadata.STATUS_RISK))));
   }
 
@@ -131,7 +131,7 @@ public class AssertionRepositoryInProgressTests {
         "Alice", "Charlie", List.of("Alice", "Charlie", "Diego", "Bob"),
         Map.of(13L, 1, 14L, 0, 15L, 0), 245,
         201, 0, 0, 1,
-        0, 2, BigDecimal.valueOf(0.20),
+        0, 2, BigDecimal.valueOf(0.2),
         "One NEN Assertion Contest", r));
   }
 
@@ -161,7 +161,7 @@ public class AssertionRepositoryInProgressTests {
         "Amanda", "Wendell", List.of("Liesl", "Wendell", "Amanda"),
         Map.of(13L, 1, 14L, 1, 15L, -2), 300,
         200, 1, 0, 2,
-        0, 0, BigDecimal.valueOf(0.70),
+        0, 0, BigDecimal.valueOf(0.7),
         "One NEN NEB Assertion Contest", r2));
   }
 }
