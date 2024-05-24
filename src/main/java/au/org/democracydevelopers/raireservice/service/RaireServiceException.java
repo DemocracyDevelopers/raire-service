@@ -150,10 +150,15 @@ public class RaireServiceException extends Exception {
     WRONG_CANDIDATE_NAMES,
 
     /**
-     * The user has request to retrieve assertions for a contest for which no assertions have
+     * The user has requested to retrieve assertions for a contest for which no assertions have
      * been generated.
      */
     NO_ASSERTIONS_PRESENT,
+
+    /**
+     * The user has requested to generate assertions for a contest for which no votes are present.
+     */
+    NO_VOTES_PRESENT,
 
     // Internal errors (that the user can do nothing about)
 

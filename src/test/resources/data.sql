@@ -92,3 +92,7 @@ INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) val
 INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (15, 15, 'Type 3', 1, 12, '15-1-4', 15, 'UPLOADED', 4);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (15, 12, '["Alice"]', 999971, 22);
 INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (15, 12, '["Wendell","Liesel"]', 999972, 23);
+
+-- Some plurality votes for the Valid Plurality Contest.
+INSERT INTO cast_vote_record (id, cvr_number, ballot_type, batch_id, county_id, imprinted_id, record_id, record_type, scanner_id) values (16, 16, 'Type 3', 1, 12, '16-1-4', 16, 'UPLOADED', 4);
+INSERT INTO cvr_contest_info (cvr_id, county_id, choices, contest_id, index) values (15, 10, '["Alice"]', 999995, 24);

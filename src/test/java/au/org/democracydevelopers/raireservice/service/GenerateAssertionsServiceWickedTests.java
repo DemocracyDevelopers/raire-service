@@ -28,7 +28,6 @@ import au.org.democracydevelopers.raire.RaireError.TiedWinners;
 import au.org.democracydevelopers.raire.RaireError.TimeoutCheckingWinner;
 import au.org.democracydevelopers.raire.RaireError.TimeoutFindingAssertions;
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
-import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
@@ -64,9 +63,6 @@ public class GenerateAssertionsServiceWickedTests {
 
   private static final Logger logger = LoggerFactory.getLogger(
       GenerateAssertionsServiceWickedTests.class);
-
-  @Autowired
-  AssertionRepository assertionRepository;
 
   @Autowired
   GenerateAssertionsService generateAssertionsService;

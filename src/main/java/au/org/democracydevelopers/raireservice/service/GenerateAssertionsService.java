@@ -89,6 +89,16 @@ public class GenerateAssertionsService {
           prefix, request.contestName, request.candidates, request.totalAuditableBallots,
           request.timeLimitSeconds));
 
+      // Check that the contest exists and is all IRV. Otherwise this is an internal error because
+      // it should be caught before here.
+      if(contestRepository.findFirstByName(request.contestName).isEmpty()
+          || !contestRepository.isAllIRV(request.contestName)) {
+        final String msg = String.format("%s Contest %s does not exist or is not all IRV", prefix,
+            request.contestName);
+        logger.error(msg + "Throwing a RaireServiceException.");
+        throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
+      }
+
       // Use raire-java to consolidate the votes, collecting all votes with the same ranking
       // together and representing that collection as a single ranking with an associated number
       // denoting how many votes with that ranking exist.
@@ -103,12 +113,19 @@ public class GenerateAssertionsService {
           c -> cvrContestInfoRepository.getCVRs(c.getContestID(), c.getCountyID())).
           flatMap(List::stream).toList();
 
-      if(votes.size() > request.totalAuditableBallots){
+      if(votes.size() > request.totalAuditableBallots) {
         final String msg = String.format("%s %d votes present for contest %s but a universe size of "
             + "%d specified in the assertion generation request. Throwing a RaireServiceException.",
             prefix, votes.size(), request.contestName, request.totalAuditableBallots);
         logger.error(msg);
         throw new RaireServiceException(msg, RaireErrorCode.INVALID_TOTAL_AUDITABLE_BALLOTS);
+      }
+
+      if(votes.isEmpty()) {
+        final String msg = String.format("%s No votes present for contest %s.", prefix,
+            request.contestName);
+        logger.error(msg + " Throwing a RaireServiceException.");
+        throw new RaireServiceException(msg, RaireErrorCode.NO_VOTES_PRESENT);
       }
 
       logger.debug(String.format("%s Adding all extracted rankings to a consolidator to identify " +

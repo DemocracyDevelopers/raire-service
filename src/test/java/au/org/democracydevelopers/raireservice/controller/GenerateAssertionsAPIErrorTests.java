@@ -24,7 +24,9 @@ import static au.org.democracydevelopers.raireservice.service.RaireServiceExcept
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -47,10 +49,11 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Tests for appropriate responses to bad requests to the generate-assertions endpoint. This class
- * automatically fires up the RAIRE Microservice on a random port. Currently, we check for
- * proper input validation.
+ * automatically fires up the RAIRE Microservice on a random port. These sorts of errors are _not_
+ * supposed to happen - they indicate programming errors or problems with databases etc.
+ * Currently, we check for proper input validation and inconsistent input.
  * The list of tests is similar to GenerateAssertionsRequestTests.java, and also to
- * GetAssertionsAPITests.java when the same test is relevant to both endpoints.
+ * GetAssertionsAPIErrorTests.java when the same test is relevant to both endpoints.
  * Contests which will be used for validity testing are
  * preloaded into the database using src/test/resources/data.sql.
  * Tests include:
@@ -73,6 +76,8 @@ public class GenerateAssertionsAPIErrorTests {
   private final static HttpHeaders httpHeaders = new HttpHeaders();
   private final static String baseURL = "http://localhost:";
   private final static String generateAssertionsEndpoint = "/raire/generate-assertions";
+
+  private final static List<String> aliceAndBob = List.of("Alice","Bob");
 
   @LocalServerPort
   private int port;
@@ -132,15 +137,30 @@ public class GenerateAssertionsAPIErrorTests {
     testUtils.log(logger, "generateAssertionsWithNonExistentContestIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    String requestAsJson =
-        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
-            +"\"contestName\":\"NonExistentContest\",\"candidates\":[\"Alice\",\"Bob\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest("NonExistentContest",
+        100, 10, aliceAndBob);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No such contest"));
+  }
+
+  /**
+   * The generateAssertions endpoint, called with a valid IRV contest for which no votes are present,
+   * returns a meaningful error.
+   */
+  @Test
+  public void generateAssertionsFromNoVotesIsAnError() {
+    testUtils.log(logger, "generateAssertionsFromNoVotesIsAnError");
+    String url = baseURL + port + generateAssertionsEndpoint;
+
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest("No CVR Mayoral", 100,
+        10, aliceAndBob);
+
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No votes present for contest"));
   }
 
   /**
@@ -152,11 +172,8 @@ public class GenerateAssertionsAPIErrorTests {
     testUtils.log(logger, "generateAssertionsWithPluralityContestIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    String requestAsJson =
-        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
-            +"\"contestName\":\"Valid Plurality Contest\",\"candidates\":[\"Alice\",\"Bob\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(
+        "Valid Plurality Contest", 100, 10, aliceAndBob);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -172,11 +189,8 @@ public class GenerateAssertionsAPIErrorTests {
     testUtils.log(logger, "generateAssertionsWithMixedIRVPluralityContestIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    String requestAsJson =
-        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
-            +"\"contestName\":\"Invalid Mixed Contest\",\"candidates\":[\"Alice\",\"Bob\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest("Invalid Mixed Contest",
+        100,10,aliceAndBob);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
@@ -400,8 +414,6 @@ public class GenerateAssertionsAPIErrorTests {
         "Non-positive total auditable ballots"));
   }
 
-
-
   /**
    * The generateAssertions endpoint, called with null/missing time limit, returns a meaningful error.
    */
@@ -478,6 +490,8 @@ public class GenerateAssertionsAPIErrorTests {
     assertTrue(response.getStatusCode().is5xxServerError());
     assertEquals(WRONG_CANDIDATE_NAMES.toString(),
         response.getHeaders().getFirst("error_code"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
+        "was not on the list of candidates"));
   }
 
 }
