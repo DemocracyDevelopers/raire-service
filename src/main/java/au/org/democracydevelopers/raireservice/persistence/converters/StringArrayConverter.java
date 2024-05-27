@@ -20,14 +20,13 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.converters;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
-import java.lang.reflect.Type;
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * stored in the colorodo-rla database as a single String into an array of String,
  * one String for each choice. The counterpart in colorado-rla is a converter between
  * String and List<String>. We convert choices to an array of String for easier
- * interaction with raire-java.
+ * interaction with raire-java. We have also replaced the use of GSON with Jackson.
  */
 @Converter(autoApply = true)
 public class StringArrayConverter implements AttributeConverter<String[], String> {
@@ -47,58 +46,73 @@ public class StringArrayConverter implements AttributeConverter<String[], String
   /**
    * The type information for an array of String.
    */
-  private static final Type STRING_ARRAY = new TypeToken<String[]>() {}.getType();
+  private static final TypeReference<String[]> STRING_ARRAY = new TypeReference<>() {};
 
   /**
-   * A GSON instance used to convert an array of String to a JSON representation (a single String)
-   * and vice versa. The colorado-rla convention is to retain HTML characters when serialising and
-   * to serialise null fields. Note, however, that we throw an exception when the converter is
-   * trying to convert a null/blank entry to a JSON string, or a null/blank entry to an array of
-   * strings. In the context with which this converter is being used by raire-service, the first
-   * would add invalid data to the database, and the second would indicate that invalid data is
-   * present in the database.
+   * An ObjectMapper  used to convert an array of String to a JSON representation (a single String)
+   * and vice versa. We throw an exception when the converter is trying to convert a null/blank
+   * entry to a JSON string, or a null/blank entry to an array of strings. In the context with
+   * which this converter is being used by raire-service, the first would add invalid data to the
+   * database, and the second would indicate that invalid data is present in the database. Note
+   * that in colorado-rla their converter (using GSON) disables HTML escaping.
    */
-  private static final Gson GSON =
-      new GsonBuilder().serializeNulls().disableHtmlEscaping().create();
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   /**
    * Converts the specified array of String to a single String database column entry.
    *
    * @param arrayOfString The list of String to be converted into a single String.
-   * @throws JsonSyntaxException when a null/blank field would be stored in place of a JSON
-   * representation of a list.
+   * @throws RuntimeException when a null/blank field would be stored in place of a JSON
+   * representation of a list, or the given String array could not be converted to JSON.
    */
   @Override
   public String convertToDatabaseColumn(final String[] arrayOfString) {
+    final String prefix = "[convertToDatabaseColumn]";
     if(arrayOfString == null){
-      final String msg = "[convertToDatabaseColumn] Attempt to store a null value in place " +
-          "of a JSON list.";
+      final String msg = String.format("%s Attempt to store a null value in place of a JSON list.",
+          prefix);
       logger.error(msg);
-      throw new JsonSyntaxException(msg);
+      throw new RuntimeException(msg);
     }
-    return GSON.toJson(arrayOfString);
+    try {
+      return objectMapper.writeValueAsString(arrayOfString);
+    } catch (JsonProcessingException e) {
+      final String msg = String.format("%s Problem in converting %s to a JSON string: %s.", prefix,
+          Arrays.toString(arrayOfString), e.getMessage());
+      logger.error(msg);
+      throw new RuntimeException(msg);
+    }
   }
 
   /**
    * Converts the specified single-String database column entry to an array of String. If the
    * column entry is null or an empty string, this method will return 'null'. If the column
    * entry is a non-empty string, and not in the JSON format of a list, this method will throw a
-   * Json Parse/Syntax Exception. We also throw this exception if the caller is trying to
-   * convert a null string, or an empty string, to an array of strings. This indicates a problem
-   * in the data present in the database.
+   * RuntimeException. We also throw this exception if the caller is trying to convert a null
+   * string, or an empty string, to an array of strings. This indicates a problem in the data
+   * present in the database.
    *
    * @param arrayAsString The column entry.
-   * @throws JsonSyntaxException when the database column entry being converted to an array of
+   * @throws RuntimeException when the database column entry being converted to an array of
    * strings is not in the correct JSON format, or is blank.
    */
   @Override
   public String[] convertToEntityAttribute(final String arrayAsString) {
-      if(arrayAsString.isBlank()){
-        final String msg = "[convertToEntityAttribute] A null/blank entry is present in the " +
-            "database in place of a JSON list. Error in attempting to convert to a list.";
-        logger.error(msg);
-        throw new JsonSyntaxException(msg);
-      }
-      return GSON.fromJson(arrayAsString, STRING_ARRAY);
+    final String prefix = "[convertToEntityAttribute]";
+    if(arrayAsString.isBlank()){
+      final String msg = String.format("%s A null/blank entry is present in the database in place "
+              + "of a JSON list. Error in attempting to convert \"%s\" to a list.", prefix,
+              arrayAsString);
+      logger.error(msg);
+      throw new RuntimeException(msg);
+    }
+    try {
+      return objectMapper.readValue(arrayAsString, STRING_ARRAY);
+    } catch (JsonProcessingException e) {
+      final String msg = String.format("%s Problem in converting \"%s\" to an array of strings: %s",
+          prefix, arrayAsString, e.getMessage());
+      logger.error(msg);
+      throw new RuntimeException(e);
+    }
   }
 }
