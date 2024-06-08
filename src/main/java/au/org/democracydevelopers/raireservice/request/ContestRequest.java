@@ -38,9 +38,27 @@ public abstract class ContestRequest {
   private final static Logger logger = LoggerFactory.getLogger(ContestRequest.class);
 
   /**
+   * Default time limit, in seconds. This is an optional parameter.
+   */
+  private final static int DEFAULT_TIME_LIMIT = 5;
+
+  /**
    * The name of the contest
    */
   public final String contestName;
+
+  /**
+   * The total number of ballots in the universe under audit.
+   * This may not be the same as the number of ballots or CVRs in the contest, if the contest
+   * is available only to a subset of voters in the universe.
+   */
+  public final int totalAuditableBallots;
+
+  /**
+   * The elapsed time allowed to raire to generate the assertions, in seconds.
+   * Ignored for GetAssertionsRequests.
+   */
+  public final double timeLimitSeconds;
 
   /**
    * List of candidate names.
@@ -50,25 +68,32 @@ public abstract class ContestRequest {
   /**
    * All args constructor.
    * @param contestName the name of the contest
+   * @param totalAuditableBallots the total auditable ballots in the universe under audit.
+   * @param timeLimitSeconds the elapsed time allowed for RAIRE to generate assertions, in seconds.
    * @param candidates the list of candidates by name
    */
-  @ConstructorProperties({"contestName", "candidates"})
-  public ContestRequest(String contestName, List<String> candidates) {
+  @ConstructorProperties({"contestName", "totalAuditableBallots", "timeLimitSeconds","candidates"})
+  public ContestRequest(String contestName, int totalAuditableBallots, double timeLimitSeconds,
+      List<String> candidates) {
     this.contestName = contestName;
+    this.totalAuditableBallots = totalAuditableBallots;
+    this.timeLimitSeconds = timeLimitSeconds;
     this.candidates = candidates;
   }
 
   /**
-   * Validates the contest request, checking that the contest exists and is an IRV contest, and
-   * that the contest request has candidates. Note it does _not_ check whether the candidates are
-   * present in the CVRs.
+   * Validates the contest request, checking that the contest exists and is an IRV contest, that
+   * the total ballots and time limit have sensible values, and that the contest has candidates.
+   * Note it does _not_ check whether the candidates are present in the CVRs.
    * @param contestRepository the respository for getting Contest objects from the database.
    * @throws RequestValidationException if the request is invalid.
    */
   public void Validate(ContestRepository contestRepository) throws RequestValidationException {
     final String prefix = "[Validate]";
-    logger.debug(String.format("%s Validating a request to retrieve contest information from the "+
-        "database for contest %s with specified candidates %s.", prefix, contestName, candidates));
+    logger.debug(String.format("%s Validating a Contest Request for contest %s " +
+        "with specified candidates %s, total number of auditable ballots %d, and time limit " +
+        "on assertion generation of %fs.", prefix, contestName, candidates, totalAuditableBallots,
+        timeLimitSeconds));
 
     if(contestName == null || contestName.isBlank()) {
       final String msg = String.format("%s No contest name specified. " +
@@ -79,7 +104,8 @@ public abstract class ContestRequest {
 
     if(candidates == null || candidates.isEmpty() || candidates.stream().anyMatch(String::isBlank)) {
       final String msg = String.format("%s Request for contest %s with a bad candidate list %s. " +
-          "Throwing a RequestValidationException.", prefix, contestName, (candidates==null ? "" : candidates));
+          "Throwing a RequestValidationException.", prefix, contestName,
+          (candidates==null ? "" : candidates));
       logger.error(msg);
       throw new RequestValidationException(msg);
     }
@@ -94,6 +120,19 @@ public abstract class ContestRequest {
     if(!contestRepository.isAllIRV(contestName)) {
       final String msg = String.format("%s Request for contest %s: not comprised of all IRV " +
           "contests. Throwing a RequestValidationException.", prefix, contestName);
+      logger.error(msg);
+      throw new RequestValidationException(msg);
+    }
+
+    if(totalAuditableBallots <= 0) {
+      final String msg = String.format("%s Non-positive total auditable ballots (%d). Throwing a " +
+          "RequestValidationException.", prefix, totalAuditableBallots);
+      logger.error(msg);
+      throw new RequestValidationException(msg);
+    }
+    if(timeLimitSeconds <= 0) {
+      final String msg = String.format("%s Non-positive time limit on assertion generation (%f). " +
+          "Throwing a RequestValidationException.", prefix, timeLimitSeconds);
       logger.error(msg);
       throw new RequestValidationException(msg);
     }

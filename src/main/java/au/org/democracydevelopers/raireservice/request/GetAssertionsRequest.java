@@ -44,7 +44,14 @@ public class GetAssertionsRequest extends ContestRequest {
   private final static Logger logger = LoggerFactory.getLogger(GetAssertionsRequest.class);
 
   /**
-   * The risk limit for the audit, expected to be in the range [0,1].
+   * The winner, as stated by the request. This is written into response metadata
+   * _without_ being checked.
+   */
+  public final String winner;
+
+  /**
+   * The risk limit for the audit, expected to be in the range [0,1]. Defaults to zero, because
+   * then we know we will never mistakenly claim the risk limit has been met.
    */
   public final BigDecimal riskLimit;
 
@@ -54,10 +61,13 @@ public class GetAssertionsRequest extends ContestRequest {
    * @param candidates a list of candidates by name
    * @param riskLimit the risk limit for the audit, expected to be in the range [0,1].
    */
-  @ConstructorProperties({"contestName", "candidates", "riskLimit"})
-  public GetAssertionsRequest(String contestName, List<String> candidates, BigDecimal riskLimit) {
+  @ConstructorProperties({"contestName", "totalAuditableBallots", "timeLimitSeconds", "candidates",
+      "winner", "riskLimit"})
+  public GetAssertionsRequest(String contestName, int totalAuditableBallots, double timeLimitSeconds,
+      List<String> candidates, String winner, BigDecimal riskLimit) {
 
-    super(contestName, candidates);
+    super(contestName, totalAuditableBallots, timeLimitSeconds, candidates);
+    this.winner = winner;
     this.riskLimit = riskLimit;
   }
 
