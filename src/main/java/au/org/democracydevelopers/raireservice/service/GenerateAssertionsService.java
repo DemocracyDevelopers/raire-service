@@ -29,7 +29,7 @@ import au.org.democracydevelopers.raire.util.VoteConsolidator;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
-import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
+import au.org.democracydevelopers.raireservice.request.ContestRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import jakarta.transaction.Transactional;
 import java.util.HashMap;
@@ -80,7 +80,7 @@ public class GenerateAssertionsService {
    * it referred to candidates that were not in the expected list) or an error arose in database
    * access.
    */
-  public RaireResultOrError generateAssertions(GenerateAssertionsRequest request)
+  public RaireResultOrError generateAssertions(ContestRequest request)
       throws RaireServiceException {
     final String prefix = "[generateAssertions]";
     try{
@@ -196,7 +196,7 @@ public class GenerateAssertionsService {
    * translated assertions to the database.
    */
   @Transactional
-  public void persistAssertions(RaireResult solution, GenerateAssertionsRequest request)
+  public void persistAssertions(RaireResult solution, ContestRequest request)
       throws RaireServiceException
   {
     final String prefix = "[persistAssertions]";

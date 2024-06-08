@@ -46,6 +46,16 @@ public class Metadata {
   public final static String CONTEST = "contest";
 
   /**
+   * Metadata field name for the contest's winner.
+   */
+  public final static String WINNER = "winner";
+
+  /**
+   * Metadata field name for the contest's total Auditable ballots.
+   */
+  public final static String TOTAL_BALLOTS = "total_auditable_ballots";
+
+  /**
    * Status attribute describing a risk level.
    */
   public final static String STATUS_RISK = "risk";

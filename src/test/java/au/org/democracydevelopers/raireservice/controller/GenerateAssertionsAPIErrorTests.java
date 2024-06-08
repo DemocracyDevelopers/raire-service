@@ -24,7 +24,7 @@ import static au.org.democracydevelopers.raireservice.service.RaireServiceExcept
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
+import au.org.democracydevelopers.raireservice.request.ContestRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -137,7 +137,7 @@ public class GenerateAssertionsAPIErrorTests {
     testUtils.log(logger, "generateAssertionsWithNonExistentContestIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("NonExistentContest",
+    ContestRequest request = new ContestRequest("NonExistentContest",
         100, 10, aliceAndBob);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
@@ -154,7 +154,7 @@ public class GenerateAssertionsAPIErrorTests {
     testUtils.log(logger, "generateAssertionsFromNoVotesIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("No CVR Mayoral", 100,
+    ContestRequest request = new ContestRequest("No CVR Mayoral", 100,
         10, aliceAndBob);
 
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -172,7 +172,7 @@ public class GenerateAssertionsAPIErrorTests {
     testUtils.log(logger, "generateAssertionsWithPluralityContestIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest(
+    ContestRequest request = new ContestRequest(
         "Valid Plurality Contest", 100, 10, aliceAndBob);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
@@ -189,7 +189,7 @@ public class GenerateAssertionsAPIErrorTests {
     testUtils.log(logger, "generateAssertionsWithMixedIRVPluralityContestIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("Invalid Mixed Contest",
+    ContestRequest request = new ContestRequest("Invalid Mixed Contest",
         100,10,aliceAndBob);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 

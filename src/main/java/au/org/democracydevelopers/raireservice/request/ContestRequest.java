@@ -33,14 +33,10 @@ import java.beans.ConstructorProperties;
  * present, non-null and IRV.
  * Every actual request type inherits from this class and adds some other fields and/or validations.
  */
-public abstract class ContestRequest {
+public class ContestRequest {
 
   private final static Logger logger = LoggerFactory.getLogger(ContestRequest.class);
 
-  /**
-   * Default time limit, in seconds. This is an optional parameter.
-   */
-  private final static int DEFAULT_TIME_LIMIT = 5;
 
   /**
    * The name of the contest

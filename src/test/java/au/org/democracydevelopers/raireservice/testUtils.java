@@ -36,9 +36,29 @@ import java.util.Map;
 import org.slf4j.Logger;
 
 /**
- * Utility methods for use in test classes.
+ * Utility methods for use in test classes, including some default values for making testing easier.
  */
 public class testUtils {
+
+  public final static String baseURL = "http://localhost:";
+  public final static String getAssertionsJSONEndpoint = "/raire/get-assertions-json";
+  public final static String getAssertionsCSVEndpoint = "/raire/get-assertions-csv";
+
+  public final static String oneNEBAssertionContest = "One NEB Assertion Contest";
+  public final static String oneNENAssertionContest = "One NEN Assertion Contest";
+  public final static String oneNEBOneNENAssertionContest = "One NEN NEB Assertion Contest";
+
+  /**
+   * A default winner, used in requests - not checked.
+   */
+  public final static String defaultWinner = "A winner";
+  public final static String defaultWinnerJSON = "\"winner\":\""+defaultWinner+"\"";
+
+  /**
+   * A default ballot count, used in requests - not checked.
+   */
+  public final static int defaultCount = 100;
+  public final static String defaultCountJson = "\"totalAuditableBallots\":"+defaultCount;
 
   /**
    * Comparator for doubles within a specific tolerance.

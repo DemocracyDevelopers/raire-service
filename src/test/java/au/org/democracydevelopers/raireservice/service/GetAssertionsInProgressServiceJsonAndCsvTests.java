@@ -20,7 +20,9 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.service;
 
+import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -78,7 +80,7 @@ public class GetAssertionsInProgressServiceJsonAndCsvTests {
   void retrieveAssertionsOneNENOneNEBAssertionInProgressJSON() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressJSON");
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
-        List.of("Liesl", "Wendell", "Amanda", "Chuan"), BigDecimal.valueOf(0.05));
+        defaultCount, List.of("Liesl", "Wendell", "Amanda", "Chuan"), defaultWinner, BigDecimal.valueOf(0.05));
 
     RaireSolution solution = getAssertionsJsonService.getRaireSolution(request);
 
@@ -131,7 +133,7 @@ public class GetAssertionsInProgressServiceJsonAndCsvTests {
   void retrieveAssertionsOneNENOneNEBAssertionInProgressCSV() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressCSV");
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
-        List.of("Liesl", "Wendell", "Amanda", "Chuan"), BigDecimal.valueOf(0.05));
+        defaultCount, List.of("Liesl", "Wendell", "Amanda", "Chuan"), defaultWinner, BigDecimal.valueOf(0.05));
 
     String csv = getAssertionsCsvService.generateCSV(request);
 

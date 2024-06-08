@@ -30,8 +30,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Request (expected to be json) identifying the contest for which assertions should be retrieved
  * from the database (expected to be exported as json).
- * This extends ContestRequest and uses the contest name and candidate list, plus validations,
- * from there. A GetAssertionsRequest identifies a contest by name along with the candidate list
+ * This extends ContestRequest and uses the contest name, totalAuditable ballots and candidate list,
+ * plus validations, from there. The time limit is set to a default and ignored.
+ * A GetAssertionsRequest identifies a contest by name along with the candidate list
  * (which is necessary for producing the metadata for later visualization). riskLimit states the
  * risk limit for the audit. This is not actually used in raire-service computations,
  * but will be output later with the assertion export, so that it can be used in the assertion
@@ -42,6 +43,11 @@ import org.slf4j.LoggerFactory;
 public class GetAssertionsRequest extends ContestRequest {
 
   private final static Logger logger = LoggerFactory.getLogger(GetAssertionsRequest.class);
+
+  /**
+   * Default time limit, in seconds. Currently ignored.
+   */
+  private final static double DEFAULT_TIME_LIMIT = 5;
 
   /**
    * The winner, as stated by the request. This is written into response metadata
@@ -61,12 +67,11 @@ public class GetAssertionsRequest extends ContestRequest {
    * @param candidates a list of candidates by name
    * @param riskLimit the risk limit for the audit, expected to be in the range [0,1].
    */
-  @ConstructorProperties({"contestName", "totalAuditableBallots", "timeLimitSeconds", "candidates",
-      "winner", "riskLimit"})
-  public GetAssertionsRequest(String contestName, int totalAuditableBallots, double timeLimitSeconds,
-      List<String> candidates, String winner, BigDecimal riskLimit) {
+  @ConstructorProperties({"contestName", "totalAuditableBallots", "candidates", "winner", "riskLimit"})
+  public GetAssertionsRequest(String contestName, int totalAuditableBallots, List<String> candidates,
+      String winner, BigDecimal riskLimit) {
 
-    super(contestName, totalAuditableBallots, timeLimitSeconds, candidates);
+    super(contestName, totalAuditableBallots, DEFAULT_TIME_LIMIT, candidates);
     this.winner = winner;
     this.riskLimit = riskLimit;
   }

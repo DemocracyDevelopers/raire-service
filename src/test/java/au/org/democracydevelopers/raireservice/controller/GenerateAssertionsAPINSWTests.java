@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raireservice.NSWValues.Expected;
-import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
+import au.org.democracydevelopers.raireservice.request.ContestRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
 import au.org.democracydevelopers.raireservice.testUtils;
@@ -91,7 +91,7 @@ public class GenerateAssertionsAPINSWTests {
 
     for(Expected expected : expectedSolutionData) {
       testUtils.log(logger, "checkAllNSWByAPI: contest "+expected.contestName());
-      GenerateAssertionsRequest generateRequest = new GenerateAssertionsRequest(
+      ContestRequest generateRequest = new ContestRequest(
           expected.contestName(), expected.ballotCount(), DEFAULT_TIME_LIMIT, expected.choices());
 
       // Request for the assertions to be generated.
@@ -105,7 +105,7 @@ public class GenerateAssertionsAPINSWTests {
 
       // Request the assertions
       GetAssertionsRequest getRequest = new GetAssertionsRequest(expected.contestName(),
-        expected.choices(), DEFAULT_RISK_LIMIT);
+          expected.ballotCount(), expected.choices(), expected.winner(), DEFAULT_RISK_LIMIT);
       ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
           RaireSolution.class);
 

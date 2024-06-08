@@ -20,9 +20,11 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static au.org.democracydevelopers.raireservice.testUtils.correctAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static au.org.democracydevelopers.raireservice.testUtils.correctSolutionData;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -98,8 +100,8 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertionJSON");
     String url = baseURL + port + getAssertionsJsonEndpoint;
 
-    GetAssertionsRequest request = new GetAssertionsRequest(oneNEBAssertionContest,
-        List.of("Alice","Bob"), BigDecimal.valueOf(0.1));
+    GetAssertionsRequest request = new GetAssertionsRequest(oneNEBAssertionContest, defaultCount,
+        List.of("Alice","Bob"), defaultWinner, BigDecimal.valueOf(0.1));
 
     ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request,
         RaireSolution.class);
@@ -164,8 +166,8 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertionJSON");
     String url = baseURL + port + getAssertionsJsonEndpoint;
 
-    GetAssertionsRequest request = new GetAssertionsRequest(oneNENAssertionContest,
-        List.of("Alice","Bob","Charlie","Diego"), BigDecimal.valueOf(0.1));
+    GetAssertionsRequest request = new GetAssertionsRequest(oneNENAssertionContest, defaultCount,
+        List.of("Alice","Bob","Charlie","Diego"), defaultWinner, BigDecimal.valueOf(0.1));
     ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request,
         RaireSolution.class);
 
@@ -235,7 +237,7 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
 
     // Make the request.
     GetAssertionsRequest request = new GetAssertionsRequest(oneNEBOneNENAssertionContest,
-        List.of("Liesl","Wendell","Amanda","Chuan"), BigDecimal.valueOf(0.05));
+        defaultCount, List.of("Liesl","Wendell","Amanda","Chuan"), defaultWinner, BigDecimal.valueOf(0.05));
     ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request,
         RaireSolution.class);
 

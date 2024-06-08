@@ -21,6 +21,8 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.service;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -76,8 +78,8 @@ public class GetAssertionsServiceCsvTests {
   @Test
   public void testCSVTies() throws RaireServiceException {
     testUtils.log(logger, "testCSVTies");
-    GetAssertionsRequest request = new GetAssertionsRequest(
-        "Lots of assertions with ties Contest", candidates, BigDecimal.valueOf(0.1));
+    GetAssertionsRequest request = new GetAssertionsRequest( "Lots of assertions with ties Contest",
+        defaultCount, candidates, defaultWinner, BigDecimal.valueOf(0.1));
     String output = getAssertionsCSVService.generateCSV(request);
     assertTrue(output.contains("Contest name,Lots of assertions with ties Contest\n"));
     assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n\n"));
@@ -116,7 +118,7 @@ public class GetAssertionsServiceCsvTests {
   public void testCharacterEscaping() throws RaireServiceException {
     testUtils.log(logger,"testCharacterEscaping");
     GetAssertionsRequest request = new GetAssertionsRequest("Lots of tricky characters Contest",
-        trickyCharacters, BigDecimal.valueOf(0.1));
+        defaultCount, trickyCharacters, defaultWinner, BigDecimal.valueOf(0.1));
     String output = getAssertionsCSVService.generateCSV(request);
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(0)));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(1)));
@@ -132,8 +134,8 @@ public class GetAssertionsServiceCsvTests {
   @Test
   public void testCsvDemoContest() throws RaireServiceException {
     testUtils.log(logger,"testCsvDemoContest");
-    GetAssertionsRequest request = new GetAssertionsRequest(
-        "CSV Demo Contest", candidates, BigDecimal.valueOf(0.1));
+    GetAssertionsRequest request = new GetAssertionsRequest( "CSV Demo Contest",
+        defaultCount, candidates, defaultWinner, BigDecimal.valueOf(0.1));
     String output = getAssertionsCSVService.generateCSV(request);
     assertTrue(output.contains("Contest name,CSV Demo Contest\n"));
     assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n\n"));
@@ -163,8 +165,8 @@ public class GetAssertionsServiceCsvTests {
   public void wrongCandidatesIsAnError() {
     testUtils.log(logger, "wrongCandidatesIsAnError");
 
-    GetAssertionsRequest request = new GetAssertionsRequest(
-        "CSV Demo Contest", List.of("Alicia", "Boba", "Chuan"), BigDecimal.valueOf(0.05)
+    GetAssertionsRequest request = new GetAssertionsRequest( "CSV Demo Contest", defaultCount,
+        List.of("Alicia", "Boba", "Chuan"), defaultWinner, BigDecimal.valueOf(0.05)
     );
 
     RaireServiceException ex = assertThrows(RaireServiceException.class,

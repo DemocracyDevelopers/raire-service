@@ -21,8 +21,10 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.controller;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.ERROR_CODE_KEY;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static au.org.democracydevelopers.raireservice.testUtils.correctAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,7 +33,7 @@ import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
-import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
+import au.org.democracydevelopers.raireservice.request.ContestRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
@@ -142,7 +144,7 @@ public class GenerateAssertionsAPIKnownTests {
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
     String getUrl = baseURL + port + getAssertionsEndpoint;
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample1,
+    ContestRequest request = new ContestRequest(guideToRaireExample1,
         27, DEFAULT_TIME_LIMIT, Arrays.stream(aliceBobChuanDiego).toList());
 
 
@@ -156,8 +158,8 @@ public class GenerateAssertionsAPIKnownTests {
     assertEquals(response.getBody().winner(), "Chuan");
 
     // Request the assertions
-    GetAssertionsRequest getRequest = new GetAssertionsRequest(guideToRaireExample1,
-        Arrays.stream(aliceBobChuanDiego).toList(), DEFAULT_RISK_LIMIT);
+    GetAssertionsRequest getRequest = new GetAssertionsRequest(guideToRaireExample1, defaultCount,
+        Arrays.stream(aliceBobChuanDiego).toList(), defaultWinner, DEFAULT_RISK_LIMIT);
     ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
         RaireSolution.class);
 
@@ -187,7 +189,7 @@ public class GenerateAssertionsAPIKnownTests {
     testUtils.log(logger, "testGuideToRairePart2Example2");
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
     String getUrl = baseURL + port + getAssertionsEndpoint;
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample2,
+    ContestRequest request = new ContestRequest(guideToRaireExample2,
         41, 5, Arrays.stream(aliceChuanBob).toList());
 
     // Request for the assertions to be generated.
@@ -200,8 +202,8 @@ public class GenerateAssertionsAPIKnownTests {
     assertEquals(response.getBody().winner(), "Chuan");
 
     // Request the assertions
-    GetAssertionsRequest getRequest = new GetAssertionsRequest(guideToRaireExample2,
-        Arrays.stream(aliceChuanBob).toList(), DEFAULT_RISK_LIMIT);
+    GetAssertionsRequest getRequest = new GetAssertionsRequest(guideToRaireExample2, defaultCount,
+        Arrays.stream(aliceChuanBob).toList(), defaultWinner, DEFAULT_RISK_LIMIT);
     ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
         RaireSolution.class);
 
@@ -239,7 +241,7 @@ public class GenerateAssertionsAPIKnownTests {
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
     String getUrl = baseURL + port + getAssertionsEndpoint;
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
+    ContestRequest request = new ContestRequest(simpleContest,
         5, 5, Arrays.stream(aliceChuanBob).toList());
 
     // Request for the assertions to be generated.
@@ -252,8 +254,8 @@ public class GenerateAssertionsAPIKnownTests {
     assertEquals(response.getBody().winner(), "Alice");
 
     // Request the assertions
-    GetAssertionsRequest getRequest = new GetAssertionsRequest(simpleContest,
-        Arrays.stream(aliceChuanBob).toList(), DEFAULT_RISK_LIMIT);
+    GetAssertionsRequest getRequest = new GetAssertionsRequest(simpleContest, defaultCount,
+        Arrays.stream(aliceChuanBob).toList(), defaultWinner, DEFAULT_RISK_LIMIT);
     ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
         RaireSolution.class);
 
@@ -281,7 +283,7 @@ public class GenerateAssertionsAPIKnownTests {
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
     String getUrl = baseURL + port + getAssertionsEndpoint;
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest(crossCountySimpleContest,
+    ContestRequest request = new ContestRequest(crossCountySimpleContest,
         5, 5, Arrays.stream(aliceChuanBob).toList());
 
     // Request for the assertions to be generated.
@@ -295,7 +297,8 @@ public class GenerateAssertionsAPIKnownTests {
 
     // Request the assertions
     GetAssertionsRequest getRequest = new GetAssertionsRequest(crossCountySimpleContest,
-        Arrays.stream(aliceChuanBob).toList(), DEFAULT_RISK_LIMIT);
+        defaultCount,
+        Arrays.stream(aliceChuanBob).toList(), defaultWinner, DEFAULT_RISK_LIMIT);
     ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
         RaireSolution.class);
 
@@ -334,7 +337,7 @@ public class GenerateAssertionsAPIKnownTests {
 
      // Tell raire that the totalAuditableBallots is double the number in the database
      // for this contest.
-     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
+     ContestRequest request = new ContestRequest(simpleContest,
          10, 5, Arrays.stream(aliceChuanBob).toList());
 
      // Request for the assertions to be generated.
@@ -347,8 +350,8 @@ public class GenerateAssertionsAPIKnownTests {
      assertEquals(response.getBody().winner(), "Alice");
 
      // Request the assertions
-     GetAssertionsRequest getRequest = new GetAssertionsRequest(simpleContest,
-         Arrays.stream(aliceChuanBob).toList(), DEFAULT_RISK_LIMIT);
+     GetAssertionsRequest getRequest = new GetAssertionsRequest(simpleContest, defaultCount,
+         Arrays.stream(aliceChuanBob).toList(), defaultWinner, DEFAULT_RISK_LIMIT);
      ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
          RaireSolution.class);
 
@@ -378,7 +381,7 @@ public class GenerateAssertionsAPIKnownTests {
     testUtils.log(logger, "simpleContestSingleCountyInsufficientBallotsError");
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest notEnoughBallotsRequest = new GenerateAssertionsRequest(simpleContest,
+    ContestRequest notEnoughBallotsRequest = new ContestRequest(simpleContest,
         2, 5, Arrays.stream(aliceChuanBob).toList());
 
     // Request for the assertions to be generated.

@@ -21,6 +21,8 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.controller;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultCountJson;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultWinnerJSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -96,7 +98,7 @@ public class GetAssertionsAPICsvTests {
 
     String requestAsJson =
         "{\"riskLimit\":0.10,\"contestName\":\"Lots of assertions with ties Contest\","
-            + candidatesAsJson;
+            + defaultCountJson + defaultWinnerJSON + candidatesAsJson;
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -143,7 +145,7 @@ public class GetAssertionsAPICsvTests {
     String url = baseURL + port + getAssertionsEndpoint;
     String requestAsJson =
         "{\"riskLimit\":0.10,\"contestName\":\"Lots of tricky characters Contest\","
-            + trickyCharactersAsJson;
+            + defaultCountJson + defaultWinnerJSON + trickyCharactersAsJson;
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -166,7 +168,7 @@ public class GetAssertionsAPICsvTests {
     testUtils.log(logger, "testCSVDemoContest");
     String url = baseURL + port + getAssertionsEndpoint;
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
-        + candidatesAsJson;
+        + defaultCountJson + defaultWinnerJSON + candidatesAsJson;
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -202,6 +204,7 @@ public class GetAssertionsAPICsvTests {
     String url = baseURL + port + getAssertionsEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
+        + defaultCountJson + defaultWinnerJSON
         + "\"candidates\":[\"Alicia\",\"Boba\",\"Chuan\",\"Diego\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);

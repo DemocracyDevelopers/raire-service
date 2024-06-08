@@ -23,7 +23,7 @@ package au.org.democracydevelopers.raireservice.controller;
 import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
-import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
+import au.org.democracydevelopers.raireservice.request.ContestRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.RequestValidationException;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
@@ -72,7 +72,7 @@ public class AssertionController {
    * part of a GenerateAssertionsResponse. The raire-java API will be accessed to generate
    * assertions for the contest. If this is successful, these assertions will be stored in the
    * database.
-   * @param request a GenerateAssertionsRequest, specifying an IRV contest name for which to generate
+   * @param request a ContestRequest, specifying an IRV contest name for which to generate
    *                the assertions.
    * @return the winner (in the case of success) or an error. The winner, together with the contest,
    * is a GenerateAssertionsResponse.
@@ -83,7 +83,7 @@ public class AssertionController {
    * appropriate http error.
    */
   @PostMapping(path = "/generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<GenerateAssertionsResponse> serve(@RequestBody GenerateAssertionsRequest request)
+  public ResponseEntity<GenerateAssertionsResponse> serve(@RequestBody ContestRequest request)
       throws RequestValidationException, RaireServiceException
   {
     final String prefix = "[endpoint:generate-assertions]";

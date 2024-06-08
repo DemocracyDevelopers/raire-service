@@ -23,7 +23,7 @@ package au.org.democracydevelopers.raireservice.response;
 import java.beans.ConstructorProperties;
 
 /**
- * The success response to a GenerateAssertionsRequest. This simply returns the winner, as
+ * The success response to a ContestRequest. This simply returns the winner, as
  * calculated by raire, along with the name of the contest for which the initial request was made.
  *
  * @param contestName The name of the contest.
