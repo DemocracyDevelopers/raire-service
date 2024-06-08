@@ -115,19 +115,19 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
 
   /**
    * Test a variety of bad requests to ensure they elicit the appropriate error message.
-   * @param type which endpoint to use: JSON or CSV
-   * @param riskLimit risk limit as a string
-   * @param contestName the name of the contest
-   * @param totalBallots the total ballots in the universe
-   * @param winner the winner's name
-   * @param candidateList the list of candidate names
-   * @param errorMsg the expected error message
+   * @param type which endpoint to use: JSON or CSV.
+   * @param riskLimit risk limit as a string.
+   * @param contestName the name of the contest.
+   * @param totalBallots the total ballots in the universe.
+   * @param winner the winner's name.
+   * @param candidateList the list of candidate names.
+   * @param errorMsg the expected error message.
    */
   @ParameterizedTest
   @MethodSource("expectedBadRequestErrors")
   public void testExpectedErrors(String type, String riskLimit, String contestName,
       String totalBallots, String winner, String candidateList, String errorMsg) {
-    testUtils.log(logger, "getAssertionsWithNonExistentContestIsAnErrorJSON");
+    testUtils.log(logger, "testExpectedErrors");
     String url = baseURL + port
         + (type.equals("JSON") ? getAssertionsJSONEndpoint : getAssertionsCSVEndpoint);
 

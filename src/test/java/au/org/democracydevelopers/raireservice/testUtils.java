@@ -50,6 +50,7 @@ public class testUtils {
   public final static String oneNEBAssertionContest = "One NEB Assertion Contest";
   public final static String oneNENAssertionContest = "One NEN Assertion Contest";
   public final static String oneNEBOneNENAssertionContest = "One NEN NEB Assertion Contest";
+  public final static String ballinaMayoral = "Ballina Mayoral";
 
   /**
    * A default winner, used in requests - not checked.
