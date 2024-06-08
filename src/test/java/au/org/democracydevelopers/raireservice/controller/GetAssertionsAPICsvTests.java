@@ -21,8 +21,10 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.controller;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
+import static au.org.democracydevelopers.raireservice.testUtils.baseURL;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCountJson;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultWinnerJSON;
+import static au.org.democracydevelopers.raireservice.testUtils.getAssertionsCSVEndpoint;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -66,8 +68,6 @@ public class GetAssertionsAPICsvTests {
   private static final Logger logger = LoggerFactory.getLogger(GetAssertionsAPICsvTests.class);
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
-  private final static String baseURL = "http://localhost:";
-  private final static String getAssertionsEndpoint = "/raire/get-assertions-csv";
   private final static String candidatesAsJson = "\"candidates\":[\"Alice\",\"Bob\",\"Chuan\",\"Diego\"]}";
   private final static List<String> trickyCharacters
       = List.of("Annoying, Alice", "\"Breaking, Bob\"", "Challenging, Chuan", "O'Difficult, Diego");
@@ -94,11 +94,11 @@ public class GetAssertionsAPICsvTests {
   @Test
   public void testValidRequestWithLotsOfTies() {
     testUtils.log(logger, "testValidRequestWithLotsOfTies");
-    String url = baseURL + port + getAssertionsEndpoint;
+    String url = baseURL + port + getAssertionsCSVEndpoint;
 
     String requestAsJson =
         "{\"riskLimit\":0.10,\"contestName\":\"Lots of assertions with ties Contest\","
-            + defaultCountJson + defaultWinnerJSON + candidatesAsJson;
+            + defaultCountJson + "," + defaultWinnerJSON + "," + candidatesAsJson;
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -142,10 +142,10 @@ public class GetAssertionsAPICsvTests {
   @Test
   public void testCharacterEscapingForCSVExport() {
     testUtils.log(logger, "testCharacterEscapingForCSVExport");
-    String url = baseURL + port + getAssertionsEndpoint;
+    String url = baseURL + port + getAssertionsCSVEndpoint;
     String requestAsJson =
         "{\"riskLimit\":0.10,\"contestName\":\"Lots of tricky characters Contest\","
-            + defaultCountJson + defaultWinnerJSON + trickyCharactersAsJson;
+            + defaultCountJson + "," + defaultWinnerJSON + "," + trickyCharactersAsJson;
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -166,9 +166,9 @@ public class GetAssertionsAPICsvTests {
   @Test
   public void testCSVDemoContest() {
     testUtils.log(logger, "testCSVDemoContest");
-    String url = baseURL + port + getAssertionsEndpoint;
+    String url = baseURL + port + getAssertionsCSVEndpoint;
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
-        + defaultCountJson + defaultWinnerJSON + candidatesAsJson;
+        + defaultCountJson + "," + defaultWinnerJSON + "," + candidatesAsJson;
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -201,10 +201,10 @@ public class GetAssertionsAPICsvTests {
   @Test
   public void wrongCandidatesIsAnError() {
     testUtils.log(logger, "wrongCandidatesIsAnError");
-    String url = baseURL + port + getAssertionsEndpoint;
+    String url = baseURL + port + getAssertionsCSVEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
-        + defaultCountJson + defaultWinnerJSON
+        + defaultCountJson + "," + defaultWinnerJSON + ","
         + "\"candidates\":[\"Alicia\",\"Boba\",\"Chuan\",\"Diego\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);

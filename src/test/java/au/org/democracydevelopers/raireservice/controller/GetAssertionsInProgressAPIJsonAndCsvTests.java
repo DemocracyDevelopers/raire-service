@@ -24,7 +24,9 @@ import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static au.org.democracydevelopers.raireservice.testUtils.correctAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static au.org.democracydevelopers.raireservice.testUtils.correctSolutionData;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultCountJson;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultWinnerJSON;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -133,8 +135,8 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertionCSV");
     String url = baseURL + port + getAssertionsCsvEndpoint;
 
-    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
-        oneNEBAssertionContest+"\",\"candidates\":[\"Alice\",\"Bob\"]}";
+    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" + oneNEBAssertionContest+"\","
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     String csv = restTemplate.postForEntity(url, request, String.class).getBody();
@@ -199,8 +201,9 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     String url = baseURL + port + getAssertionsCsvEndpoint;
 
     String requestAsJson =
-        "{\"riskLimit\":0.10,\"contestName\":\"" + oneNENAssertionContest
-            + "\",\"candidates\":[\"Alice\",\"Bob\",\"Charlie\",\"Diego\"]}";
+        "{\"riskLimit\":0.10,\"contestName\":\"" + oneNENAssertionContest + "\","
+            + defaultCountJson + "," + defaultWinnerJSON + ","
+            + "\"candidates\":[\"Alice\",\"Bob\",\"Charlie\",\"Diego\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     String csv = restTemplate.postForEntity(url, request, String.class).getBody();
@@ -282,8 +285,9 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     String url = baseURL + port + getAssertionsCsvEndpoint;
 
     String requestAsJson =
-        "{\"riskLimit\":0.05,\"contestName\":\"" + oneNEBOneNENAssertionContest
-            + "\",\"candidates\":[\"Liesl\",\"Wendell\",\"Amanda\",\"Chuan\"]}";
+        "{\"riskLimit\":0.05,\"contestName\":\"" + oneNEBOneNENAssertionContest + "\","
+            + defaultCountJson + "," + defaultWinnerJSON + ","
+            + "\"candidates\":[\"Liesl\",\"Wendell\",\"Amanda\",\"Chuan\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     String csv = restTemplate.postForEntity(url, request, String.class).getBody();

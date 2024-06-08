@@ -41,9 +41,12 @@ import org.slf4j.Logger;
 public class testUtils {
 
   public final static String baseURL = "http://localhost:";
+  public final static String generateAssertionsEndpoint = "/raire/generate-assertions";
   public final static String getAssertionsJSONEndpoint = "/raire/get-assertions-json";
   public final static String getAssertionsCSVEndpoint = "/raire/get-assertions-csv";
 
+  public final static List<String> aliceAndBob = List.of("Alice","Bob");
+  public final static List<String> aliceAndBobAndCharlie = List.of("Alice","Bob","Charlie");
   public final static String oneNEBAssertionContest = "One NEB Assertion Contest";
   public final static String oneNENAssertionContest = "One NEN Assertion Contest";
   public final static String oneNEBOneNENAssertionContest = "One NEN NEB Assertion Contest";

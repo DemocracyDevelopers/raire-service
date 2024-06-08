@@ -21,6 +21,8 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.service;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
+import static au.org.democracydevelopers.raireservice.testUtils.aliceAndBob;
+import static au.org.democracydevelopers.raireservice.testUtils.aliceAndBobAndCharlie;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -72,8 +74,6 @@ public class GenerateAssertionsServiceErrorTests {
 
   @Autowired
   private GenerateAssertionsService generateAssertionsService;
-  private final static List<String> aliceAndBob = List.of("Alice","Bob");
-  private final static List<String> aliceAndBobAndCharlie = List.of("Alice","Bob","Charlie");
   private final static String BallinaOneVote = "Ballina One Vote Contest";
 
   /**

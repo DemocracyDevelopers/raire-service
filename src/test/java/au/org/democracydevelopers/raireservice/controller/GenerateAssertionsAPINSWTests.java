@@ -21,6 +21,9 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.controller;
 
 import static au.org.democracydevelopers.raireservice.NSWValues.expectedSolutionData;
+import static au.org.democracydevelopers.raireservice.testUtils.baseURL;
+import static au.org.democracydevelopers.raireservice.testUtils.generateAssertionsEndpoint;
+import static au.org.democracydevelopers.raireservice.testUtils.getAssertionsJSONEndpoint;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -61,11 +64,6 @@ import org.springframework.test.context.junit.jupiter.EnabledIf;
 public class GenerateAssertionsAPINSWTests {
 
   private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsAPINSWTests.class);
-  private final static String baseURL = "http://localhost:";
-  private final static String generateAssertionsEndpoint = "/raire/generate-assertions";
-
-  // Get assertions endpoint - used for testing that they were generated properly.
-  private final static String getAssertionsEndpoint = "/raire/get-assertions-json";
   private static final int DEFAULT_TIME_LIMIT = 5;
   private static final BigDecimal DEFAULT_RISK_LIMIT = BigDecimal.valueOf(0.03);
   private static final DoubleComparator doubleComparator = new DoubleComparator();
@@ -87,7 +85,7 @@ public class GenerateAssertionsAPINSWTests {
   public void checkAllNSWByAPI() {
     testUtils.log(logger, "checkAllNSWByAPI");
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
-    String getUrl = baseURL + port + getAssertionsEndpoint;
+    String getUrl = baseURL + port + getAssertionsJSONEndpoint;
 
     for(Expected expected : expectedSolutionData) {
       testUtils.log(logger, "checkAllNSWByAPI: contest "+expected.contestName());

@@ -20,8 +20,11 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static au.org.democracydevelopers.raireservice.testUtils.aliceAndBob;
 import static au.org.democracydevelopers.raireservice.testUtils.baseURL;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCountJson;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultWinnerJSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -30,9 +33,17 @@ import au.org.democracydevelopers.raireservice.service.RaireServiceException.Rai
 import au.org.democracydevelopers.raireservice.testUtils;
 import static au.org.democracydevelopers.raireservice.testUtils.getAssertionsJSONEndpoint;
 import static au.org.democracydevelopers.raireservice.testUtils.getAssertionsCSVEndpoint;
+
+import java.math.BigInteger;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,8 +103,8 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     testUtils.log(logger, "testValidRequestWithNoAssertionsJSON");
     String url = "http://localhost:" + port + getAssertionsJSONEndpoint;
 
-    String requestAsJson =
-        "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
+    String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\","
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -114,8 +125,8 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     testUtils.log(logger, "testValidRequestWithNoAssertionsCSV");
     String url = "http://localhost:" + port + getAssertionsCSVEndpoint;
 
-    String requestAsJson =
-        "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
+    String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\","
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -195,36 +206,137 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
   }
 
   /**
+   * Test a variety of bad requests to ensure they elicit the appropriate error message.
+   * @param type which endpoint to use: JSON or CSV
+   * @param riskLimit risk limit as a string
+   * @param contestName the name of the contest
+   * @param totalBallots the total ballots in the universe
+   * @param winner the winner's name
+   * @param candidateList the list of candidate names
+   * @param errorMsg the expected error message
+   */
+  @ParameterizedTest
+  @MethodSource("expectedBadRequestErrors")
+  public void testExpectedErrors(String type, String riskLimit, String contestName,
+      String totalBallots, String winner, String candidateList, String errorMsg) {
+    testUtils.log(logger, "getAssertionsWithNonExistentContestIsAnErrorJSON");
+    String url = baseURL + port
+        + (type.equals("JSON") ? getAssertionsJSONEndpoint : getAssertionsCSVEndpoint);
+
+    String requestAsJson = "{"
+        + String.join(",", List.of(
+          "\"riskLimit\":"+riskLimit,
+          "\"contestName\":"+contestName,
+          "\"totalAuditableBallots\":"+totalBallots,
+          "\"winner\":"+winner,
+          "\"candidates\":"+candidateList
+        ))
+        + "}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is4xxClientError());
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), errorMsg));
+  }
+
+
+  private static Stream<Arguments> expectedBadRequestErrors() {
+    String aliceAndBobJSON = "[\"Alice\",\"Bob\"]";
+    String ballotCount = Integer.toString(defaultCount);
+    String ballinaMayoral = "\"Ballina Mayoral\"";
+
+    return Stream.of(
+        // getAssertions, called with a nonexistent contest, returns a meaningful error.
+        Arguments.of("JSON", "0.05", "\"Nonexistent Contest\"", ballotCount,
+           "\""+defaultWinner+"\"", aliceAndBobJSON, "No such contest"),
+        Arguments.of("CSV", "0.05", "\"Nonexistent Contest\"", ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON, "No such contest"),
+        // getAssertions, called with a valid plurality contest, returns a meaningful error.
+        Arguments.of("JSON", "0.05",  "\"Valid Plurality Contest\"", ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON,  "Not comprised of all IRV"),
+        Arguments.of("CSV", "0.05",  "\"Valid Plurality Contest\"", ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON,  "Not comprised of all IRV"),
+        // getAssertions, called with a mixed IRV and non-IRV contest, returns a meaningful error.
+        Arguments.of("JSON", "0.05", "\"Invalid Mixed Contest\"", ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON,  "Not comprised of all IRV"),
+        Arguments.of("CSV", "0.05", "\"Invalid Mixed Contest\"", ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON,  "Not comprised of all IRV"),
+        // getAssertions, called with a null contest name, returns a meaningful error.
+        Arguments.of("JSON", "0.05", null, ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON, "No contest name"),
+        Arguments.of("CSV", "0.05", null, ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON,  "No contest name"),
+        // getAssertions, called with an empty contest name, returns a meaningful error.
+        Arguments.of("JSON", "0.05", "\"\"", ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON, "No contest name"),
+        Arguments.of("CSV", "0.05", "\"\"", ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON,  "No contest name"),
+        // getAssertions, called with an all-whitespace contest name, returns a meaningful error.
+        Arguments.of("JSON", "0.05", "\"    \"", ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON, "No contest name"),
+        Arguments.of("CSV", "0.05", "\"     \"", ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON,  "No contest name"),
+        // getAssertions, called with a null candidate list, returns a meaningful error.
+        Arguments.of("JSON", "0.05", ballinaMayoral, ballotCount,
+            "\""+defaultWinner+"\"", null, "Bad candidate list"),
+        Arguments.of("CSV", "0.05", ballinaMayoral, ballotCount,
+            "\""+defaultWinner+"\"", null,  "Bad candidate list"),
+        // getAssertions endpoint, called with an empty candidate list, returns a meaningful error.
+        Arguments.of("JSON", "0.05", ballinaMayoral, ballotCount,
+            "\""+defaultWinner+"\"", "[]", "Bad candidate list"),
+        Arguments.of("CSV", "0.05", ballinaMayoral, ballotCount,
+            "\""+defaultWinner+"\"", "[]",  "Bad candidate list"),
+        // getAssertions, called with a whitespace candidate name, returns a meaningful error.
+        Arguments.of("JSON", "0.05", ballinaMayoral, ballotCount,
+            "\""+defaultWinner+"\"", "[\"Alice\",\"    \"]", "Bad candidate list"),
+        Arguments.of("CSV", "0.05", ballinaMayoral, ballotCount,
+            "\""+defaultWinner+"\"", "[\"Alice\",\"    \"]",  "Bad candidate list"),
+        // getAssertions, called with a null risk limit, returns a meaningful error. (JSON)
+        Arguments.of("JSON", null, ballinaMayoral, ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON, "Null or negative risk limit"),
+        Arguments.of("CSV", null, ballinaMayoral, ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON,   "Null or negative risk limit"),
+        // getAssertions, called with a negative risk limit, returns a meaningful error.
+        // (Note that a value >=1 is vacuously met but not invalid.)
+        Arguments.of("JSON", "-0.05", ballinaMayoral, ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON, "Null or negative risk limit"),
+        Arguments.of("CSV", "-0.05", ballinaMayoral, ballotCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON,   "Null or negative risk limit")
+    );
+  }
+
+  /**
    * The getAssertions endpoint, called with a nonexistent contest, returns a meaningful error.
    * (JSON)
-   */
+
   @Test
   public void getAssertionsWithNonExistentContestIsAnErrorJSON() {
     testUtils.log(logger, "getAssertionsWithNonExistentContestIsAnErrorJSON");
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
+    // Done
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"Nonexistent Contest\","
-      + defaultCountJson + defaultWinnerJSON +"\"candidates\":[\"Alice\",\"Bob\"]}";
+      + defaultCountJson + "," + defaultWinnerJSON + "," +"\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No such contest"));
-
   }
-
+  */
   /**
    * The getAssertions endpoint, called with a nonexistent contest, returns a meaningful error.
    * (CSV)
-   */
   @Test
   public void getAssertionsWithNonExistentContestIsAnErrorCSV() {
     testUtils.log(logger, "getAssertionsWithNonExistentContestIsAnErrorCSV");
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
+    // Done
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"Nonexistent Contest\","
-        + defaultCountJson + defaultWinnerJSON +"\"candidates\":[\"Alice\",\"Bob\"]}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," +"\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -234,18 +346,19 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
 
   }
 
+   */
   /**
    * The getAssertions endpoint, called with a valid plurality contest, returns a meaningful error.
    * (JSON)
-   */
   @Test
   public void getAssertionsWithPluralityContestIsAnErrorJSON() {
     testUtils.log(logger, "getAssertionsWithPluralityContestIsAnErrorJSON");
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
+    // Done
     String requestAsJson =
         "{\"riskLimit\":0.05,\"contestName\":\"Valid Plurality Contest\","
-            + defaultCountJson + defaultWinnerJSON +"\"candidates\":[\"Alice\",\"Bob\"]}";
+            + defaultCountJson + "," + defaultWinnerJSON + "," +"\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -254,18 +367,19 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not comprised of all IRV"));
   }
 
+   */
   /**
    * The getAssertions endpoint, called with a valid plurality contest, returns a meaningful error.
    * (CSV)
-   */
   @Test
   public void getAssertionsWithPluralityContestIsAnErrorCSV() {
     testUtils.log(logger, "getAssertionsWithPluralityContestIsAnErrorCSV");
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
+    // Done
     String requestAsJson =
         "{\"riskLimit\":0.05,\"contestName\":\"Valid Plurality Contest\","
-        + defaultCountJson + defaultWinnerJSON +"\"candidates\":[\"Alice\",\"Bob\"]}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," +"\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -274,18 +388,19 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not comprised of all IRV"));
   }
 
+   */
   /**
    * The getAssertions endpoint, called with a mixed IRV and non-IRV contest, returns a meaningful
    * error. (JSON)
-   */
   @Test
   public void getAssertionsWithMixedIRVPluralityContestIsAnErrorJSON() {
     testUtils.log(logger, "getAssertionsWithMixedIRVPluralityContestIsAnErrorJSON");
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
+    // Done
     String requestAsJson =
         "{\"riskLimit\":0.05,\"contestName\":\"Invalid Mixed Contest\","
-        + defaultCountJson + defaultWinnerJSON +"\"candidates\":[\"Alice\",\"Bob\"]}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," +"\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -295,18 +410,19 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
 
   }
 
+   */
   /**
    * The getAssertions endpoint, called with a mixed IRV and non-IRV contest, returns a meaningful
    * error. (CSV)
-   */
   @Test
   public void getAssertionsWithMixedIRVPluralityContestIsAnErrorCSV() {
     testUtils.log(logger, "getAssertionsWithMixedIRVPluralityContestIsAnErrorCSV");
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
+    // Done
     String requestAsJson =
         "{\"riskLimit\":0.05,\"contestName\":\"Invalid Mixed Contest\","
-        + defaultCountJson + defaultWinnerJSON + "\"candidates\":[\"Alice\",\"Bob\"]}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -316,6 +432,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
 
   }
 
+   */
   /**
    * The getAssertions endpoint, called with a missing contest name, returns a meaningful error.
    * (JSON)
@@ -325,8 +442,8 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     testUtils.log(logger, "getAssertionsWithMissingContestNameIsAnErrorJSON");
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
-    String requestAsJson = "{\"riskLimit\":0.05,\"candidates\":[\"Alice\",\"Bob\"]"
-        + defaultCountJson + defaultWinnerJSON + "}";
+    String requestAsJson = "{\"riskLimit\":0.05,\"candidates\":[\"Alice\",\"Bob\"],"
+        + defaultCountJson + "," + defaultWinnerJSON + "}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -345,7 +462,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"candidates\":[\"Alice\",\"Bob\"],"
-        + defaultCountJson + defaultWinnerJSON + "}";
+        + defaultCountJson + "," + defaultWinnerJSON + "}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -356,14 +473,14 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
 
   /**
    * The getAssertions endpoint, called with a null contest name, returns a meaningful error. (JSON)
-   */
   @Test
   public void getAssertionsWithNullContestNameIsAnErrorJSON() {
     testUtils.log(logger, "getAssertionsWithNullContestNameIsAnErrorJSON");
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
+    // Done
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":null,"
-        +"\"candidates\":[\"Alice\",\"Bob\"]," + defaultCountJson + defaultWinnerJSON + "}";
+        +"\"candidates\":[\"Alice\",\"Bob\"]," + defaultCountJson + "," + defaultWinnerJSON + "}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -372,16 +489,17 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No contest name"));
   }
 
+   */
   /**
    * The getAssertions endpoint, called with a null contest name, returns a meaningful error. (CSV)
-   */
   @Test
   public void getAssertionsWithNullContestNameIsAnErrorCSV() {
     testUtils.log(logger, "getAssertionsWithNullContestNameIsAnErrorCSV");
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
+  // Done
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":null,"
-        + defaultCountJson + defaultWinnerJSON + "\"candidates\":[\"Alice\",\"Bob\"]}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -390,17 +508,18 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No contest name"));
   }
 
+   */
   /**
    * The getAssertions endpoint, called with an empty contest name, returns a meaningful error.
    * (JSON)
-   */
   @Test
   public void getAssertionsWithEmptyContestNameIsAnErrorJSON() {
     testUtils.log(logger, "getAssertionsWithEmptyContestNameIsAnErrorJSON");
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
+    // Done
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"\","
-        + defaultCountJson + defaultWinnerJSON + "\"candidates\":[\"Alice\",\"Bob\"]}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -408,18 +527,19 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No contest name"));
   }
+   */
 
   /**
    * The getAssertions endpoint, called with an empty contest name, returns a meaningful error.
    * (CSV)
-   */
   @Test
   public void getAssertionsWithEmptyContestNameIsAnErrorCSV() {
     testUtils.log(logger, "getAssertionsWithEmptyContestNameIsAnErrorCSV");
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
+    // Done
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"\","
-        + defaultCountJson + defaultWinnerJSON + "\"candidates\":[\"Alice\",\"Bob\"]}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -428,18 +548,19 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No contest name"));
   }
 
+   */
   /**
    * The getAssertions endpoint, called with an all-whitespace contest name, returns a meaningful
    * error. (JSON)
-   */
   @Test
   public void getAssertionsWithWhitespaceContestNameIsAnErrorJSON() {
     testUtils.log(logger, "getAssertionsWithWhitespaceContestNameIsAnErrorJSON");
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"    \","
-        + defaultCountJson + defaultWinnerJSON + "\"candidates\":[\"Alice\",\"Bob\"]}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
 
+    // Done
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
@@ -447,17 +568,18 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No contest name"));
   }
 
+   */
   /**
    * The getAssertions endpoint, called with an all-whitespace contest name, returns a meaningful
    * error. (CSV)
-   */
   @Test
   public void getAssertionsWithWhitespaceContestNameIsAnErrorCSV() {
     testUtils.log(logger, "getAssertionsWithWhitespaceContestNameIsAnErrorCSV");
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
+  // Done
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"    \","
-        + defaultCountJson + defaultWinnerJSON + "\"candidates\":[\"Alice\",\"Bob\"]}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -466,6 +588,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No contest name"));
   }
 
+   */
   /**
    * The getAssertions endpoint, called with a missing candidate list, returns a meaningful error.
    * (JSON)
@@ -476,7 +599,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,"
-        + defaultCountJson + defaultWinnerJSON + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -495,7 +618,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,"
-        + defaultCountJson + defaultWinnerJSON + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -507,14 +630,14 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
   /**
    * The getAssertions endpoint, called with a null candidate list, returns a meaningful error.
    * (JSON)
-   */
   @Test
   public void getAssertionsWithNullCandidateListIsAnErrorJSON() {
     testUtils.log(logger, "getAssertionsWithNullCandidateListIsAnErrorJSON");
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
-    String requestAsJson = "{\"riskLimit\":0.05,,\"candidates\":null,"
-        + defaultCountJson + defaultWinnerJSON + "\"contestName\":\"Ballina Mayoral\"}";
+    // Done
+    String requestAsJson = "{\"riskLimit\":0.05,\"candidates\":null,"
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -522,18 +645,19 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Bad candidate list"));
   }
+   */
 
   /**
    * The getAssertions endpoint, called with a null candidate list, returns a meaningful error.
    * (CSV)
-   */
   @Test
   public void getAssertionsWithNullCandidateListIsAnErrorCSV() {
     testUtils.log(logger, "getAssertionsWithNullCandidateListIsAnErrorCSV");
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
+    // Done
     String requestAsJson = "{\"riskLimit\":0.05,\"candidates\":null,"
-        + defaultCountJson + defaultWinnerJSON + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -541,18 +665,18 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Bad candidate list"));
   }
+   */
 
   /**
    * The getAssertions endpoint, called with an empty candidate list, returns a meaningful error.
    * (JSON)
-   */
   @Test
   public void getAssertionsWithEmptyCandidateListIsAnErrorJSON() {
     testUtils.log(logger, "getAssertionsWithEmptyCandidateListIsAnErrorJSON");
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"candidates\":[],"
-        + defaultCountJson + defaultWinnerJSON + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -561,17 +685,18 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Bad candidate list"));
   }
 
+   */
   /**
    * The getAssertions endpoint, called with an empty candidate list, returns a meaningful error.
    * (CSV)
-   */
   @Test
   public void getAssertionsWithEmptyCandidateListIsAnErrorCVS() {
     testUtils.log(logger, "getAssertionsWithEmptyCandidateListIsAnErrorCSV");
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
+    // Done
     String requestAsJson = "{\"riskLimit\":0.05,\"candidates\":[],"
-        + defaultCountJson + defaultWinnerJSON + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -579,37 +704,39 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Bad candidate list"));
   }
+   */
 
   /**
    * The getAssertions endpoint, called with a whitespace candidate name, returns a meaningful error.
    * (JSON)
-   */
   @Test
   public void getAssertionsWithWhitespaceCandidateNameIsAnErrorJSON() {
     testUtils.log(logger, "getAssertionsWithWhitespaceCandidateNameIsAnErrorJSON");
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05, \"candidates\":[\"Alice\",\"    \"],"
-        + defaultCountJson + defaultWinnerJSON + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
+    // Done
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Bad candidate list"));
   }
+   */
 
   /**
    * The getAssertions endpoint, called with a whitespace candidate name, returns a meaningful error.
    * (CSV)
-   */
   @Test
   public void getAssertionsWithWhitespaceCandidateNameIsAnErrorCSV() {
     testUtils.log(logger, "getAssertionsWithWhitespaceCandidateNameIsAnErrorCSV");
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
+  // Done
     String requestAsJson = "{\"riskLimit\":0.05, \"candidates\":[\"Alice\",\"    \"],"
-        + defaultCountJson + defaultWinnerJSON + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -617,6 +744,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Bad candidate list"));
   }
+   */
 
   /**
    * The getAssertions endpoint, called with a missing risk limit, returns a meaningful error.
@@ -628,7 +756,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     String requestAsJson = "{\"candidates\":[\"Alice\",\"Bob\"],"
-        + defaultCountJson + defaultWinnerJSON + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -647,7 +775,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
     String requestAsJson = "{\"candidates\":[\"Alice\",\"Bob\"],"
-    + defaultCountJson + defaultWinnerJSON + "\"contestName\":\"Ballina Mayoral\"}";
+    + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -658,14 +786,14 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
 
   /**
    * The getAssertions endpoint, called with a null risk limit, returns a meaningful error. (JSON)
-   */
   @Test
   public void getAssertionsWithNullRiskLimitIsAnErrorJSON() {
     testUtils.log(logger, "getAssertionsWithNullRiskLimitIsAnErrorJSON");
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
+  // Done
     String requestAsJson = "{\"riskLimit\":null,\"candidates\":[\"Alice\",\"Bob\"],"
-        + defaultCountJson + defaultWinnerJSON + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -673,17 +801,18 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Null or negative risk limit"));
   }
+   */
 
   /**
    * The getAssertions endpoint, called with a null risk limit, returns a meaningful error. (CSV)
-   */
   @Test
   public void getAssertionsWithNullRiskLimitIsAnErrorCSV() {
     testUtils.log(logger, "getAssertionsWithNullRiskLimitIsAnErrorCSV");
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
+  // Done
     String requestAsJson = "{\"riskLimit\":null,\"candidates\":[\"Alice\",\"Bob\"],"
-        + defaultCountJson + defaultWinnerJSON + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -691,18 +820,19 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Null or negative risk limit"));
   }
+   */
 
   /**
    * The getAssertions endpoint, called with a negative risk limit, returns a meaningful error.
    * (Note that a value >=1 is vacuously met but not invalid.) (JSON)
-   */
   @Test
   public void getAssertionsWithNegativeRiskLimitIsAnErrorJSON() {
     testUtils.log(logger, "getAssertionsWithNegativeRiskLimitIsAnErrorJSON");
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
+  // Done
     String requestAsJson = "{\"riskLimit\":-0.05,\"candidates\":[\"Alice\",\"Bob\"],"
-        + defaultCountJson + defaultWinnerJSON + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -710,17 +840,18 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Null or negative risk limit"));
   }
+   */
   /**
    * The getAssertions endpoint, called with a negative risk limit, returns a meaningful error.
    * (Note that a value >=1 is vacuously met but not invalid.) (CSV)
-   */
   @Test
   public void getAssertionsWithNegativeRiskLimitIsAnErrorCSV() {
     testUtils.log(logger, "getAssertionsWithNegativeRiskLimitIsAnErrorCSV");
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
+  // Done
     String requestAsJson = "{\"riskLimit\":-0.05,\"candidates\":[\"Alice\",\"Bob\"],"
-        + defaultCountJson + defaultWinnerJSON + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -728,4 +859,5 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Null or negative risk limit"));
   }
+   */
 }
