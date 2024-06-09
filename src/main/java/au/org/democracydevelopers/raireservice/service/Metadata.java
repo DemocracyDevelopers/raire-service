@@ -101,6 +101,9 @@ public class Metadata {
   // Other headers used in parts of the csv
   public final static String CONTEST_NAME_HEADER = "Contest name";
   public final static String CANDIDATES_HEADER = "Candidates";
+  public final static String WINNER_HEADER = "Winner";
+  public final static String TOTAL_AUDITABLE_BALLOTS_HEADER = "Total universe";
+  public final static String RISK_LIMIT_HEADER = "Risk limit";
 
   public final static List<String> extremumHeaders = List.of("Extreme item","Value","Assertion IDs");
 

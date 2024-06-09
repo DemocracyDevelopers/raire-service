@@ -28,6 +28,9 @@ import static au.org.democracydevelopers.raireservice.service.Metadata.DILUTED_M
 import static au.org.democracydevelopers.raireservice.service.Metadata.ESTIMATED_SAMPLES;
 import static au.org.democracydevelopers.raireservice.service.Metadata.MARGIN;
 import static au.org.democracydevelopers.raireservice.service.Metadata.OPTIMISTIC_SAMPLES;
+import static au.org.democracydevelopers.raireservice.service.Metadata.RISK_LIMIT_HEADER;
+import static au.org.democracydevelopers.raireservice.service.Metadata.TOTAL_AUDITABLE_BALLOTS_HEADER;
+import static au.org.democracydevelopers.raireservice.service.Metadata.WINNER_HEADER;
 import static au.org.democracydevelopers.raireservice.service.Metadata.extremumHeaders;
 import static au.org.democracydevelopers.raireservice.service.Metadata.csvHeaders;
 import static au.org.democracydevelopers.raireservice.util.CSVUtils.escapeThenJoin;
@@ -44,7 +47,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
-import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -252,12 +254,24 @@ public class GetAssertionsCsvService {
   private String makePreface(GetAssertionsRequest request) {
       return escapeThenJoin(
             // The contest name. This gets escaped just in case it contains commas.
-            List.of(CONTEST_NAME_HEADER, StringEscapeUtils.escapeCsv(request.contestName))
+            List.of(CONTEST_NAME_HEADER, request.contestName)
           ) + "\n"
           + escapeThenJoin(
             // The list of candidates.
             List.of(CANDIDATES_HEADER, escapeThenJoin(request.candidates))
-          )  +"\n\n"
+          )  +"\n"
+    + escapeThenJoin(
+        // The contest winner, as detected by raire and retuned in the contest header.
+        List.of(WINNER_HEADER, request.winner)
+    ) + "\n"
+    + escapeThenJoin(
+        // The total auditable ballots
+        List.of(TOTAL_AUDITABLE_BALLOTS_HEADER, ""+request.totalAuditableBallots)
+    ) + "\n"
+    + escapeThenJoin(
+        // The risk limit.
+        List.of(RISK_LIMIT_HEADER, request.riskLimit.toString())
+    ) + "\n\n"
           + escapeThenJoin(extremumHeaders) + "\n";
   }
 

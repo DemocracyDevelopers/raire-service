@@ -79,10 +79,13 @@ public class GetAssertionsServiceCsvTests {
   public void testCSVTies() throws RaireServiceException {
     testUtils.log(logger, "testCSVTies");
     GetAssertionsRequest request = new GetAssertionsRequest( "Lots of assertions with ties Contest",
-        defaultCount, candidates, defaultWinner, BigDecimal.valueOf(0.1));
+        defaultCount, candidates, "Bob", BigDecimal.valueOf(0.1));
     String output = getAssertionsCSVService.generateCSV(request);
     assertTrue(output.contains("Contest name,Lots of assertions with ties Contest\n"));
-    assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n\n"));
+    assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n"));
+    assertTrue(output.contains("Winner,Bob\n"));
+    assertTrue(output.contains("Total universe,"+defaultCount+"\n"));
+    assertTrue(output.contains("Risk limit,0.1\n\n"));
     assertTrue(output.contains("Extreme item,Value,Assertion IDs"));
     assertTrue(output.contains("Margin,220,\"2, 5, 6\""));
     assertTrue(output.contains("Diluted margin,0.22,\"2, 5, 6\""));
@@ -118,8 +121,9 @@ public class GetAssertionsServiceCsvTests {
   public void testCharacterEscaping() throws RaireServiceException {
     testUtils.log(logger,"testCharacterEscaping");
     GetAssertionsRequest request = new GetAssertionsRequest("Lots of tricky characters Contest",
-        defaultCount, trickyCharacters, defaultWinner, BigDecimal.valueOf(0.1));
+        defaultCount, trickyCharacters, "Winner, needs escaping", BigDecimal.valueOf(0.1));
     String output = getAssertionsCSVService.generateCSV(request);
+    assertTrue(output.contains("Winner,\"Winner, needs escaping\""));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(0)));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(1)));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(2)));
@@ -134,11 +138,15 @@ public class GetAssertionsServiceCsvTests {
   @Test
   public void testCsvDemoContest() throws RaireServiceException {
     testUtils.log(logger,"testCsvDemoContest");
+    BigDecimal riskLimit = BigDecimal.valueOf(0.03);
     GetAssertionsRequest request = new GetAssertionsRequest( "CSV Demo Contest",
-        defaultCount, candidates, defaultWinner, BigDecimal.valueOf(0.1));
+        defaultCount, candidates, defaultWinner, riskLimit);
     String output = getAssertionsCSVService.generateCSV(request);
     assertTrue(output.contains("Contest name,CSV Demo Contest\n"));
-    assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n\n"));
+    assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n"));
+    assertTrue(output.contains("Winner,"+defaultWinner+"\n"));
+    assertTrue(output.contains("Total universe,"+defaultCount+"\n"));
+    assertTrue(output.contains("Risk limit,"+riskLimit+"\n\n"));
     assertTrue(output.contains("Extreme item,Value,Assertion IDs\n"));
     assertTrue(output.contains("Margin,100,\"2\"\n"));
     assertTrue(output.contains("Diluted margin,0.1,\"2\"\n"));
