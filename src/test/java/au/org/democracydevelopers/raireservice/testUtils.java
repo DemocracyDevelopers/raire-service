@@ -113,19 +113,21 @@ public class testUtils {
 
   /**
    * Check that the RaireResult's solution has the expected margin and difficulty.
-   * @param margin expected margin
-   * @param difficulty expected difficulty
-   * @param numAssertions the expected number of assertions
-   * @param result the RaireResult in the body of the response
+   * @param margin expected margin.
+   * @param difficulty expected difficulty.
+   * @param numCandidates the number of candidates.
+   * @param winner the winner's index in the candidate array.
+   * @param numAssertions the expected number of assertions.
+   * @param result the RaireResult in the body of the response.
    * @return true if the result's data matches the expected values.
    */
-  public static boolean correctSolutionData(int margin, double difficulty, int numAssertions,
-      RaireResult result) {
+  public static boolean correctSolutionData(int margin, double difficulty, int numCandidates,
+      int winner, int numAssertions, RaireResult result) {
 
-    int retrievedMargin = result.margin;
-    double retrievedDifficulty = result.difficulty;
-    return retrievedMargin == margin
-        && doubleComparator.compare(retrievedDifficulty, difficulty) == 0
+    return result.margin == margin
+        && doubleComparator.compare(result.difficulty, difficulty) == 0
+        && result.num_candidates == numCandidates
+        && result.winner == winner
         && result.assertions.length == numAssertions;
   }
 

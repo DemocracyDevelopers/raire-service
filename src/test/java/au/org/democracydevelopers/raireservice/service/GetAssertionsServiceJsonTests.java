@@ -80,7 +80,7 @@ public class GetAssertionsServiceJsonTests {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertion");
     GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEB Assertion Contest",
-        defaultCount, List.of("Alice", "Bob"), defaultWinner, BigDecimal.valueOf(0.1));
+        defaultCount, List.of("Alice", "Bob"), "Bob", BigDecimal.valueOf(0.1));
 
     RaireSolution solution = service.getRaireSolution(request);
 
@@ -94,6 +94,8 @@ public class GetAssertionsServiceJsonTests {
     // Check the contents of the RaireResults within the RaireSolution.
     assertEquals(1.1, solution.solution.Ok.difficulty);
     assertEquals(320, solution.solution.Ok.margin);
+    assertEquals(1, solution.solution.Ok.winner);
+    assertEquals(2, solution.solution.Ok.num_candidates);
 
     AssertionAndDifficulty[] assertions = solution.solution.Ok.assertions;
     assertEquals(1, assertions.length);
@@ -119,7 +121,8 @@ public class GetAssertionsServiceJsonTests {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertion");
     GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN Assertion Contest",
-        defaultCount, List.of("Alice", "Charlie", "Diego", "Bob"), defaultWinner, BigDecimal.valueOf(0.1));
+        defaultCount, List.of("Alice", "Charlie", "Diego", "Bob"), "NotACandidate",
+        BigDecimal.valueOf(0.1));
 
     RaireSolution solution = service.getRaireSolution(request);
 
@@ -134,6 +137,9 @@ public class GetAssertionsServiceJsonTests {
     // Check the contents of the RaireResults within the RaireSolution.
     assertEquals(3.01, solution.solution.Ok.difficulty);
     assertEquals(240, solution.solution.Ok.margin);
+    // Winner is -1 if not a candidate. This should be caught at request validation.
+    assertEquals(-1, solution.solution.Ok.winner);
+    assertEquals(4, solution.solution.Ok.num_candidates);
 
     AssertionAndDifficulty[] assertions = solution.solution.Ok.assertions;
     assertEquals(1, assertions.length);

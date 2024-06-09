@@ -138,7 +138,7 @@ public class GetAssertionsAPIJsonTests {
     assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(320,1.1, 1, response.getBody().solution.Ok));
+    assertTrue(correctSolutionData(320,1.1, 2,1, 1, response.getBody().solution.Ok));
 
     // We expect one NEB assertion with the following data.
     assertTrue(correctAssertionData("NEB", 320, 1.1, 0,
@@ -167,7 +167,7 @@ public class GetAssertionsAPIJsonTests {
     assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(240, 3.01, 1, response.getBody().solution.Ok));
+    assertTrue(correctSolutionData(240, 3.01, 4, 0, 1, response.getBody().solution.Ok));
 
     // We expect one NEN assertion with the following data.
     assertTrue(correctAssertionData("NEN",240,3.01, 0,

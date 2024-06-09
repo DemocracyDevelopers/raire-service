@@ -118,7 +118,8 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(320,1.1, 1,
+    // FIXME
+    assertTrue(correctSolutionData(320,1.1, 2,1, 1,
         response.getBody().solution.Ok));
 
     // We expect one NEB assertion with the following data.
@@ -184,7 +185,8 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(240, 3.01, 1,
+    // FIXME
+    assertTrue(correctSolutionData(240, 3.01, 4, 3, 1,
         response.getBody().solution.Ok));
 
     // We expect one assertion with the following data.
@@ -255,7 +257,8 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(112, 3.17, 2,
+    //FIXME
+    assertTrue(correctSolutionData(112, 3.17, 4, 3, 2,
         response.getBody().solution.Ok));
 
     // We expect two assertions with the following data, but we don't necessarily know what order
