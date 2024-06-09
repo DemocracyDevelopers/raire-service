@@ -99,6 +99,14 @@ public class GetAssertionsRequest extends ContestRequest {
       throw new RequestValidationException(msg);
     }
 
+    // Check for null winner.
+    if (winner == null) {
+      final String msg = String.format("%s Null or absent winner specified in request. "
+          + "Throwing a RequestValidationException.", prefix);
+      logger.error(msg);
+      throw new RequestValidationException(msg);
+    }
+
     logger.debug(String.format("%s Get Assertions Request validated.", prefix));
   }
 }

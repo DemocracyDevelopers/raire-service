@@ -102,18 +102,16 @@ public class GetAssertionsRequestTests {
   private static Stream<Arguments> expectedExceptionMessages() {
     BigDecimal defaultRiskLimit = BigDecimal.valueOf(0.03);
     List<String> alice = List.of("Alice");
-    String pluralityContestName = "Valid Plurality Contest";
-    String mixedContestName = "Invalid Mixed Contest";
     return Stream.of(
         // A request for a contest that doesn't exist is invalid.
         Arguments.of("NonExistentContest", defaultCount, alice, defaultWinner,
             defaultRiskLimit, "No such contest"),
         // A request for a plurality contest is invalid, because we have assertions only for IRV.
-        Arguments.of(pluralityContestName, defaultCount, alice, defaultWinner,
+        Arguments.of("Valid Plurality Contest", defaultCount, alice, defaultWinner,
             defaultRiskLimit, "not comprised of all IRV"),
         // A request for mixed IRV-plurality contests is invalid.
         // Note that this is a data problem - contests should have a consistent description.
-        Arguments.of(mixedContestName, defaultCount, alice, defaultWinner,
+        Arguments.of("Invalid Mixed Contest", defaultCount, alice, defaultWinner,
             defaultRiskLimit, "not comprised of all IRV"),
         // A request with null contest name is invalid.
         Arguments.of(null, defaultCount, alice, defaultWinner,
@@ -138,7 +136,15 @@ public class GetAssertionsRequestTests {
             null, "risk limit"),
         // A request with a negative risk limit is invalid.
         Arguments.of(ballinaMayoral, defaultCount, alice, defaultWinner,
-            BigDecimal.valueOf(-0.03), "risk limit")
+            BigDecimal.valueOf(-0.03), "risk limit"),
+        // A request with a null winner is invalid.
+        // (Note that a request with an empty/whitespace winner is strange but valid.)
+        Arguments.of(ballinaMayoral, defaultCount, alice, null,
+            defaultRiskLimit, "Null or absent winner"),
+        // A request with a negative totalAuditableBallots is invalid.
+        // (Note that a request with zero auditable ballots is strange but valid.)
+        Arguments.of(ballinaMayoral, -10, alice, defaultWinner,
+            defaultRiskLimit, "Non-positive total auditable ballots")
     );
   }
 }
