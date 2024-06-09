@@ -55,8 +55,8 @@ public class testUtils {
   /**
    * A default winner, used in requests - not checked.
    */
-  public final static String defaultWinner = "A winner";
-  public final static String defaultWinnerJSON = "\"winner\":\""+defaultWinner+"\"";
+  public final static String defaultWinner = "Chuan";
+  public final static String defaultWinnerJSON = "\"winner\":\""+"Chuan"+"\"";
 
   /**
    * A default ballot count, used in requests - not checked.

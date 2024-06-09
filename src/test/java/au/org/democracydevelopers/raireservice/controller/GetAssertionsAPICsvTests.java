@@ -57,6 +57,7 @@ import org.springframework.test.context.ActiveProfiles;
  * correct API output rather than checking the service directly.
  * Contests which will be used for validity testing are preloaded into the database using
  * src/test/resources/simple_assertions_csv_challenges.sql.
+ * FIXME add winner, risk limit.
  */
 
 @ActiveProfiles("csv-challenges")
@@ -108,7 +109,10 @@ public class GetAssertionsAPICsvTests {
 
     assertNotNull(output);
     assertTrue(output.contains("Contest name,Lots of assertions with ties Contest\n"));
-    assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n\n"));
+    assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n"));
+    assertTrue(output.contains("Winner,Chuan\n"));
+    assertTrue(output.contains("Total universe,100\n"));
+    assertTrue(output.contains("Risk limit,0.10\n\n"));
     assertTrue(output.contains("Extreme item,Value,Assertion IDs"));
     assertTrue(output.contains("Margin,220,\"2, 5, 6\""));
     assertTrue(output.contains("Diluted margin,0.22,\"2, 5, 6\""));
@@ -145,7 +149,7 @@ public class GetAssertionsAPICsvTests {
     String url = baseURL + port + getAssertionsCSVEndpoint;
     String requestAsJson =
         "{\"riskLimit\":0.10,\"contestName\":\"Lots of tricky characters Contest\","
-            + defaultCountJson + "," + defaultWinnerJSON + "," + trickyCharactersAsJson;
+            + defaultCountJson + "," + "\"winner\":\"Annoying, Alice\"" + "," + trickyCharactersAsJson;
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -154,6 +158,7 @@ public class GetAssertionsAPICsvTests {
     String output = response.getBody();
 
     assertNotNull(output);
+    assertTrue(output.contains("Winner,\"Annoying, Alice\"\n"));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(0)));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(1)));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(2)));
@@ -176,7 +181,10 @@ public class GetAssertionsAPICsvTests {
 
     assertNotNull(output);
     assertTrue(output.contains("Contest name,CSV Demo Contest\n"));
-    assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n\n"));
+    assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n"));
+    assertTrue(output.contains("Winner,Chuan\n"));
+    assertTrue(output.contains("Total universe,100\n"));
+    assertTrue(output.contains("Risk limit,0.10\n\n"));
     assertTrue(output.contains("Extreme item,Value,Assertion IDs\n"));
     assertTrue(output.contains("Margin,100,\"2\"\n"));
     assertTrue(output.contains("Diluted margin,0.1,\"2\"\n"));

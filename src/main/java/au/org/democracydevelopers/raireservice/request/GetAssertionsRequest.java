@@ -64,7 +64,9 @@ public class GetAssertionsRequest extends ContestRequest {
   /**
    * All args constructor.
    * @param contestName the name of the contest
+   * @param totalAuditableBallots the total number of ballots in the universe.
    * @param candidates a list of candidates by name
+   * @param winner the winner's name
    * @param riskLimit the risk limit for the audit, expected to be in the range [0,1].
    */
   @ConstructorProperties({"contestName", "totalAuditableBallots", "candidates", "winner", "riskLimit"})
@@ -103,6 +105,14 @@ public class GetAssertionsRequest extends ContestRequest {
     if (winner == null) {
       final String msg = String.format("%s Null or absent winner specified in request. "
           + "Throwing a RequestValidationException.", prefix);
+      logger.error(msg);
+      throw new RequestValidationException(msg);
+    }
+
+    // Check that the claimed winner is one of the candidates.
+    if (!candidates.contains(winner)) {
+      final String msg = String.format("%s Winner %s is not one of the candidates: %s. "
+          + "Throwing a RequestValidationException.", prefix, winner, candidates);
       logger.error(msg);
       throw new RequestValidationException(msg);
     }
