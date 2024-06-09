@@ -27,12 +27,10 @@ import static au.org.democracydevelopers.raireservice.testUtils.correctAssertion
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static au.org.democracydevelopers.raireservice.testUtils.correctSolutionData;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCountJson;
-import static au.org.democracydevelopers.raireservice.testUtils.defaultWinnerJSON;
 import static au.org.democracydevelopers.raireservice.testUtils.getAssertionsJSONEndpoint;
 import static au.org.democracydevelopers.raireservice.testUtils.oneNEBAssertionContest;
 import static au.org.democracydevelopers.raireservice.testUtils.oneNEBOneNENAssertionContest;
 import static au.org.democracydevelopers.raireservice.testUtils.oneNENAssertionContest;
-import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -107,7 +105,7 @@ public class GetAssertionsAPIJsonTests {
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"" + oneNEBAssertionContest + "\","
-        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
+        + defaultCountJson + "," + "\"winner\":\"Bob\"" + "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -127,7 +125,7 @@ public class GetAssertionsAPIJsonTests {
 
     // Make the request.
     GetAssertionsRequest request = new GetAssertionsRequest(oneNEBAssertionContest, defaultCount,
-        List.of("Alice","Bob"), defaultWinner, BigDecimal.valueOf(0.1));
+        List.of("Alice","Bob"), "Bob", BigDecimal.valueOf(0.1));
     ResponseEntity<RaireSolution> response
         = restTemplate.postForEntity(url, request, RaireSolution.class);
 
@@ -157,7 +155,7 @@ public class GetAssertionsAPIJsonTests {
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     GetAssertionsRequest request =  new GetAssertionsRequest(oneNENAssertionContest, defaultCount,
-        List.of("Alice","Bob","Charlie","Diego"), defaultWinner, BigDecimal.valueOf(0.1));
+        List.of("Alice","Bob","Charlie","Diego"), "Alice", BigDecimal.valueOf(0.1));
     ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request, RaireSolution.class);
 
     // The metadata has been constructed appropriately
@@ -188,7 +186,7 @@ public class GetAssertionsAPIJsonTests {
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     GetAssertionsRequest request =  new GetAssertionsRequest(oneNEBOneNENAssertionContest,
-        defaultCount, List.of("Alice","Bob","Charlie","Diego"), defaultWinner, BigDecimal.valueOf(0.1));
+        defaultCount, List.of("Alice","Bob","Charlie","Diego"), "Alice", BigDecimal.valueOf(0.1));
     ResponseEntity<String> response
         = restTemplate.postForEntity(url, request, String.class);
 
