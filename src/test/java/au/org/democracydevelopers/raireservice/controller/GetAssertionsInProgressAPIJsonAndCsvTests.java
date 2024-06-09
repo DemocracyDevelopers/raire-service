@@ -63,6 +63,7 @@ import org.springframework.transaction.annotation.Transactional;
  * GetAssertionsInProgressServiceTestsJsonAndCsv.java.
  * Contests which will be used for validity testing are preloaded into the database using
  * src/test/resources/data.sql.
+ * FIXME add winner, risk limit, total auditable ballots.
  */
 @ActiveProfiles("assertions-in-progress")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -103,7 +104,7 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     String url = baseURL + port + getAssertionsJsonEndpoint;
 
     GetAssertionsRequest request = new GetAssertionsRequest(oneNEBAssertionContest, defaultCount,
-        List.of("Alice","Bob"), defaultWinner, BigDecimal.valueOf(0.1));
+        List.of("Alice","Bob"), "Bob", BigDecimal.valueOf(0.1));
 
     ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request,
         RaireSolution.class);
@@ -136,7 +137,7 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     String url = baseURL + port + getAssertionsCsvEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" + oneNEBAssertionContest+"\","
-        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
+        + defaultCountJson + "," + "\"winner\":\"Bob\""+ "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     String csv = restTemplate.postForEntity(url, request, String.class).getBody();
@@ -169,7 +170,7 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     String url = baseURL + port + getAssertionsJsonEndpoint;
 
     GetAssertionsRequest request = new GetAssertionsRequest(oneNENAssertionContest, defaultCount,
-        List.of("Alice","Bob","Charlie","Diego"), defaultWinner, BigDecimal.valueOf(0.1));
+        List.of("Alice","Bob","Charlie","Diego"), "Diego", BigDecimal.valueOf(0.1));
     ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request,
         RaireSolution.class);
 
@@ -202,7 +203,7 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
 
     String requestAsJson =
         "{\"riskLimit\":0.10,\"contestName\":\"" + oneNENAssertionContest + "\","
-            + defaultCountJson + "," + defaultWinnerJSON + ","
+            + defaultCountJson + "," +"\"winner\":\"Alice\"" + ","
             + "\"candidates\":[\"Alice\",\"Bob\",\"Charlie\",\"Diego\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);

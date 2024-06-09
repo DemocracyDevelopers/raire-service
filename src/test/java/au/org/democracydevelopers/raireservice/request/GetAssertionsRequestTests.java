@@ -69,7 +69,7 @@ public class GetAssertionsRequestTests {
   public void validRequestForIRVContestIsValid() {
     testUtils.log(logger, "validRequestForIRVContestIsValid");
     GetAssertionsRequest validRequest = new GetAssertionsRequest("Ballina Mayoral",
-        defaultCount, List.of("Alice"), defaultWinner, BigDecimal.valueOf(0.03));
+        defaultCount, List.of("Alice"), "Alice", BigDecimal.valueOf(0.03));
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
   }
 
@@ -144,7 +144,10 @@ public class GetAssertionsRequestTests {
         // A request with a negative totalAuditableBallots is invalid.
         // (Note that a request with zero auditable ballots is strange but valid.)
         Arguments.of(ballinaMayoral, -10, alice, defaultWinner,
-            defaultRiskLimit, "Non-positive total auditable ballots")
+            defaultRiskLimit, "Non-positive total auditable ballots"),
+        // A request with a winner who is not one of the candidates is invalid.
+        Arguments.of(ballinaMayoral, defaultCount, alice, "Bob",
+            defaultRiskLimit, "not one of the candidates")
     );
   }
 }

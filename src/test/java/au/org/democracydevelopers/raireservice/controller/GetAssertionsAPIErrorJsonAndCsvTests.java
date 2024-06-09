@@ -101,7 +101,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = "http://localhost:" + port + getAssertionsJSONEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\","
-        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Bob\",\"Chuan\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -227,7 +227,12 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
         Arguments.of("JSON", riskLimit, ballinaMayoral, "-10",
             "\""+defaultWinner+"\"", aliceAndBobJSON, "Non-positive total auditable ballots"),
         Arguments.of("CSV", riskLimit, ballinaMayoral, "-10",
-            "\""+defaultWinner+"\"", aliceAndBobJSON, "Non-positive total auditable ballots")
+            "\""+defaultWinner+"\"", aliceAndBobJSON, "Non-positive total auditable ballots"),
+        // A request with a winner who is not one of the candidates is invalid.
+        Arguments.of("JSON", riskLimit, ballinaMayoral, ""+defaultCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON, "not one of the candidates"),
+        Arguments.of("CSV", riskLimit, ballinaMayoral, ""+defaultCount,
+            "\""+defaultWinner+"\"", aliceAndBobJSON,  "not one of the candidates")
     );
   }
 
@@ -241,7 +246,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = "http://localhost:" + port + getAssertionsCSVEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\","
-        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
+        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Bob\",\"Chuan\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);

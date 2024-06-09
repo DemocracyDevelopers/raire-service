@@ -35,11 +35,12 @@ public class RaireResultMixIn extends RaireResult {
 
   /**
    * The winner of an IRV contest is not stored in the colorado-rla database.
-   */
   @JsonIgnore public int winner;
+   */
 
   /**
    * raire-service includes the candidates of a contest in the metadata attached to a RaireSolution.
+   * FIXME should we include this after all?
    */
   @JsonIgnore public int num_candidates;
 

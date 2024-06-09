@@ -88,7 +88,6 @@ public class GetAssertionsJsonService {
       metadata.put(Metadata.RISK_LIMIT, request.riskLimit);
       metadata.put(Metadata.CONTEST, request.contestName);
       metadata.put(Metadata.TOTAL_BALLOTS, request.totalAuditableBallots);
-      metadata.put(Metadata.WINNER, request.winner);
 
       // Translate the assertions extracted from the database into AssertionAndDifficulty objects,
       // keeping track of the maximum difficulty and minimum margin.
