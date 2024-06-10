@@ -138,7 +138,8 @@ public class GetAssertionsAPIJsonTests {
     assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(320,1.1, 2,1, 1, response.getBody().solution.Ok));
+    assertTrue(correctSolutionData(320,1.1, 2,1, 1,
+        response.getBody().solution.Ok));
 
     // We expect one NEB assertion with the following data.
     assertTrue(correctAssertionData("NEB", 320, 1.1, 0,

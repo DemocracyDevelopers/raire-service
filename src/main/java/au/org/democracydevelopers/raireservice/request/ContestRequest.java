@@ -27,16 +27,19 @@ import org.slf4j.LoggerFactory;
 import java.beans.ConstructorProperties;
 
 /**
- * Request (expected to be json) identifying a contest by name and listing its candidates.
- * This is an abstract class containing only the core input & validation for contests -
- * just the contest name and list of candidates, plus basic methods to check that they are
- * present, non-null and IRV.
- * Every actual request type inherits from this class and adds some other fields and/or validations.
+ * Request (expected to be json) identifying a contest by name and listing other data:
+ * - the candidates (by name),
+ * - the total auditable ballots in the universe (used to calculate difficulty in raire),
+ * - the time limit allowed to raire.
+ * This is used directly for requesting assertion generation.
+ * The only significant method is a verification method for checking that the data items are
+ * present and have reasonable values.
+ * The get assertions request type inherits from this class and adds some other fields and
+ * validations.
  */
 public class ContestRequest {
 
   private final static Logger logger = LoggerFactory.getLogger(ContestRequest.class);
-
 
   /**
    * The name of the contest

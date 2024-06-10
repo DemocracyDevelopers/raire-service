@@ -62,7 +62,8 @@ public class GetAssertionsRequest extends ContestRequest {
   public final BigDecimal riskLimit;
 
   /**
-   * All args constructor.
+   * Not-quite-all args constructor. (Arguments omit the timeLimitSeconds, which is set to a default
+   * and ignored.)
    * @param contestName the name of the contest
    * @param totalAuditableBallots the total number of ballots in the universe.
    * @param candidates a list of candidates by name
