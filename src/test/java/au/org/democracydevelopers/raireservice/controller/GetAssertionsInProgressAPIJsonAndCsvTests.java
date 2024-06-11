@@ -63,7 +63,6 @@ import org.springframework.transaction.annotation.Transactional;
  * GetAssertionsInProgressServiceTestsJsonAndCsv.java.
  * Contests which will be used for validity testing are preloaded into the database using
  * src/test/resources/data.sql.
- * FIXME add winner, risk limit, total auditable ballots.
  */
 @ActiveProfiles("assertions-in-progress")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -112,13 +111,12 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     // The metadata has been constructed appropriately
     assertNotNull(response.getBody());
     assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest,
-        BigDecimal.valueOf(0.1), response.getBody().metadata, Double.class));
+        BigDecimal.valueOf(0.1), defaultCount, response.getBody().metadata, Double.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    // FIXME
     assertTrue(correctSolutionData(320,1.1, 2,1, 1,
         response.getBody().solution.Ok));
 
@@ -146,6 +144,9 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     assertNotNull(csv);
     assertTrue(csv.contains("Contest name,One NEB Assertion Contest\n"));
     assertTrue(csv.contains("Candidates,\"Alice,Bob\""));
+    assertTrue(csv.contains("Winner,Bob\n"));
+    assertTrue(csv.contains("Total universe,"+defaultCount+"\n"));
+    assertTrue(csv.contains("Risk limit,0.10\n\n"));
     assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
     assertTrue(csv.contains("Margin,320,\"1\"\n"));
     assertTrue(csv.contains("Diluted margin,0.32,\"1\"\n"));
@@ -179,13 +180,12 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     assertNotNull(response.getBody());
     assertTrue(
         correctMetadata(List.of("Alice", "Bob", "Charlie", "Diego"), oneNENAssertionContest,
-            BigDecimal.valueOf(0.1), response.getBody().metadata, Double.class));
+            BigDecimal.valueOf(0.1), defaultCount, response.getBody().metadata, Double.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    // FIXME
     assertTrue(correctSolutionData(240, 3.01, 4, 3, 1,
         response.getBody().solution.Ok));
 
@@ -214,6 +214,9 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     assertNotNull(csv);
     assertTrue(csv.contains("Contest name,One NEN Assertion Contest\n"));
     assertTrue(csv.contains("Candidates,\"Alice,Bob,Charlie,Diego\""));
+    assertTrue(csv.contains("Winner,Alice\n"));
+    assertTrue(csv.contains("Total universe,"+defaultCount+"\n"));
+    assertTrue(csv.contains("Risk limit,0.10\n\n"));
     assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
     assertTrue(csv.contains("Margin,240,\"1\"\n"));
     assertTrue(csv.contains("Diluted margin,0.12,\"1\"\n"));
@@ -250,14 +253,13 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     // The metadata has been constructed appropriately.
     assertNotNull(response.getBody());
     assertTrue(correctMetadata(List.of("Liesl", "Wendell", "Amanda", "Chuan"),
-        oneNEBOneNENAssertionContest, BigDecimal.valueOf(0.05), response.getBody().metadata,
-        Double.class));
+        oneNEBOneNENAssertionContest, BigDecimal.valueOf(0.05), defaultCount,
+        response.getBody().metadata, Double.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    //FIXME
     assertTrue(correctSolutionData(112, 3.17, 4, 3, 2,
         response.getBody().solution.Ok));
 
@@ -299,6 +301,9 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     assertNotNull(csv);
     assertTrue(csv.contains("Contest name,One NEN NEB Assertion Contest\n"));
     assertTrue(csv.contains("Candidates,\"Liesl,Wendell,Amanda,Chuan\""));
+    assertTrue(csv.contains("Winner,"+defaultWinner+"\n"));
+    assertTrue(csv.contains("Total universe,"+defaultCount+"\n"));
+    assertTrue(csv.contains("Risk limit,0.05\n\n"));
     assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
     assertTrue(csv.contains("Margin,112,\"1\"\n"));
     assertTrue(csv.contains("Diluted margin,0.1,\"1\"\n"));

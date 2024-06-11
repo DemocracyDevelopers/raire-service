@@ -86,7 +86,7 @@ public class GetAssertionsServiceJsonTests {
 
     // Check that the metadata has been constructed appropriately
     assertTrue(correctMetadata(List.of("Alice","Bob"), "One NEB Assertion Contest",
-        BigDecimal.valueOf(0.1), solution.metadata, BigDecimal.class));
+        BigDecimal.valueOf(0.1), defaultCount, solution.metadata, BigDecimal.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(solution.solution.Err);
@@ -128,8 +128,8 @@ public class GetAssertionsServiceJsonTests {
 
     // Check that the metadata has been constructed appropriately
     assertTrue(correctMetadata(List.of("Alice","Charlie","Diego","Bob"),
-        "One NEN Assertion Contest", BigDecimal.valueOf(0.1), solution.metadata,
-        BigDecimal.class));
+        "One NEN Assertion Contest", BigDecimal.valueOf(0.1), defaultCount,
+        solution.metadata, BigDecimal.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(solution.solution.Err);

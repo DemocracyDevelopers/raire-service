@@ -86,8 +86,8 @@ public class GetAssertionsInProgressServiceJsonAndCsvTests {
 
     // Check that the metadata has been constructed appropriately
     assertTrue(correctMetadata(List.of("Liesl","Wendell","Amanda","Chuan"),
-        "One NEN NEB Assertion Contest", BigDecimal.valueOf(0.05), solution.metadata,
-        BigDecimal.class));
+        "One NEN NEB Assertion Contest", BigDecimal.valueOf(0.05), defaultCount,
+        solution.metadata, BigDecimal.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(solution.solution.Err);
@@ -139,6 +139,9 @@ public class GetAssertionsInProgressServiceJsonAndCsvTests {
 
     assertTrue(csv.contains("Contest name,One NEN NEB Assertion Contest\n"));
     assertTrue(csv.contains("Candidates,\"Liesl,Wendell,Amanda,Chuan\""));
+    assertTrue(csv.contains("Winner,"+defaultWinner+"\n"));
+    assertTrue(csv.contains("Total universe,"+defaultCount+"\n"));
+    assertTrue(csv.contains("Risk limit,0.05\n\n"));
     assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
     assertTrue(csv.contains("Margin,112,\"1\"\n"));
     assertTrue(csv.contains("Diluted margin,0.1,\"1\"\n"));

@@ -57,7 +57,6 @@ import org.springframework.test.context.ActiveProfiles;
  * correct API output rather than checking the service directly.
  * Contests which will be used for validity testing are preloaded into the database using
  * src/test/resources/simple_assertions_csv_challenges.sql.
- * FIXME add winner, risk limit.
  */
 
 @ActiveProfiles("csv-challenges")

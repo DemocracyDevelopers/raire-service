@@ -83,6 +83,7 @@ public class testUtils {
    * @param candidates  the expected list of candidate names
    * @param contestName the expected contest name
    * @param riskLimit   the expected risk limit
+   * @param totalAuditableBallots the size of the universe of ballots.
    * @param metadata    the metadata from the response, in which the riskLimit is interpreted as a
    *                    double by the deserializer.
    * @param riskLimitClass the class in which the risk limit is expressed. Use BigDecimal for things
@@ -91,7 +92,8 @@ public class testUtils {
    * @return true if the response's metadata fields match the candidates, contestname and riskLimit.
    */
   public static boolean correctMetadata(List<String> candidates, String contestName,
-      BigDecimal riskLimit, Map<String, Object> metadata, Type riskLimitClass) throws ClassCastException {
+      BigDecimal riskLimit, int totalAuditableBallots, Map<String, Object> metadata,
+      Type riskLimitClass) throws ClassCastException {
 
     BigDecimal retrievedRiskLimit;
     if(riskLimitClass == Double.class) {
@@ -105,9 +107,11 @@ public class testUtils {
 
     String retrievedContestName = metadata.get(Metadata.CONTEST).toString();
     List<String> retrievedCandidates = (List<String>) metadata.get(Metadata.CANDIDATES);
+    int retrievedTotalBallots = Integer.parseInt(metadata.get(Metadata.TOTAL_BALLOTS).toString());
 
     return contestName.equals(retrievedContestName)
         && riskLimit.compareTo(retrievedRiskLimit) == 0
+        && totalAuditableBallots == retrievedTotalBallots
         && setsNoDupesEqual(candidates, retrievedCandidates);
   }
 
