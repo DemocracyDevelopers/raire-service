@@ -32,7 +32,7 @@ import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
-import au.org.democracydevelopers.raireservice.request.ContestRequest;
+import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
@@ -140,7 +140,7 @@ public class GenerateAssertionsAPIKnownTests {
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
     String getUrl = baseURL + port + getAssertionsEndpoint;
 
-    ContestRequest request = new ContestRequest(guideToRaireExample1,
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample1,
         27, DEFAULT_TIME_LIMIT, Arrays.stream(aliceBobChuanDiego).toList());
 
 
@@ -185,7 +185,7 @@ public class GenerateAssertionsAPIKnownTests {
     testUtils.log(logger, "testGuideToRairePart2Example2");
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
     String getUrl = baseURL + port + getAssertionsEndpoint;
-    ContestRequest request = new ContestRequest(guideToRaireExample2,
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample2,
         41, 5, Arrays.stream(aliceChuanBob).toList());
 
     // Request for the assertions to be generated.
@@ -237,7 +237,7 @@ public class GenerateAssertionsAPIKnownTests {
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
     String getUrl = baseURL + port + getAssertionsEndpoint;
 
-    ContestRequest request = new ContestRequest(simpleContest,
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
         5, 5, Arrays.stream(aliceChuanBob).toList());
 
     // Request for the assertions to be generated.
@@ -281,7 +281,7 @@ public class GenerateAssertionsAPIKnownTests {
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
     String getUrl = baseURL + port + getAssertionsEndpoint;
 
-    ContestRequest request = new ContestRequest(crossCountySimpleContest,
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(crossCountySimpleContest,
         5, 5, Arrays.stream(aliceChuanBob).toList());
 
     // Request for the assertions to be generated.
@@ -334,7 +334,7 @@ public class GenerateAssertionsAPIKnownTests {
 
      // Tell raire that the totalAuditableBallots is double the number in the database
      // for this contest.
-     ContestRequest request = new ContestRequest(simpleContest,
+     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
          10, 5, Arrays.stream(aliceChuanBob).toList());
 
      // Request for the assertions to be generated.
@@ -378,7 +378,7 @@ public class GenerateAssertionsAPIKnownTests {
     testUtils.log(logger, "simpleContestSingleCountyInsufficientBallotsError");
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
 
-    ContestRequest notEnoughBallotsRequest = new ContestRequest(simpleContest,
+    GenerateAssertionsRequest notEnoughBallotsRequest = new GenerateAssertionsRequest(simpleContest,
         2, 5, Arrays.stream(aliceChuanBob).toList());
 
     // Request for the assertions to be generated.

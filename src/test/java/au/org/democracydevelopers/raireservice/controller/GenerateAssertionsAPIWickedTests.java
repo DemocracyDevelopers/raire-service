@@ -27,7 +27,7 @@ import static au.org.democracydevelopers.raireservice.service.RaireServiceExcept
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.request.ContestRequest;
+import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -90,14 +90,14 @@ public class GenerateAssertionsAPIWickedTests {
    * The API requests appropriate for each preloaded contest. Those intended to produce a timeout
    * have a particularly small timeLimit.
    */
-  private final static ContestRequest tiedWinnersRequest
-      = new ContestRequest(tiedWinnersContest, 2, 5,
+  private final static GenerateAssertionsRequest tiedWinnersRequest
+      = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5,
       aliceChuanBob);
-  private final static ContestRequest ByronShortTimeoutRequest
-      = new ContestRequest(ByronMayoral, 18165, 0.001,
+  private final static GenerateAssertionsRequest ByronShortTimeoutRequest
+      = new GenerateAssertionsRequest(ByronMayoral, 18165, 0.001,
       choicesByron);
-  private final static ContestRequest checkingWinnersTimeoutRequest
-      = new ContestRequest(timeOutCheckingWinnersContest, 20,
+  private final static GenerateAssertionsRequest checkingWinnersTimeoutRequest
+      = new GenerateAssertionsRequest(timeOutCheckingWinnersContest, 20,
       0.001, timeoutCheckingWinnersChoices);
 
   @LocalServerPort

@@ -30,6 +30,7 @@ import au.org.democracydevelopers.raireservice.persistence.repository.AssertionR
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import au.org.democracydevelopers.raireservice.request.ContestRequest;
+import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import jakarta.transaction.Transactional;
 import java.util.HashMap;
@@ -80,7 +81,7 @@ public class GenerateAssertionsService {
    * it referred to candidates that were not in the expected list) or an error arose in database
    * access.
    */
-  public RaireResultOrError generateAssertions(ContestRequest request)
+  public RaireResultOrError generateAssertions(GenerateAssertionsRequest request)
       throws RaireServiceException {
     final String prefix = "[generateAssertions]";
     try{
@@ -149,7 +150,7 @@ public class GenerateAssertionsService {
       RaireProblem raireProblem = new RaireProblem(
           metadata, consolidator.getVotes(), request.candidates.size(), null,
           new BallotComparisonOneOnDilutedMargin(request.totalAuditableBallots),
-          TrimAlgorithm.MinimizeAssertions, null, (double) request.timeLimitSeconds
+          TrimAlgorithm.MinimizeAssertions, null, request.timeLimitSeconds
       );
 
       // Tell raire-java to generate assertions, returning a RaireSolutionOrError.

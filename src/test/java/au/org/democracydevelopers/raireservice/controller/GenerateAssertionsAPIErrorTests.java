@@ -28,7 +28,7 @@ import static au.org.democracydevelopers.raireservice.testUtils.generateAssertio
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.request.ContestRequest;
+import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
 import java.util.stream.Stream;
@@ -142,7 +142,7 @@ public class GenerateAssertionsAPIErrorTests {
     testUtils.log(logger, "generateAssertionsFromNoVotesIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    ContestRequest request = new ContestRequest("No CVR Mayoral", 100,
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest("No CVR Mayoral", 100,
         10, aliceAndBob);
 
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -165,7 +165,7 @@ public class GenerateAssertionsAPIErrorTests {
     testUtils.log(logger, "testExpectedErrors");
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    ContestRequest request = new ContestRequest(contestName, totalBallots, timeLimit, candidateList);
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(contestName, totalBallots, timeLimit, candidateList);
 
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 

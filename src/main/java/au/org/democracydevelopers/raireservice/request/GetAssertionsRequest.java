@@ -45,11 +45,6 @@ public class GetAssertionsRequest extends ContestRequest {
   private final static Logger logger = LoggerFactory.getLogger(GetAssertionsRequest.class);
 
   /**
-   * Default time limit, in seconds. Currently ignored.
-   */
-  private final static double DEFAULT_TIME_LIMIT = 5;
-
-  /**
    * The winner, as stated by the request. This is written into response metadata
    * _without_ being checked.
    */
@@ -74,15 +69,18 @@ public class GetAssertionsRequest extends ContestRequest {
   public GetAssertionsRequest(String contestName, int totalAuditableBallots, List<String> candidates,
       String winner, BigDecimal riskLimit) {
 
-    super(contestName, totalAuditableBallots, DEFAULT_TIME_LIMIT, candidates);
+    super(contestName, totalAuditableBallots, candidates);
     this.winner = winner;
     this.riskLimit = riskLimit;
   }
 
   /**
-   * Validates the request to retrieve assertions for the contest, checking that the contest exists
-   * and is an IRV contest, that the risk limit has a sensible value, and that there are candidates.
+   * Validates the GetAssertionsRequest,
+   * super::Validate() checks that the contest exists and is an IRV contest, that
+   * the total ballots has a sensible value, and that the contest has candidates.
    * Note it does _not_ check whether the candidates are present in the CVRs.
+   * This function adds tests that the risk limit has a sensible value, and that the winner
+   * exists and is one of the listed candidates.
    * @param contestRepository the repository for getting Contest objects from the database.
    * @throws RequestValidationException if the request is invalid.
    */

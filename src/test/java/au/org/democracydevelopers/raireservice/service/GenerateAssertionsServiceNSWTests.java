@@ -31,7 +31,7 @@ import au.org.democracydevelopers.raireservice.NSWValues.Expected;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
-import au.org.democracydevelopers.raireservice.request.ContestRequest;
+import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -102,7 +102,7 @@ public class GenerateAssertionsServiceNSWTests {
     for (Expected expected : expectedSolutionData) {
       testUtils.log(logger, "checkAllNSWByService: contest " + expected.contestName());
 
-      ContestRequest request = new ContestRequest(expected.contestName(),
+      GenerateAssertionsRequest request = new GenerateAssertionsRequest(expected.contestName(),
           expected.ballotCount(), DEFAULT_TIME_LIMIT, expected.choices());
 
       // Generate assertions.
