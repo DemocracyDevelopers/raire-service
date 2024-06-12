@@ -39,17 +39,17 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * Tests on ContestRequests, particularly focusing on the validation step.
- * Contests which will be used to test the validity of the ContestRequest are
+ * Tests on GenerateAssertionsRequests, particularly focusing on the validation step.
+ * Contests which will be used to test the validity of the GenerateAssertionsRequest are
  * preloaded into the database using src/test/resources/data.sql.
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class ContestRequestTests {
+public class GenerateAssertionsRequestTests {
 
-  private static final Logger logger = LoggerFactory.getLogger(ContestRequestTests.class);
+  private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsRequestTests.class);
 
   @Autowired
   ContestRepository contestRepository;
@@ -67,7 +67,7 @@ public class ContestRequestTests {
   @Test
   public void validRequestForSingleIRVContestIsValid() {
     testUtils.log(logger, "validRequestForSingleIRVContestIsValid");
-    ContestRequest validRequest = new ContestRequest(ballina,
+    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(ballina,
         100, 100, candidates);
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
   }
@@ -78,7 +78,7 @@ public class ContestRequestTests {
   @Test
   public void validRequestForCrossCountyIRVContestIsValid() {
     testUtils.log(logger, "validRequestForCrossCountyIRVContestIsValid");
-    ContestRequest validRequest = new ContestRequest(multiCounty,
+    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(multiCounty,
         100, 100, candidates);
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
   }
@@ -89,7 +89,7 @@ public class ContestRequestTests {
   @Test
   public void requestForNonexistentContestIsInvalid() {
     testUtils.log(logger, "requestForNonexistentContestIsInvalid");
-    ContestRequest invalidRequest = new ContestRequest(
+    GenerateAssertionsRequest invalidRequest = new GenerateAssertionsRequest(
         "NonExistentContest", 100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> invalidRequest.Validate(contestRepository));
@@ -104,7 +104,7 @@ public class ContestRequestTests {
   public void validRequestForPluralityContestIsInvalid() {
     testUtils.log(logger, "validRequestForPluralityContestIsInvalid");
     String validPlurality = "Valid Plurality Contest";
-    ContestRequest request = new ContestRequest(validPlurality,
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(validPlurality,
         100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
@@ -119,7 +119,7 @@ public class ContestRequestTests {
   public void validRequestForMixedContestTypesIsInvalid() {
     testUtils.log(logger, "validRequestForMixedContestTypesIsInvalid");
     String invalidMixed = "Invalid Mixed Contest";
-    ContestRequest request = new ContestRequest(invalidMixed,
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(invalidMixed,
         100, 100,  candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
@@ -132,7 +132,7 @@ public class ContestRequestTests {
   @Test
   public void requestWithNullNameIsInvalid() {
     testUtils.log(logger, "requestWithNullNameIsInvalid");
-    ContestRequest request = new ContestRequest(null,
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(null,
         100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
@@ -145,7 +145,7 @@ public class ContestRequestTests {
   @Test
   public void requestWithEmptyNameIsInvalid() {
     testUtils.log(logger, "requestWithEmptyNameIsInvalid");
-    ContestRequest request = new ContestRequest("",
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest("",
         100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
@@ -158,7 +158,7 @@ public class ContestRequestTests {
   @Test
   public void requestWithWhitespaceNameIsInvalid() {
     testUtils.log(logger, "requestWithWhitespaceNameIsInvalid");
-    ContestRequest request = new ContestRequest("   ",
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest("   ",
         100, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
@@ -171,7 +171,7 @@ public class ContestRequestTests {
   @Test
   public void requestWithNullCandidateListIsInvalid() {
     testUtils.log(logger, "requestWithNullCandidateListIsInvalid");
-    ContestRequest request = new ContestRequest(ballina,
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(ballina,
         100, 100, null);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
@@ -184,7 +184,7 @@ public class ContestRequestTests {
   @Test
   public void requestWithEmptyCandidateListIsInvalid() {
     testUtils.log(logger, "requestWithEmptyCandidateListIsInvalid");
-    ContestRequest request = new ContestRequest(ballina,
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(ballina,
         100, 100, List.of());
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
@@ -197,7 +197,7 @@ public class ContestRequestTests {
   @Test
   public void requestWithWhitespaceCandidateNameIsInvalid() {
     testUtils.log(logger, "requestWithWhitespaceCandidateNameIsInvalid");
-    ContestRequest request = new ContestRequest(ballina,
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(ballina,
         50, 50, List.of("Alice","    "));
     Exception ex = assertThrows(RequestValidationException.class,
         () -> request.Validate(contestRepository));
@@ -210,7 +210,7 @@ public class ContestRequestTests {
   @Test
   public void ZeroTotalAuditableBallotsIsInvalid() {
     testUtils.log(logger, "ZeroTotalAuditableBallotsIsInvalid");
-    ContestRequest validRequest = new ContestRequest(multiCounty,
+    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(multiCounty,
         0, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> validRequest.Validate(contestRepository));
@@ -225,7 +225,7 @@ public class ContestRequestTests {
   @Test
   public void negativeTotalAuditableBallotsIsInvalid() {
     testUtils.log(logger, "negativeTotalAuditableBallotsIsInvalid");
-    ContestRequest validRequest = new ContestRequest(ballina,
+    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(ballina,
         -10, 100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> validRequest.Validate(contestRepository));
@@ -239,7 +239,7 @@ public class ContestRequestTests {
   @Test
   public void ZeroTimeProvisionForResultIsInvalid() {
     testUtils.log(logger, "ZeroTimeProvisionForResultIsInvalid");
-    ContestRequest validRequest = new ContestRequest(ballina,
+    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(ballina,
           100, 0, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> validRequest.Validate(contestRepository));
@@ -253,7 +253,7 @@ public class ContestRequestTests {
   @Test
   public void negativeTimeProvisionForResultIsInvalid() {
     testUtils.log(logger, "negativeTimeProvisionForResultIsInvalid");
-    ContestRequest validRequest = new ContestRequest(ballina,
+    GenerateAssertionsRequest validRequest = new GenerateAssertionsRequest(ballina,
         100, -100, candidates);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> validRequest.Validate(contestRepository));

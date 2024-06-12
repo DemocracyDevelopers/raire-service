@@ -23,7 +23,7 @@ package au.org.democracydevelopers.raireservice.controller;
 import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
-import au.org.democracydevelopers.raireservice.request.ContestRequest;
+import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.RequestValidationException;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
@@ -83,7 +83,7 @@ public class AssertionController {
    * appropriate http error.
    */
   @PostMapping(path = "/generate-assertions", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<GenerateAssertionsResponse> serve(@RequestBody ContestRequest request)
+  public ResponseEntity<GenerateAssertionsResponse> serve(@RequestBody GenerateAssertionsRequest request)
       throws RequestValidationException, RaireServiceException
   {
     final String prefix = "[endpoint:generate-assertions]";

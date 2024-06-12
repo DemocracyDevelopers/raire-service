@@ -24,22 +24,19 @@ import au.org.democracydevelopers.raireservice.persistence.repository.ContestRep
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.beans.ConstructorProperties;
 
 /**
- * Request (expected to be json) identifying a contest by name and listing other data:
+ * Abstract class that serves as a parent class for particular requests to raire. This class
+ * identifies a contest by name and includes
  * - the candidates (by name),
  * - the total auditable ballots in the universe (used to calculate difficulty in raire),
  * - the time limit allowed to raire.
- * This is used directly for requesting assertion generation.
  * The only significant method is a verification method for checking that the data items are
  * present and have reasonable values.
- * The get assertions request type inherits from this class and adds some other fields and
- * validations.
+ * GenerateAssertionsRequest and GetAssertionsRequest inherit from this class and add some other
+ * fields and validations.
  */
-public class ContestRequest {
-
-  private final static Logger logger = LoggerFactory.getLogger(ContestRequest.class);
+public abstract class ContestRequest {
 
   /**
    * The name of the contest
@@ -54,29 +51,24 @@ public class ContestRequest {
   public final int totalAuditableBallots;
 
   /**
-   * The elapsed time allowed to raire to generate the assertions, in seconds.
-   * Ignored for GetAssertionsRequests.
-   */
-  public final double timeLimitSeconds;
-
-  /**
    * List of candidate names.
    */
   public final List<String> candidates;
 
   /**
+   * Class-wide logger.
+   */
+  private final static Logger logger = LoggerFactory.getLogger(ContestRequest.class);
+
+  /**
    * All args constructor.
    * @param contestName the name of the contest
    * @param totalAuditableBallots the total auditable ballots in the universe under audit.
-   * @param timeLimitSeconds the elapsed time allowed for RAIRE to generate assertions, in seconds.
    * @param candidates the list of candidates by name
    */
-  @ConstructorProperties({"contestName", "totalAuditableBallots", "timeLimitSeconds","candidates"})
-  public ContestRequest(String contestName, int totalAuditableBallots, double timeLimitSeconds,
-      List<String> candidates) {
+  protected ContestRequest(String contestName, int totalAuditableBallots, List<String> candidates) {
     this.contestName = contestName;
     this.totalAuditableBallots = totalAuditableBallots;
-    this.timeLimitSeconds = timeLimitSeconds;
     this.candidates = candidates;
   }
 
@@ -90,9 +82,8 @@ public class ContestRequest {
   public void Validate(ContestRepository contestRepository) throws RequestValidationException {
     final String prefix = "[Validate]";
     logger.debug(String.format("%s Validating a Contest Request for contest %s " +
-        "with specified candidates %s, total number of auditable ballots %d, and time limit " +
-        "on assertion generation of %fs.", prefix, contestName, candidates, totalAuditableBallots,
-        timeLimitSeconds));
+        "with specified candidates %s, total number of auditable ballots %d.", prefix, contestName,
+        candidates, totalAuditableBallots));
 
     if(contestName == null || contestName.isBlank()) {
       final String msg = String.format("%s No contest name specified. " +
@@ -129,13 +120,5 @@ public class ContestRequest {
       logger.error(msg);
       throw new RequestValidationException(msg);
     }
-    if(timeLimitSeconds <= 0) {
-      final String msg = String.format("%s Non-positive time limit on assertion generation (%f). " +
-          "Throwing a RequestValidationException.", prefix, timeLimitSeconds);
-      logger.error(msg);
-      throw new RequestValidationException(msg);
-    }
-
-    logger.debug(String.format("%s Request for contest information valid.", prefix));
   }
 }
