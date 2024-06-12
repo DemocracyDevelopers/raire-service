@@ -20,6 +20,8 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.service;
 
+import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -70,8 +72,8 @@ public class GetAssertionsServiceErrorJsonAndCsvTests {
   @Transactional
   void existentContestNoAssertionsJSON(){
     testUtils.log(logger, "existentContestNoAssertionsJSON");
-    GetAssertionsRequest request = new GetAssertionsRequest("No CVR Mayoral",
-        List.of(), BigDecimal.valueOf(0.1));
+    GetAssertionsRequest request = new GetAssertionsRequest("No CVR Mayoral", defaultCount,
+        List.of(), defaultWinner, BigDecimal.valueOf(0.1));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         getAssertionsJsonService.getRaireSolution(request));
@@ -86,8 +88,8 @@ public class GetAssertionsServiceErrorJsonAndCsvTests {
   @Transactional
   void existentContestNoAssertionsCSV(){
     testUtils.log(logger, "existentContestNoAssertionsCSV");
-    GetAssertionsRequest request = new GetAssertionsRequest("No CVR Mayoral",
-        List.of(), BigDecimal.valueOf(0.1));
+    GetAssertionsRequest request = new GetAssertionsRequest("No CVR Mayoral", defaultCount,
+        List.of(), defaultWinner, BigDecimal.valueOf(0.1));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         getAssertionsCsvService.generateCSV(request));
@@ -104,7 +106,7 @@ public class GetAssertionsServiceErrorJsonAndCsvTests {
   void nonExistentContestNoAssertionsJSON(){
     testUtils.log(logger, "nonExistentContestNoAssertionsJSON");
     GetAssertionsRequest request = new GetAssertionsRequest("Non-Existent Contest Name",
-        List.of(), BigDecimal.valueOf(0.1));
+        defaultCount, List.of(), defaultWinner, BigDecimal.valueOf(0.1));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         getAssertionsJsonService.getRaireSolution(request));
@@ -121,7 +123,7 @@ public class GetAssertionsServiceErrorJsonAndCsvTests {
   void nonExistentContestNoAssertionsCSV(){
     testUtils.log(logger, "nonExistentContestNoAssertionsCSV");
     GetAssertionsRequest request = new GetAssertionsRequest("Non-Existent Contest Name",
-        List.of(), BigDecimal.valueOf(0.1));
+        defaultCount, List.of(), defaultWinner, BigDecimal.valueOf(0.1));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         getAssertionsCsvService.generateCSV(request));

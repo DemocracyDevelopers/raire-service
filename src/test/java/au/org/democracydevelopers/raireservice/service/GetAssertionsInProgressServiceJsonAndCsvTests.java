@@ -20,7 +20,9 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.service;
 
+import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -78,14 +80,14 @@ public class GetAssertionsInProgressServiceJsonAndCsvTests {
   void retrieveAssertionsOneNENOneNEBAssertionInProgressJSON() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressJSON");
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
-        List.of("Liesl", "Wendell", "Amanda", "Chuan"), BigDecimal.valueOf(0.05));
+        defaultCount, List.of("Liesl", "Wendell", "Amanda", "Chuan"), defaultWinner, BigDecimal.valueOf(0.05));
 
     RaireSolution solution = getAssertionsJsonService.getRaireSolution(request);
 
     // Check that the metadata has been constructed appropriately
     assertTrue(correctMetadata(List.of("Liesl","Wendell","Amanda","Chuan"),
-        "One NEN NEB Assertion Contest", BigDecimal.valueOf(0.05), solution.metadata,
-        BigDecimal.class));
+        "One NEN NEB Assertion Contest", BigDecimal.valueOf(0.05), defaultCount,
+        solution.metadata, BigDecimal.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(solution.solution.Err);
@@ -131,12 +133,15 @@ public class GetAssertionsInProgressServiceJsonAndCsvTests {
   void retrieveAssertionsOneNENOneNEBAssertionInProgressCSV() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressCSV");
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
-        List.of("Liesl", "Wendell", "Amanda", "Chuan"), BigDecimal.valueOf(0.05));
+        defaultCount, List.of("Liesl", "Wendell", "Amanda", "Chuan"), defaultWinner, BigDecimal.valueOf(0.05));
 
     String csv = getAssertionsCsvService.generateCSV(request);
 
     assertTrue(csv.contains("Contest name,One NEN NEB Assertion Contest\n"));
     assertTrue(csv.contains("Candidates,\"Liesl,Wendell,Amanda,Chuan\""));
+    assertTrue(csv.contains("Winner,"+defaultWinner+"\n"));
+    assertTrue(csv.contains("Total universe,"+defaultCount+"\n"));
+    assertTrue(csv.contains("Risk limit,0.05\n\n"));
     assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
     assertTrue(csv.contains("Margin,112,\"1\"\n"));
     assertTrue(csv.contains("Diluted margin,0.1,\"1\"\n"));

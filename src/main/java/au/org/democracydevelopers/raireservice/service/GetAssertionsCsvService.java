@@ -28,6 +28,9 @@ import static au.org.democracydevelopers.raireservice.service.Metadata.DILUTED_M
 import static au.org.democracydevelopers.raireservice.service.Metadata.ESTIMATED_SAMPLES;
 import static au.org.democracydevelopers.raireservice.service.Metadata.MARGIN;
 import static au.org.democracydevelopers.raireservice.service.Metadata.OPTIMISTIC_SAMPLES;
+import static au.org.democracydevelopers.raireservice.service.Metadata.RISK_LIMIT_HEADER;
+import static au.org.democracydevelopers.raireservice.service.Metadata.TOTAL_AUDITABLE_BALLOTS_HEADER;
+import static au.org.democracydevelopers.raireservice.service.Metadata.WINNER_HEADER;
 import static au.org.democracydevelopers.raireservice.service.Metadata.extremumHeaders;
 import static au.org.democracydevelopers.raireservice.service.Metadata.csvHeaders;
 import static au.org.democracydevelopers.raireservice.util.CSVUtils.escapeThenJoin;
@@ -41,10 +44,11 @@ import au.org.democracydevelopers.raireservice.util.DoubleComparator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
-import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -244,20 +248,25 @@ public class GetAssertionsCsvService {
   }
 
   /**
-   * Construct the preface of the csv file, including contest metadata (contest name and list of
-   * candidates), and headers for the extreme values.
+   * Construct the preface of the csv file, including contest metadata (contest name, list of
+   * candidates, winner, total auditable ballots and risk limit) and headers for the extreme values.
    * @param request the GetAssertionsRequest, used for contest name and candidate list.
    * @return a preface to the CSV file.
    */
   private String makePreface(GetAssertionsRequest request) {
-      return escapeThenJoin(
-            // The contest name. This gets escaped just in case it contains commas.
-            List.of(CONTEST_NAME_HEADER, StringEscapeUtils.escapeCsv(request.contestName))
-          ) + "\n"
-          + escapeThenJoin(
-            // The list of candidates.
-            List.of(CANDIDATES_HEADER, escapeThenJoin(request.candidates))
-          )  +"\n\n"
+      Map<String,String> metadata = new HashMap<>();
+      metadata.put(CONTEST_NAME_HEADER, request.contestName);
+      metadata.put(CANDIDATES_HEADER, escapeThenJoin(request.candidates));
+      metadata.put(WINNER_HEADER, request.winner);
+      metadata.put(TOTAL_AUDITABLE_BALLOTS_HEADER, ""+request.totalAuditableBallots);
+      metadata.put(RISK_LIMIT_HEADER, request.riskLimit.toString());
+
+      List<String> prefaceHeaders = List.of(CONTEST_NAME_HEADER, CANDIDATES_HEADER, WINNER_HEADER,
+          TOTAL_AUDITABLE_BALLOTS_HEADER, RISK_LIMIT_HEADER);
+
+      return String.join("\n", prefaceHeaders.stream()
+          .map(h -> escapeThenJoin(List.of(h, metadata.get(h)))).toList())
+          +"\n\n"
           + escapeThenJoin(extremumHeaders) + "\n";
   }
 

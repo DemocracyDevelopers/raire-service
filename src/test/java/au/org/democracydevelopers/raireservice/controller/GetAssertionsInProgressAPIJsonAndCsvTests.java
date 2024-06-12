@@ -20,9 +20,13 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static au.org.democracydevelopers.raireservice.testUtils.correctAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static au.org.democracydevelopers.raireservice.testUtils.correctSolutionData;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultCountJson;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultWinnerJSON;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -98,8 +102,8 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertionJSON");
     String url = baseURL + port + getAssertionsJsonEndpoint;
 
-    GetAssertionsRequest request = new GetAssertionsRequest(oneNEBAssertionContest,
-        List.of("Alice","Bob"), BigDecimal.valueOf(0.1));
+    GetAssertionsRequest request = new GetAssertionsRequest(oneNEBAssertionContest, defaultCount,
+        List.of("Alice","Bob"), "Bob", BigDecimal.valueOf(0.1));
 
     ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request,
         RaireSolution.class);
@@ -107,13 +111,13 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     // The metadata has been constructed appropriately
     assertNotNull(response.getBody());
     assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest,
-        BigDecimal.valueOf(0.1), response.getBody().metadata, Double.class));
+        BigDecimal.valueOf(0.1), defaultCount, response.getBody().metadata, Double.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(320,1.1, 1,
+    assertTrue(correctSolutionData(320,1.1, 2,1, 1,
         response.getBody().solution.Ok));
 
     // We expect one NEB assertion with the following data.
@@ -131,8 +135,8 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertionCSV");
     String url = baseURL + port + getAssertionsCsvEndpoint;
 
-    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" +
-        oneNEBAssertionContest+"\",\"candidates\":[\"Alice\",\"Bob\"]}";
+    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"" + oneNEBAssertionContest+"\","
+        + defaultCountJson + "," + "\"winner\":\"Bob\""+ "," + "\"candidates\":[\"Alice\",\"Bob\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     String csv = restTemplate.postForEntity(url, request, String.class).getBody();
@@ -140,6 +144,9 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     assertNotNull(csv);
     assertTrue(csv.contains("Contest name,One NEB Assertion Contest\n"));
     assertTrue(csv.contains("Candidates,\"Alice,Bob\""));
+    assertTrue(csv.contains("Winner,Bob\n"));
+    assertTrue(csv.contains("Total universe,"+defaultCount+"\n"));
+    assertTrue(csv.contains("Risk limit,0.10\n\n"));
     assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
     assertTrue(csv.contains("Margin,320,\"1\"\n"));
     assertTrue(csv.contains("Diluted margin,0.32,\"1\"\n"));
@@ -164,8 +171,8 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertionJSON");
     String url = baseURL + port + getAssertionsJsonEndpoint;
 
-    GetAssertionsRequest request = new GetAssertionsRequest(oneNENAssertionContest,
-        List.of("Alice","Bob","Charlie","Diego"), BigDecimal.valueOf(0.1));
+    GetAssertionsRequest request = new GetAssertionsRequest(oneNENAssertionContest, defaultCount,
+        List.of("Alice","Bob","Charlie","Diego"), "Diego", BigDecimal.valueOf(0.1));
     ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request,
         RaireSolution.class);
 
@@ -173,13 +180,13 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     assertNotNull(response.getBody());
     assertTrue(
         correctMetadata(List.of("Alice", "Bob", "Charlie", "Diego"), oneNENAssertionContest,
-            BigDecimal.valueOf(0.1), response.getBody().metadata, Double.class));
+            BigDecimal.valueOf(0.1), defaultCount, response.getBody().metadata, Double.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(240, 3.01, 1,
+    assertTrue(correctSolutionData(240, 3.01, 4, 3, 1,
         response.getBody().solution.Ok));
 
     // We expect one assertion with the following data.
@@ -197,8 +204,9 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     String url = baseURL + port + getAssertionsCsvEndpoint;
 
     String requestAsJson =
-        "{\"riskLimit\":0.10,\"contestName\":\"" + oneNENAssertionContest
-            + "\",\"candidates\":[\"Alice\",\"Bob\",\"Charlie\",\"Diego\"]}";
+        "{\"riskLimit\":0.10,\"contestName\":\"" + oneNENAssertionContest + "\","
+            + defaultCountJson + "," +"\"winner\":\"Alice\"" + ","
+            + "\"candidates\":[\"Alice\",\"Bob\",\"Charlie\",\"Diego\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     String csv = restTemplate.postForEntity(url, request, String.class).getBody();
@@ -206,6 +214,9 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     assertNotNull(csv);
     assertTrue(csv.contains("Contest name,One NEN Assertion Contest\n"));
     assertTrue(csv.contains("Candidates,\"Alice,Bob,Charlie,Diego\""));
+    assertTrue(csv.contains("Winner,Alice\n"));
+    assertTrue(csv.contains("Total universe,"+defaultCount+"\n"));
+    assertTrue(csv.contains("Risk limit,0.10\n\n"));
     assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
     assertTrue(csv.contains("Margin,240,\"1\"\n"));
     assertTrue(csv.contains("Diluted margin,0.12,\"1\"\n"));
@@ -235,21 +246,21 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
 
     // Make the request.
     GetAssertionsRequest request = new GetAssertionsRequest(oneNEBOneNENAssertionContest,
-        List.of("Liesl","Wendell","Amanda","Chuan"), BigDecimal.valueOf(0.05));
+        defaultCount, List.of("Liesl","Wendell","Amanda","Chuan"), defaultWinner, BigDecimal.valueOf(0.05));
     ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request,
         RaireSolution.class);
 
     // The metadata has been constructed appropriately.
     assertNotNull(response.getBody());
     assertTrue(correctMetadata(List.of("Liesl", "Wendell", "Amanda", "Chuan"),
-        oneNEBOneNENAssertionContest, BigDecimal.valueOf(0.05), response.getBody().metadata,
-        Double.class));
+        oneNEBOneNENAssertionContest, BigDecimal.valueOf(0.05), defaultCount,
+        response.getBody().metadata, Double.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
     assertNull(response.getBody().solution.Err);
 
     // Check the contents of the RaireResults within the RaireSolution.
-    assertTrue(correctSolutionData(112, 3.17, 2,
+    assertTrue(correctSolutionData(112, 3.17, 4, 3, 2,
         response.getBody().solution.Ok));
 
     // We expect two assertions with the following data, but we don't necessarily know what order
@@ -280,8 +291,9 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     String url = baseURL + port + getAssertionsCsvEndpoint;
 
     String requestAsJson =
-        "{\"riskLimit\":0.05,\"contestName\":\"" + oneNEBOneNENAssertionContest
-            + "\",\"candidates\":[\"Liesl\",\"Wendell\",\"Amanda\",\"Chuan\"]}";
+        "{\"riskLimit\":0.05,\"contestName\":\"" + oneNEBOneNENAssertionContest + "\","
+            + defaultCountJson + "," + defaultWinnerJSON + ","
+            + "\"candidates\":[\"Liesl\",\"Wendell\",\"Amanda\",\"Chuan\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     String csv = restTemplate.postForEntity(url, request, String.class).getBody();
@@ -289,6 +301,9 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
     assertNotNull(csv);
     assertTrue(csv.contains("Contest name,One NEN NEB Assertion Contest\n"));
     assertTrue(csv.contains("Candidates,\"Liesl,Wendell,Amanda,Chuan\""));
+    assertTrue(csv.contains("Winner,"+defaultWinner+"\n"));
+    assertTrue(csv.contains("Total universe,"+defaultCount+"\n"));
+    assertTrue(csv.contains("Risk limit,0.05\n\n"));
     assertTrue(csv.contains("Extreme item,Value,Assertion IDs\n"));
     assertTrue(csv.contains("Margin,112,\"1\"\n"));
     assertTrue(csv.contains("Diluted margin,0.1,\"1\"\n"));

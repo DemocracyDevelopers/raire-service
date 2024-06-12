@@ -21,15 +21,23 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.controller;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
+import static au.org.democracydevelopers.raireservice.testUtils.aliceAndBob;
+import static au.org.democracydevelopers.raireservice.testUtils.ballinaMayoral;
+import static au.org.democracydevelopers.raireservice.testUtils.baseURL;
+import static au.org.democracydevelopers.raireservice.testUtils.generateAssertionsEndpoint;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
+import au.org.democracydevelopers.raireservice.request.ContestRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,10 +82,6 @@ public class GenerateAssertionsAPIErrorTests {
   private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsAPIErrorTests.class);
 
   private final static HttpHeaders httpHeaders = new HttpHeaders();
-  private final static String baseURL = "http://localhost:";
-  private final static String generateAssertionsEndpoint = "/raire/generate-assertions";
-
-  private final static List<String> aliceAndBob = List.of("Alice","Bob");
 
   @LocalServerPort
   private int port;
@@ -130,22 +134,6 @@ public class GenerateAssertionsAPIErrorTests {
   }
 
   /**
-   * The generateAssertions endpoint, called with a nonexistent contest, returns a meaningful error.
-   */
-  @Test
-  public void generateAssertionsWithNonExistentContestIsAnError() {
-    testUtils.log(logger, "generateAssertionsWithNonExistentContestIsAnError");
-    String url = baseURL + port + generateAssertionsEndpoint;
-
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("NonExistentContest",
-        100, 10, aliceAndBob);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No such contest"));
-  }
-
-  /**
    * The generateAssertions endpoint, called with a valid IRV contest for which no votes are present,
    * returns a meaningful error.
    */
@@ -154,7 +142,7 @@ public class GenerateAssertionsAPIErrorTests {
     testUtils.log(logger, "generateAssertionsFromNoVotesIsAnError");
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("No CVR Mayoral", 100,
+    ContestRequest request = new ContestRequest("No CVR Mayoral", 100,
         10, aliceAndBob);
 
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -164,37 +152,72 @@ public class GenerateAssertionsAPIErrorTests {
   }
 
   /**
-   * The generateAssertions endpoint, called with a valid plurality contest,
-   * returns a meaningful error.
+   * @param contestName the name of the contest.
+   * @param totalBallots the total auditable ballots.
+   * @param timeLimit the time limit in seconds.
+   * @param candidateList the list of candidate names.
+   * @param errorMsg the expected error message.
    */
-  @Test
-  public void generateAssertionsWithPluralityContestIsAnError() {
-    testUtils.log(logger, "generateAssertionsWithPluralityContestIsAnError");
+  @ParameterizedTest
+  @MethodSource("expectedBadRequestErrors")
+  public void testExpectedErrors(String contestName, int totalBallots, double timeLimit,
+      List<String> candidateList, String errorMsg) {
+    testUtils.log(logger, "testExpectedErrors");
     String url = baseURL + port + generateAssertionsEndpoint;
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest(
-        "Valid Plurality Contest", 100, 10, aliceAndBob);
+    ContestRequest request = new ContestRequest(contestName, totalBallots, timeLimit, candidateList);
+
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not comprised of all IRV"));
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), errorMsg));
   }
 
   /**
-   * The generateAssertions endpoint, called with a mixed IRV and non-IRV contest,
-   * returns a meaningful error.
+   * The actual data for the testExpectedErrors function.
+   * @return the data to be tested.
    */
-  @Test
-  public void generateAssertionsWithMixedIRVPluralityContestIsAnError() {
-    testUtils.log(logger, "generateAssertionsWithMixedIRVPluralityContestIsAnError");
-    String url = baseURL + port + generateAssertionsEndpoint;
-
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("Invalid Mixed Contest",
-        100,10,aliceAndBob);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Not comprised of all IRV"));
+  private static Stream<Arguments> expectedBadRequestErrors() {
+    final int ballotCount = 100;
+    final int timeLimit = 10;
+    return Stream.of(
+        // generateAssertions, called with a nonexistent contest.
+        Arguments.of("NonExistentContest", ballotCount, timeLimit, aliceAndBob,
+            "No such contest"),
+        // generateAssertions, called with a valid plurality contest.
+        Arguments.of("Valid Plurality Contest", ballotCount, timeLimit, aliceAndBob,
+            "Not comprised of all IRV"),
+        // generateAssertions endpoint, called with a mixed IRV and non-IRV contest.
+        Arguments.of("Invalid Mixed Contest", ballotCount, timeLimit, aliceAndBob,
+            "Not comprised of all IRV"),
+        // generateAssertions endpoint, called with a null contest name.
+        Arguments.of(null, ballotCount, timeLimit, aliceAndBob, "No contest name"),
+        // generateAssertions endpoint, called with an empty contest name.
+        Arguments.of("", ballotCount, timeLimit, aliceAndBob, "No contest name"),
+        // generateAssertions endpoint, called with an all-whitespace contest name.
+        Arguments.of("     ", ballotCount, timeLimit, aliceAndBob, "No contest name"),
+        // generateAssertions endpoint, called with a null candidate list.
+        Arguments.of(ballinaMayoral, ballotCount, timeLimit, null,
+            "Bad candidate list"),
+        // generateAssertions endpoint, called with an empty candidate list.
+        Arguments.of(ballinaMayoral, ballotCount, timeLimit, List.of(),
+            "Bad candidate list"),
+        // generateAssertions endpoint, called with a whitespace candidate name.
+        Arguments.of(ballinaMayoral, ballotCount, timeLimit, List.of("Alice", "  "),
+            "Bad candidate list"),
+        // generateAssertions endpoint, called with zero total auditable ballots.
+        Arguments.of(ballinaMayoral, 0, timeLimit, aliceAndBob,
+            "Non-positive total auditable ballots"),
+        // generateAssertions endpoint, called with negative total auditable ballots.
+        Arguments.of(ballinaMayoral, -10, timeLimit, aliceAndBob,
+            "Non-positive total auditable ballots"),
+        // generateAssertions endpoint, called with zero time limit.
+        Arguments.of(ballinaMayoral, ballotCount, 0, aliceAndBob,
+            "Non-positive time limit"),
+        // generateAssertions endpoint, called with negative time limit.
+        Arguments.of(ballinaMayoral, ballotCount, -4.0, aliceAndBob,
+            "Non-positive time limit")
+    );
   }
 
   /**
@@ -217,83 +240,6 @@ public class GenerateAssertionsAPIErrorTests {
   }
 
   /**
-   * The generateAssertions endpoint, called with a null contest name, returns a meaningful error.
-   */
-  @Test
-  public void generateAssertionsWithNullContestNameIsAnError() {
-    testUtils.log(logger, "generateAssertionsWithNullContestNameIsAnError");
-    String url = baseURL + port + generateAssertionsEndpoint;
-
-    String requestAsJson =
-        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
-            +"\"contestName\":null,\"candidates\":[\"Alice\",\"Bob\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No contest name"));
-  }
-
-  /**
-   * The generateAssertions endpoint, called with an empty contest name, returns a meaningful error.
-   */
-  @Test
-  public void generateAssertionsWithEmptyContestNameIsAnError() {
-    testUtils.log(logger, "generateAssertionsWithEmptyContestNameIsAnError");
-    String url = baseURL + port + generateAssertionsEndpoint;
-
-    String requestAsJson =
-        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
-            +"\"contestName\":\"\",\"candidates\":[\"Alice\",\"Bob\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No contest name"));
-  }
-
-  /**
-   * The generateAssertions endpoint, called with an all-whitespace contest name,
-   * returns a meaningful error.
-   */
-  @Test
-  public void generateAssertionsWithWhitespaceContestNameIsAnError() {
-    testUtils.log(logger, "generateAssertionsWithWhitespaceContestNameIsAnError");
-    String url = baseURL + port + generateAssertionsEndpoint;
-
-    String requestAsJson =
-        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"
-            +"\"contestName\":\"     \",\"candidates\":[\"Alice\",\"Bob\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "No contest name"));
-  }
-
-  /**
-   * The generateAssertions endpoint, called with a null candidate list, returns a meaningful error.
-   */
-  @Test
-  public void generateAssertionsWithNullCandidateListIsAnError() {
-    testUtils.log(logger, "generateAssertionsWithNullCandidateListIsAnError");
-    String url = baseURL + port + generateAssertionsEndpoint;
-
-    String requestAsJson =
-        "{\"timeLimitSeconds\":5.0,\"totalAuditableBallots\":100,"
-            +"\"candidates\":null,\"contestName\":\"Ballina Mayoral\"}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Bad candidate list"));
-  }
-
-  /**
    * The generateAssertions endpoint, called with a missing candidate list, returns a meaningful error.
    */
   @Test
@@ -313,46 +259,7 @@ public class GenerateAssertionsAPIErrorTests {
   }
 
   /**
-   * The generateAssertions endpoint, called with an empty candidate list, returns a meaningful error.
-   */
-  @Test
-  public void generateAssertionsWithEmptyCandidateListIsAnError() {
-    testUtils.log(logger, "generateAssertionsWithEmptyCandidateListIsAnError");
-    String url = baseURL + port + generateAssertionsEndpoint;
-
-    String requestAsJson =
-        "{\"timeLimitSeconds\":5.0,\"totalAuditableBallots\":100,"
-            +"\"contestName\":\"Ballina Mayoral\",\"candidates\":[]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Bad candidate list"));
-  }
-
-  /**
-   * The generateAssertions endpoint, called with a whitespace candidate name,
-   * returns a meaningful error.
-   */
-  @Test
-  public void generateAssertionsWithWhiteSpaceCandidateNameIsAnError() {
-    testUtils.log(logger, "generateAssertionsWithWhiteSpaceCandidateNameIsAnError");
-    String url = baseURL + port + generateAssertionsEndpoint;
-
-    String requestAsJson =
-        "{\"timeLimitSeconds\":5.0,\"totalAuditableBallots\":100,"
-            +"\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"     \"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(), "Bad candidate list"));
-  }
-
-  /**
-   * The generateAssertions endpoint, called with null/missing total auditable ballots, returns a
+   * The generateAssertions endpoint, called with missing total auditable ballots, returns a
    * meaningful error.
    */
   @Test
@@ -373,49 +280,7 @@ public class GenerateAssertionsAPIErrorTests {
   }
 
   /**
-   * The generateAssertions endpoint, called with zero total auditable ballots,
-   * returns a meaningful error.
-   */
-  @Test
-  public void generateAssertionsWithZeroAuditableBallotsIsAnError() {
-    testUtils.log(logger, "generateAssertionsWithZeroAuditableBallotsIsAnError");
-    String url = baseURL + port + generateAssertionsEndpoint;
-
-    String requestAsJson =
-        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":0,"
-            +"\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
-        "Non-positive total auditable ballots"));
-  }
-
-  /**
-   * The generateAssertions endpoint, called with negative total auditable ballots,
-   * returns a meaningful error.
-   */
-  @Test
-  public void generateAssertionsWithNegativeAuditableBallotsIsAnError() {
-    testUtils.log(logger, "generateAssertionsWithNegativeAuditableBallotsIsAnError");
-    String url = baseURL + port + generateAssertionsEndpoint;
-
-    String requestAsJson =
-        "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":-10,"
-            +"\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
-        "Non-positive total auditable ballots"));
-  }
-
-  /**
-   * The generateAssertions endpoint, called with null/missing time limit, returns a meaningful error.
+   * The generateAssertions endpoint, called with missing time limit, returns a meaningful error.
    */
   @Test
   public void generateAssertionsWithNullTimeLimitIsAnError() {
@@ -434,51 +299,13 @@ public class GenerateAssertionsAPIErrorTests {
   }
 
   /**
-   * The generateAssertions endpoint, called with zero time limit, returns a meaningful error.
-   */
-  @Test
-  public void generateAssertionsWithZeroTimeLimitIsAnError() {
-    testUtils.log(logger, "generateAssertionsWithZeroTimeLimitIsAnError");
-    String url = baseURL + port + generateAssertionsEndpoint;
-
-    String requestAsJson =
-        "{\"timeLimitSeconds\":0.0,\"totalAuditableBallots\":100,"
-            +"\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),"Non-positive time limit"));
-  }
-
-  /**
-   * The generateAssertions endpoint, called with negative time limit, returns a meaningful error.
-   */
-  @Test
-  public void generateAssertionsWithNegativeTimeLimitIsAnError() {
-    testUtils.log(logger, "generateAssertionsWithNegativeTimeLimitIsAnError");
-    String url = baseURL + port + generateAssertionsEndpoint;
-
-    String requestAsJson =
-        "{\"timeLimitSeconds\":-50.0,\"totalAuditableBallots\":100,"
-            +"\"contestName\":\"Ballina Mayoral\",\"candidates\":[\"Alice\",\"Bob\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),"Non-positive time limit"));
-  }
-
-  /**
    * A GenerateAssertions request with a candidate list that is valid, but the votes in the database
    * contain at least one candidate who is not in the expected candidate list. This is an error.
    */
   @Test
   public void wrongCandidatesIsAnError() {
     testUtils.log(logger, "wrongCandidatesIsAnError");
-    String url = "http://localhost:" +port + generateAssertionsEndpoint;
+    String url = "http://localhost:" + port + generateAssertionsEndpoint;
 
     String requestAsJson =
         "{\"timeLimitSeconds\":10.0,\"totalAuditableBallots\":100,"

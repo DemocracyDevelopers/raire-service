@@ -87,6 +87,7 @@ public class GetAssertionsJsonService {
       metadata.put(Metadata.CANDIDATES, request.candidates);
       metadata.put(Metadata.RISK_LIMIT, request.riskLimit);
       metadata.put(Metadata.CONTEST, request.contestName);
+      metadata.put(Metadata.TOTAL_BALLOTS, request.totalAuditableBallots);
 
       // Translate the assertions extracted from the database into AssertionAndDifficulty objects,
       // keeping track of the maximum difficulty and minimum margin.
@@ -120,9 +121,10 @@ public class GetAssertionsJsonService {
       logger.debug(String.format("%s Minimum margin across assertions: %d.", prefix, margin));
 
       // Using a version of RaireResult in which certain attributes will be ignored in
-      // serialisation.
+      // serialisation. If request.winner is not in the candidate list, that should be caught at
+      // validation time.
       RaireResultMixIn result = new RaireResultMixIn(translated.toArray(AssertionAndDifficulty[]::new),
-          difficulty, margin, request.candidates.size());
+          difficulty, margin, request.candidates.indexOf(request.winner), request.candidates.size());
 
       RaireSolution solution = new RaireSolution(metadata, new RaireResultOrError(result));
       logger.debug(String.format("%s Constructed RaireSolution for return and serialisation.", prefix));

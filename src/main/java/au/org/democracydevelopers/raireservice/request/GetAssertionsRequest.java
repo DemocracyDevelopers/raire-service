@@ -30,8 +30,9 @@ import org.slf4j.LoggerFactory;
 /**
  * Request (expected to be json) identifying the contest for which assertions should be retrieved
  * from the database (expected to be exported as json).
- * This extends ContestRequest and uses the contest name and candidate list, plus validations,
- * from there. A GetAssertionsRequest identifies a contest by name along with the candidate list
+ * This extends ContestRequest and uses the contest name, totalAuditable ballots and candidate list,
+ * plus validations, from there. The time limit is set to a default and ignored.
+ * A GetAssertionsRequest identifies a contest by name along with the candidate list
  * (which is necessary for producing the metadata for later visualization). riskLimit states the
  * risk limit for the audit. This is not actually used in raire-service computations,
  * but will be output later with the assertion export, so that it can be used in the assertion
@@ -44,20 +45,37 @@ public class GetAssertionsRequest extends ContestRequest {
   private final static Logger logger = LoggerFactory.getLogger(GetAssertionsRequest.class);
 
   /**
-   * The risk limit for the audit, expected to be in the range [0,1].
+   * Default time limit, in seconds. Currently ignored.
+   */
+  private final static double DEFAULT_TIME_LIMIT = 5;
+
+  /**
+   * The winner, as stated by the request. This is written into response metadata
+   * _without_ being checked.
+   */
+  public final String winner;
+
+  /**
+   * The risk limit for the audit, expected to be in the range [0,1]. Defaults to zero, because
+   * then we know we will never mistakenly claim the risk limit has been met.
    */
   public final BigDecimal riskLimit;
 
   /**
-   * All args constructor.
+   * Not-quite-all args constructor. (Arguments omit the timeLimitSeconds, which is set to a default
+   * and ignored.)
    * @param contestName the name of the contest
+   * @param totalAuditableBallots the total number of ballots in the universe.
    * @param candidates a list of candidates by name
+   * @param winner the winner's name
    * @param riskLimit the risk limit for the audit, expected to be in the range [0,1].
    */
-  @ConstructorProperties({"contestName", "candidates", "riskLimit"})
-  public GetAssertionsRequest(String contestName, List<String> candidates, BigDecimal riskLimit) {
+  @ConstructorProperties({"contestName", "totalAuditableBallots", "candidates", "winner", "riskLimit"})
+  public GetAssertionsRequest(String contestName, int totalAuditableBallots, List<String> candidates,
+      String winner, BigDecimal riskLimit) {
 
-    super(contestName, candidates);
+    super(contestName, totalAuditableBallots, DEFAULT_TIME_LIMIT, candidates);
+    this.winner = winner;
     this.riskLimit = riskLimit;
   }
 
@@ -80,6 +98,22 @@ public class GetAssertionsRequest extends ContestRequest {
     if (riskLimit == null || riskLimit.compareTo(BigDecimal.ZERO) < 0) {
       final String msg = String.format("%s Null or negative risk limit specified in request (%s). "
           + "Throwing a RequestValidationException.", prefix, riskLimit);
+      logger.error(msg);
+      throw new RequestValidationException(msg);
+    }
+
+    // Check for null winner.
+    if (winner == null) {
+      final String msg = String.format("%s Null or absent winner specified in request. "
+          + "Throwing a RequestValidationException.", prefix);
+      logger.error(msg);
+      throw new RequestValidationException(msg);
+    }
+
+    // Check that the claimed winner is one of the candidates.
+    if (!candidates.contains(winner)) {
+      final String msg = String.format("%s Winner %s is not one of the candidates: %s. "
+          + "Throwing a RequestValidationException.", prefix, winner, candidates);
       logger.error(msg);
       throw new RequestValidationException(msg);
     }

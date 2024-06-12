@@ -21,6 +21,8 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.service;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
+import static au.org.democracydevelopers.raireservice.testUtils.aliceAndBob;
+import static au.org.democracydevelopers.raireservice.testUtils.aliceAndBobAndCharlie;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -29,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raire.RaireError;
-import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
+import au.org.democracydevelopers.raireservice.request.ContestRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
@@ -72,8 +74,6 @@ public class GenerateAssertionsServiceErrorTests {
 
   @Autowired
   private GenerateAssertionsService generateAssertionsService;
-  private final static List<String> aliceAndBob = List.of("Alice","Bob");
-  private final static List<String> aliceAndBobAndCharlie = List.of("Alice","Bob","Charlie");
   private final static String BallinaOneVote = "Ballina One Vote Contest";
 
   /**
@@ -83,7 +83,7 @@ public class GenerateAssertionsServiceErrorTests {
   public void generateAssertionsWithNonExistentContestIsAnError() {
     testUtils.log(logger, "generateAssertionsWithNonExistentContestIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("NonExistentContest", 100,
+    ContestRequest request = new ContestRequest("NonExistentContest", 100,
         10, aliceAndBob);
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
@@ -101,7 +101,7 @@ public class GenerateAssertionsServiceErrorTests {
   public void generateAssertionsFromNoVotesIsAnError() {
     testUtils.log(logger, "generateAssertionsFromNoVotesIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("No CVR Mayoral", 100,
+    ContestRequest request = new ContestRequest("No CVR Mayoral", 100,
         10, aliceAndBob);
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
@@ -118,7 +118,7 @@ public class GenerateAssertionsServiceErrorTests {
   public void generateAssertionsWithPluralityContestIsAnError() {
     testUtils.log(logger, "generateAssertionsWithPluralityContestIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest(
+    ContestRequest request = new ContestRequest(
         "Valid Plurality Contest", 100, 10, aliceAndBob);
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
@@ -135,7 +135,7 @@ public class GenerateAssertionsServiceErrorTests {
   public void generateAssertionsWithMixedIRVPluralityContestIsAnError() {
     testUtils.log(logger, "generateAssertionsWithMixedIRVPluralityContestIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("Invalid Mixed Contest",
+    ContestRequest request = new ContestRequest("Invalid Mixed Contest",
         100,10,aliceAndBob);
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
@@ -151,7 +151,7 @@ public class GenerateAssertionsServiceErrorTests {
   public void generateAssertionsWithEmptyContestNameIsAnError() {
     testUtils.log(logger, "generateAssertionsWithEmptyContestNameIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("",
+    ContestRequest request = new ContestRequest("",
         100,10,aliceAndBob);
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
@@ -168,7 +168,7 @@ public class GenerateAssertionsServiceErrorTests {
   public void generateAssertionsWithWhitespaceContestNameIsAnError() {
     testUtils.log(logger, "generateAssertionsWithWhitespaceContestNameIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("   ",
+    ContestRequest request = new ContestRequest("   ",
         100, 10, aliceAndBob);
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
@@ -184,7 +184,7 @@ public class GenerateAssertionsServiceErrorTests {
   public void generateAssertionsWithEmptyCandidateListIsAnError() {
     testUtils.log(logger, "generateAssertionsWithEmptyCandidateListIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("Ballina One Vote Contest",
+    ContestRequest request = new ContestRequest("Ballina One Vote Contest",
         100, 10, List.of());
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
@@ -201,7 +201,7 @@ public class GenerateAssertionsServiceErrorTests {
   public void generateAssertionsWithWhiteSpaceCandidateNameIsAnError() {
     testUtils.log(logger, "generateAssertionsWithWhiteSpaceCandidateNameIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest(BallinaOneVote,
+    ContestRequest request = new ContestRequest(BallinaOneVote,
         100, 10, List.of("Alice", "   "));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
@@ -218,7 +218,7 @@ public class GenerateAssertionsServiceErrorTests {
   public void generateAssertionsWithZeroAuditableBallotsIsAnError() {
     testUtils.log(logger, "generateAssertionsWithZeroAuditableBallotsIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest(BallinaOneVote,
+    ContestRequest request = new ContestRequest(BallinaOneVote,
         0, 10, aliceAndBobAndCharlie);
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
@@ -235,7 +235,7 @@ public class GenerateAssertionsServiceErrorTests {
   public void generateAssertionsWithNegativeAuditableBallotsIsAnError() {
     testUtils.log(logger, "generateAssertionsWithNegativeAuditableBallotsIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest(BallinaOneVote,
+    ContestRequest request = new ContestRequest(BallinaOneVote,
         -10, 10, aliceAndBobAndCharlie);
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
@@ -251,7 +251,7 @@ public class GenerateAssertionsServiceErrorTests {
   public void generateAssertionsWithZeroTimeLimitIsAnError() throws RaireServiceException {
     testUtils.log(logger, "generateAssertionsWithZeroTimeLimitIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest(BallinaOneVote,
+    ContestRequest request = new ContestRequest(BallinaOneVote,
         100, 0, aliceAndBobAndCharlie);
 
     var response = generateAssertionsService.generateAssertions(request);
@@ -267,7 +267,7 @@ public class GenerateAssertionsServiceErrorTests {
   public void generateAssertionsWithNegativeTimeLimitIsAnError() throws RaireServiceException {
     testUtils.log(logger, "generateAssertionsWithNegativeTimeLimitIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest(BallinaOneVote,
+    ContestRequest request = new ContestRequest(BallinaOneVote,
         100, -50, aliceAndBobAndCharlie);
 
     var response = generateAssertionsService.generateAssertions(request);
@@ -284,7 +284,7 @@ public class GenerateAssertionsServiceErrorTests {
   public void wrongCandidatesIsAnError() {
     testUtils.log(logger, "wrongCandidatesIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("Ballina One Vote Contest",
+    ContestRequest request = new ContestRequest("Ballina One Vote Contest",
         100, 10, List.of("Alice","Bob","Chuan"));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->

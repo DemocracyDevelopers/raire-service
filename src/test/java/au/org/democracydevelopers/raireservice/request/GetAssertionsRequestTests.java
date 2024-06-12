@@ -20,6 +20,9 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.request;
 
+import static au.org.democracydevelopers.raireservice.testUtils.ballinaMayoral;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,8 +31,12 @@ import au.org.democracydevelopers.raireservice.persistence.repository.ContestRep
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,145 +69,85 @@ public class GetAssertionsRequestTests {
   public void validRequestForIRVContestIsValid() {
     testUtils.log(logger, "validRequestForIRVContestIsValid");
     GetAssertionsRequest validRequest = new GetAssertionsRequest("Ballina Mayoral",
-        List.of("Alice"), BigDecimal.valueOf(0.03));
+        defaultCount, List.of("Alice"), "Alice", BigDecimal.valueOf(0.03));
     assertDoesNotThrow(() -> validRequest.Validate(contestRepository));
   }
 
   /**
-   * A request for a contest that doesn't exist is invalid.
+   * Collection of tests for proper catching of invalid requests, including non-IRV contests and
+   * various invalid input parameters.
+   * @param contestName the name of the contest.
+   * @param totalBallots the total number of ballots.
+   * @param candidateList the list of candidate names.
+   * @param winner the winner's name.
+   * @param riskLimit the risk limit.
+   * @param errorMsg the expected error message.
    */
-  @Test
-  public void requestForNonexistentContestIsInvalid() {
-    testUtils.log(logger, "requestForNonexistentContestIsInvalid");
-    GetAssertionsRequest invalidRequest
-        = new GetAssertionsRequest("NonExistentContest", List.of("Alice"),
-        BigDecimal.valueOf(0.03));
+  @ParameterizedTest
+  @MethodSource("expectedExceptionMessages")
+  public void testExpectedErrors(String contestName, int totalBallots, List<String> candidateList,
+      String winner, BigDecimal riskLimit, String errorMsg) {
+    testUtils.log(logger, "testExpectedErrors");
+    GetAssertionsRequest invalidRequest = new GetAssertionsRequest(contestName, totalBallots,
+        candidateList, winner, riskLimit);
     Exception ex = assertThrows(RequestValidationException.class,
         () -> invalidRequest.Validate(contestRepository));
-    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No such contest"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), errorMsg));
   }
 
   /**
-   * A request for an existent plurality contest is invalid, because we have assertions only for
-   * IRV contests.
+   * The actual data for the testExpectedErrors function.
+   * @return the data to be tested.
    */
-  @Test
-  public void validRequestForPluralityContestIsInvalid() {
-    testUtils.log(logger, "validRequestForPluralityContestIsInvalid");
-    String pluralityContestName = "Valid Plurality Contest";
-    GetAssertionsRequest request
-        = new GetAssertionsRequest(pluralityContestName, List.of("Alice"), BigDecimal.valueOf(0.03));
-    Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "not comprised of all IRV"));
-  }
-
-  /**
-   * A request for mixed IRV-plurality contests is invalid.
-   * Note that this is a data problem - contests should have a consistent description.
-   */
-  @Test
-  public void validRequestForMixedContestTypesIsInvalid() {
-    testUtils.log(logger, "validRequestForMixedContestTypesIsInvalid");
-    String mixedContestName = "Invalid Mixed Contest";
-    GetAssertionsRequest request
-        = new GetAssertionsRequest(mixedContestName, List.of("Alice"), BigDecimal.valueOf(0.03));
-    Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "not comprised of all IRV"));
-  }
-
-  /**
-   * A request with null contest name is invalid.
-   */
-  @Test
-  public void requestWithNullNameIsInvalid() {
-    testUtils.log(logger, "requestWithNullNameIsInvalid");
-    GetAssertionsRequest request
-        = new GetAssertionsRequest(null, List.of("Alice"), BigDecimal.valueOf(0.03));
-    Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No contest name"));
-  }
-
-  /**
-   * A request with empty contest name is invalid.
-   */
-  @Test
-  public void requestWithEmptyNameIsInvalid() {
-    testUtils.log(logger, "requestWithEmptyNameIsInvalid");
-    GetAssertionsRequest request
-        = new GetAssertionsRequest("", List.of("Alice"), BigDecimal.valueOf(0.03));
-    Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No contest name"));
-  }
-
-  /**
-   * A request with all-whitespace contest name is invalid.
-   */
-  @Test
-  public void requestWithWhitespaceNameIsInvalid() {
-    testUtils.log(logger, "requestWithWhitespaceNameIsInvalid");
-    GetAssertionsRequest request
-        = new GetAssertionsRequest("   ", List.of("Alice"), BigDecimal.valueOf(0.03));
-    Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No contest name"));
-  }
-
-  /**
-   * A request with null candidate list is invalid.
-   */
-  @Test
-  public void requestWithNullCandidateListIsInvalid() {
-    testUtils.log(logger, "requestWithNullCandidateListIsInvalid");
-    GetAssertionsRequest request
-        = new GetAssertionsRequest("IRVContestName", null, BigDecimal.valueOf(0.03));
-    Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "bad candidate list"));
-  }
-
-  /**
-   * A request with empty candidate list is invalid.
-   */
-  @Test
-  public void requestWithEmptyCandidateListIsInvalid() {
-    testUtils.log(logger, "requestWithEmptyCandidateListIsInvalid");
-    GetAssertionsRequest request
-        = new GetAssertionsRequest("IRVContestName",  List.of(), BigDecimal.valueOf(0.03));
-    Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "bad candidate list"));
-  }
-
-  /**
-   * A request with an all-whitespace candidate name is invalid.
-   */
-  @Test
-  public void requestWithWhitespaceCandidateNameIsInvalid() {
-    testUtils.log(logger, "requestWithWhitespaceCandidateNameIsInvalid");
-    GetAssertionsRequest request
-        = new GetAssertionsRequest("IRVContest", List.of("Alice","    "), BigDecimal.valueOf(0.03));
-    Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "bad candidate list"));
-  }
-
-  /**
-   * A request with a null risk limit is invalid.
-   */
-  @Test
-  public void requestWithNullRiskLimitIsInvalid() {
-    testUtils.log(logger, "requestWithNullRiskLimitIsInvalid");
-    GetAssertionsRequest request
-        = new GetAssertionsRequest("Ballina Mayoral", List.of("Alice"), null);
-    Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "risk limit"));
-  }
-
-  /**
-   * A request with a negative risk limit is invalid.
-   */
-  @Test
-  public void requestWithNegativeRiskLimitIsInvalid() {
-    testUtils.log(logger, "requestWithNegativeRiskLimitIsInvalid");
-    GetAssertionsRequest request
-        = new GetAssertionsRequest("Ballina Mayoral", List.of("Alice"), BigDecimal.valueOf(-0.03));
-    Exception ex = assertThrows(RequestValidationException.class, () -> request.Validate(contestRepository));
-    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "risk limit"));
+  private static Stream<Arguments> expectedExceptionMessages() {
+    BigDecimal defaultRiskLimit = BigDecimal.valueOf(0.03);
+    List<String> alice = List.of("Alice");
+    return Stream.of(
+        // A request for a contest that doesn't exist is invalid.
+        Arguments.of("NonExistentContest", defaultCount, alice, defaultWinner,
+            defaultRiskLimit, "No such contest"),
+        // A request for a plurality contest is invalid, because we have assertions only for IRV.
+        Arguments.of("Valid Plurality Contest", defaultCount, alice, defaultWinner,
+            defaultRiskLimit, "not comprised of all IRV"),
+        // A request for mixed IRV-plurality contests is invalid.
+        // Note that this is a data problem - contests should have a consistent description.
+        Arguments.of("Invalid Mixed Contest", defaultCount, alice, defaultWinner,
+            defaultRiskLimit, "not comprised of all IRV"),
+        // A request with null contest name is invalid.
+        Arguments.of(null, defaultCount, alice, defaultWinner,
+            defaultRiskLimit, "No contest name"),
+        // A request with empty contest name is invalid.
+        Arguments.of("", defaultCount, alice, defaultWinner,
+            defaultRiskLimit, "No contest name"),
+        // A request with all-whitespace contest name is invalid.
+        Arguments.of("    ", defaultCount, alice, defaultWinner,
+            defaultRiskLimit, "No contest name"),
+        // A request with null candidate list is invalid.
+        Arguments.of("IRVContestName", defaultCount, null, defaultWinner,
+            defaultRiskLimit, "bad candidate list"),
+        // A request with empty candidate list is invalid.
+        Arguments.of("IRVContestName", defaultCount, List.of(), defaultWinner,
+            defaultRiskLimit, "bad candidate list"),
+        // A request with an all-whitespace candidate name is invalid.
+        Arguments.of("IRVContestName", defaultCount, List.of("Alice","    "), defaultWinner,
+            defaultRiskLimit, "bad candidate list"),
+        // A request with a null risk limit is invalid.
+        Arguments.of(ballinaMayoral, defaultCount, alice, defaultWinner,
+            null, "risk limit"),
+        // A request with a negative risk limit is invalid.
+        Arguments.of(ballinaMayoral, defaultCount, alice, defaultWinner,
+            BigDecimal.valueOf(-0.03), "risk limit"),
+        // A request with a null winner is invalid.
+        // (Note that a request with an empty/whitespace winner is strange but valid.)
+        Arguments.of(ballinaMayoral, defaultCount, alice, null,
+            defaultRiskLimit, "Null or absent winner"),
+        // A request with a negative totalAuditableBallots is invalid.
+        // (Note that a request with zero auditable ballots is strange but valid.)
+        Arguments.of(ballinaMayoral, -10, alice, defaultWinner,
+            defaultRiskLimit, "Non-positive total auditable ballots"),
+        // A request with a winner who is not one of the candidates is invalid.
+        Arguments.of(ballinaMayoral, defaultCount, alice, "Bob",
+            defaultRiskLimit, "not one of the candidates")
+    );
   }
 }

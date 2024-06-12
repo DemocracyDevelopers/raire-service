@@ -36,9 +36,33 @@ import java.util.Map;
 import org.slf4j.Logger;
 
 /**
- * Utility methods for use in test classes.
+ * Utility methods for use in test classes, including some default values for making testing easier.
  */
 public class testUtils {
+
+  public final static String baseURL = "http://localhost:";
+  public final static String generateAssertionsEndpoint = "/raire/generate-assertions";
+  public final static String getAssertionsJSONEndpoint = "/raire/get-assertions-json";
+  public final static String getAssertionsCSVEndpoint = "/raire/get-assertions-csv";
+
+  public final static List<String> aliceAndBob = List.of("Alice","Bob");
+  public final static List<String> aliceAndBobAndCharlie = List.of("Alice","Bob","Charlie");
+  public final static String oneNEBAssertionContest = "One NEB Assertion Contest";
+  public final static String oneNENAssertionContest = "One NEN Assertion Contest";
+  public final static String oneNEBOneNENAssertionContest = "One NEN NEB Assertion Contest";
+  public final static String ballinaMayoral = "Ballina Mayoral";
+
+  /**
+   * A default winner, used in requests - not checked.
+   */
+  public final static String defaultWinner = "Chuan";
+  public final static String defaultWinnerJSON = "\"winner\":\""+"Chuan"+"\"";
+
+  /**
+   * A default ballot count, used in requests - not checked.
+   */
+  public final static int defaultCount = 100;
+  public final static String defaultCountJson = "\"totalAuditableBallots\":"+defaultCount;
 
   /**
    * Comparator for doubles within a specific tolerance.
@@ -59,6 +83,7 @@ public class testUtils {
    * @param candidates  the expected list of candidate names
    * @param contestName the expected contest name
    * @param riskLimit   the expected risk limit
+   * @param totalAuditableBallots the size of the universe of ballots.
    * @param metadata    the metadata from the response, in which the riskLimit is interpreted as a
    *                    double by the deserializer.
    * @param riskLimitClass the class in which the risk limit is expressed. Use BigDecimal for things
@@ -67,7 +92,8 @@ public class testUtils {
    * @return true if the response's metadata fields match the candidates, contestname and riskLimit.
    */
   public static boolean correctMetadata(List<String> candidates, String contestName,
-      BigDecimal riskLimit, Map<String, Object> metadata, Type riskLimitClass) throws ClassCastException {
+      BigDecimal riskLimit, int totalAuditableBallots, Map<String, Object> metadata,
+      Type riskLimitClass) throws ClassCastException {
 
     BigDecimal retrievedRiskLimit;
     if(riskLimitClass == Double.class) {
@@ -81,27 +107,31 @@ public class testUtils {
 
     String retrievedContestName = metadata.get(Metadata.CONTEST).toString();
     List<String> retrievedCandidates = (List<String>) metadata.get(Metadata.CANDIDATES);
+    int retrievedTotalBallots = Integer.parseInt(metadata.get(Metadata.TOTAL_BALLOTS).toString());
 
     return contestName.equals(retrievedContestName)
         && riskLimit.compareTo(retrievedRiskLimit) == 0
+        && totalAuditableBallots == retrievedTotalBallots
         && setsNoDupesEqual(candidates, retrievedCandidates);
   }
 
   /**
    * Check that the RaireResult's solution has the expected margin and difficulty.
-   * @param margin expected margin
-   * @param difficulty expected difficulty
-   * @param numAssertions the expected number of assertions
-   * @param result the RaireResult in the body of the response
+   * @param margin expected margin.
+   * @param difficulty expected difficulty.
+   * @param numCandidates the number of candidates.
+   * @param winner the winner's index in the candidate array.
+   * @param numAssertions the expected number of assertions.
+   * @param result the RaireResult in the body of the response.
    * @return true if the result's data matches the expected values.
    */
-  public static boolean correctSolutionData(int margin, double difficulty, int numAssertions,
-      RaireResult result) {
+  public static boolean correctSolutionData(int margin, double difficulty, int numCandidates,
+      int winner, int numAssertions, RaireResult result) {
 
-    int retrievedMargin = result.margin;
-    double retrievedDifficulty = result.difficulty;
-    return retrievedMargin == margin
-        && doubleComparator.compare(retrievedDifficulty, difficulty) == 0
+    return result.margin == margin
+        && doubleComparator.compare(result.difficulty, difficulty) == 0
+        && result.num_candidates == numCandidates
+        && result.winner == winner
         && result.assertions.length == numAssertions;
   }
 

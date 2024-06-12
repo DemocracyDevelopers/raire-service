@@ -22,7 +22,7 @@ package au.org.democracydevelopers.raireservice.request;
 
 /**
  * Exception indicating that a request failed validation. For a ContestRequest (including
- * GenerateAssertionsRequest and GetAssertionRequest) this may be because:
+ * ContestRequest and GetAssertionRequest) this may be because:
  * - the contest name is blank, or the candidate list is empty,
  * - there is no contest of the requested name in the database,
  * - the contest is not an IRV contest,

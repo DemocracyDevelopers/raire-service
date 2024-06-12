@@ -34,16 +34,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class RaireResultMixIn extends RaireResult {
 
   /**
-   * The winner of an IRV contest is not stored in the colorado-rla database.
-   */
-  @JsonIgnore public int winner;
-
-  /**
-   * raire-service includes the candidates of a contest in the metadata attached to a RaireSolution.
-   */
-  @JsonIgnore public int num_candidates;
-
-  /**
    * The time that raire-java takes to determine the winner of an IRV contest is not stored in
    * the colorado-rla database.
    */
@@ -74,11 +64,12 @@ public class RaireResultMixIn extends RaireResult {
    * @param assertions the assertions with difficulties.
    * @param difficulty the highest difficulty.
    * @param margin the lowest margin.
+   * @param winner the index of the winner in the list of candidates.
    * @param num_candidates the number of candidates in the contest.
    */
   public RaireResultMixIn(AssertionAndDifficulty[] assertions, double difficulty, int margin,
-      int num_candidates) {
-    super(assertions, difficulty, margin, -1, num_candidates, new TimeTaken(0,0),
+      int winner, int num_candidates) {
+    super(assertions, difficulty, margin, winner, num_candidates, new TimeTaken(0,0),
         new TimeTaken(0,0), new TimeTaken(0,0), false);
   }
 }
