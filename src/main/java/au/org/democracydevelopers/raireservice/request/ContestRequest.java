@@ -28,9 +28,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Abstract class that serves as a parent class for particular requests to raire. This class
  * identifies a contest by name and includes
- * - the candidates (by name),
- * - the total auditable ballots in the universe (used to calculate difficulty in raire),
- * - the time limit allowed to raire.
+ * - the candidates (by name), and
+ * - the total auditable ballots in the universe (used to calculate difficulty in raire).
  * The only significant method is a verification method for checking that the data items are
  * present and have reasonable values.
  * GenerateAssertionsRequest and GetAssertionsRequest inherit from this class and add some other
@@ -74,9 +73,9 @@ public abstract class ContestRequest {
 
   /**
    * Validates the contest request, checking that the contest exists and is an IRV contest, that
-   * the total ballots and time limit have sensible values, and that the contest has candidates.
+   * the total ballots has a sensible value, and that the contest has candidates.
    * Note it does _not_ check whether the candidates are present in the CVRs.
-   * @param contestRepository the respository for getting Contest objects from the database.
+   * @param contestRepository the repository for getting Contest objects from the database.
    * @throws RequestValidationException if the request is invalid.
    */
   public void Validate(ContestRepository contestRepository) throws RequestValidationException {
