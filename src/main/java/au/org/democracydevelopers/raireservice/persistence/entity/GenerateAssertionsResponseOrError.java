@@ -62,14 +62,14 @@ public abstract class GenerateAssertionsResponseOrError {
    */
   @Column(name = "contest_name", updatable = false, nullable = false)
   @ReadOnlyProperty
-  protected String contestName;
+  private String contestName;
 
   /**
    * Name of the winner of the contest, as determined by raire-java.
    */
   @Column(name = "winner", updatable = false, nullable = false)
   @ReadOnlyProperty
-  protected String winner;
+  private String winner;
 
   /**
    * An error or warning, if there was one, or ResultOK if none. Most errors mean there are no
@@ -78,7 +78,13 @@ public abstract class GenerateAssertionsResponseOrError {
    */
   @Column(name = "error_or_warning", updatable = false, nullable = false)
   @ReadOnlyProperty
-  protected String errorOrWarning;
+  private String errorOrWarning;
+
+  /**
+   * The message associated with the error or warning, for example the names of the tied winners.
+   */
+  @Column(name = "message", updatable = false, nullable = false)
+  private String message;
 
   /**
    * Default no-args constructor (required for persistence).
@@ -98,7 +104,7 @@ public abstract class GenerateAssertionsResponseOrError {
    * example "isOK" with a blank winner, or a winner with an error that prevents finding a winner.
    */
   public GenerateAssertionsResponseOrError(String contestName, String winner, boolean isOK,
-                                           RaireErrorCode errorOrWarning) throws IllegalArgumentException
+                                           RaireErrorCode errorOrWarning, String message) throws IllegalArgumentException
   {
     final String prefix = "[all args constructor]";
     logger.debug(String.format("%s Parameters: contest name %s; winner %s; isOK %s; error/warning %s.",
@@ -107,6 +113,7 @@ public abstract class GenerateAssertionsResponseOrError {
     this.contestName = contestName;
     this.winner = winner;
     this.errorOrWarning = isOK ? ResultOK : errorOrWarning.toString();
+    this.message = message;
 
     if(contestName.isBlank()){
       String msg = String.format("%s Attempt to build GenerateAssertionsResponseOrError with blank contest name",

@@ -111,7 +111,7 @@ public class GenerateAssertionsServiceNSWTests {
       assertEquals(expected.winner(), request.candidates.get(response.Ok.winner));
 
       // Save the assertions
-      generateAssertionsService.persistAssertions(response.Ok, request);
+      generateAssertionsService.persistAssertionsOrErrors(response, request);
 
       // Check difficulty.
       List<Assertion> assertions = assertionRepository.findByContestName(expected.contestName());

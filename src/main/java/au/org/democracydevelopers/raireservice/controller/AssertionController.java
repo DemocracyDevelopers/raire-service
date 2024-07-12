@@ -99,12 +99,13 @@ public class AssertionController {
     logger.debug(String.format("%s Calling raire-java with assertion generation request.",prefix));
     RaireResultOrError solution = generateAssertionsService.generateAssertions(request);
 
+    generateAssertionsService.persistAssertionsOrErrors(solution, request);
+
     if (solution.Ok != null) {
       // Generation of assertions was successful, now save them to the database.
       logger.debug(String.format("%s Assertion generation successful: %d assertions " +
               "generated in %ss.", prefix, solution.Ok.assertions.length,
               solution.Ok.time_to_find_assertions.seconds));
-      generateAssertionsService.persistAssertions(solution.Ok, request);
 
       logger.debug(String.format("%s Assertions stored in database for contest %s.",
           prefix, request.contestName));
@@ -117,14 +118,15 @@ public class AssertionController {
       return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    // raire-java was not able to generate assertions successfully.
+    // raire-java was not able to generate assertions successfully, but did not return an error.
+    // This is not supposed to happen.
     if(solution.Err == null){
       final String msg = "An error occurred in raire-java, yet no error information was returned.";
       logger.error(String.format("%s %s", prefix, msg));
       throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
     }
 
-    // raire-java returned error information, form and throw an exception using that data. (Note:
+    // raire-java returned error information. Form and throw an exception using that data. (Note:
     // we need to create the exception first to get a human readable message to log).
     RaireServiceException ex = new RaireServiceException(solution.Err, request.candidates);
     final String msg = "An error occurred in raire-java: " + ex.getMessage();

@@ -22,7 +22,6 @@ package au.org.democracydevelopers.raireservice.service;
 
 import au.org.democracydevelopers.raire.RaireProblem;
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
-import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMargin;
 import au.org.democracydevelopers.raire.pruning.TrimAlgorithm;
 import au.org.democracydevelopers.raire.util.VoteConsolidator;
@@ -197,7 +196,7 @@ public class GenerateAssertionsService {
    * translated assertions to the database.
    */
   @Transactional
-  public void persistAssertions(RaireResult solution, ContestRequest request)
+  public void persistAssertionsOrErrors(RaireResultOrError solution, ContestRequest request)
       throws RaireServiceException
   {
     final String prefix = "[persistAssertions]";
@@ -207,13 +206,16 @@ public class GenerateAssertionsService {
           "stored for contest %s (if present).", prefix, request.contestName));
       assertionRepository.deleteByContestName(request.contestName);
 
-      // Persist assertions formed by raire-java.
-      logger.debug(String.format("%s Proceeding to translate and save %d assertions to the " +
-              "database for contest %s.", prefix, solution.assertions.length, request.contestName));
-      assertionRepository.translateAndSaveAssertions(request.contestName,
-          request.totalAuditableBallots, request.candidates.toArray(String[]::new), solution.assertions);
+      // If the solution is OK, persist assertions formed by raire-java.
+      if(solution.Ok != null) {
+        logger.debug(String.format("%s Proceeding to translate and save %d assertions to the " +
+            "database for contest %s.", prefix, solution.Ok.assertions.length, request.contestName));
+        assertionRepository.translateAndSaveAssertions(request.contestName,
+            request.totalAuditableBallots, request.candidates.toArray(String[]::new), solution.Ok.assertions);
 
-      logger.debug(String.format("%s Assertions persisted.", prefix));
+        logger.debug(String.format("%s Assertions persisted.", prefix));
+      }
+      // TODO Deal with else
     }
     catch(IllegalArgumentException ex){
       final String msg = String.format("%s Invalid arguments were supplied to " +
