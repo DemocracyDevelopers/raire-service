@@ -25,10 +25,10 @@ import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
 import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMargin;
 import au.org.democracydevelopers.raire.pruning.TrimAlgorithm;
 import au.org.democracydevelopers.raire.util.VoteConsolidator;
-import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsResponseOrError;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
+import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummary;
 import au.org.democracydevelopers.raireservice.request.ContestRequest;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
@@ -36,6 +36,8 @@ import jakarta.transaction.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -64,6 +66,8 @@ public class GenerateAssertionsService {
 
   private final AssertionRepository assertionRepository;
 
+  private final GenerateAssertionsSummary summaryRepository;
+
   /**
    * All args constructor.
    * @param cvrContestInfoRepository for extracting CVR vote data from the database.
@@ -71,10 +75,12 @@ public class GenerateAssertionsService {
    * @param assertionRepository for saving assertions to the database.
    */
   public GenerateAssertionsService(CVRContestInfoRepository cvrContestInfoRepository,
-      ContestRepository contestRepository, AssertionRepository assertionRepository){
+      ContestRepository contestRepository, AssertionRepository assertionRepository,
+      GenerateAssertionsSummary summaryRepository) {
     this.cvrContestInfoRepository = cvrContestInfoRepository;
     this.contestRepository = contestRepository;
     this.assertionRepository = assertionRepository;
+    this.summaryRepository = summaryRepository;
   }
 
   /**
@@ -252,16 +258,16 @@ public class GenerateAssertionsService {
         // This is not supposed to happen - we got neither assertions nor an error.
         error = INTERNAL_ERROR.toString();
       }
-      GenerateAssertionsResponseOrError summary
-          = new GenerateAssertionsResponseOrError(request.contestName, winner,
-          solution.Ok != null, error, warning, errorMsg);
-      // TODO save summary.
+
+      saveOrUpdateSummary(request.contestName, winner, error, warning, errorMsg);
     }
     catch(IllegalArgumentException ex){
       final String msg = String.format("%s Invalid arguments were supplied to " +
-          "AssertionRepository::translateAndSaveAssertions. This is likely either a non-positive " +
+          "AssertionRepository::translateAndSaveAssertions or GenerateAssertionsSummaryRepository::update. " +
+          "This is likely either a non-positive " +
           "universe size, invalid margin, or invalid combination of winner, loser and list of " +
-          "assumed continuing candidates. %s", prefix, ex.getMessage());
+          "assumed continuing candidates, or, for the summary, both a winner and and error, or neither. %s",
+          prefix, ex.getMessage());
       logger.error(msg);
       throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
     }
@@ -281,10 +287,33 @@ public class GenerateAssertionsService {
       throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
     }
     catch(Exception ex){
-      final String msg = String.format("%s An exception arose when persisting assertions. %s",
+      final String msg = String.format("%s An exception arose when persisting assertions or associated data. %s",
           prefix, ex.getMessage());
       logger.error(msg);
       throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
+    }
+  }
+
+  /**
+   * Save or update Generate Assertions response summary data.
+   * @param contestName the name of the contest.
+   * @param winner      the winner, as a string.
+   * @param error       the error, if any.
+   * @param warning     the warning, if any.
+   * @param errorMsg    the message associated with the error, if any.
+   */
+  private void saveOrUpdateSummary(String contestName, String winner, String error, String warning, String errorMsg) {
+
+    au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary summary;
+    final Optional<au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary> OptSummary = summaryRepository.findByContestName(contestName);
+
+    if(OptSummary.isPresent()) {
+      // Update a summary already present in the database; the change is automatically persisted.
+      OptSummary.get().update(winner, error, warning, errorMsg);
+    } else {
+      // If there is no summary for ths contest, make a new summary and save it.
+      summary = new au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary(contestName, winner, error, warning, errorMsg);
+      summaryRepository.save(summary);
     }
   }
 }

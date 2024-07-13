@@ -32,9 +32,9 @@ import org.slf4j.LoggerFactory;
  */
 @Entity
 @Table(name = "generate_assertions_response_or_error")
-public class GenerateAssertionsResponseOrError {
+public class GenerateAssertionsSummary {
 
-  private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsResponseOrError.class);
+  private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsSummary.class);
 
   /**
    * ID.
@@ -54,7 +54,7 @@ public class GenerateAssertionsResponseOrError {
   /**
    * Name of the contest.
    */
-  @Column(name = "contest_name", updatable = false, nullable = false)
+  @Column(name = "contest_name", unique = true, updatable = false, nullable = false)
   private String contestName;
 
   /**
@@ -95,34 +95,26 @@ public class GenerateAssertionsResponseOrError {
   /**
    * Default no-args constructor (required for persistence).
    */
-  public GenerateAssertionsResponseOrError() {}
+  public GenerateAssertionsSummary() {}
 
 
   /**
    * Construct GenerateAssertionsResponseOrError for a specific contest.
-   * If isOK is true there must be a non-blank winner. There may also be a warning,
-   * e.g. TIME_OUT_TRIMMING_ASSERTIONS.
+   * There may also be a warning, e.g. TIME_OUT_TRIMMING_ASSERTIONS.
    * @param contestName Contest for which the Assertion has been created.
    * @param winner Winner of the Assertion (name of a candidate in the contest).
-   * @param isOK indication of whether assertion generation was successful.
    * @param error the error produced by raire, if any.
    * @param warning the warning produced by raire, if any.
    * @param message the message associated with the error, if any.
    * @throws IllegalArgumentException if the caller supplies an invalid combination of inputs, for
-   * example "isOK" with a blank winner, or a winner with an error that prevents finding a winner.
+   * example a blank error with a blank winner.
    */
-  public GenerateAssertionsResponseOrError(String contestName, String winner, boolean isOK,
-                      String error, String warning, String message) throws IllegalArgumentException
+  public GenerateAssertionsSummary(String contestName, String winner,
+                                   String error, String warning, String message) throws IllegalArgumentException
   {
     final String prefix = "[all args constructor]";
     logger.debug(String.format("%s Parameters: contest name %s; winner %s; isOK %s; error %s; warning %s.",
         prefix, contestName, winner, isOK, error, warning));
-
-    this.contestName = contestName;
-    this.winner = winner;
-    this.error = isOK ? "" : error;
-    this.warning = warning;
-    this.message = message;
 
     if(contestName.isBlank()){
       String msg = String.format("%s Attempt to build GenerateAssertionsResponseOrError with blank contest name",
@@ -131,13 +123,45 @@ public class GenerateAssertionsResponseOrError {
       throw new IllegalArgumentException(msg);
     }
 
-    if(isOK && winner.isBlank()) {
-      String msg = String.format("%s Attempt to build GenerateAssertionsResponseOrError with Result OK" +
-              "but blank winner name", prefix);
+    this.contestName = contestName;
+
+    update(winner, error, warning, message);
+
+    logger.debug(String.format("%s Construction complete.", prefix));
+  }
+
+  /**
+   * Update all the data except the contestName. Intended for initialization, and for subsequent
+   * runs of Generate Assertions, for the same contest.
+   * @param winner  the winner's name, as computed by raire.
+   * @param error   the error, if any.
+   * @param warning the warning, if any.
+   * @param message the message associated with the error (e.g. the names of tied winners).
+   * @throws IllegalArgumentException if the data is inconsistent, i.e. both an error and a winner,
+   * or neither.
+   */
+  public void update(String winner, String error, String warning, String message)
+                                                                  throws IllegalArgumentException {
+    final String prefix = "[update]";
+    this.winner = winner;
+    this.error = error;
+    this.warning = warning;
+    this.message = message;
+
+    // There should be either a winner or an error.
+    if(error.isBlank() && winner.isBlank()) {
+      String msg = String.format("%s Attempt to build or update GenerateAssertionsResponseOrError " +
+          "with blank error and blank winner name", prefix);
       logger.error(msg);
       throw new IllegalArgumentException(msg);
     }
 
-    logger.debug(String.format("%s Construction complete.", prefix));
+    // There should not be both a winner and an error.
+    if(!error.isBlank() && !winner.isBlank()) {
+      String msg = String.format("%s Attempt to build or update GenerateAssertionsResponseOrError " +
+          "with error and winner name", prefix);
+      logger.error(msg);
+      throw new IllegalArgumentException(msg);
+    }
   }
 }
