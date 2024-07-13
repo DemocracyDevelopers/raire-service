@@ -33,7 +33,7 @@ import java.util.Optional;
 
 /**
  * Database retrieval and storage for the results of generating assertions (the winner, and possibly
- * an error).
+ * an error or warning).
  */
 @Repository
 public interface GenerateAssertionsSummaryRepository extends JpaRepository<GenerateAssertionsSummary, Long> {
@@ -41,8 +41,8 @@ public interface GenerateAssertionsSummaryRepository extends JpaRepository<Gener
   Logger logger = LoggerFactory.getLogger(GenerateAssertionsSummaryRepository.class);
 
   /**
-   * Retrieve all GenerateAssertionsResponseOrError records (there should be at most one) from the
-   * database belonging to the contest with the given name.
+   * Retrieve all GenerateAssertionsSummary records from the database belonging to the contest with
+   * the given name. There will be at most one, because contest name is unique.
    * @param contestName Name of the contest whose data is being retrieved.
    */
   @Query(value="select a from GenerateAssertionsSummary a where a.contestName = :contestName")

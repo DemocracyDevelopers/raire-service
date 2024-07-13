@@ -29,6 +29,7 @@ import au.org.democracydevelopers.raireservice.persistence.repository.AssertionR
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
+import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary;
 import au.org.democracydevelopers.raireservice.request.ContestRequest;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
@@ -43,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import static au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary.UNKNOWN_WINNER;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.INTERNAL_ERROR;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.TIMEOUT_TRIMMING_ASSERTIONS;
 
@@ -52,11 +54,6 @@ import static au.org.democracydevelopers.raireservice.service.RaireServiceExcept
  */
 @Service
 public class GenerateAssertionsService {
-
-  /**
-   * Default winner to be used in the case where winner is unknown.
-   */
-  protected static final String UNKNOWN_WINNER = "Unknown";
 
   private final static Logger logger = LoggerFactory.getLogger(GenerateAssertionsService.class);
 
@@ -222,7 +219,7 @@ public class GenerateAssertionsService {
       throws RaireServiceException
   {
     // Values to be stored in the Generate Assertions Response Or Error table.
-    String winner = UNKNOWN_WINNER;
+    String winner = "";
     String error = "";
     String errorMsg = "";
     String warning = "";
@@ -266,7 +263,7 @@ public class GenerateAssertionsService {
           "AssertionRepository::translateAndSaveAssertions or GenerateAssertionsSummaryRepository::update. " +
           "This is likely either a non-positive " +
           "universe size, invalid margin, or invalid combination of winner, loser and list of " +
-          "assumed continuing candidates, or, for the summary, both a winner and and error, or neither. %s",
+          "assumed continuing candidates, or, for the summary, both a winner and an error, or neither. %s",
           prefix, ex.getMessage());
       logger.error(msg);
       throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
@@ -304,15 +301,15 @@ public class GenerateAssertionsService {
    */
   private void saveOrUpdateSummary(String contestName, String winner, String error, String warning, String errorMsg) {
 
-    au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary summary;
-    final Optional<au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary> OptSummary = summaryRepository.findByContestName(contestName);
+    GenerateAssertionsSummary summary;
+    final Optional<GenerateAssertionsSummary> OptSummary = summaryRepository.findByContestName(contestName);
 
     if(OptSummary.isPresent()) {
       // Update a summary already present in the database; the change is automatically persisted.
       OptSummary.get().update(winner, error, warning, errorMsg);
     } else {
       // If there is no summary for ths contest, make a new summary and save it.
-      summary = new au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary(contestName, winner, error, warning, errorMsg);
+      summary = new GenerateAssertionsSummary(contestName, winner, error, warning, errorMsg);
       summaryRepository.save(summary);
     }
   }

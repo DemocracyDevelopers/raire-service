@@ -37,6 +37,11 @@ public class GenerateAssertionsSummary {
   private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsSummary.class);
 
   /**
+   * Default winner to be used in the case where winner is unknown.
+   */
+  public static final String UNKNOWN_WINNER = "Unknown";
+
+  /**
    * ID.
    */
   @Id
@@ -135,10 +140,6 @@ public class GenerateAssertionsSummary {
   public void update(String winner, String error, String warning, String message)
                                                                   throws IllegalArgumentException {
     final String prefix = "[update]";
-    this.winner = winner;
-    this.error = error;
-    this.warning = warning;
-    this.message = message;
 
     // There should be either a winner or an error.
     if(error.isBlank() && winner.isBlank()) {
@@ -148,12 +149,17 @@ public class GenerateAssertionsSummary {
       throw new IllegalArgumentException(msg);
     }
 
-    // There should not be both a winner and an error.
+    // There should not be both a winner and an error. (It's OK to have a winner and a warning.)
     if(!error.isBlank() && !winner.isBlank()) {
       String msg = String.format("%s Attempt to build or update GenerateAssertionsResponseOrError " +
           "with error and winner name", prefix);
       logger.error(msg);
       throw new IllegalArgumentException(msg);
     }
+
+    this.winner = winner.isBlank() ? UNKNOWN_WINNER : winner;
+    this.error = error;
+    this.warning = warning;
+    this.message = message;
   }
 }
