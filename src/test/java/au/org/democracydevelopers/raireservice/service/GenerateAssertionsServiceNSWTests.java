@@ -29,11 +29,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
 import au.org.democracydevelopers.raireservice.NSWValues.Expected;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
+import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
+import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,10 +70,13 @@ public class GenerateAssertionsServiceNSWTests {
   private CVRContestInfoRepository cvrContestInfoRepository;
 
   @Autowired
-  AssertionRepository assertionRepository;
+  private AssertionRepository assertionRepository;
 
   @Autowired
-  GenerateAssertionsService generateAssertionsService;
+  private GenerateAssertionsSummaryRepository summaryRepository;
+
+  @Autowired
+  private GenerateAssertionsService generateAssertionsService;
 
   private static final int DEFAULT_TIME_LIMIT = 5;
 
@@ -116,6 +123,11 @@ public class GenerateAssertionsServiceNSWTests {
       // Check difficulty.
       List<Assertion> assertions = assertionRepository.findByContestName(expected.contestName());
       assertTrue(difficultyMatchesMax(expected.difficulty(), assertions));
+
+      // Check correct winner is properly stored, and no errors are stored.
+      Optional<GenerateAssertionsSummary> summary = summaryRepository.findByContestName(expected.contestName());
+      assertTrue(summary.isPresent());
+      assertTrue(summary.get().equalData(expected.contestName(), expected.winner(), "","",""));
     }
   }
 }

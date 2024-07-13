@@ -20,17 +20,20 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.service;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import au.org.democracydevelopers.raire.RaireError.TiedWinners;
 import au.org.democracydevelopers.raire.RaireError.TimeoutCheckingWinner;
 import au.org.democracydevelopers.raire.RaireError.TimeoutFindingAssertions;
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
+import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary;
+import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +70,9 @@ public class GenerateAssertionsServiceWickedTests {
   @Autowired
   GenerateAssertionsService generateAssertionsService;
 
+  @Autowired
+  GenerateAssertionsSummaryRepository summaryRepository;
+
   /**
    * Names of contests, to match preloaded data.
    */
@@ -101,18 +107,30 @@ public class GenerateAssertionsServiceWickedTests {
 
   /**
    * Tied winners results in raire-java returning a TiedWinners RaireError. This is a super-simple
-   * election with two candidates with one vote each.
+   * election with two candidates (Alice and Bob) with one first-preference vote each.
    */
   @Test
   @Transactional
-  void tiedWinnersThrowsTiedWinnersError() throws RaireServiceException {
-    testUtils.log(logger, "tiedWinnersThrowsTiedWinnersError");
+  void tiedWinnersThrowsTiedWinnersErrorAndStoresIt() throws RaireServiceException {
+    testUtils.log(logger, "tiedWinnersThrowsTiedWinnersErrorAndStoresIt");
     RaireResultOrError result = generateAssertionsService.generateAssertions(tiedWinnersRequest);
 
     assertNull(result.Ok);
     assertNotNull(result.Err);
 
     assertInstanceOf(TiedWinners.class, result.Err);
+
+    generateAssertionsService.persistAssertionsOrErrors(result, tiedWinnersRequest);
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(tiedWinnersContest);
+    assertTrue(optSummary.isPresent());
+    // Check that Alice and Bob are the tied winners
+    assertTrue(optSummary.get().equalData(tiedWinnersContest, GenerateAssertionsSummary.UNKNOWN_WINNER,
+        TIED_WINNERS.toString(), "", "Alice"));
+    assertTrue(optSummary.get().equalData(tiedWinnersContest, GenerateAssertionsSummary.UNKNOWN_WINNER,
+        TIED_WINNERS.toString(), "", "Bob"));
+    // and that Chuan is not
+    assertFalse(optSummary.get().equalData(tiedWinnersContest, GenerateAssertionsSummary.UNKNOWN_WINNER,
+        TIED_WINNERS.toString(), "", "Chuan"));
   }
 
   /**
@@ -121,8 +139,8 @@ public class GenerateAssertionsServiceWickedTests {
    */
   @Test
   @Transactional
-  void twentyTiedWinnersThrowsTimeOutCheckingWinnersError() throws RaireServiceException {
-    testUtils.log(logger, "twentyTiedWinnersThrowsTimeOutCheckingWinnersError");
+  void twentyTiedWinnersThrowsTimeOutCheckingWinnersErrorAndStoresIt() throws RaireServiceException {
+    testUtils.log(logger, "twentyTiedWinnersThrowsTimeOutCheckingWinnersErrorAndStoresIt");
     RaireResultOrError result = generateAssertionsService
         .generateAssertions(checkingWinnersTimeoutRequest);
 
@@ -130,6 +148,12 @@ public class GenerateAssertionsServiceWickedTests {
     assertNotNull(result.Err);
 
     assertInstanceOf(TimeoutCheckingWinner.class, result.Err);
+
+    generateAssertionsService.persistAssertionsOrErrors(result, checkingWinnersTimeoutRequest);
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(timeOutCheckingWinnersContest);
+    assertTrue(optSummary.isPresent());
+    assertTrue(optSummary.get().equalData(timeOutCheckingWinnersContest, GenerateAssertionsSummary.UNKNOWN_WINNER,
+        TIMEOUT_CHECKING_WINNER.toString(), "", "Time out checking winner"));
   }
 
   /**
@@ -145,5 +169,11 @@ public class GenerateAssertionsServiceWickedTests {
     assertNotNull(result.Err);
 
     assertInstanceOf(TimeoutFindingAssertions.class, result.Err);
+
+    generateAssertionsService.persistAssertionsOrErrors(result, ByronShortTimeoutRequest);
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(ByronMayoral);
+    assertTrue(optSummary.isPresent());
+    assertTrue(optSummary.get().equalData(ByronMayoral, GenerateAssertionsSummary.UNKNOWN_WINNER,
+        TIMEOUT_FINDING_ASSERTIONS.toString(), "", "Time out finding assertions"));
   }
 }
