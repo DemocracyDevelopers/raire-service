@@ -255,7 +255,7 @@ public class GenerateAssertionsService {
       GenerateAssertionsResponseOrError summary
           = new GenerateAssertionsResponseOrError(request.contestName, winner,
           solution.Ok != null, error, warning, errorMsg);
-      // TODO save winner, warning, error, errormessage.
+      // TODO save summary.
     }
     catch(IllegalArgumentException ex){
       final String msg = String.format("%s Invalid arguments were supplied to " +
