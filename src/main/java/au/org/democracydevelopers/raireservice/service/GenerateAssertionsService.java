@@ -25,6 +25,7 @@ import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
 import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMargin;
 import au.org.democracydevelopers.raire.pruning.TrimAlgorithm;
 import au.org.democracydevelopers.raire.util.VoteConsolidator;
+import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsResponseOrError;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
@@ -40,12 +41,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.INTERNAL_ERROR;
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.TIMEOUT_TRIMMING_ASSERTIONS;
+
 /**
  * This class contains functionality for generating assertions for a given contest by calling
  * raire-java, and persisting those assertions to the colorado-rla database.
  */
 @Service
 public class GenerateAssertionsService {
+
+  /**
+   * Default winner to be used in the case where winner is unknown.
+   */
+  protected static final String UNKNOWN_WINNER = "Unknown";
 
   private final static Logger logger = LoggerFactory.getLogger(GenerateAssertionsService.class);
 
@@ -187,18 +196,31 @@ public class GenerateAssertionsService {
   }
 
   /**
-   * Given successfully generated assertions stored within a RaireResult, persist these
-   * assertions to the database.
-   * @param solution RaireResult containing assertions to persist for a given contest.
+   * Given a raire result or error, persist it.
+   * If the result contains successfully generated assertions stored within a RaireResult, persist
+   * these assertions to the database and the winner in the GenerateAssertionsResponse table.
+   * If the result contains an error or warning, persist it and its message in the
+   * GenerateAssertionsResponse table.
+   * Previously-stored assertions are deleted, regardless of whether assertion generation
+   * was successful this time.
+   * @param solution RaireResultOrError containing either assertions to persist for a given contest,
+   *                 with a winner, or an error. Note that there may be both a warning and successful
+   *                 assertion generation.
    * @param request Assertions generation request containing contest information.
    * @throws RaireServiceException when an error arises in either the translation of
    * raire-java assertions into a form suitable for saving to the database, or in persisting these
-   * translated assertions to the database.
+   * translated assertions and associated data to the database.
    */
   @Transactional
   public void persistAssertionsOrErrors(RaireResultOrError solution, ContestRequest request)
       throws RaireServiceException
   {
+    // Values to be stored in the Generate Assertions Response Or Error table.
+    String winner = UNKNOWN_WINNER;
+    String error = "";
+    String errorMsg = "";
+    String warning = "";
+
     final String prefix = "[persistAssertions]";
     try{
       // Delete any existing assertions for this contest.
@@ -214,8 +236,26 @@ public class GenerateAssertionsService {
             request.totalAuditableBallots, request.candidates.toArray(String[]::new), solution.Ok.assertions);
 
         logger.debug(String.format("%s Assertions persisted.", prefix));
+
+        // Update summary data.
+        winner = request.candidates.get(solution.Ok.winner);
+        warning = solution.Ok.warning_trim_timed_out ? TIMEOUT_TRIMMING_ASSERTIONS.toString() : "";
+
+      } else if(solution.Err != null) {
+        // Update summary data.
+        // Creating a RaireServiceException gives us a human-readable error message, though the
+        // exception is not thrown.
+        RaireServiceException ex = new RaireServiceException(solution.Err, request.candidates);
+        error = ex.errorCode.toString();
+        errorMsg = ex.getMessage();
+      } else {
+        // This is not supposed to happen - we got neither assertions nor an error.
+        error = INTERNAL_ERROR.toString();
       }
-      // TODO Deal with else
+      GenerateAssertionsResponseOrError summary
+          = new GenerateAssertionsResponseOrError(request.contestName, winner,
+          solution.Ok != null, error, warning, errorMsg);
+      // TODO save winner, warning, error, errormessage.
     }
     catch(IllegalArgumentException ex){
       final String msg = String.format("%s Invalid arguments were supplied to " +
@@ -234,8 +274,9 @@ public class GenerateAssertionsService {
       throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
     }
     catch(DataAccessException ex){
-      final String msg = String.format("%s Data access exception arose when persisting assertions. %s",
-          prefix, ex.getMessage());
+      final String msg
+          = String.format("%s Data access exception when persisting assertions or associated data. %s",
+            prefix, ex.getMessage());
       logger.error(msg);
       throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
     }

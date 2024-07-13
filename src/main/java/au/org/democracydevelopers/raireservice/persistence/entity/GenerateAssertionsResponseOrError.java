@@ -20,11 +20,9 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import jakarta.persistence.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.annotation.ReadOnlyProperty;
 
 /**
  * RAIRE (raire-java) generates a set of assertions for a given IRV contest, but it also returns
@@ -34,11 +32,9 @@ import org.springframework.data.annotation.ReadOnlyProperty;
  */
 @Entity
 @Table(name = "generate_assertions_response_or_error")
-public abstract class GenerateAssertionsResponseOrError {
+public class GenerateAssertionsResponseOrError {
 
   private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsResponseOrError.class);
-
-  private static final String ResultOK = "OK";
 
   /**
    * ID.
@@ -46,7 +42,6 @@ public abstract class GenerateAssertionsResponseOrError {
   @Id
   @Column(updatable = false, nullable = false)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @ReadOnlyProperty
   private long id;
 
   /**
@@ -54,31 +49,42 @@ public abstract class GenerateAssertionsResponseOrError {
    */
   @Version
   @Column(name = "version", updatable = false, nullable = false)
-  @ReadOnlyProperty
   private long version;
 
   /**
    * Name of the contest.
    */
   @Column(name = "contest_name", updatable = false, nullable = false)
-  @ReadOnlyProperty
   private String contestName;
+
+  /**
+   * Whether assertion generation was successful. If this is true, there should be assertions
+   * and a winner; if false, there should be an error.
+   */
+  @Column(name = "is_ok", updatable = false, nullable = false)
+  private boolean isOK;
 
   /**
    * Name of the winner of the contest, as determined by raire-java.
    */
   @Column(name = "winner", updatable = false, nullable = false)
-  @ReadOnlyProperty
   private String winner;
 
   /**
-   * An error or warning, if there was one, or ResultOK if none. Most errors mean there are no
+   * An error, if there was one, or ResultOK if none. Errors mean there are no
    * assertions (nor winner), but some warnings (e.g. TIME_OUT_TRIMMING_ASSERTIONS) do have
    * assertions and a winner, and allow the audit to continue.
    */
-  @Column(name = "error_or_warning", updatable = false, nullable = false)
-  @ReadOnlyProperty
-  private String errorOrWarning;
+  @Column(name = "error", updatable = false, nullable = false)
+  private String error;
+
+  /**
+   * A warning, if there was one, or emptystring if none. Warnings (e.g. TIME_OUT_TRIMMING_ASSERTIONS)
+   * mean that assertion generation succeeded and the audit can continue, but re-running with longer
+   * time allowed might be beneficial.
+   */
+  @Column(name = "warning", updatable = false, nullable = false)
+  private String warning;
 
   /**
    * The message associated with the error or warning, for example the names of the tied winners.
@@ -99,20 +105,23 @@ public abstract class GenerateAssertionsResponseOrError {
    * @param contestName Contest for which the Assertion has been created.
    * @param winner Winner of the Assertion (name of a candidate in the contest).
    * @param isOK indication of whether assertion generation was successful.
-   * @param errorOrWarning the error or warning produced by raire.
+   * @param error the error produced by raire, if any.
+   * @param warning the warning produced by raire, if any.
+   * @param message the message associated with the error, if any.
    * @throws IllegalArgumentException if the caller supplies an invalid combination of inputs, for
    * example "isOK" with a blank winner, or a winner with an error that prevents finding a winner.
    */
   public GenerateAssertionsResponseOrError(String contestName, String winner, boolean isOK,
-                                           RaireErrorCode errorOrWarning, String message) throws IllegalArgumentException
+                      String error, String warning, String message) throws IllegalArgumentException
   {
     final String prefix = "[all args constructor]";
-    logger.debug(String.format("%s Parameters: contest name %s; winner %s; isOK %s; error/warning %s.",
-        prefix, contestName, winner, isOK, errorOrWarning));
+    logger.debug(String.format("%s Parameters: contest name %s; winner %s; isOK %s; error %s; warning %s.",
+        prefix, contestName, winner, isOK, error, warning));
 
     this.contestName = contestName;
     this.winner = winner;
-    this.errorOrWarning = isOK ? ResultOK : errorOrWarning.toString();
+    this.error = isOK ? "" : error;
+    this.warning = warning;
     this.message = message;
 
     if(contestName.isBlank()){
