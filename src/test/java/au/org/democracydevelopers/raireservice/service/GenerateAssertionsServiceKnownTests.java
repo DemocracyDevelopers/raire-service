@@ -29,15 +29,18 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
 import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.time.TimeTaken;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
+import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary;
 import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
+import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
@@ -58,7 +61,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Tests to validate the behaviour of Assertion generation on a collection of simple contest with
+ * Tests to validate the behaviour of Assertion generation on a collection of simple contests with
  * human-computable assertions. Relevant data is preloaded into the test database from
  * src/test/resources/known_testcases_votes.sql.
  * This includes
@@ -83,6 +86,9 @@ public class GenerateAssertionsServiceKnownTests {
 
   @Autowired
   AssertionRepository assertionRepository;
+
+  @Autowired
+  GenerateAssertionsSummaryRepository summaryRepository;
 
   @Autowired
   GenerateAssertionsService generateAssertionsService;
@@ -172,6 +178,13 @@ public class GenerateAssertionsServiceKnownTests {
 
     assertTrue(correctDBAssertionData(8, 8 / 27.0, 27 / 8.0,
         "Chuan", "Bob", List.of(), nebAssertion));
+
+    // There should be a summary with winner Chuan and no error.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(guideToRaireExample1);
+    assertTrue(optSummary.isPresent());
+    GenerateAssertionsSummary summary = optSummary.get();
+    summary.equalData(guideToRaireExample1, "Chuan","", "", "");
   }
 
   /**
@@ -195,6 +208,13 @@ public class GenerateAssertionsServiceKnownTests {
 
     List<Assertion> assertions = assertionRepository.findByContestName(guideToRaireExample2);
     checkGuideToRaireExample2Assertions(assertions);
+
+    // Check persistence of summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(guideToRaireExample2);
+    assertTrue(optSummary.isPresent());
+    GenerateAssertionsSummary summary = optSummary.get();
+    summary.equalData(guideToRaireExample2, "Chuan","", "", "");
   }
 
   /**
@@ -243,6 +263,13 @@ public class GenerateAssertionsServiceKnownTests {
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
     assertTrue(correctDBAssertionData(1, 0.2, 5, "Alice",
         "Bob", List.of("Bob","Alice"), nenAssertion));
+
+    // Check persistence of summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(simpleContest);
+    assertTrue(optSummary.isPresent());
+    GenerateAssertionsSummary summary = optSummary.get();
+    summary.equalData(simpleContest, "Alice","", "", "");
   }
 
   /**
@@ -281,7 +308,12 @@ public class GenerateAssertionsServiceKnownTests {
     assertTrue(correctDBAssertionData(1, 0.2, 5, "Alice",
         "Bob", List.of("Bob","Alice"), nenAssertion));
 
-
+    // Check persistence of summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(crossCountySimpleContest);
+    assertTrue(optSummary.isPresent());
+    GenerateAssertionsSummary summary = optSummary.get();
+    summary.equalData(crossCountySimpleContest, "Alice","", "", "");
   }
 
   /**
@@ -326,6 +358,13 @@ public class GenerateAssertionsServiceKnownTests {
     NENAssertion nenAssertion = (NENAssertion) nenMaybeAssertion.get();
     assertTrue(correctDBAssertionData(1, 0.1, 10, "Alice",
         "Bob", List.of("Bob","Alice"), nenAssertion));
+
+    // Check persistence of summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(simpleContest);
+    assertTrue(optSummary.isPresent());
+    GenerateAssertionsSummary summary = optSummary.get();
+    summary.equalData(simpleContest, "Alice","", "", "");
   }
 
   /**
@@ -342,6 +381,11 @@ public class GenerateAssertionsServiceKnownTests {
         generateAssertionsService.generateAssertions(notEnoughBallotsRequest)
     );
     assertSame(ex.errorCode, RaireErrorCode.INVALID_TOTAL_AUDITABLE_BALLOTS);
+
+    // Check there is no summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(simpleContest);
+    assertFalse(optSummary.isPresent());
   }
 
   /**
@@ -361,6 +405,11 @@ public class GenerateAssertionsServiceKnownTests {
         generateAssertionsService.generateAssertions(wrongCandidatesRequest)
     );
     assertSame(ex.errorCode, RaireErrorCode.WRONG_CANDIDATE_NAMES);
+
+    // Check there is no summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(simpleContest);
+    assertFalse(optSummary.isPresent());
   }
 
   /**
@@ -385,6 +434,11 @@ public class GenerateAssertionsServiceKnownTests {
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
+
+    // Check there is no summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(simpleContest);
+    assertFalse(optSummary.isPresent());
   }
 
   /**
@@ -409,6 +463,11 @@ public class GenerateAssertionsServiceKnownTests {
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
+
+    // Check there is no summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(simpleContest);
+    assertFalse(optSummary.isPresent());
   }
 
   /**
@@ -433,6 +492,11 @@ public class GenerateAssertionsServiceKnownTests {
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
+
+    // Check there is no summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(simpleContest);
+    assertFalse(optSummary.isPresent());
   }
 
    /**
@@ -457,6 +521,11 @@ public class GenerateAssertionsServiceKnownTests {
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
+
+    // Check there is no summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(simpleContest);
+    assertFalse(optSummary.isPresent());
   }
 
   /**
@@ -481,6 +550,11 @@ public class GenerateAssertionsServiceKnownTests {
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
+
+    // Check there is no summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(simpleContest);
+    assertFalse(optSummary.isPresent());
   }
 
   /**
@@ -506,6 +580,11 @@ public class GenerateAssertionsServiceKnownTests {
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
+
+    // Check there is no summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(simpleContest);
+    assertFalse(optSummary.isPresent());
   }
 
   /**
@@ -531,6 +610,11 @@ public class GenerateAssertionsServiceKnownTests {
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
+
+    // Check there is no summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(simpleContest);
+    assertFalse(optSummary.isPresent());
   }
 
   /**
@@ -556,6 +640,11 @@ public class GenerateAssertionsServiceKnownTests {
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
+
+    // Check there is no summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(simpleContest);
+    assertFalse(optSummary.isPresent());
   }
 
   /**
@@ -581,6 +670,11 @@ public class GenerateAssertionsServiceKnownTests {
 
     List<Assertion> assertions = assertionRepository.findByContestName(simpleContest);
     assertEquals(0, assertions.size());
+
+    // Check there is no summary data.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(simpleContest);
+    assertFalse(optSummary.isPresent());
   }
 
 

@@ -21,6 +21,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
 import jakarta.persistence.*;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,5 +162,25 @@ public class GenerateAssertionsSummary {
     this.error = error;
     this.warning = warning;
     this.message = message;
+  }
+
+  /**
+   * Whether all the data match, as strings, except for 'message' which only has to match a substring.
+   * Used for testing.
+   * @param contestName      the expected name of the contest.
+   * @param winner           the expected winner's name.
+   * @param error            the expected error, if any.
+   * @param warning          the expected warning, if any.
+   * @param messageSubstring a string expected to be a substring of the error message.
+   * @return true if contestname, winner, error and warning all match, and messageSubstring is
+   * a substring of message.
+   */
+  public boolean equalData(String contestName, String winner,
+                           String error, String warning, String messageSubstring) {
+    return this.contestName.equals(contestName)
+        && this.winner.equals(winner)
+        && this.error.equals(error)
+        && this.warning.equals(warning)
+        && StringUtils.containsIgnoreCase(this.message, messageSubstring);
   }
 }
