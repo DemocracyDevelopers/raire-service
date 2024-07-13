@@ -20,6 +20,8 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.repository;
 
+import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,10 +36,9 @@ import java.util.Optional;
  * an error).
  */
 @Repository
-public interface GenerateAssertionsSummary
-    extends JpaRepository<au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary, Long> {
+public interface GenerateAssertionsSummaryRepository extends JpaRepository<GenerateAssertionsSummary, Long> {
 
-  Logger logger = LoggerFactory.getLogger(GenerateAssertionsSummary.class);
+  Logger logger = LoggerFactory.getLogger(GenerateAssertionsSummaryRepository.class);
 
   /**
    * Retrieve all GenerateAssertionsResponseOrError records (there should be at most one) from the

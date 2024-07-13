@@ -28,7 +28,7 @@ import au.org.democracydevelopers.raire.util.VoteConsolidator;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
-import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummary;
+import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
 import au.org.democracydevelopers.raireservice.request.ContestRequest;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
@@ -66,7 +66,7 @@ public class GenerateAssertionsService {
 
   private final AssertionRepository assertionRepository;
 
-  private final GenerateAssertionsSummary summaryRepository;
+  private final GenerateAssertionsSummaryRepository summaryRepository;
 
   /**
    * All args constructor.
@@ -76,7 +76,7 @@ public class GenerateAssertionsService {
    */
   public GenerateAssertionsService(CVRContestInfoRepository cvrContestInfoRepository,
       ContestRepository contestRepository, AssertionRepository assertionRepository,
-      GenerateAssertionsSummary summaryRepository) {
+      GenerateAssertionsSummaryRepository summaryRepository) {
     this.cvrContestInfoRepository = cvrContestInfoRepository;
     this.contestRepository = contestRepository;
     this.assertionRepository = assertionRepository;

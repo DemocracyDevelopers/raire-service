@@ -58,22 +58,14 @@ public class GenerateAssertionsSummary {
   private String contestName;
 
   /**
-   * Whether assertion generation was successful. If this is true, there should be assertions
-   * and a winner; if false, there should be an error.
-   */
-  @Column(name = "is_ok", updatable = false, nullable = false)
-  private boolean isOK;
-
-  /**
    * Name of the winner of the contest, as determined by raire-java.
    */
   @Column(name = "winner", updatable = false, nullable = false)
   private String winner;
 
   /**
-   * An error, if there was one, or ResultOK if none. Errors mean there are no
-   * assertions (nor winner), but some warnings (e.g. TIME_OUT_TRIMMING_ASSERTIONS) do have
-   * assertions and a winner, and allow the audit to continue.
+   * An error, if there was one, or emptystring if none. Errors mean there are no
+   * assertions (nor winner).
    */
   @Column(name = "error", updatable = false, nullable = false)
   private String error;
@@ -113,8 +105,8 @@ public class GenerateAssertionsSummary {
                                    String error, String warning, String message) throws IllegalArgumentException
   {
     final String prefix = "[all args constructor]";
-    logger.debug(String.format("%s Parameters: contest name %s; winner %s; isOK %s; error %s; warning %s.",
-        prefix, contestName, winner, isOK, error, warning));
+    logger.debug(String.format("%s Parameters: contest name %s; winner %s; error %s; warning %s.",
+        prefix, contestName, winner, error, warning));
 
     if(contestName.isBlank()){
       String msg = String.format("%s Attempt to build GenerateAssertionsResponseOrError with blank contest name",
