@@ -27,6 +27,9 @@ import au.org.democracydevelopers.raire.RaireError.TiedWinners;
 import au.org.democracydevelopers.raire.RaireError.TimeoutCheckingWinner;
 import au.org.democracydevelopers.raire.RaireError.TimeoutFindingAssertions;
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
+import au.org.democracydevelopers.raire.algorithm.RaireResult;
+import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
+import au.org.democracydevelopers.raire.time.TimeTaken;
 import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary;
 import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
@@ -79,6 +82,7 @@ public class GenerateAssertionsServiceWickedTests {
   private static final String tiedWinnersContest = "Tied Winners Contest";
   private static final String ByronMayoral = "Byron Mayoral";
   private static final String timeOutCheckingWinnersContest = "Time out checking winners contest";
+  private static final String timeOutTrimmingAssertionsContest = "Time out trimming contest";
 
   /**
    * Candidate lists for the preloaded contests.
@@ -104,6 +108,9 @@ public class GenerateAssertionsServiceWickedTests {
   private final static GenerateAssertionsRequest checkingWinnersTimeoutRequest
       = new GenerateAssertionsRequest(timeOutCheckingWinnersContest, 20,
       0.001, timeoutCheckingWinnersChoices);
+  private final static GenerateAssertionsRequest timeOutTrimmingContestRequest
+      = new GenerateAssertionsRequest(timeOutTrimmingAssertionsContest, 20, 5,
+      aliceChuanBob);
 
   /**
    * Tied winners results in raire-java returning a TiedWinners RaireError. This is a super-simple
@@ -161,8 +168,8 @@ public class GenerateAssertionsServiceWickedTests {
    */
   @Test
   @Transactional
-  void ByronWithShortTimeoutThrowsTimeoutGeneratingAssertionsError() throws RaireServiceException {
-    testUtils.log(logger, "ByronWithShortTimeoutThrowsTimeoutGeneratingAssertionsError");
+  void ByronWithShortTimeoutThrowsTimeoutGeneratingAssertionsErrorAndStoresIt() throws RaireServiceException {
+    testUtils.log(logger, "ByronWithShortTimeoutThrowsTimeoutGeneratingAssertionsErrorAndStoresIt");
     RaireResultOrError result = generateAssertionsService.generateAssertions(ByronShortTimeoutRequest);
 
     assertNull(result.Ok);
@@ -175,5 +182,27 @@ public class GenerateAssertionsServiceWickedTests {
     assertTrue(optSummary.isPresent());
     assertTrue(optSummary.get().equalData(ByronMayoral, GenerateAssertionsSummary.UNKNOWN_WINNER,
         TIMEOUT_FINDING_ASSERTIONS.toString(), "", "Time out finding assertions"));
+  }
+
+  /**
+   * Correct storage of TIMEOUT_TRIMMING_ASSERTIONS. We do not actually know how to make a set of
+   * votes that produce this result from generateAssertions, so we only test trying to store them.
+   */
+  @Test
+  @Transactional
+  void timeOutTrimmingAssertionsCorrectlyStored() throws RaireServiceException {
+    TimeTaken time = new TimeTaken(1000L, 0.5);
+
+    // The important thing about this result is setting the final boolean (warning_trim_timed_out)
+    // to true. Winner 0 happens to be Alice.
+    RaireResult result = new RaireResult(new AssertionAndDifficulty[]{}, 75.4, 200,
+        0, 3, time, time, time, true);
+    RaireResultOrError solution = new RaireResultOrError(result);
+    generateAssertionsService.persistAssertionsOrErrors(solution, timeOutTrimmingContestRequest);
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(timeOutTrimmingAssertionsContest);
+    assertTrue(optSummary.isPresent());
+    assertTrue(optSummary.get().equalData(timeOutTrimmingAssertionsContest, aliceChuanBob.getFirst(),
+        "", TIMEOUT_TRIMMING_ASSERTIONS.toString(),  ""));
   }
 }
