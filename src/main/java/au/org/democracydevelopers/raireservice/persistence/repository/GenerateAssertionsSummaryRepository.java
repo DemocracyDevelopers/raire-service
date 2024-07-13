@@ -46,6 +46,6 @@ public interface GenerateAssertionsSummaryRepository extends JpaRepository<Gener
    * @param contestName Name of the contest whose data is being retrieved.
    */
   @Query(value="select a from GenerateAssertionsSummary a where a.contestName = :contestName")
-  Optional<au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary> findByContestName(@Param("contestName") String contestName);
+  Optional<GenerateAssertionsSummary> findByContestName(@Param("contestName") String contestName);
 
 }
