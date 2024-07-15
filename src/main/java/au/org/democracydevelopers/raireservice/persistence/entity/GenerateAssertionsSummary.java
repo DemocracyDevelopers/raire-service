@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * GenerateAssertionsService, one row per contest.
  */
 @Entity
-@Table(name = "generate_assertions_response_or_error")
+@Table(name = "generate_assertions_summary")
 public class GenerateAssertionsSummary {
 
   private static final Logger logger = LoggerFactory.getLogger(GenerateAssertionsSummary.class);

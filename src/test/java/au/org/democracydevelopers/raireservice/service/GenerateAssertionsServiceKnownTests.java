@@ -75,6 +75,7 @@ import org.springframework.transaction.annotation.Transactional;
  *   to check that there's an appropriate error response.
  * - A request for the simple example with the wrong candidate names, to check that there's an
  *   appropriate error response.
+ *   TODO add tests that replacement of summaries happens when expected, i.e. if save is called twice.
  */
 @ActiveProfiles("known-testcases")
 @SpringBootTest

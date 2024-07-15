@@ -53,7 +53,8 @@ import org.springframework.transaction.annotation.Transactional;
  * Tests to validate the behavior of Assertion generation on a collection of particularly nasty
  * test cases designed to elicit errors. These kinds of errors _are_ expected to happen occasionally
  * in normal operation, if the input data is particularly challenging.
- * This has the same tests as GenerateAssertionsAPIWickedTests.java. Relevant data is preloaded into
+ * This has the same tests as GenerateAssertionsAPIWickedTests.java (except for the test of
+ * TimeOutTrimming assertions, which is hard to do via API). Relevant data is preloaded into
  * the test database from src/test/resources/known_testcases_votes.sql.
  * This includes
  * - a contest with tied winners,

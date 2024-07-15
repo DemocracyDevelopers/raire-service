@@ -63,6 +63,7 @@ import org.springframework.test.context.ActiveProfiles;
  *   database,
  * - missing, negative or zero values for numerical inputs (totalAuditableBallots and
  *   timeLimitSeconds).
+ *   TODO add tests for persisting error summaries (except tied winners, which is already done).
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest
