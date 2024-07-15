@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.ERROR_CODE_KEY;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
 import static au.org.democracydevelopers.raireservice.testUtils.baseURL;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCountJson;
@@ -218,6 +219,6 @@ public class GetAssertionsAPICsvTests {
 
     assertTrue(response.getStatusCode().is5xxServerError());
     assertEquals(WRONG_CANDIDATE_NAMES.toString(),
-        response.getHeaders().getFirst("error_code"));
+        response.getHeaders().getFirst(ERROR_CODE_KEY));
   }
 }

@@ -163,7 +163,7 @@ public class GetAssertionsJsonService {
         = generateAssertionsSummaryRepository.findByContestName(request.contestName);
     if(summary.isEmpty()) {
       // There is no record. This is expected if assertion-generation has not been run.
-      String msg = String.format("No generate assertions summary for contest %s.", request.contestName);
+      String msg = String.format("No assertion generation summary for contest %s.", request.contestName);
       logger.debug(String.format("%s %s", prefix, msg));
       throw new RaireServiceException(msg, RaireErrorCode.NO_ASSERTIONS_PRESENT);
     } else if (summary.get().winner.isBlank()) {

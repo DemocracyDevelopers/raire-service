@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.ERROR_CODE_KEY;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static au.org.democracydevelopers.raireservice.testUtils.baseURL;
@@ -196,7 +197,7 @@ public class GetAssertionsAPIJsonTests {
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
        "Inconsistent winner and candidate list"));
     assertEquals(WRONG_CANDIDATE_NAMES.toString(),
-        Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
+        Objects.requireNonNull(response.getHeaders().get(ERROR_CODE_KEY)).getFirst());
   }
 
   // TODO make another test where the saved winner is OK but the other candidates aren't.

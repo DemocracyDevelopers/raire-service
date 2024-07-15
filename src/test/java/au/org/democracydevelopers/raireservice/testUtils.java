@@ -59,6 +59,11 @@ public class testUtils {
   public final static String defaultCountJson = "\"totalAuditableBallots\":"+defaultCount;
 
   /**
+   * A default risk limit, used in requests.
+   */
+  public final static BigDecimal defaultRiskLimit = BigDecimal.valueOf(0.04);
+
+  /**
    * Comparator for doubles within a specific tolerance.
    */
   private static final DoubleComparator doubleComparator = new DoubleComparator();

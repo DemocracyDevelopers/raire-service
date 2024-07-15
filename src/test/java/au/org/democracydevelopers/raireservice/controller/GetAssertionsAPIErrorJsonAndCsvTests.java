@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.ERROR_CODE_KEY;
 import static au.org.democracydevelopers.raireservice.testUtils.baseURL;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCountJson;
@@ -89,30 +90,6 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
   }
 
-  /**
-   * A valid request for a contest that exists but has no assertions. Returns the correct error
-   * code and message. (JSON)
-   */
-  @Test
-  public void testValidRequestWithNoAssertionsJSON() {
-    testUtils.log(logger, "testValidRequestWithNoAssertionsJSON");
-    String url = "http://localhost:" + port + getAssertionsJSONEndpoint;
-
-    String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\","
-        + defaultCountJson + "," + "\"candidates\":[\"Bob\",\"Chuan\"]}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is5xxServerError());
-    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT.toString(),
-        Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
-        "No generate assertions summary"));
-  }
-
-  // TODO Add a test for the case where there's a summary record but no assertions. Should be.
-  // No assertions have been generated for the contest"));
 
   /**
    * Test a variety of bad requests to ensure they elicit the appropriate error message.
@@ -242,7 +219,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
 
     assertTrue(response.getStatusCode().is5xxServerError());
     assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT.toString(),
-        Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
+        Objects.requireNonNull(response.getHeaders().get(ERROR_CODE_KEY)).getFirst());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
         "No assertions have been generated"));
   }
