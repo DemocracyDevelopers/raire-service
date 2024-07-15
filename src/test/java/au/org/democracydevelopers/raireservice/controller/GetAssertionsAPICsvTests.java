@@ -23,7 +23,6 @@ package au.org.democracydevelopers.raireservice.controller;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
 import static au.org.democracydevelopers.raireservice.testUtils.baseURL;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCountJson;
-import static au.org.democracydevelopers.raireservice.testUtils.defaultWinnerJSON;
 import static au.org.democracydevelopers.raireservice.testUtils.getAssertionsCSVEndpoint;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -98,7 +97,7 @@ public class GetAssertionsAPICsvTests {
 
     String requestAsJson =
         "{\"riskLimit\":0.10,\"contestName\":\"Lots of assertions with ties Contest\","
-            + defaultCountJson + "," + defaultWinnerJSON + "," + candidatesAsJson;
+            + defaultCountJson + "," + candidatesAsJson;
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -109,7 +108,7 @@ public class GetAssertionsAPICsvTests {
     assertNotNull(output);
     assertTrue(output.contains("Contest name,Lots of assertions with ties Contest\n"));
     assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n"));
-    assertTrue(output.contains("Winner,Chuan\n"));
+    assertTrue(output.contains("Winner,Alice\n"));
     assertTrue(output.contains("Total universe,100\n"));
     assertTrue(output.contains("Risk limit,0.10\n\n"));
     assertTrue(output.contains("Extreme item,Value,Assertion IDs"));
@@ -148,7 +147,7 @@ public class GetAssertionsAPICsvTests {
     String url = baseURL + port + getAssertionsCSVEndpoint;
     String requestAsJson =
         "{\"riskLimit\":0.10,\"contestName\":\"Lots of tricky characters Contest\","
-            + defaultCountJson + "," + "\"winner\":\"Annoying, Alice\"" + "," + trickyCharactersAsJson;
+            + defaultCountJson + "," + trickyCharactersAsJson;
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -172,7 +171,7 @@ public class GetAssertionsAPICsvTests {
     testUtils.log(logger, "testCSVDemoContest");
     String url = baseURL + port + getAssertionsCSVEndpoint;
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
-        + defaultCountJson + "," + defaultWinnerJSON + "," + candidatesAsJson;
+        + defaultCountJson + "," + candidatesAsJson;
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -181,7 +180,7 @@ public class GetAssertionsAPICsvTests {
     assertNotNull(output);
     assertTrue(output.contains("Contest name,CSV Demo Contest\n"));
     assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n"));
-    assertTrue(output.contains("Winner,Chuan\n"));
+    assertTrue(output.contains("Winner,Diego\n"));
     assertTrue(output.contains("Total universe,100\n"));
     assertTrue(output.contains("Risk limit,0.10\n\n"));
     assertTrue(output.contains("Extreme item,Value,Assertion IDs\n"));
@@ -211,7 +210,7 @@ public class GetAssertionsAPICsvTests {
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
-        + defaultCountJson + "," + defaultWinnerJSON + ","
+        + defaultCountJson + ","
         + "\"candidates\":[\"Alicia\",\"Boba\",\"Chuan\",\"Diego\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);

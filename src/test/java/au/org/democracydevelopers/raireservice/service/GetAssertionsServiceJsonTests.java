@@ -22,7 +22,6 @@ package au.org.democracydevelopers.raireservice.service;
 
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
-import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

@@ -22,7 +22,6 @@ package au.org.democracydevelopers.raireservice.service;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
-import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -83,7 +82,7 @@ public class GetAssertionsServiceCsvTests {
     String output = getAssertionsCSVService.generateCSV(request);
     assertTrue(output.contains("Contest name,Lots of assertions with ties Contest\n"));
     assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n"));
-    assertTrue(output.contains("Winner,Bob\n"));
+    assertTrue(output.contains("Winner,Alice\n"));
     assertTrue(output.contains("Total universe,"+defaultCount+"\n"));
     assertTrue(output.contains("Risk limit,0.1\n\n"));
     assertTrue(output.contains("Extreme item,Value,Assertion IDs"));
@@ -123,7 +122,7 @@ public class GetAssertionsServiceCsvTests {
     GetAssertionsRequest request = new GetAssertionsRequest("Lots of tricky characters Contest",
         defaultCount, trickyCharacters, BigDecimal.valueOf(0.1));
     String output = getAssertionsCSVService.generateCSV(request);
-    assertTrue(output.contains("Winner,\"Winner, needs escaping\""));
+    assertTrue(output.contains("Winner,\"Annoying, Alice\""));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(0)));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(1)));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(2)));
@@ -144,7 +143,7 @@ public class GetAssertionsServiceCsvTests {
     String output = getAssertionsCSVService.generateCSV(request);
     assertTrue(output.contains("Contest name,CSV Demo Contest\n"));
     assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n"));
-    assertTrue(output.contains("Winner,"+defaultWinner+"\n"));
+    assertTrue(output.contains("Winner,Diego\n"));
     assertTrue(output.contains("Total universe,"+defaultCount+"\n"));
     assertTrue(output.contains("Risk limit,"+riskLimit+"\n\n"));
     assertTrue(output.contains("Extreme item,Value,Assertion IDs\n"));

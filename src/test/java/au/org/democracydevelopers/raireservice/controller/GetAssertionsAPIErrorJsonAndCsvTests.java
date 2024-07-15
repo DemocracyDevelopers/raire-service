@@ -23,8 +23,6 @@ package au.org.democracydevelopers.raireservice.controller;
 import static au.org.democracydevelopers.raireservice.testUtils.baseURL;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCountJson;
-import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
-import static au.org.democracydevelopers.raireservice.testUtils.defaultWinnerJSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -101,7 +99,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = "http://localhost:" + port + getAssertionsJSONEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\","
-        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Bob\",\"Chuan\"]}";
+        + defaultCountJson + "," + "\"candidates\":[\"Bob\",\"Chuan\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -110,8 +108,11 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT.toString(),
         Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
-        "No assertions have been generated for the contest"));
+        "No generate assertions summary"));
   }
+
+  // TODO Add a test for the case where there's a summary record but no assertions. Should be.
+  // No assertions have been generated for the contest"));
 
   /**
    * Test a variety of bad requests to ensure they elicit the appropriate error message.
@@ -119,14 +120,13 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
    * @param riskLimit risk limit as a string.
    * @param contestName the name of the contest.
    * @param totalBallots the total ballots in the universe.
-   * @param winner the winner's name.
    * @param candidateList the list of candidate names.
    * @param errorMsg the expected error message.
    */
   @ParameterizedTest
   @MethodSource("expectedBadRequestErrors")
   public void testExpectedErrors(String type, String riskLimit, String contestName,
-      String totalBallots, String winner, String candidateList, String errorMsg) {
+      String totalBallots, String candidateList, String errorMsg) {
     testUtils.log(logger, "testExpectedErrors");
     String url = baseURL + port
         + (type.equals("JSON") ? getAssertionsJSONEndpoint : getAssertionsCSVEndpoint);
@@ -136,7 +136,6 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
           "\"riskLimit\":"+riskLimit,
           "\"contestName\":"+contestName,
           "\"totalAuditableBallots\":"+totalBallots,
-          "\"winner\":"+winner,
           "\"candidates\":"+candidateList
         ))
         + "}";
@@ -162,77 +161,67 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     return Stream.of(
         // getAssertions, called with a nonexistent contest, returns a meaningful error.
         Arguments.of("JSON", riskLimit, "\"Nonexistent Contest\"", ballotCount,
-           "\""+defaultWinner+"\"", aliceAndBobJSON, "No such contest"),
+            aliceAndBobJSON, "No such contest"),
         Arguments.of("CSV", riskLimit, "\"Nonexistent Contest\"", ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON, "No such contest"),
+            aliceAndBobJSON, "No such contest"),
         // getAssertions, called with a valid plurality contest, returns a meaningful error.
         Arguments.of("JSON", riskLimit,  "\"Valid Plurality Contest\"", ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON,  "Not comprised of all IRV"),
+            aliceAndBobJSON,  "Not comprised of all IRV"),
         Arguments.of("CSV", riskLimit,  "\"Valid Plurality Contest\"", ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON,  "Not comprised of all IRV"),
+            aliceAndBobJSON,  "Not comprised of all IRV"),
         // getAssertions, called with a mixed IRV and non-IRV contest, returns a meaningful error.
         Arguments.of("JSON", riskLimit, "\"Invalid Mixed Contest\"", ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON,  "Not comprised of all IRV"),
+            aliceAndBobJSON,  "Not comprised of all IRV"),
         Arguments.of("CSV", riskLimit, "\"Invalid Mixed Contest\"", ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON,  "Not comprised of all IRV"),
+            aliceAndBobJSON,  "Not comprised of all IRV"),
         // getAssertions, called with a null contest name, returns a meaningful error.
         Arguments.of("JSON", riskLimit, null, ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON, "No contest name"),
+            aliceAndBobJSON, "No contest name"),
         Arguments.of("CSV", riskLimit, null, ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON,  "No contest name"),
+            aliceAndBobJSON,  "No contest name"),
         // getAssertions, called with an empty contest name, returns a meaningful error.
         Arguments.of("JSON", riskLimit, "\"\"", ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON, "No contest name"),
+            aliceAndBobJSON, "No contest name"),
         Arguments.of("CSV", riskLimit, "\"\"", ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON,  "No contest name"),
+            aliceAndBobJSON,  "No contest name"),
         // getAssertions, called with an all-whitespace contest name, returns a meaningful error.
         Arguments.of("JSON", riskLimit, "\"    \"", ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON, "No contest name"),
+            aliceAndBobJSON, "No contest name"),
         Arguments.of("CSV", riskLimit, "\"     \"", ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON,  "No contest name"),
+            aliceAndBobJSON,  "No contest name"),
         // getAssertions, called with a null candidate list, returns a meaningful error.
         Arguments.of("JSON", riskLimit, ballinaMayoral, ballotCount,
-            "\""+defaultWinner+"\"", null, "Bad candidate list"),
+            null, "Bad candidate list"),
         Arguments.of("CSV", riskLimit, ballinaMayoral, ballotCount,
-            "\""+defaultWinner+"\"", null,  "Bad candidate list"),
+            null,  "Bad candidate list"),
         // getAssertions endpoint, called with an empty candidate list, returns a meaningful error.
         Arguments.of("JSON", riskLimit, ballinaMayoral, ballotCount,
-            "\""+defaultWinner+"\"", "[]", "Bad candidate list"),
+            "[]", "Bad candidate list"),
         Arguments.of("CSV", riskLimit, ballinaMayoral, ballotCount,
-            "\""+defaultWinner+"\"", "[]",  "Bad candidate list"),
+            "[]",  "Bad candidate list"),
         // getAssertions, called with a whitespace candidate name, returns a meaningful error.
         Arguments.of("JSON", riskLimit, ballinaMayoral, ballotCount,
-            "\""+defaultWinner+"\"", "[\"Alice\",\"    \"]", "Bad candidate list"),
+            "[\"Alice\",\"    \"]", "Bad candidate list"),
         Arguments.of("CSV", riskLimit, ballinaMayoral, ballotCount,
-            "\""+defaultWinner+"\"", "[\"Alice\",\"    \"]",  "Bad candidate list"),
+            "[\"Alice\",\"    \"]",  "Bad candidate list"),
         // getAssertions, called with a null risk limit, returns a meaningful error. (JSON)
         Arguments.of("JSON", null, ballinaMayoral, ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON, "Null or negative risk limit"),
+            aliceAndBobJSON, "Null or negative risk limit"),
         Arguments.of("CSV", null, ballinaMayoral, ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON,   "Null or negative risk limit"),
+            aliceAndBobJSON,   "Null or negative risk limit"),
         // getAssertions, called with a negative risk limit, returns a meaningful error.
         // (Note that a value >=1 is vacuously met but not invalid.)
         Arguments.of("JSON", "-0.05", ballinaMayoral, ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON, "Null or negative risk limit"),
+            aliceAndBobJSON, "Null or negative risk limit"),
         Arguments.of("CSV", "-0.05", ballinaMayoral, ballotCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON,   "Null or negative risk limit"),
-        // A request with a null winner is invalid.
-        // (Note that a request with an empty/whitespace winner is strange but valid.)
-        Arguments.of("JSON", riskLimit, ballinaMayoral, ballotCount,
-            null, aliceAndBobJSON, "Null or absent winner"),
-        Arguments.of("CSV", riskLimit, ballinaMayoral, ballotCount,
-            null, aliceAndBobJSON, "Null or absent winner"),
+            aliceAndBobJSON,   "Null or negative risk limit"),
         // A request with a negative totalAuditableBallots is invalid.
         // (Note that a request with zero auditable ballots is strange but valid.)
         Arguments.of("JSON", riskLimit, ballinaMayoral, "-10",
-            "\""+defaultWinner+"\"", aliceAndBobJSON, "Non-positive total auditable ballots"),
+            aliceAndBobJSON, "Non-positive total auditable ballots"),
         Arguments.of("CSV", riskLimit, ballinaMayoral, "-10",
-            "\""+defaultWinner+"\"", aliceAndBobJSON, "Non-positive total auditable ballots"),
-        // A request with a winner who is not one of the candidates is invalid.
-        Arguments.of("JSON", riskLimit, ballinaMayoral, ""+defaultCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON, "not one of the candidates"),
-        Arguments.of("CSV", riskLimit, ballinaMayoral, ""+defaultCount,
-            "\""+defaultWinner+"\"", aliceAndBobJSON,  "not one of the candidates")
+            aliceAndBobJSON, "Non-positive total auditable ballots")
+        // TODO Add a test for when the stored winner isn't on the list of candidates.
     );
   }
 
@@ -246,7 +235,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = "http://localhost:" + port + getAssertionsCSVEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"contestName\":\"Ballina Mayoral\","
-        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"candidates\":[\"Bob\",\"Chuan\"]}";
+        + defaultCountJson + "," + "\"candidates\":[\"Bob\",\"Chuan\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -255,8 +244,12 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT.toString(),
         Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
-        "No assertions have been generated for the contest"));
+        "No assertions have been generated"));
   }
+
+  // TODO Add a test for when there are assertions but no summary. Should be
+  //  "No assertions have been generated for the contest" if there's a summary but no assertions, and
+  //  "No generate assertions summary" if there's no summary. JSON makes the distinction; CSV doesn't.));
 
   /**
    * This is really just a test that the testing is working. There's no mapping for the plain
@@ -334,7 +327,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"candidates\":[\"Alice\",\"Bob\"],"
-        + defaultCountJson + "," + defaultWinnerJSON + "}";
+        + defaultCountJson + "}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -353,7 +346,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,\"candidates\":[\"Alice\",\"Bob\"],"
-        + defaultCountJson + "," + defaultWinnerJSON + "}";
+        + defaultCountJson + "}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -372,7 +365,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,"
-        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -391,7 +384,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.05,"
-        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -410,7 +403,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     String requestAsJson = "{\"candidates\":[\"Alice\",\"Bob\"],"
-        + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
+        + defaultCountJson + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -429,7 +422,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
     String requestAsJson = "{\"candidates\":[\"Alice\",\"Bob\"],"
-    + defaultCountJson + "," + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
+    + defaultCountJson + "," + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -448,7 +441,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     String requestAsJson = "{\"candidates\":[\"Alice\",\"Bob\"],\"riskLimit\":0.05,"
-        + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
+        + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -468,7 +461,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
     String requestAsJson = "{\"candidates\":[\"Alice\",\"Bob\"],\"riskLimit\":0.05,"
-        + defaultWinnerJSON + "," + "\"contestName\":\"Ballina Mayoral\"}";
+        + "\"contestName\":\"Ballina Mayoral\"}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -476,45 +469,5 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(response.getStatusCode().is4xxClientError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
         "Non-positive total auditable ballots"));
-  }
-
-  /**
-   * The getAssertions endpoint, called with a missing winner, returns a meaningful
-   * error. (JSON) (Note that an empty/whitespace winner is strange but valid.)
-   */
-  @Test
-  public void getAssertionsWithMissingWinnerIsAnErrorJSON() {
-    testUtils.log(logger, "getAssertionsWithMissingWinnerIsAnErrorJSON");
-    String url = baseURL + port + getAssertionsJSONEndpoint;
-
-    String requestAsJson = "{\"candidates\":[\"Alice\",\"Bob\"],\"riskLimit\":0.05,"
-        + defaultCountJson + "," + "\"contestName\":\"Ballina Mayoral\"}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
-        "Null or absent winner"));
-  }
-
-  /**
-   * The getAssertions endpoint, called with a missing winner, returns a meaningful
-   * error. (CSV) (Note that an empty/whitespace winner is strange but valid.)
-   */
-  @Test
-  public void getAssertionsWithMissingWinnerIsAnErrorCSV() {
-    testUtils.log(logger, "getAssertionsWithMissingWinnerIsAnErrorCSV");
-    String url = baseURL + port + getAssertionsJSONEndpoint;
-
-    String requestAsJson = "{\"candidates\":[\"Alice\",\"Bob\"],\"riskLimit\":0.05,"
-        + defaultCountJson + "," + "\"contestName\":\"Ballina Mayoral\"}";
-
-    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
-    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-    assertTrue(response.getStatusCode().is4xxClientError());
-    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
-        "Null or absent winner"));
   }
 }

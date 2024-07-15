@@ -125,11 +125,12 @@ public class GetAssertionsAPIJsonTests {
 
     // Make the request.
     GetAssertionsRequest request = new GetAssertionsRequest(oneNEBAssertionContest, defaultCount,
-        List.of("Alice","Bob"), BigDecimal.valueOf(0.1));
+        List.of("Bob","Alice"), BigDecimal.valueOf(0.1));
     ResponseEntity<RaireSolution> response
         = restTemplate.postForEntity(url, request, RaireSolution.class);
 
-    // The metadata has been constructed appropriately.
+    // The metadata has been constructed appropriately. Note reversal of candidate names to check
+    // the set, rather than the ordered list, is matched.
     assertNotNull(response.getBody());
     assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest, BigDecimal.valueOf(0.1),
         defaultCount, response.getBody().metadata, Double.class));
@@ -142,8 +143,8 @@ public class GetAssertionsAPIJsonTests {
         response.getBody().solution.Ok));
 
     // We expect one NEB assertion with the following data.
-    assertTrue(correctAssertionData("NEB", 320, 1.1, 0,
-        1, new ArrayList<>(), 1.0, response.getBody().solution.Ok.assertions[0]));
+    assertTrue(correctAssertionData("NEB", 320, 1.1, 1,
+        0, new ArrayList<>(), 1.0, response.getBody().solution.Ok.assertions[0]));
   }
 
   /**
@@ -177,7 +178,7 @@ public class GetAssertionsAPIJsonTests {
 
   /**
    * Retrieve assertions for a contest where the request has been set up with incorrect
-   * candidate names for the given contest.
+   * candidate names for the saved winner (which is none of them).
    * This is a valid request in the sense that it passes Request.Validate(), but should later fail.
    */
   @Test
@@ -193,8 +194,12 @@ public class GetAssertionsAPIJsonTests {
 
     assertTrue(response.getStatusCode().is5xxServerError());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
-        "candidate list provided as parameter is inconsistent"));
+       "Inconsistent winner and candidate list"));
     assertEquals(WRONG_CANDIDATE_NAMES.toString(),
         Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
   }
+
+  // TODO make another test where the saved winner is OK but the other candidates aren't.
+        // Should be "candidate list provided as parameter is inconsistent"));
+  // Possibly needed at other points too.
 }

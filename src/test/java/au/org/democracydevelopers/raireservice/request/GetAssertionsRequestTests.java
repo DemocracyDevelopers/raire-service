@@ -22,7 +22,6 @@ package au.org.democracydevelopers.raireservice.request;
 
 import static au.org.democracydevelopers.raireservice.testUtils.ballinaMayoral;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
-import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -79,14 +78,13 @@ public class GetAssertionsRequestTests {
    * @param contestName the name of the contest.
    * @param totalBallots the total number of ballots.
    * @param candidateList the list of candidate names.
-   * @param winner the winner's name.
    * @param riskLimit the risk limit.
    * @param errorMsg the expected error message.
    */
   @ParameterizedTest
   @MethodSource("expectedExceptionMessages")
   public void testExpectedErrors(String contestName, int totalBallots, List<String> candidateList,
-      String winner, BigDecimal riskLimit, String errorMsg) {
+      BigDecimal riskLimit, String errorMsg) {
     testUtils.log(logger, "testExpectedErrors");
     GetAssertionsRequest invalidRequest = new GetAssertionsRequest(contestName, totalBallots,
         candidateList, riskLimit);
@@ -104,42 +102,42 @@ public class GetAssertionsRequestTests {
     List<String> alice = List.of("Alice");
     return Stream.of(
         // A request for a contest that doesn't exist is invalid.
-        Arguments.of("NonExistentContest", defaultCount, alice, defaultWinner,
+        Arguments.of("NonExistentContest", defaultCount, alice,
             defaultRiskLimit, "No such contest"),
         // A request for a plurality contest is invalid, because we have assertions only for IRV.
-        Arguments.of("Valid Plurality Contest", defaultCount, alice, defaultWinner,
+        Arguments.of("Valid Plurality Contest", defaultCount, alice,
             defaultRiskLimit, "not comprised of all IRV"),
         // A request for mixed IRV-plurality contests is invalid.
         // Note that this is a data problem - contests should have a consistent description.
-        Arguments.of("Invalid Mixed Contest", defaultCount, alice, defaultWinner,
+        Arguments.of("Invalid Mixed Contest", defaultCount, alice,
             defaultRiskLimit, "not comprised of all IRV"),
         // A request with null contest name is invalid.
-        Arguments.of(null, defaultCount, alice, defaultWinner,
+        Arguments.of(null, defaultCount, alice,
             defaultRiskLimit, "No contest name"),
         // A request with empty contest name is invalid.
-        Arguments.of("", defaultCount, alice, defaultWinner,
+        Arguments.of("", defaultCount, alice,
             defaultRiskLimit, "No contest name"),
         // A request with all-whitespace contest name is invalid.
-        Arguments.of("    ", defaultCount, alice, defaultWinner,
+        Arguments.of("    ", defaultCount, alice,
             defaultRiskLimit, "No contest name"),
         // A request with null candidate list is invalid.
-        Arguments.of("IRVContestName", defaultCount, null, defaultWinner,
+        Arguments.of("IRVContestName", defaultCount, null,
             defaultRiskLimit, "bad candidate list"),
         // A request with empty candidate list is invalid.
-        Arguments.of("IRVContestName", defaultCount, List.of(), defaultWinner,
+        Arguments.of("IRVContestName", defaultCount, List.of(),
             defaultRiskLimit, "bad candidate list"),
         // A request with an all-whitespace candidate name is invalid.
-        Arguments.of("IRVContestName", defaultCount, List.of("Alice","    "), defaultWinner,
+        Arguments.of("IRVContestName", defaultCount, List.of("Alice","    "),
             defaultRiskLimit, "bad candidate list"),
         // A request with a null risk limit is invalid.
-        Arguments.of(ballinaMayoral, defaultCount, alice, defaultWinner,
+        Arguments.of(ballinaMayoral, defaultCount, alice,
             null, "risk limit"),
         // A request with a negative risk limit is invalid.
-        Arguments.of(ballinaMayoral, defaultCount, alice, defaultWinner,
+        Arguments.of(ballinaMayoral, defaultCount, alice,
             BigDecimal.valueOf(-0.03), "risk limit"),
         // A request with a negative totalAuditableBallots is invalid.
         // (Note that a request with zero auditable ballots is strange but valid.)
-        Arguments.of(ballinaMayoral, -10, alice, defaultWinner,
+        Arguments.of(ballinaMayoral, -10, alice,
             defaultRiskLimit, "Non-positive total auditable ballots")
     );
   }

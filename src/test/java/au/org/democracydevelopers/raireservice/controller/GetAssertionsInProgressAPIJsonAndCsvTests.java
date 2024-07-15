@@ -25,8 +25,6 @@ import static au.org.democracydevelopers.raireservice.testUtils.correctAssertion
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static au.org.democracydevelopers.raireservice.testUtils.correctSolutionData;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCountJson;
-import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
-import static au.org.democracydevelopers.raireservice.testUtils.defaultWinnerJSON;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -293,7 +291,7 @@ public class GetAssertionsInProgressAPIJsonAndCsvTests {
 
     String requestAsJson =
         "{\"riskLimit\":0.05,\"contestName\":\"" + oneNEBOneNENAssertionContest + "\","
-            + defaultCountJson + "," + defaultWinnerJSON + ","
+            + defaultCountJson + ","
             + "\"candidates\":[\"Liesl\",\"Wendell\",\"Amanda\",\"Chuan\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);

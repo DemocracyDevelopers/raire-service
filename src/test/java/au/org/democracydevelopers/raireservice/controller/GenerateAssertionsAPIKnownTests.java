@@ -23,7 +23,6 @@ package au.org.democracydevelopers.raireservice.controller;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.ERROR_CODE_KEY;
 import static au.org.democracydevelopers.raireservice.testUtils.correctAssertionData;
 import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
-import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
