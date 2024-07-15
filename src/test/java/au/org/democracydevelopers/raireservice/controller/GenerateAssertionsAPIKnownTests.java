@@ -155,7 +155,7 @@ public class GenerateAssertionsAPIKnownTests {
 
     // Request the assertions
     GetAssertionsRequest getRequest = new GetAssertionsRequest(guideToRaireExample1, 27,
-        Arrays.stream(aliceBobChuanDiego).toList(), defaultWinner, DEFAULT_RISK_LIMIT);
+        Arrays.stream(aliceBobChuanDiego).toList(), DEFAULT_RISK_LIMIT);
     ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
         RaireSolution.class);
 
@@ -199,7 +199,7 @@ public class GenerateAssertionsAPIKnownTests {
 
     // Request the assertions
     GetAssertionsRequest getRequest = new GetAssertionsRequest(guideToRaireExample2, 41,
-        Arrays.stream(aliceChuanBob).toList(), defaultWinner, DEFAULT_RISK_LIMIT);
+        Arrays.stream(aliceChuanBob).toList(), DEFAULT_RISK_LIMIT);
     ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
         RaireSolution.class);
 
@@ -251,7 +251,7 @@ public class GenerateAssertionsAPIKnownTests {
 
     // Request the assertions
     GetAssertionsRequest getRequest = new GetAssertionsRequest(simpleContest, 147,
-        Arrays.stream(aliceChuanBob).toList(), defaultWinner, DEFAULT_RISK_LIMIT);
+        Arrays.stream(aliceChuanBob).toList(), DEFAULT_RISK_LIMIT);
     ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
         RaireSolution.class);
 
@@ -295,7 +295,7 @@ public class GenerateAssertionsAPIKnownTests {
 
     // Request the assertions
     GetAssertionsRequest getRequest = new GetAssertionsRequest(crossCountySimpleContest, 5,
-        Arrays.stream(aliceChuanBob).toList(), defaultWinner, DEFAULT_RISK_LIMIT);
+        Arrays.stream(aliceChuanBob).toList(), DEFAULT_RISK_LIMIT);
     ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
         RaireSolution.class);
 
@@ -348,7 +348,7 @@ public class GenerateAssertionsAPIKnownTests {
 
      // Request the assertions
      GetAssertionsRequest getRequest = new GetAssertionsRequest(simpleContest, 10,
-         Arrays.stream(aliceChuanBob).toList(), defaultWinner, DEFAULT_RISK_LIMIT);
+         Arrays.stream(aliceChuanBob).toList(), DEFAULT_RISK_LIMIT);
      ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
          RaireSolution.class);
 

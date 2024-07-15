@@ -103,7 +103,7 @@ public class GenerateAssertionsAPINSWTests {
 
       // Request the assertions
       GetAssertionsRequest getRequest = new GetAssertionsRequest(expected.contestName(),
-          expected.ballotCount(), expected.choices(), expected.winner(), DEFAULT_RISK_LIMIT);
+          expected.ballotCount(), expected.choices(), DEFAULT_RISK_LIMIT);
       ResponseEntity<RaireSolution> getResponse = restTemplate.postForEntity(getUrl, getRequest,
           RaireSolution.class);
 

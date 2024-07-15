@@ -67,14 +67,14 @@ public class GenerateAssertionsSummary {
    * Name of the winner of the contest, as determined by raire-java.
    */
   @Column(name = "winner", updatable = false, nullable = false)
-  private String winner;
+  public String winner;
 
   /**
    * An error, if there was one, or emptystring if none. Errors mean there are no
    * assertions (nor winner).
    */
   @Column(name = "error", updatable = false, nullable = false)
-  private String error;
+  public String error;
 
   /**
    * A warning, if there was one, or emptystring if none. Warnings (e.g. TIME_OUT_TRIMMING_ASSERTIONS)
@@ -82,13 +82,13 @@ public class GenerateAssertionsSummary {
    * time allowed might be beneficial.
    */
   @Column(name = "warning", updatable = false, nullable = false)
-  private String warning;
+  public String warning;
 
   /**
    * The message associated with the error or warning, for example the names of the tied winners.
    */
   @Column(name = "message", updatable = false, nullable = false)
-  private String message;
+  public String message;
 
   /**
    * Default no-args constructor (required for persistence).
@@ -175,6 +175,7 @@ public class GenerateAssertionsSummary {
    * @return true if contestname, winner, error and warning all match, and messageSubstring is
    * a substring of message.
    */
+  // TODO can probably get rid of this.
   public boolean equalData(String contestName, String winner,
                            String error, String warning, String messageSubstring) {
     return this.contestName.equals(contestName)

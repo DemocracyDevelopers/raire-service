@@ -35,6 +35,7 @@ import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
 import au.org.democracydevelopers.raire.assertions.NotEliminatedNext;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
+import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
@@ -71,6 +72,9 @@ public class GetAssertionsServiceJsonTests {
   @Autowired
   AssertionRepository assertionRepository;
 
+  @Autowired
+  GenerateAssertionsSummaryRepository summaryRepository;
+
   /**
    * Retrieve assertions for a contest that has one NEB assertion.
    */
@@ -78,9 +82,9 @@ public class GetAssertionsServiceJsonTests {
   @Transactional
   void retrieveAssertionsExistentContestOneNEBAssertion() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNEBAssertion");
-    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
+    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository, summaryRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEB Assertion Contest",
-        defaultCount, List.of("Alice", "Bob"), "Bob", BigDecimal.valueOf(0.1));
+        defaultCount, List.of("Alice", "Bob"), BigDecimal.valueOf(0.1));
 
     RaireSolution solution = service.getRaireSolution(request);
 
@@ -94,7 +98,7 @@ public class GetAssertionsServiceJsonTests {
     // Check the contents of the RaireResults within the RaireSolution.
     assertEquals(1.1, solution.solution.Ok.difficulty);
     assertEquals(320, solution.solution.Ok.margin);
-    assertEquals(1, solution.solution.Ok.winner);
+    assertEquals(0, solution.solution.Ok.winner);
     assertEquals(2, solution.solution.Ok.num_candidates);
 
     AssertionAndDifficulty[] assertions = solution.solution.Ok.assertions;
@@ -119,10 +123,9 @@ public class GetAssertionsServiceJsonTests {
   @Transactional
   void retrieveAssertionsExistentContestOneNENAssertion() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsExistentContestOneNENAssertion");
-    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
+    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository, summaryRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN Assertion Contest",
-        defaultCount, List.of("Alice", "Charlie", "Diego", "Bob"), "NotACandidate",
-        BigDecimal.valueOf(0.1));
+        defaultCount, List.of("Alice", "Charlie", "Diego", "Bob"), BigDecimal.valueOf(0.1));
 
     RaireSolution solution = service.getRaireSolution(request);
 
@@ -137,8 +140,8 @@ public class GetAssertionsServiceJsonTests {
     // Check the contents of the RaireResults within the RaireSolution.
     assertEquals(3.01, solution.solution.Ok.difficulty);
     assertEquals(240, solution.solution.Ok.margin);
-    // Winner is -1 if not a candidate. This should be caught at request validation.
-    assertEquals(-1, solution.solution.Ok.winner);
+    // Winner is  Alice according to database.
+    assertEquals(0, solution.solution.Ok.winner);
     assertEquals(4, solution.solution.Ok.num_candidates);
 
     AssertionAndDifficulty[] assertions = solution.solution.Ok.assertions;
@@ -167,15 +170,15 @@ public class GetAssertionsServiceJsonTests {
   @Transactional
   void retrieveAssertionsInconsistentRequest1()  {
     testUtils.log(logger, "retrieveAssertionsInconsistentRequest1");
-    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
+    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository, summaryRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
-        defaultCount, List.of("Alice", "Charlie", "Diego", "Bob"), defaultWinner, BigDecimal.valueOf(0.1));
+        defaultCount, List.of("Alice", "Charlie", "Diego", "Bob"), BigDecimal.valueOf(0.1));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         service.getRaireSolution(request));
     assertEquals(RaireErrorCode.WRONG_CANDIDATE_NAMES, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
-        "Candidate list provided as parameter is inconsistent"));
+        "Inconsistent winner and candidate list"));
   }
 
   /**
@@ -186,14 +189,14 @@ public class GetAssertionsServiceJsonTests {
   @Transactional
   void retrieveAssertionsInconsistentRequest2()  {
     testUtils.log(logger, "retrieveAssertionsInconsistentRequest2");
-    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository);
+    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository, summaryRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
-        defaultCount, List.of(), defaultWinner, BigDecimal.valueOf(0.1));
+        defaultCount, List.of(), BigDecimal.valueOf(0.1));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         service.getRaireSolution(request));
     assertEquals(RaireErrorCode.WRONG_CANDIDATE_NAMES, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
-        "Candidate list provided as parameter is inconsistent"));
+        "Inconsistent winner and candidate list"));
   }
 }

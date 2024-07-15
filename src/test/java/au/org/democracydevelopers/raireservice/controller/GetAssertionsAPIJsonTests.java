@@ -125,7 +125,7 @@ public class GetAssertionsAPIJsonTests {
 
     // Make the request.
     GetAssertionsRequest request = new GetAssertionsRequest(oneNEBAssertionContest, defaultCount,
-        List.of("Alice","Bob"), "Bob", BigDecimal.valueOf(0.1));
+        List.of("Alice","Bob"), BigDecimal.valueOf(0.1));
     ResponseEntity<RaireSolution> response
         = restTemplate.postForEntity(url, request, RaireSolution.class);
 
@@ -156,7 +156,7 @@ public class GetAssertionsAPIJsonTests {
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     GetAssertionsRequest request =  new GetAssertionsRequest(oneNENAssertionContest, defaultCount,
-        List.of("Alice","Bob","Charlie","Diego"), "Alice", BigDecimal.valueOf(0.1));
+        List.of("Alice","Bob","Charlie","Diego"), BigDecimal.valueOf(0.1));
     ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request, RaireSolution.class);
 
     // The metadata has been constructed appropriately
@@ -187,7 +187,7 @@ public class GetAssertionsAPIJsonTests {
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     GetAssertionsRequest request =  new GetAssertionsRequest(oneNEBOneNENAssertionContest,
-        defaultCount, List.of("Alice","Bob","Charlie","Diego"), "Alice", BigDecimal.valueOf(0.1));
+        defaultCount, List.of("Alice","Bob","Charlie","Diego"), BigDecimal.valueOf(0.1));
     ResponseEntity<String> response
         = restTemplate.postForEntity(url, request, String.class);
 

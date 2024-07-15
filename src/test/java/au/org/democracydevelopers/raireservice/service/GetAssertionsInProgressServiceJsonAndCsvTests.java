@@ -80,7 +80,7 @@ public class GetAssertionsInProgressServiceJsonAndCsvTests {
   void retrieveAssertionsOneNENOneNEBAssertionInProgressJSON() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressJSON");
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
-        defaultCount, List.of("Liesl", "Wendell", "Amanda", "Chuan"), defaultWinner, BigDecimal.valueOf(0.05));
+        defaultCount, List.of("Liesl", "Wendell", "Amanda", "Chuan"), BigDecimal.valueOf(0.05));
 
     RaireSolution solution = getAssertionsJsonService.getRaireSolution(request);
 
@@ -133,7 +133,7 @@ public class GetAssertionsInProgressServiceJsonAndCsvTests {
   void retrieveAssertionsOneNENOneNEBAssertionInProgressCSV() throws RaireServiceException {
     testUtils.log(logger, "retrieveAssertionsOneNENOneNEBAssertionInProgressCSV");
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
-        defaultCount, List.of("Liesl", "Wendell", "Amanda", "Chuan"), defaultWinner, BigDecimal.valueOf(0.05));
+        defaultCount, List.of("Liesl", "Wendell", "Amanda", "Chuan"), BigDecimal.valueOf(0.05));
 
     String csv = getAssertionsCsvService.generateCSV(request);
 

@@ -79,7 +79,7 @@ public class GetAssertionsServiceCsvTests {
   public void testCSVTies() throws RaireServiceException {
     testUtils.log(logger, "testCSVTies");
     GetAssertionsRequest request = new GetAssertionsRequest( "Lots of assertions with ties Contest",
-        defaultCount, candidates, "Bob", BigDecimal.valueOf(0.1));
+        defaultCount, candidates, BigDecimal.valueOf(0.1));
     String output = getAssertionsCSVService.generateCSV(request);
     assertTrue(output.contains("Contest name,Lots of assertions with ties Contest\n"));
     assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n"));
@@ -121,7 +121,7 @@ public class GetAssertionsServiceCsvTests {
   public void testCharacterEscaping() throws RaireServiceException {
     testUtils.log(logger,"testCharacterEscaping");
     GetAssertionsRequest request = new GetAssertionsRequest("Lots of tricky characters Contest",
-        defaultCount, trickyCharacters, "Winner, needs escaping", BigDecimal.valueOf(0.1));
+        defaultCount, trickyCharacters, BigDecimal.valueOf(0.1));
     String output = getAssertionsCSVService.generateCSV(request);
     assertTrue(output.contains("Winner,\"Winner, needs escaping\""));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(0)));
@@ -140,7 +140,7 @@ public class GetAssertionsServiceCsvTests {
     testUtils.log(logger,"testCsvDemoContest");
     BigDecimal riskLimit = BigDecimal.valueOf(0.03);
     GetAssertionsRequest request = new GetAssertionsRequest( "CSV Demo Contest",
-        defaultCount, candidates, defaultWinner, riskLimit);
+        defaultCount, candidates, riskLimit);
     String output = getAssertionsCSVService.generateCSV(request);
     assertTrue(output.contains("Contest name,CSV Demo Contest\n"));
     assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n"));
@@ -174,7 +174,7 @@ public class GetAssertionsServiceCsvTests {
     testUtils.log(logger, "wrongCandidatesIsAnError");
 
     GetAssertionsRequest request = new GetAssertionsRequest( "CSV Demo Contest", defaultCount,
-        List.of("Alicia", "Boba", "Chuan"), defaultWinner, BigDecimal.valueOf(0.05)
+        List.of("Alicia", "Boba", "Chuan"), BigDecimal.valueOf(0.05)
     );
 
     RaireServiceException ex = assertThrows(RaireServiceException.class,

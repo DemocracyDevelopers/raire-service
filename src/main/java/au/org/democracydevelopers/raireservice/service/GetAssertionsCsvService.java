@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.service;
 
+import static au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary.UNKNOWN_WINNER;
 import static au.org.democracydevelopers.raireservice.service.Metadata.CANDIDATES_HEADER;
 import static au.org.democracydevelopers.raireservice.service.Metadata.CONTEST_NAME_HEADER;
 import static au.org.democracydevelopers.raireservice.service.Metadata.CURRENT_RISK;
@@ -37,17 +38,14 @@ import static au.org.democracydevelopers.raireservice.util.CSVUtils.escapeThenJo
 import static au.org.democracydevelopers.raireservice.util.CSVUtils.intListToString;
 
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
+import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
+import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.util.DoubleComparator;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,13 +61,15 @@ public class GetAssertionsCsvService {
   private final static Logger logger = LoggerFactory.getLogger(GetAssertionsCsvService.class);
 
   private final AssertionRepository assertionRepository;
+  private final GenerateAssertionsSummaryRepository generateAssertionsSummaryRepository;
 
   /**
    * All args constructor.
    * @param assertionRepository the assertion repository.
    */
-  public GetAssertionsCsvService(AssertionRepository assertionRepository) {
+  public GetAssertionsCsvService(AssertionRepository assertionRepository, GenerateAssertionsSummaryRepository generateAssertionsSummaryRepository) {
     this.assertionRepository = assertionRepository;
+    this.generateAssertionsSummaryRepository = generateAssertionsSummaryRepository;
   }
 
   /**
@@ -254,12 +254,20 @@ public class GetAssertionsCsvService {
    * @return a preface to the CSV file.
    */
   private String makePreface(GetAssertionsRequest request) {
-      Map<String,String> metadata = new HashMap<>();
-      metadata.put(CONTEST_NAME_HEADER, request.contestName);
-      metadata.put(CANDIDATES_HEADER, escapeThenJoin(request.candidates));
-      metadata.put(WINNER_HEADER, request.winner);
-      metadata.put(TOTAL_AUDITABLE_BALLOTS_HEADER, ""+request.totalAuditableBallots);
-      metadata.put(RISK_LIMIT_HEADER, request.riskLimit.toString());
+    Map<String,String> metadata = new HashMap<>();
+    metadata.put(CONTEST_NAME_HEADER, request.contestName);
+    metadata.put(CANDIDATES_HEADER, escapeThenJoin(request.candidates));
+    metadata.put(TOTAL_AUDITABLE_BALLOTS_HEADER, ""+request.totalAuditableBallots);
+    metadata.put(RISK_LIMIT_HEADER, request.riskLimit.toString());
+
+    // Get the winner from the database, or put UNKNOWN_WINNER if it is blank or no summary is present.
+    Optional<GenerateAssertionsSummary> summary
+        = generateAssertionsSummaryRepository.findByContestName(request.contestName);
+    if (!summary.isPresent() || summary.get().winner.isBlank()) {
+      metadata.put(WINNER_HEADER, UNKNOWN_WINNER);
+    } else {
+      metadata.put(WINNER_HEADER, summary.get().winner);
+    }
 
       List<String> prefaceHeaders = List.of(CONTEST_NAME_HEADER, CANDIDATES_HEADER, WINNER_HEADER,
           TOTAL_AUDITABLE_BALLOTS_HEADER, RISK_LIMIT_HEADER);

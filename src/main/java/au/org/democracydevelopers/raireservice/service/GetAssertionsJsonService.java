@@ -24,17 +24,16 @@ import au.org.democracydevelopers.raire.RaireSolution;
 
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
 import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
+import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary;
+import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
 import au.org.democracydevelopers.raireservice.response.RaireResultMixIn;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
+
+import java.util.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -51,13 +50,15 @@ public class GetAssertionsJsonService {
   private final static Logger logger = LoggerFactory.getLogger(GetAssertionsJsonService.class);
 
   private final AssertionRepository assertionRepository;
+  private final GenerateAssertionsSummaryRepository generateAssertionsSummaryRepository;
 
   /**
    * All-args constructor.
    * @param assertionRepository Repository for retrieval of assertions from the colorado-rla database.
    */
-  public GetAssertionsJsonService(AssertionRepository assertionRepository){
+  public GetAssertionsJsonService(AssertionRepository assertionRepository, GenerateAssertionsSummaryRepository generateAssertionsSummaryRepository){
     this.assertionRepository = assertionRepository;
+    this.generateAssertionsSummaryRepository = generateAssertionsSummaryRepository;
   }
 
   /**
@@ -76,7 +77,11 @@ public class GetAssertionsJsonService {
       logger.debug(String.format("%s Preparing to build a RaireSolution for serialisation into " +
               "assertion visualiser report for contest %s.", prefix, request.contestName));
 
-      // Retrieve the assertions.
+      // Retrieve the winner, if there is one. This will throw a RaireServiceException if there is
+      // no GenerateAssertions Summary.
+      int winner = getWinnerFromSummaryThrowError(request);
+
+      // Retrieve the assertions. This will throw a RaireServiceException if there are none.
       List<Assertion> assertions = assertionRepository.getAssertionsThrowError(request.contestName);
 
       // Create contest metadata map, supplied as input when creating a RaireResult.
@@ -121,10 +126,9 @@ public class GetAssertionsJsonService {
       logger.debug(String.format("%s Minimum margin across assertions: %d.", prefix, margin));
 
       // Using a version of RaireResult in which certain attributes will be ignored in
-      // serialisation. If request.winner is not in the candidate list, that should be caught at
-      // validation time.
+      // serialisation.
       RaireResultMixIn result = new RaireResultMixIn(translated.toArray(AssertionAndDifficulty[]::new),
-          difficulty, margin, request.candidates.indexOf(request.winner), request.candidates.size());
+          difficulty, margin, winner, request.candidates.size());
 
       RaireSolution solution = new RaireSolution(metadata, new RaireResultOrError(result));
       logger.debug(String.format("%s Constructed RaireSolution for return and serialisation.", prefix));
@@ -140,5 +144,42 @@ public class GetAssertionsJsonService {
           prefix, ex.getMessage()));
       throw new RaireServiceException(ex.getMessage(), RaireErrorCode.INTERNAL_ERROR);
     }
+  }
+
+  /**
+   * Retrieve the GenerateAssertionsSummary record for this contest, and either return the winner's
+   * index in the candidate list (if it is present and valid) or throw an error with the appropriate
+   * error message (if either there is no record, or the record contains an error rather than a winner).
+   * We are assuming that if there is no GenerateAssetionsSummary record, there are also no assertions.
+   * @return the winner, as an index in the candidate list, if there is one.
+   * @throws RaireServiceException if there is no GenerateAssertionsSummaryRecord, or if it does
+   *         not contain a winner.
+   */
+  private int getWinnerFromSummaryThrowError(GetAssertionsRequest request) throws RaireServiceException {
+    final String prefix = "[getWinnerFromSummaryThrowError]";
+
+    // Retrieve the summary, or throw an error if there is none.
+    Optional<GenerateAssertionsSummary> summary
+        = generateAssertionsSummaryRepository.findByContestName(request.contestName);
+    if(summary.isEmpty()) {
+      // There is no record. This is expected if assertion-generation has not been run.
+      String msg = String.format("No generate-assertions summary for contest %s.", request.contestName);
+      logger.debug(String.format("%s %s", prefix, msg));
+      throw new RaireServiceException(msg, RaireErrorCode.NO_ASSERTIONS_PRESENT);
+    } else if (summary.get().winner.isBlank()) {
+      // There is a record of a failed attempt to generate assertions. Return the error & message.
+      String msg = String.format("No assertions generated for contest %s. %s %s %s %s", prefix,
+          request.contestName, summary.get().error, summary.get().message, summary.get().warning);
+      logger.debug(String.format("%s %s", prefix, msg));
+      throw new RaireServiceException(msg, RaireErrorCode.NO_ASSERTIONS_PRESENT);
+    } else if (!request.candidates.contains(summary.get().winner)) {
+      // The recorded winner is not one of the candidates in the request.
+      String msg = String.format("Inconsistent winner and candidate list. Winner: %s, Candidates %s",
+          summary.get().winner, request.candidates);
+      logger.debug(String.format("%s %s", prefix, msg));
+      throw new RaireServiceException(msg, RaireErrorCode.WRONG_CANDIDATE_NAMES);
+    }
+
+    return request.candidates.indexOf(summary.get().winner);
   }
 }

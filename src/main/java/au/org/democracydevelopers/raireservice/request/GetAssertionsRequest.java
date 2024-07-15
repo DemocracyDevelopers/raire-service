@@ -45,12 +45,6 @@ public class GetAssertionsRequest extends ContestRequest {
   private final static Logger logger = LoggerFactory.getLogger(GetAssertionsRequest.class);
 
   /**
-   * The winner, as stated by the request. This is written into response metadata
-   * _without_ being checked.
-   */
-  public final String winner;
-
-  /**
    * The risk limit for the audit, expected to be in the range [0,1]. Defaults to zero, because
    * then we know we will never mistakenly claim the risk limit has been met.
    */
@@ -62,15 +56,13 @@ public class GetAssertionsRequest extends ContestRequest {
    * @param contestName the name of the contest
    * @param totalAuditableBallots the total number of ballots in the universe.
    * @param candidates a list of candidates by name
-   * @param winner the winner's name
    * @param riskLimit the risk limit for the audit, expected to be in the range [0,1].
    */
   @ConstructorProperties({"contestName", "totalAuditableBallots", "candidates", "winner", "riskLimit"})
   public GetAssertionsRequest(String contestName, int totalAuditableBallots, List<String> candidates,
-      String winner, BigDecimal riskLimit) {
+      BigDecimal riskLimit) {
 
     super(contestName, totalAuditableBallots, candidates);
-    this.winner = winner;
     this.riskLimit = riskLimit;
   }
 
@@ -96,22 +88,6 @@ public class GetAssertionsRequest extends ContestRequest {
     if (riskLimit == null || riskLimit.compareTo(BigDecimal.ZERO) < 0) {
       final String msg = String.format("%s Null or negative risk limit specified in request (%s). "
           + "Throwing a RequestValidationException.", prefix, riskLimit);
-      logger.error(msg);
-      throw new RequestValidationException(msg);
-    }
-
-    // Check for null winner.
-    if (winner == null) {
-      final String msg = String.format("%s Null or absent winner specified in request. "
-          + "Throwing a RequestValidationException.", prefix);
-      logger.error(msg);
-      throw new RequestValidationException(msg);
-    }
-
-    // Check that the claimed winner is one of the candidates.
-    if (!candidates.contains(winner)) {
-      final String msg = String.format("%s Winner %s is not one of the candidates: %s. "
-          + "Throwing a RequestValidationException.", prefix, winner, candidates);
       logger.error(msg);
       throw new RequestValidationException(msg);
     }
