@@ -21,8 +21,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.service;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
-import static au.org.democracydevelopers.raireservice.testUtils.aliceAndBob;
-import static au.org.democracydevelopers.raireservice.testUtils.aliceAndBobAndCharlie;
+import static au.org.democracydevelopers.raireservice.testUtils.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -31,10 +30,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import au.org.democracydevelopers.raire.RaireError;
+import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary;
+import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
+import java.util.Optional;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -63,7 +66,8 @@ import org.springframework.test.context.ActiveProfiles;
  *   database,
  * - missing, negative or zero values for numerical inputs (totalAuditableBallots and
  *   timeLimitSeconds).
- *   TODO add tests for persisting error summaries (except tied winners, which is already done).
+ * These failures are _not_ meant to be persisted, since they are bad requests that cause assertion-
+ * generation not to be attempted.
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest
@@ -75,10 +79,15 @@ public class GenerateAssertionsServiceErrorTests {
 
   @Autowired
   private GenerateAssertionsService generateAssertionsService;
+
+  @Autowired
+  private GenerateAssertionsSummaryRepository summaryRepository;
+
   private final static String BallinaOneVote = "Ballina One Vote Contest";
 
   /**
    * The generateAssertions service, called with a nonexistent contest, returns a meaningful error.
+   * No summary record is persisted.
    */
   @Test
   public void generateAssertionsWithNonExistentContestIsAnError() {
@@ -92,11 +101,14 @@ public class GenerateAssertionsServiceErrorTests {
     assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
         "does not exist or is not all IRV"));
+
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName("NonExistentContest");
+    assertTrue(optSummary.isEmpty());
   }
 
   /**
    * The generateAssertions service, called with a valid IRV contest for which no votes are present,
-   * returns a meaningful error.
+   * returns a meaningful error. No summary record is persisted.
    */
   @Test
   public void generateAssertionsFromNoVotesIsAnError() {
@@ -109,11 +121,14 @@ public class GenerateAssertionsServiceErrorTests {
         generateAssertionsService.generateAssertions(request));
     assertEquals(RaireErrorCode.NO_VOTES_PRESENT, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "No votes present for contest"));
+
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName("No CVR Mayoral");
+    assertTrue(optSummary.isEmpty());
   }
 
   /**
    * The generateAssertions service, called with a valid plurality contest, returns a meaningful
-   * error.
+   * error. No summary record is persisted.
    */
   @Test
   public void generateAssertionsWithPluralityContestIsAnError() {
@@ -125,12 +140,17 @@ public class GenerateAssertionsServiceErrorTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.generateAssertions(request));
     assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
-    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "does not exist or is not all IRV"));
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "does not exist or is not all IRV"));
+
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName("Valid Plurality Contest");
+    assertTrue(optSummary.isEmpty());
   }
 
   /**
    * The generateAssertions service, called with a mixed IRV and non-IRV contest,
-   * returns a meaningful error.
+   * returns a meaningful error. No summary record is persisted.
    */
   @Test
   public void generateAssertionsWithMixedIRVPluralityContestIsAnError() {
@@ -143,10 +163,15 @@ public class GenerateAssertionsServiceErrorTests {
         generateAssertionsService.generateAssertions(request));
     assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "does not exist or is not all IRV"));
+
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName("Invalid Mixed Contest");
+    assertTrue(optSummary.isEmpty());
   }
 
   /**
    * The generateAssertions service, called with an empty contest name, returns a meaningful error.
+   * No summary record is persisted.
    */
   @Test
   public void generateAssertionsWithEmptyContestNameIsAnError() {
@@ -159,11 +184,14 @@ public class GenerateAssertionsServiceErrorTests {
         generateAssertionsService.generateAssertions(request));
     assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "does not exist or is not all IRV"));
+
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName("");
+    assertTrue(optSummary.isEmpty());
   }
 
   /**
    * The generateAssertions service, called with an all-whitespace contest name, returns a
-   * meaningful error.
+   * meaningful error. No summary record is persisted.
    */
   @Test
   public void generateAssertionsWithWhitespaceContestNameIsAnError() {
@@ -176,27 +204,34 @@ public class GenerateAssertionsServiceErrorTests {
         generateAssertionsService.generateAssertions(request));
     assertEquals(RaireErrorCode.INTERNAL_ERROR, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "does not exist or is not all IRV"));
+
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName("   ");
+    assertTrue(optSummary.isEmpty());
   }
 
   /**
    * The generateAssertions service, called with an empty candidate list, returns a meaningful error.
+   * No summary record is persisted.
    */
   @Test
   public void generateAssertionsWithEmptyCandidateListIsAnError() {
     testUtils.log(logger, "generateAssertionsWithEmptyCandidateListIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("Ballina One Vote Contest",
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(BallinaOneVote,
         100, 10, List.of());
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.generateAssertions(request));
     assertEquals(WRONG_CANDIDATE_NAMES, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "not on the list of candidates"));
+
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(BallinaOneVote);
+    assertTrue(optSummary.isEmpty());
   }
 
   /**
    * The generateAssertions service, called with a whitespace candidate name, returns a meaningful
-   * error.
+   * error. No summary record is persisted.
    */
   @Test
   public void generateAssertionsWithWhiteSpaceCandidateNameIsAnError() {
@@ -209,11 +244,14 @@ public class GenerateAssertionsServiceErrorTests {
         generateAssertionsService.generateAssertions(request));
     assertEquals(WRONG_CANDIDATE_NAMES, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "not on the list of candidates"));
+
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(BallinaOneVote);
+    assertTrue(optSummary.isEmpty());
   }
 
   /**
    * The generateAssertions service, called with zero total auditable ballots, returns a meaningful
-   * error.
+   * error. No summary record is persisted.
    */
   @Test
   public void generateAssertionsWithZeroAuditableBallotsIsAnError() {
@@ -226,11 +264,14 @@ public class GenerateAssertionsServiceErrorTests {
         generateAssertionsService.generateAssertions(request));
     assertEquals(RaireErrorCode.INVALID_TOTAL_AUDITABLE_BALLOTS, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "universe size"));
+
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(BallinaOneVote);
+    assertTrue(optSummary.isEmpty());
   }
 
   /**
    * The generateAssertions service, called with negative total auditable ballots,
-   * returns a meaningful error.
+   * returns a meaningful error. No summary record is persisted.
    */
   @Test
   public void generateAssertionsWithNegativeAuditableBallotsIsAnError() {
@@ -243,10 +284,14 @@ public class GenerateAssertionsServiceErrorTests {
         generateAssertionsService.generateAssertions(request));
     assertEquals(RaireErrorCode.INVALID_TOTAL_AUDITABLE_BALLOTS, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "universe size"));
+
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(BallinaOneVote);
+    assertTrue(optSummary.isEmpty());
   }
 
   /**
    * The generateAssertions service, called with zero time limit, returns a meaningful error.
+   * No summary record is persisted.
    */
   @Test
   public void generateAssertionsWithZeroTimeLimitIsAnError() throws RaireServiceException {
@@ -259,10 +304,14 @@ public class GenerateAssertionsServiceErrorTests {
     assertNull(response.Ok);
     assertNotNull(response.Err);
     assertInstanceOf(RaireError.InvalidTimeout.class, response.Err);
+
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(BallinaOneVote);
+    assertTrue(optSummary.isEmpty());
   }
 
   /**
    * The generateAssertions service, called with negative time limit, returns a meaningful error.
+   * No summary record is persisted.
    */
   @Test
   public void generateAssertionsWithNegativeTimeLimitIsAnError() throws RaireServiceException {
@@ -275,22 +324,29 @@ public class GenerateAssertionsServiceErrorTests {
     assertNull(response.Ok);
     assertNotNull(response.Err);
     assertInstanceOf(RaireError.InvalidTimeout.class, response.Err);
+
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(BallinaOneVote);
+    assertTrue(optSummary.isEmpty());
   }
 
   /**
    * A GenerateAssertions request with a candidate list that is valid, but the votes in the database
    * contain at least one candidate who is not in the expected candidate list. This is an error.
+   * No summary record is persisted.
    */
   @Test
   public void wrongCandidatesIsAnError() {
     testUtils.log(logger, "wrongCandidatesIsAnError");
 
-    GenerateAssertionsRequest request = new GenerateAssertionsRequest("Ballina One Vote Contest",
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(BallinaOneVote,
         100, 10, List.of("Alice","Bob","Chuan"));
 
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.generateAssertions(request));
     assertEquals(WRONG_CANDIDATE_NAMES, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "not on the list of candidates"));
+
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(BallinaOneVote);
+    assertTrue(optSummary.isEmpty());
   }
 }
