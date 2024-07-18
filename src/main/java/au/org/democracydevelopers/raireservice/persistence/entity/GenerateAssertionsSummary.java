@@ -26,6 +26,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.*;
+
 /**
  * RAIRE (raire-java) generates a set of assertions for a given IRV contest, but it also returns
  * the winner and (possibly) an informative error. These need to be persisted so that IRV reports
@@ -62,20 +66,20 @@ public class GenerateAssertionsSummary {
    * Name of the contest.
    */
   @Column(name = "contest_name", unique = true, updatable = false, nullable = false)
-  private String contestName;
+  private String contestName = "";
 
   /**
    * Name of the winner of the contest, as determined by raire-java.
    */
   @Column(name = "winner", updatable = false, nullable = false)
-  public String winner;
+  public String winner = "";
 
   /**
    * An error, if there was one, or emptystring if none. Errors mean there are no
    * assertions (nor winner).
    */
   @Column(name = "error", updatable = false, nullable = false)
-  public String error;
+  public String error = "";
 
   /**
    * A warning, if there was one, or emptystring if none. Warnings (e.g. TIME_OUT_TRIMMING_ASSERTIONS)
@@ -83,34 +87,26 @@ public class GenerateAssertionsSummary {
    * time allowed might be beneficial.
    */
   @Column(name = "warning", updatable = false, nullable = false)
-  public String warning;
+  public String warning = "";
 
   /**
    * The message associated with the error or warning, for example the names of the tied winners.
    */
   @Column(name = "message", updatable = false, nullable = false)
-  public String message;
+  public String message = "";
 
   /**
    * Default no-args constructor (required for persistence).
    */
   public GenerateAssertionsSummary() {}
 
-
   /**
-   * Construct GenerateAssertionsResponseOrError for a specific contest.
-   * There may also be a warning, e.g. TIME_OUT_TRIMMING_ASSERTIONS.
+   * Construct empty GenerateAssertionsSummary for a specific contest.
    * @param contestName Contest for which the Assertion has been created.
-   * @param winner Winner of the Assertion (name of a candidate in the contest).
-   * @param error the error produced by raire, if any.
-   * @param warning the warning produced by raire, if any.
-   * @param message the message associated with the error, if any.
-   * @throws IllegalArgumentException if the caller supplies an invalid combination of inputs, for
-   * example a blank error with a blank winner.
+   * @throws RaireServiceException if the given contestName is blank.
    */
-  public GenerateAssertionsSummary(String contestName, String winner,
-      String error, String warning, String message) throws IllegalArgumentException, RaireServiceException {
-    final String prefix = "[all args constructor]";
+  public GenerateAssertionsSummary(String contestName) throws RaireServiceException {
+    final String prefix = "[Generate Assertions Summary initial constructor]";
     logger.debug(String.format("%s Parameters: contest name %s; winner %s; error %s; warning %s.",
         prefix, contestName, winner, error, warning));
 
@@ -118,50 +114,76 @@ public class GenerateAssertionsSummary {
       String msg = String.format("%s Attempt to build GenerateAssertionsResponseOrError with blank contest name",
           prefix);
       logger.error(msg);
-      throw new IllegalArgumentException(msg);
+      throw new RaireServiceException(msg, INTERNAL_ERROR);
     }
 
     this.contestName = contestName;
-
-    update(winner, error, warning, message);
 
     logger.debug(String.format("%s Construction complete.", prefix));
   }
 
   /**
-   * Update all the data except the contestName. Intended for initialization, and for subsequent
-   * runs of Generate Assertions, for the same contest.
-   * @param winner  the winner's name, as computed by raire.
+   * Update error data, remove winner and warnings, when assertion generation failed. Intended for
+   * initialization, and for subsequent runs of Generate Assertions, for the same contest, when
+   * assertion generation failed.
    * @param error   the error, if any.
-   * @param warning the warning, if any.
    * @param message the message associated with the error (e.g. the names of tied winners).
-   * @throws RaireServiceException if the data is inconsistent, i.e. both an error and a winner,
-   * or neither.
+   * @throws RaireServiceException if the error is blank.
    */
-  public void update(String winner, String error, String warning, String message)
-                                                                  throws RaireServiceException {
+  public void update(String error, String message) throws RaireServiceException {
     final String prefix = "[update]";
-
-    // There should be either a winner or an error.
-    if(error.isBlank() && winner.isBlank()) {
-      String msg = String.format("%s Attempt to build or update GenerateAssertionsResponseOrError " +
-          "with blank error and blank winner name", prefix);
-      logger.error(msg);
-      throw new RaireServiceException(msg, RaireServiceException.RaireErrorCode.INTERNAL_ERROR);
-    }
+    logger.debug(String.format("%s %s %s.", prefix, "Updating error summary for contest ",
+        contestName));
 
     // There should not be both a winner and an error. (It's OK to have a winner and a warning.)
-    if(!error.isBlank() && !winner.isBlank()) {
+    if(error.isBlank()) {
       String msg = String.format("%s Attempt to build or update GenerateAssertionsResponseOrError " +
-          "with error and winner name", prefix);
+          "using the error constructor with a blank error.", prefix);
       logger.error(msg);
       throw new RaireServiceException(msg, RaireServiceException.RaireErrorCode.INTERNAL_ERROR);
     }
 
-    this.winner = winner.isBlank() ? UNKNOWN_WINNER : winner;
+    this.winner = UNKNOWN_WINNER;
     this.error = error;
-    this.warning = warning;
+    this.warning = "";
     this.message = message;
+
+    logger.debug(String.format("%s Successful update of summary for contest %s, error %s, message %s.",
+        prefix, contestName, error, message));
+  }
+
+  /**
+   * Update summary data, remove errors and associated messages, when Assertion Generation Succeeded.
+   * Intended for initialization, and for subsequent runs of Generate Assertions for the same
+   * contest.
+   * @param candidates   The candidate list submitted in the Generate Assertions request.
+   * @param winnerIndex  The index of the winner, in the candidate list.
+   * @param trimTimedOut Indication of whether the warning_trim_timed_out flag was present in
+   *                     raire's response.
+   * @throws RaireServiceException if the winnerIndex is not valid for the size of the candidate list.
+   */
+  public void update(List<String> candidates, int winnerIndex, boolean trimTimedOut)
+                                                                    throws RaireServiceException {
+    final String prefix = "[update]";
+    logger.debug(String.format("%s %s %s.", prefix, "Updating winner summary for contest ",
+        contestName));
+    try {
+      winner = candidates.get(winnerIndex);
+      error = "";
+      warning = trimTimedOut ? TIMEOUT_TRIMMING_ASSERTIONS.toString() : "";
+      message = "";
+
+      logger.debug(String.format("%s Successful update of summary for contest %s, winner %s, trim time out %s.",
+          prefix, contestName, winner, trimTimedOut));
+    } catch (IndexOutOfBoundsException e) {
+      // The winner's index was out of bounds. This can happen if the winner isn't present in the set
+      // of candidates in the request.
+      String msg = String.format("Invalid winner when updating summary for contest %s, winner %d, trim time out %s," +
+              "candidate list %s.", contestName, winnerIndex, trimTimedOut, candidates);
+      logger.debug(String.format("%s %s", prefix, msg));
+      throw new RaireServiceException(msg, INTERNAL_ERROR);
+    }
+
   }
 
   /**

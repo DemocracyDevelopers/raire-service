@@ -45,7 +45,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.INTERNAL_ERROR;
-import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.TIMEOUT_TRIMMING_ASSERTIONS;
 
 /**
  * This class contains functionality for generating assertions for a given contest by calling
@@ -221,59 +220,52 @@ public class GenerateAssertionsService {
    */
   @Transactional(rollbackOn = {RuntimeException.class, DataAccessException.class, RaireServiceException.class})
   public void persistAssertionsOrErrors(RaireResultOrError solution, ContestRequest request)
-      throws RaireServiceException
-  {
-    // Values to be stored in the Generate Assertions Response Or Error table.
-    String winner = "";
-    String error = "";
-    String errorMsg = "";
-    String warning = "";
-
+      throws RaireServiceException {
     final String prefix = "[persistAssertionsOrErrors]";
 
-      // Delete any existing assertions for this contest.
-      logger.debug(String.format("%s (Database access) Proceeding to delete any assertions " +
-          "stored for contest %s (if present).", prefix, request.contestName));
-      assertionRepository.deleteByContestName(request.contestName);
+    // Retrieve an existing summary or start a new one.
+    GenerateAssertionsSummary summary;
+    final Optional<GenerateAssertionsSummary> OptSummary
+        = summaryRepository.findByContestName(request.contestName);
+    if (OptSummary.isPresent()) {
+      // A summary is already present in the database - we will update this.
+      summary = OptSummary.get();
+    } else {
+      // There is no summary for ths contest - make a new blank summary and save it.
+      summary = new GenerateAssertionsSummary(request.contestName);
+      summaryRepository.save(summary);
+    }
 
-      // If the solution is OK, persist assertions formed by raire-java.
-      if (solution.Ok != null) {
-        logger.debug(String.format("%s Proceeding to translate and save %d assertions to the " +
-            "database for contest %s.", prefix, solution.Ok.assertions.length, request.contestName));
-        assertionRepository.translateAndSaveAssertions(request.contestName,
-            request.totalAuditableBallots, request.candidates.toArray(String[]::new), solution.Ok.assertions);
+    // Delete any existing assertions for this contest.
+    logger.debug(String.format("%s (Database access) Proceeding to delete any assertions " +
+        "stored for contest %s (if present).", prefix, request.contestName));
+    assertionRepository.deleteByContestName(request.contestName);
 
-        logger.debug(String.format("%s Assertions persisted.", prefix));
+    if (solution.Ok != null) {
+      // The solution is OK. Persist assertions formed by raire-java and save the winner and warning.
+      logger.debug(String.format("%s Proceeding to translate and save %d assertions to the " +
+          "database for contest %s.", prefix, solution.Ok.assertions.length, request.contestName));
+      assertionRepository.translateAndSaveAssertions(request.contestName,
+          request.totalAuditableBallots, request.candidates.toArray(String[]::new), solution.Ok.assertions);
 
-        // Update summary data.
-        winner = request.candidates.get(solution.Ok.winner);
-        warning = solution.Ok.warning_trim_timed_out ? TIMEOUT_TRIMMING_ASSERTIONS.toString() : "";
+      logger.debug(String.format("%s Assertions persisted.", prefix));
 
-        // If the solution records data for a failed assertion generation, persist that.
-      } else if (solution.Err != null) {
-        // Update summary data.
-        // Creating a RaireServiceException gives us a human-readable error message, though the
-        // exception is not thrown.
-        RaireServiceException ex = new RaireServiceException(solution.Err, request.candidates);
-        error = ex.errorCode.toString();
-        errorMsg = ex.getMessage();
-      } else {
-        // This is not supposed to happen - we got neither assertions nor an error.
-        error = INTERNAL_ERROR.toString();
-      }
+      // Update summary data, success.
+      summary.update(request.candidates, solution.Ok.winner, solution.Ok.warning_trim_timed_out);
 
-      // Save or update the summary.
-      final Optional<GenerateAssertionsSummary> OptSummary
-          = summaryRepository.findByContestName(request.contestName);
+    } else if (solution.Err != null) {
+      // The solution indicates a failed assertion generation. Persist the error and message.
 
-      if (OptSummary.isPresent()) {
-        // Update a summary already present in the database; the change is automatically persisted.
-        OptSummary.get().update(winner, error, warning, errorMsg);
-      } else {
-        // If there is no summary for ths contest, make a new summary and save it.
-        summaryRepository.save(
-            new GenerateAssertionsSummary(request.contestName, winner, error, warning, errorMsg)
-            );
-      }
+      // Creating a RaireServiceException gives us a human-readable error message, though the
+      // exception is not thrown.
+      RaireServiceException ex = new RaireServiceException(solution.Err, request.candidates);
+
+      // Update summary data.
+      summary.update(ex.errorCode.toString(), ex.getMessage());
+    } else {
+      // This is not supposed to happen - we got neither assertions nor an error.
+      summary.update(INTERNAL_ERROR.toString(), "Internal error");
+    }
+
   }
 }

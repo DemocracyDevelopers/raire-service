@@ -22,10 +22,16 @@ package au.org.democracydevelopers.raireservice.service;
 
 import au.org.democracydevelopers.raire.RaireError;
 import au.org.democracydevelopers.raire.RaireSolution;
+import au.org.democracydevelopers.raire.algorithm.RaireResult;
+import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
+import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
+import au.org.democracydevelopers.raire.time.TimeTaken;
 import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary;
 import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -40,11 +46,11 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.INTERNAL_ERROR;
-import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.TIMEOUT_FINDING_ASSERTIONS;
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.*;
 import static au.org.democracydevelopers.raireservice.testUtils.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -69,8 +75,9 @@ public class GenerateAssertionsServiceErrorPersistenceTests {
   @Autowired
   private GenerateAssertionsService generateAssertionsService;
 
+  private static final List<String> aliceBobAndChuan = List.of("Alice", "Bob", "Chuan");
   private static final GenerateAssertionsRequest ballinaMayoralRequest = new GenerateAssertionsRequest(ballinaMayoral, 100,
-      10, aliceAndBob);
+      10, aliceBobAndChuan);
 
   @ParameterizedTest
   @Transactional
@@ -96,8 +103,73 @@ public class GenerateAssertionsServiceErrorPersistenceTests {
    */
    private static Stream<Arguments> expectedRaireErrorSummaries() {
      return Stream.of(
-        Arguments.of(new RaireError.InternalErrorTrimming(), INTERNAL_ERROR, "", "Internal error"),
-        Arguments.of(new RaireError.TimeoutFindingAssertions(43.4), TIMEOUT_FINDING_ASSERTIONS, "", "Time out finding assertions")
+         // The elimination order "Chuan, Bob, Alice" apparently could not be ruled out.
+         Arguments.of(new RaireError.CouldNotRuleOut(new int[]{2,1,0}), COULD_NOT_RULE_OUT_ALTERNATIVE, "", "Chuan, Bob, Alice"),
+         // This happens if the assertion generation request had the wrong candidate names.
+         Arguments.of(new RaireError.InvalidCandidateNumber(), WRONG_CANDIDATE_NAMES, "", "Candidate list does not match database"),
+         Arguments.of(new RaireError.InternalErrorDidntRuleOutLoser(), INTERNAL_ERROR, "", "Internal error"),
+         Arguments.of(new RaireError.InternalErrorRuledOutWinner(), INTERNAL_ERROR, "", "Internal error"),
+         Arguments.of(new RaireError.InternalErrorTrimming(), INTERNAL_ERROR, "", "Internal error"),
+         Arguments.of(new RaireError.InvalidNumberOfCandidates(), INTERNAL_ERROR, "", "Internal error"),
+         Arguments.of(new RaireError.InvalidTimeout(), INTERNAL_ERROR, "", "Internal error"),
+         // Bob and Chuan are apparently tied winners.
+         Arguments.of(new RaireError.TiedWinners(new int[]{1,2}), TIED_WINNERS, "", "Tied winners: Bob, Chuan"),
+         Arguments.of(new RaireError.TimeoutCheckingWinner(), TIMEOUT_CHECKING_WINNER, "", "Time out checking winner"),
+         Arguments.of(new RaireError.TimeoutFindingAssertions(43.4), TIMEOUT_FINDING_ASSERTIONS, "", "Time out finding assertions"),
+         // Alice is candidate 0, apparently the winner.
+         Arguments.of(new RaireError.WrongWinner(new int[]{0}), INTERNAL_ERROR, "", "")
         );
    }
+
+  /**
+   * Timeout trimming assertions warning is correctly persisted.
+   */
+  @Test
+  @Transactional
+  public void testTimeoutTrimming() throws RaireServiceException {
+    testUtils.log(logger, "testTimeoutTrimming");
+    RaireSolution.RaireResultOrError solution = new RaireSolution.RaireResultOrError(new RaireResult(
+        new AssertionAndDifficulty[]{new AssertionAndDifficulty(new NotEliminatedBefore(0,1), 42.5, 2)}, 42.5, 2, 0, 3,
+        new TimeTaken(12L, 4), new TimeTaken(3L, 3), new TimeTaken(2L, 4), true));
+    generateAssertionsService.persistAssertionsOrErrors(solution, ballinaMayoralRequest);
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(ballinaMayoral);
+    assertTrue(optSummary.isPresent());
+    assertTrue(optSummary.get().equalData(ballinaMayoral, "Alice", "", TIMEOUT_TRIMMING_ASSERTIONS.toString(), ""));
+  }
+
+  /**
+   * Trying to save a summary of a solution with an invalid winner index (-1) throws an exception with code INTERNAL_ERROR.
+   */
+  @Test
+  public void testInvalidWinnerThrowsException() {
+    testUtils.log(logger, "testInvalidWinnerThrowsException");
+    RaireSolution.RaireResultOrError solution = new RaireSolution.RaireResultOrError(new RaireResult(
+        new AssertionAndDifficulty[]{}, 42.5, 200, -1, 4,
+        new TimeTaken(12L, 4), new TimeTaken(3L, 3), new TimeTaken(2L, 4), false));
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
+        generateAssertionsService.persistAssertionsOrErrors(solution, ballinaMayoralRequest)
+    );
+    assertEquals(INTERNAL_ERROR.toString(), ex.errorCode.toString());
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "Invalid winner"));
+  }
+
+  /**
+   * Trying to save a summary of a solution with an invalid winner index throws an exception with code INTERNAL_ERROR.
+   * This has a 3-candidate winner list and a claimed winner index of 3, which isn't a valid index.
+   */
+  @Test
+  public void testInvalidWinnerTooLargeThrowsException() {
+    testUtils.log(logger, "testInvalidWinnerTooLargeThrowsException");
+    RaireSolution.RaireResultOrError solution = new RaireSolution.RaireResultOrError(new RaireResult(
+        new AssertionAndDifficulty[]{}, 42.5, 200, 3, 4,
+        new TimeTaken(12L, 4), new TimeTaken(3L, 3), new TimeTaken(2L, 4), false));
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
+      generateAssertionsService.persistAssertionsOrErrors(solution, ballinaMayoralRequest)
+    );
+    assertEquals(INTERNAL_ERROR.toString(), ex.errorCode.toString());
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "Invalid winner"));
+  }
+
+
 }
