@@ -221,7 +221,7 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT.toString(),
         Objects.requireNonNull(response.getHeaders().get(ERROR_CODE_KEY)).getFirst());
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
-        "No assertions have been generated"));
+        "No assertion generation summary"));
   }
 
   // TODO Add a test for when there are assertions but no summary. Should be

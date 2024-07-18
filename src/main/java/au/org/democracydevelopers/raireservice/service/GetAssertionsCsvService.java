@@ -280,7 +280,7 @@ public class GetAssertionsCsvService {
     }
 
     // Put the winner from the database into metadata, or put UNKNOWN_WINNER if it is blank.
-    metadata.put(WINNER_HEADER, summary.get().winner.isBlank() ? summary.get().winner : UNKNOWN_WINNER);
+    metadata.put(WINNER_HEADER, summary.get().winner.isBlank() ? UNKNOWN_WINNER : summary.get().winner);
 
     List<String> prefaceHeaders = List.of(CONTEST_NAME_HEADER, CANDIDATES_HEADER, WINNER_HEADER,
         TOTAL_AUDITABLE_BALLOTS_HEADER, RISK_LIMIT_HEADER);
