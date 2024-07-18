@@ -249,7 +249,7 @@ public class AssertionRepositoryTests {
    */
   @Test
   @Transactional
-  void translateAndSaveNoAssertions(){
+  void translateAndSaveNoAssertions() throws RaireServiceException {
     testUtils.log(logger, "translateAndSaveNoAssertions");
     String[] candidates = {"Alice", "Bob", "Charlie"};
     AssertionAndDifficulty[] empty = {};
@@ -351,7 +351,7 @@ public class AssertionRepositoryTests {
   /**
    * Translate and save Alice NEB Bob in contest "One NEB Assertion Contest".
    */
-  void saveAssertionsOneNEBContest(){
+  void saveAssertionsOneNEBContest() throws RaireServiceException {
     String[] candidates = {"Alice", "Charlie", "Bob"};
     AssertionAndDifficulty aadAliceNEBBob = new AssertionAndDifficulty(
         new au.org.democracydevelopers.raire.assertions.NotEliminatedBefore(0, 2),
@@ -366,7 +366,7 @@ public class AssertionRepositoryTests {
   /**
    * Translate and save Alice NEN Charlie in contest "One NEN Assertion Contest".
    */
-  void saveAssertionsOneNENContest(){
+  void saveAssertionsOneNENContest() throws RaireServiceException {
     String[] candidates = {"Alice", "Charlie", "Diego", "Bob"};
     int[] continuing = {0, 1 ,2, 3};
     AssertionAndDifficulty aadAliceNENCharlie = new AssertionAndDifficulty(
@@ -383,7 +383,7 @@ public class AssertionRepositoryTests {
    * Translate and save Amanda NEB Liesl and Amanda NEN Wendell for the contest
    * "One NEN NEB Assertion Contest".
    */
-  void saveAssertionsOneNENOneNEBContest(){
+  void saveAssertionsOneNENOneNEBContest() throws RaireServiceException {
     String[] candidates = {"Liesl", "Wendell", "Amanda"};
     int[] continuing = {0, 1 ,2};
     AssertionAndDifficulty aadAmandaNEBLiesl = new AssertionAndDifficulty(
@@ -405,7 +405,7 @@ public class AssertionRepositoryTests {
    * Al (Bob) Jones and Alice P. Mangrove NEN West W. Westerson for the contest
    * "Multi-County Contest 1".
    */
-  void saveAssertionsMultiCountyContest(){
+  void saveAssertionsMultiCountyContest() throws RaireServiceException {
     String[] candidates = {"West W. Westerson", "Alice P. Mangrove", "Charlie C. Chaplin",
         "Al (Bob) Jones"};
 

@@ -29,6 +29,8 @@ import au.org.democracydevelopers.raireservice.persistence.entity.NENAssertion;
 
 import au.org.democracydevelopers.raireservice.service.RaireServiceException;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -74,37 +76,57 @@ public interface AssertionRepository extends JpaRepository<Assertion, Long> {
    * @param universeSize Number of ballots in the auditing universe for these assertions.
    * @param candidates Names of the candidates in the contest.
    * @param assertions Array of raire-java assertions for the contest.
-   * @throws IllegalArgumentException if the caller supplies a non-positive universe size,
-   * invalid margin, or invalid combination of winner, loser and list of assumed continuing candidates.
-   * @throws ArrayIndexOutOfBoundsException if the winner or loser indices in any of the raire-java
-   * assertions are invalid with respect to the given array of candidates.
+   * @throws RaireServiceException with INTERNAL_ERROR if the caller supplies a non-positive
+   * universe size, invalid margin, or invalid combination of winner, loser and list of assumed
+   * continuing candidates, or if winner or loser indices in any of the raire-java assertions are
+   * invalid with respect to the given array of candidates.  These are all internal errors by this
+   * point because they should have been caught earlier.
+   * Also translateAssertion may throw a RaireServiceException with WRONG_CANDIDATE_NAMES, which
+   * is not caught.
    */
   @Modifying
   default void translateAndSaveAssertions(String contestName, long universeSize, String[] candidates,
-      AssertionAndDifficulty[] assertions)
-      throws IllegalArgumentException, ArrayIndexOutOfBoundsException
+      AssertionAndDifficulty[] assertions) throws RaireServiceException
   {
     final String prefix = "[translateAndSaveAssertions]";
     logger.debug(String.format("%s Translating and saving %s raire-java assertions to the " +
         "database. Additional parameters: contest name %s; universe size %d; and candidates %s.",
         prefix, assertions.length, contestName, universeSize, Arrays.toString(candidates)));
 
-    List<Assertion> translated = Arrays.stream(assertions).map(a -> {
-      if (a.assertion.isNEB()) {
-        return new NEBAssertion(contestName, universeSize, a.margin, a.difficulty,
-            candidates, (NotEliminatedBefore) a.assertion);
-      } else {
-        return new NENAssertion(contestName, universeSize, a.margin, a.difficulty,
-            candidates, (NotEliminatedNext) a.assertion);
+    List<Assertion> translated = new ArrayList<>();
+    try {
+      for (AssertionAndDifficulty a : assertions) {
+        Assertion translateAssertion = translateAssertion(a, contestName, universeSize, candidates);
+        translated.add(translateAssertion);
       }
-    }).toList();
+      logger.debug(String.format("%s Translation complete.", prefix));
+    } catch (IllegalArgumentException ex) {
+           final String msg = String.format("%s Invalid arguments were supplied to " +
+          "AssertionRepository::translateAndSaveAssertions or GenerateAssertionsSummaryRepository::update. " +
+          "This is likely either a non-positive " +
+          "universe size, invalid margin, or invalid combination of winner, loser and list of " +
+          "assumed continuing candidates, or, for the summary, both a winner and an error, or neither. %s",
+          prefix, ex.getMessage());
+      logger.error(msg);
+      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
+    } catch (ArrayIndexOutOfBoundsException ex) {
+           final String msg = String.format("%s Array index out of bounds access in " +
+          "AssertionRepository::translateAndSaveAssertions. This was likely due to a winner " +
+          "or loser index in a raire-java assertion being invalid with respect to the " +
+          "candidates list for the contest. %s", prefix, ex.getMessage());
+      logger.error(msg);
+      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
+    }
 
-    logger.debug(String.format("%s Translation complete.", prefix));
+
+
+    // If all is good, save the assertions.
     logger.debug(String.format("%s (Database access) Proceeding to save generated assertions.",prefix));
     this.saveAll(translated);
 
     logger.debug(String.format("%s Save all complete.", prefix));
   }
+
 
   /**
    * Find and return the list of assertions generated for the given contest, throwing a
@@ -132,5 +154,20 @@ public interface AssertionRepository extends JpaRepository<Assertion, Long> {
     }
 
     return assertions;
+  }
+
+  /**
+   * Translate a raire-java::AssertionAndDifficulty into the corresponding raire-service::assertion,
+   * of the correct type.
+   */
+
+  private Assertion translateAssertion(AssertionAndDifficulty a, String contestName, long universeSize, String[] candidates) throws RaireServiceException {
+    if (a.assertion.isNEB()) {
+      return new NEBAssertion(contestName, universeSize, a.margin, a.difficulty,
+          candidates, (NotEliminatedBefore) a.assertion);
+    } else {
+      return new NENAssertion(contestName, universeSize, a.margin, a.difficulty,
+          candidates, (NotEliminatedNext) a.assertion);
+    }
   }
 }

@@ -70,7 +70,7 @@ import org.springframework.transaction.annotation.Transactional;
  * random port, then runs a series of tests for correct responses to valid requests.
  * The list of tests is similar to - and in most cases identical to - the GetAssertionsJsonServiceTests.
  * Contests which will be used for validity testing are preloaded into the database using
- * src/test/resources/data.sql.
+ * src/test/resources/simple_assertions.sql.
  */
 @ActiveProfiles("simple-assertions")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)

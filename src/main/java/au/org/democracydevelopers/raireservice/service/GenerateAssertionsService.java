@@ -44,7 +44,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
-import static au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary.UNKNOWN_WINNER;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.INTERNAL_ERROR;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.TIMEOUT_TRIMMING_ASSERTIONS;
 
@@ -205,16 +204,22 @@ public class GenerateAssertionsService {
    * If the result contains an error or warning, persist it and its message in the
    * GenerateAssertionsResponse table.
    * Previously-stored assertions are deleted, regardless of whether assertion generation
-   * was successful this time.
+   * was successful this time. Previously-stored summaries are updated.
    * @param solution RaireResultOrError containing either assertions to persist for a given contest,
    *                 with a winner, or an error. Note that there may be both a warning and successful
    *                 assertion generation.
    * @param request Assertions generation request containing contest information.
    * @throws RaireServiceException when an error arises in either the translation of
-   * raire-java assertions into a form suitable for saving to the database, or in persisting these
-   * translated assertions and associated data to the database.
+   * raire-java assertions into a form suitable for saving to the database, in persisting these
+   * translated assertions and associated data to the database, or in retrieving and saving or updating
+   * the summaries. These cause the whole transaction to roll back.
+   * Note default behaviour of @Transactional is:
+   * - to commit and flush at the end of the transaction
+   * - to roll back if any RuntimeException is thrown,
+   * and we explicitly tell it to roll back for RaireServiceException too.
+   *
    */
-  @Transactional
+  @Transactional(rollbackOn = {RuntimeException.class, DataAccessException.class, RaireServiceException.class})
   public void persistAssertionsOrErrors(RaireResultOrError solution, ContestRequest request)
       throws RaireServiceException
   {
@@ -224,15 +229,15 @@ public class GenerateAssertionsService {
     String errorMsg = "";
     String warning = "";
 
-    final String prefix = "[persistAssertions]";
-    try{
+    final String prefix = "[persistAssertionsOrErrors]";
+
       // Delete any existing assertions for this contest.
-      logger.debug(String.format("%s (Database access) Proceeding to delete any assertions "+
+      logger.debug(String.format("%s (Database access) Proceeding to delete any assertions " +
           "stored for contest %s (if present).", prefix, request.contestName));
       assertionRepository.deleteByContestName(request.contestName);
 
       // If the solution is OK, persist assertions formed by raire-java.
-      if(solution.Ok != null) {
+      if (solution.Ok != null) {
         logger.debug(String.format("%s Proceeding to translate and save %d assertions to the " +
             "database for contest %s.", prefix, solution.Ok.assertions.length, request.contestName));
         assertionRepository.translateAndSaveAssertions(request.contestName,
@@ -244,7 +249,8 @@ public class GenerateAssertionsService {
         winner = request.candidates.get(solution.Ok.winner);
         warning = solution.Ok.warning_trim_timed_out ? TIMEOUT_TRIMMING_ASSERTIONS.toString() : "";
 
-      } else if(solution.Err != null) {
+        // If the solution records data for a failed assertion generation, persist that.
+      } else if (solution.Err != null) {
         // Update summary data.
         // Creating a RaireServiceException gives us a human-readable error message, though the
         // exception is not thrown.
@@ -256,61 +262,18 @@ public class GenerateAssertionsService {
         error = INTERNAL_ERROR.toString();
       }
 
-      saveOrUpdateSummary(request.contestName, winner, error, warning, errorMsg);
-    }
-    catch(IllegalArgumentException ex){
-      final String msg = String.format("%s Invalid arguments were supplied to " +
-          "AssertionRepository::translateAndSaveAssertions or GenerateAssertionsSummaryRepository::update. " +
-          "This is likely either a non-positive " +
-          "universe size, invalid margin, or invalid combination of winner, loser and list of " +
-          "assumed continuing candidates, or, for the summary, both a winner and an error, or neither. %s",
-          prefix, ex.getMessage());
-      logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
-    }
-    catch(ArrayIndexOutOfBoundsException ex){
-      final String msg = String.format("%s Array index out of bounds access in " +
-          "AssertionRepository::translateAndSaveAssertions. This was likely due to a winner " +
-          "or loser index in a raire-java assertion being invalid with respect to the " +
-          "candidates list for the contest. %s", prefix, ex.getMessage());
-      logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
-    }
-    catch(DataAccessException ex){
-      final String msg
-          = String.format("%s Data access exception when persisting assertions or associated data. %s",
-            prefix, ex.getMessage());
-      logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
-    }
-    catch(Exception ex){
-      final String msg = String.format("%s An exception arose when persisting assertions or associated data. %s",
-          prefix, ex.getMessage());
-      logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
-    }
-  }
+      // Save or update the summary.
+      final Optional<GenerateAssertionsSummary> OptSummary
+          = summaryRepository.findByContestName(request.contestName);
 
-  /**
-   * Save or update Generate Assertions response summary data.
-   * @param contestName the name of the contest.
-   * @param winner      the winner, as a string.
-   * @param error       the error, if any.
-   * @param warning     the warning, if any.
-   * @param errorMsg    the message associated with the error, if any.
-   */
-  private void saveOrUpdateSummary(String contestName, String winner, String error, String warning, String errorMsg) {
-
-    GenerateAssertionsSummary summary;
-    final Optional<GenerateAssertionsSummary> OptSummary = summaryRepository.findByContestName(contestName);
-
-    if(OptSummary.isPresent()) {
-      // Update a summary already present in the database; the change is automatically persisted.
-      OptSummary.get().update(winner, error, warning, errorMsg);
-    } else {
-      // If there is no summary for ths contest, make a new summary and save it.
-      summary = new GenerateAssertionsSummary(contestName, winner, error, warning, errorMsg);
-      summaryRepository.save(summary);
-    }
+      if (OptSummary.isPresent()) {
+        // Update a summary already present in the database; the change is automatically persisted.
+        OptSummary.get().update(winner, error, warning, errorMsg);
+      } else {
+        // If there is no summary for ths contest, make a new summary and save it.
+        summaryRepository.save(
+            new GenerateAssertionsSummary(request.contestName, winner, error, warning, errorMsg)
+            );
+      }
   }
 }

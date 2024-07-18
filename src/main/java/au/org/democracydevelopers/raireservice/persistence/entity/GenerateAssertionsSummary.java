@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.persistence.entity;
 
+import au.org.democracydevelopers.raireservice.service.RaireServiceException;
 import jakarta.persistence.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -108,8 +109,7 @@ public class GenerateAssertionsSummary {
    * example a blank error with a blank winner.
    */
   public GenerateAssertionsSummary(String contestName, String winner,
-                                   String error, String warning, String message) throws IllegalArgumentException
-  {
+      String error, String warning, String message) throws IllegalArgumentException, RaireServiceException {
     final String prefix = "[all args constructor]";
     logger.debug(String.format("%s Parameters: contest name %s; winner %s; error %s; warning %s.",
         prefix, contestName, winner, error, warning));
@@ -135,11 +135,11 @@ public class GenerateAssertionsSummary {
    * @param error   the error, if any.
    * @param warning the warning, if any.
    * @param message the message associated with the error (e.g. the names of tied winners).
-   * @throws IllegalArgumentException if the data is inconsistent, i.e. both an error and a winner,
+   * @throws RaireServiceException if the data is inconsistent, i.e. both an error and a winner,
    * or neither.
    */
   public void update(String winner, String error, String warning, String message)
-                                                                  throws IllegalArgumentException {
+                                                                  throws RaireServiceException {
     final String prefix = "[update]";
 
     // There should be either a winner or an error.
@@ -147,7 +147,7 @@ public class GenerateAssertionsSummary {
       String msg = String.format("%s Attempt to build or update GenerateAssertionsResponseOrError " +
           "with blank error and blank winner name", prefix);
       logger.error(msg);
-      throw new IllegalArgumentException(msg);
+      throw new RaireServiceException(msg, RaireServiceException.RaireErrorCode.INTERNAL_ERROR);
     }
 
     // There should not be both a winner and an error. (It's OK to have a winner and a warning.)
@@ -155,7 +155,7 @@ public class GenerateAssertionsSummary {
       String msg = String.format("%s Attempt to build or update GenerateAssertionsResponseOrError " +
           "with error and winner name", prefix);
       logger.error(msg);
-      throw new IllegalArgumentException(msg);
+      throw new RaireServiceException(msg, RaireServiceException.RaireErrorCode.INTERNAL_ERROR);
     }
 
     this.winner = winner.isBlank() ? UNKNOWN_WINNER : winner;
@@ -175,7 +175,6 @@ public class GenerateAssertionsSummary {
    * @return true if contestname, winner, error and warning all match, and messageSubstring is
    * a substring of message.
    */
-  // TODO can probably get rid of this.
   public boolean equalData(String contestName, String winner,
                            String error, String warning, String messageSubstring) {
     return this.contestName.equals(contestName)
