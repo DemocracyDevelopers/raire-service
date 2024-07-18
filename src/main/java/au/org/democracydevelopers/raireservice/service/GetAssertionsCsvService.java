@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.service;
 
+import static au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary.UNKNOWN_WINNER;
 import static au.org.democracydevelopers.raireservice.service.Metadata.CANDIDATES_HEADER;
 import static au.org.democracydevelopers.raireservice.service.Metadata.CONTEST_NAME_HEADER;
 import static au.org.democracydevelopers.raireservice.service.Metadata.CURRENT_RISK;
@@ -279,15 +280,15 @@ public class GetAssertionsCsvService {
     }
 
     // Put the winner from the database into metadata, or put UNKNOWN_WINNER if it is blank.
-    metadata.put(WINNER_HEADER, summary.get().winner);
+    metadata.put(WINNER_HEADER, summary.get().winner.isBlank() ? summary.get().winner : UNKNOWN_WINNER);
 
-      List<String> prefaceHeaders = List.of(CONTEST_NAME_HEADER, CANDIDATES_HEADER, WINNER_HEADER,
-          TOTAL_AUDITABLE_BALLOTS_HEADER, RISK_LIMIT_HEADER);
+    List<String> prefaceHeaders = List.of(CONTEST_NAME_HEADER, CANDIDATES_HEADER, WINNER_HEADER,
+        TOTAL_AUDITABLE_BALLOTS_HEADER, RISK_LIMIT_HEADER);
 
-      return String.join("\n", prefaceHeaders.stream()
-          .map(h -> escapeThenJoin(List.of(h, metadata.get(h)))).toList())
-          +"\n\n"
-          + escapeThenJoin(extremumHeaders) + "\n";
+    return String.join("\n", prefaceHeaders.stream()
+        .map(h -> escapeThenJoin(List.of(h, metadata.get(h)))).toList())
+        + "\n\n"
+        + escapeThenJoin(extremumHeaders) + "\n";
   }
 
   /**

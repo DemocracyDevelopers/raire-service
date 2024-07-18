@@ -143,7 +143,7 @@ public class GenerateAssertionsSummary {
       throw new RaireServiceException(msg, RaireServiceException.RaireErrorCode.INTERNAL_ERROR);
     }
 
-    this.winner = UNKNOWN_WINNER;
+    this.winner = "";
     this.error = error;
     this.warning = "";
     this.message = message;

@@ -132,12 +132,12 @@ public class GenerateAssertionsServiceWickedTests {
     Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(tiedWinnersContest);
     assertTrue(optSummary.isPresent());
     // Check that Alice and Bob are the tied winners
-    assertTrue(optSummary.get().equalData(tiedWinnersContest, GenerateAssertionsSummary.UNKNOWN_WINNER,
+    assertTrue(optSummary.get().equalData(tiedWinnersContest, "",
         TIED_WINNERS.toString(), "", "Alice"));
-    assertTrue(optSummary.get().equalData(tiedWinnersContest, GenerateAssertionsSummary.UNKNOWN_WINNER,
+    assertTrue(optSummary.get().equalData(tiedWinnersContest, "",
         TIED_WINNERS.toString(), "", "Bob"));
     // and that Chuan is not
-    assertFalse(optSummary.get().equalData(tiedWinnersContest, GenerateAssertionsSummary.UNKNOWN_WINNER,
+    assertFalse(optSummary.get().equalData(tiedWinnersContest, "",
         TIED_WINNERS.toString(), "", "Chuan"));
   }
 
@@ -160,7 +160,7 @@ public class GenerateAssertionsServiceWickedTests {
     generateAssertionsService.persistAssertionsOrErrors(result, checkingWinnersTimeoutRequest);
     Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(timeOutCheckingWinnersContest);
     assertTrue(optSummary.isPresent());
-    assertTrue(optSummary.get().equalData(timeOutCheckingWinnersContest, GenerateAssertionsSummary.UNKNOWN_WINNER,
+    assertTrue(optSummary.get().equalData(timeOutCheckingWinnersContest, "",
         TIMEOUT_CHECKING_WINNER.toString(), "", "Time out checking winner"));
   }
 
@@ -181,7 +181,7 @@ public class GenerateAssertionsServiceWickedTests {
     generateAssertionsService.persistAssertionsOrErrors(result, ByronShortTimeoutRequest);
     Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(ByronMayoral);
     assertTrue(optSummary.isPresent());
-    assertTrue(optSummary.get().equalData(ByronMayoral, GenerateAssertionsSummary.UNKNOWN_WINNER,
+    assertTrue(optSummary.get().equalData(ByronMayoral, "",
         TIMEOUT_FINDING_ASSERTIONS.toString(), "", "Time out finding assertions"));
   }
 

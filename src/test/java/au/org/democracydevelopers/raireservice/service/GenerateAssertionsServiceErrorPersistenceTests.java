@@ -106,8 +106,7 @@ public class GenerateAssertionsServiceErrorPersistenceTests {
     generateAssertionsService.persistAssertionsOrErrors(solution, ballinaMayoralRequest);
     Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(ballinaMayoral);
     assertTrue(optSummary.isPresent());
-    assertTrue(optSummary.get().equalData(ballinaMayoral, GenerateAssertionsSummary.UNKNOWN_WINNER,
-        savedError.toString(), savedWarning, savedMessage));
+    assertTrue(optSummary.get().equalData(ballinaMayoral, "", savedError.toString(), savedWarning, savedMessage));
   }
 
   /**
@@ -209,7 +208,7 @@ public class GenerateAssertionsServiceErrorPersistenceTests {
     generateAssertionsService.persistAssertionsOrErrors(solution, ballinaMayoralRequest);
     Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(ballinaMayoral);
     assertTrue(optSummary.isPresent());
-    assertTrue(optSummary.get().equalData(ballinaMayoral, GenerateAssertionsSummary.UNKNOWN_WINNER,
+    assertTrue(optSummary.get().equalData(ballinaMayoral, "",
         COULD_NOT_RULE_OUT_ALTERNATIVE.toString(), "", "Chuan, Bob, Alice"));
 
     // Make an update, check that the new values have been stored.
@@ -221,7 +220,7 @@ public class GenerateAssertionsServiceErrorPersistenceTests {
     generateAssertionsService.persistAssertionsOrErrors(solution2, ballinaMayoralRequest);
     Optional<GenerateAssertionsSummary> optSummary2 = summaryRepository.findByContestName(ballinaMayoral);
     assertTrue(optSummary2.isPresent());
-    assertTrue(optSummary2.get().equalData(ballinaMayoral, GenerateAssertionsSummary.UNKNOWN_WINNER,
+    assertTrue(optSummary2.get().equalData(ballinaMayoral, "",
         INTERNAL_ERROR.toString(), "", "Internal error"));
   }
 
