@@ -59,7 +59,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * (except for TIED_WINNERS, which is in GenerateAssertionsServiceKnownTests).
  * Tests include examples of every error that raire-java can produce, plus tests that
  * successive calls to GenerateAssertions correctly replace results.
- *   TODO add tests for persisting error summaries (except tied winners, which is already done).
  */
 @ActiveProfiles("test-containers")
 @SpringBootTest
@@ -77,6 +76,13 @@ public class GenerateAssertionsServiceErrorPersistenceTests {
 
   private static final List<String> aliceBobAndChuan = List.of("Alice", "Bob", "Chuan");
   private static final GenerateAssertionsRequest ballinaMayoralRequest = new GenerateAssertionsRequest(ballinaMayoral, 100,
+      10, aliceBobAndChuan);
+
+  /**
+   * Data for a contest and corresponding request that never work, i.e. only for testing their absence from the database.
+   */
+  private static final String neverWorksContest = "neverWorksContest";
+  private static final GenerateAssertionsRequest neverWorksRequest = new GenerateAssertionsRequest(neverWorksContest, 100,
       10, aliceBobAndChuan);
 
   @ParameterizedTest
@@ -142,16 +148,22 @@ public class GenerateAssertionsServiceErrorPersistenceTests {
    * Trying to save a summary of a solution with an invalid winner index (-1) throws an exception with code INTERNAL_ERROR.
    */
   @Test
+  @Transactional
   public void testInvalidWinnerThrowsException() {
     testUtils.log(logger, "testInvalidWinnerThrowsException");
     RaireSolution.RaireResultOrError solution = new RaireSolution.RaireResultOrError(new RaireResult(
         new AssertionAndDifficulty[]{}, 42.5, 200, -1, 4,
         new TimeTaken(12L, 4), new TimeTaken(3L, 3), new TimeTaken(2L, 4), false));
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
-        generateAssertionsService.persistAssertionsOrErrors(solution, ballinaMayoralRequest)
+        generateAssertionsService.persistAssertionsOrErrors(solution, neverWorksRequest)
     );
     assertEquals(INTERNAL_ERROR.toString(), ex.errorCode.toString());
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "Invalid winner"));
+
+    // Test that there is no record in the database.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(neverWorksContest);
+    assertTrue(optSummary.isEmpty());
   }
 
   /**
@@ -159,17 +171,21 @@ public class GenerateAssertionsServiceErrorPersistenceTests {
    * This has a 3-candidate winner list and a claimed winner index of 3, which isn't a valid index.
    */
   @Test
+  @Transactional
   public void testInvalidWinnerTooLargeThrowsException() {
     testUtils.log(logger, "testInvalidWinnerTooLargeThrowsException");
     RaireSolution.RaireResultOrError solution = new RaireSolution.RaireResultOrError(new RaireResult(
         new AssertionAndDifficulty[]{}, 42.5, 200, 3, 4,
         new TimeTaken(12L, 4), new TimeTaken(3L, 3), new TimeTaken(2L, 4), false));
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
-      generateAssertionsService.persistAssertionsOrErrors(solution, ballinaMayoralRequest)
+      generateAssertionsService.persistAssertionsOrErrors(solution, neverWorksRequest)
     );
     assertEquals(INTERNAL_ERROR.toString(), ex.errorCode.toString());
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "Invalid winner"));
+
+    // Test that there is no record in the database.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(neverWorksContest);
+    assertTrue(optSummary.isEmpty());
   }
-
-
 }

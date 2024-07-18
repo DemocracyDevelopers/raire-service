@@ -231,9 +231,8 @@ public class GenerateAssertionsService {
       // A summary is already present in the database - we will update this.
       summary = OptSummary.get();
     } else {
-      // There is no summary for ths contest - make a new blank summary and save it.
+      // There is no summary for ths contest - make a new blank summary.
       summary = new GenerateAssertionsSummary(request.contestName);
-      summaryRepository.save(summary);
     }
 
     // Delete any existing assertions for this contest.
@@ -267,5 +266,8 @@ public class GenerateAssertionsService {
       summary.update(INTERNAL_ERROR.toString(), "Internal error");
     }
 
+    // This is redundant for an object we retrieved from the database, but necessary if we made a
+    // new one.
+    summaryRepository.save(summary);
   }
 }
