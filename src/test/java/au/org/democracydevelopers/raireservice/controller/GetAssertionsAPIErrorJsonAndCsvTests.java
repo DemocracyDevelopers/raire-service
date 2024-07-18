@@ -198,7 +198,6 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
             aliceAndBobJSON, "Non-positive total auditable ballots"),
         Arguments.of("CSV", riskLimit, ballinaMayoral, "-10",
             aliceAndBobJSON, "Non-positive total auditable ballots")
-        // TODO Add a test for when the stored winner isn't on the list of candidates.
     );
   }
 
@@ -223,10 +222,6 @@ public class GetAssertionsAPIErrorJsonAndCsvTests {
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
         "No assertion generation summary"));
   }
-
-  // TODO Add a test for when there are assertions but no summary. Should be
-  //  "No assertions have been generated for the contest" if there's a summary but no assertions, and
-  //  "No generate assertions summary" if there's no summary. JSON makes the distinction; CSV doesn't.));
 
   /**
    * This is really just a test that the testing is working. There's no mapping for the plain

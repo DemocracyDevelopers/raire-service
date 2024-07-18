@@ -59,6 +59,10 @@ import org.springframework.test.context.ActiveProfiles;
  * src/test/resources/simple_assertions_csv_challenges.sql.
  */
 
+// TODO Add a test for when there are assertions but no summary. Should be
+//  "No assertions have been generated for the contest" if there's a summary but no assertions, and
+//  "No generate assertions summary" if there's no summary. JSON makes the distinction; CSV doesn't.));
+
 @ActiveProfiles("csv-challenges")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = Replace.NONE)
@@ -218,7 +222,26 @@ public class GetAssertionsAPICsvTests {
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is5xxServerError());
-    assertEquals(WRONG_CANDIDATE_NAMES.toString(),
-        response.getHeaders().getFirst(ERROR_CODE_KEY));
+    assertEquals(WRONG_CANDIDATE_NAMES.toString(), response.getHeaders().getFirst(ERROR_CODE_KEY));
+  }
+
+  /**
+   * A request with candidates who are inconsistent with the winner in the database is an error.
+   * (Diego is the stored winner.)
+   */
+  @Test
+  public void inconsistentWinnerAndCandidatesIsAnError() {
+    testUtils.log(logger, "wrongCandidatesIsAnError");
+    String url = baseURL + port + getAssertionsCSVEndpoint;
+
+    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
+        + defaultCountJson + ","
+        + "\"candidates\":[\"Alicia\",\"Boba\",\"Chuan\",\"NotDiego\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertEquals(WRONG_CANDIDATE_NAMES.toString(), response.getHeaders().getFirst(ERROR_CODE_KEY));
   }
 }

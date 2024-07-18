@@ -78,6 +78,10 @@ import org.springframework.transaction.annotation.Transactional;
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class GetAssertionsAPIJsonTests {
 
+  // TODO Add a test for when there are assertions but no summary. Should be
+  //  "No assertions have been generated for the contest" if there's a summary but no assertions, and
+  //  "No generate assertions summary" if there's no summary. JSON makes the distinction; CSV doesn't.));
+
   private static final Logger logger = LoggerFactory.getLogger(
       GetAssertionsAPIJsonTests.class);
 
@@ -200,7 +204,29 @@ public class GetAssertionsAPIJsonTests {
         Objects.requireNonNull(response.getHeaders().get(ERROR_CODE_KEY)).getFirst());
   }
 
-  // TODO make another test where the saved winner is OK but the other candidates aren't.
-        // Should be "candidate list provided as parameter is inconsistent"));
-  // Possibly needed at other points too.
+  /**
+   * Retrieve assertions for a contest where the request has been set up with incorrect
+   * candidate names for the assertions, though the saved winner is one of them.
+   * This is a valid request in the sense that it passes Request.Validate(), but should later fail.
+   * The saved winner is Amanda (who is present) but the other candidates are inconsistent with the
+   * assertions.
+   */
+  @Test
+  @Transactional
+  void retrieveAssertionsIncorrectCandidateNamesRightWinnerIsAnError() {
+    testUtils.log(logger, "retrieveAssertionsIncorrectCandidateNamesRightWinnerIsAnError");
+    String url = baseURL + port + getAssertionsJSONEndpoint;
+
+    GetAssertionsRequest request = new GetAssertionsRequest(oneNEBOneNENAssertionContest,
+        defaultCount, List.of("Amanda", "Bob", "Charlie", "Diego"), BigDecimal.valueOf(0.1));
+    ResponseEntity<String> response
+        = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
+        "candidate list provided as parameter is inconsistent"));
+    assertEquals(WRONG_CANDIDATE_NAMES.toString(),
+        Objects.requireNonNull(response.getHeaders().get(ERROR_CODE_KEY)).getFirst());
+  }
+
 }
