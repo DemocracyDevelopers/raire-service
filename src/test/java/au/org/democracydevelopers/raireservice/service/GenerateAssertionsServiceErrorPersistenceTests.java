@@ -85,6 +85,14 @@ public class GenerateAssertionsServiceErrorPersistenceTests {
   private static final GenerateAssertionsRequest neverWorksRequest = new GenerateAssertionsRequest(neverWorksContest, 100,
       10, aliceBobAndChuan);
 
+  /**
+   * Test that error data is correctly stored, for all possible raire errors.
+   * @param raireError   the error returned by raire-java.
+   * @param savedError   the error expected to be saved, as a string.
+   * @param savedWarning the warning, if any - the only current warning it TIME_OUT_TRIMMING.
+   * @param savedMessage the message associated with the error, if any.
+   * @throws RaireServiceException never.
+   */
   @ParameterizedTest
   @Transactional
   @MethodSource("expectedRaireErrorSummaries")
@@ -96,8 +104,7 @@ public class GenerateAssertionsServiceErrorPersistenceTests {
         new RaireSolution.RaireResultOrError(raireError);
 
     generateAssertionsService.persistAssertionsOrErrors(solution, ballinaMayoralRequest);
-    Optional<GenerateAssertionsSummary> optSummary
-        = summaryRepository.findByContestName(ballinaMayoral);
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(ballinaMayoral);
     assertTrue(optSummary.isPresent());
     assertTrue(optSummary.get().equalData(ballinaMayoral, GenerateAssertionsSummary.UNKNOWN_WINNER,
         savedError.toString(), savedWarning, savedMessage));
@@ -138,8 +145,7 @@ public class GenerateAssertionsServiceErrorPersistenceTests {
         new AssertionAndDifficulty[]{new AssertionAndDifficulty(new NotEliminatedBefore(0,1), 42.5, 2)}, 42.5, 2, 0, 3,
         new TimeTaken(12L, 4), new TimeTaken(3L, 3), new TimeTaken(2L, 4), true));
     generateAssertionsService.persistAssertionsOrErrors(solution, ballinaMayoralRequest);
-    Optional<GenerateAssertionsSummary> optSummary
-        = summaryRepository.findByContestName(ballinaMayoral);
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(ballinaMayoral);
     assertTrue(optSummary.isPresent());
     assertTrue(optSummary.get().equalData(ballinaMayoral, "Alice", "", TIMEOUT_TRIMMING_ASSERTIONS.toString(), ""));
   }
@@ -184,8 +190,39 @@ public class GenerateAssertionsServiceErrorPersistenceTests {
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "Invalid winner"));
 
     // Test that there is no record in the database.
-    Optional<GenerateAssertionsSummary> optSummary
-        = summaryRepository.findByContestName(neverWorksContest);
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(neverWorksContest);
     assertTrue(optSummary.isEmpty());
   }
+
+  /**
+   * Repeated saves for the same contest are properly overwritten.
+   */
+  @Test
+  @Transactional
+  public void testErrorSummaryStoragereplacement() throws RaireServiceException {
+    testUtils.log(logger, "testErrorSummaryStorageReplacement");
+
+    RaireSolution.RaireResultOrError solution =
+        new RaireSolution.RaireResultOrError(new RaireError.CouldNotRuleOut(new int[]{2,1,0}));
+
+    // Persist the first one, check that the database contains it.
+    generateAssertionsService.persistAssertionsOrErrors(solution, ballinaMayoralRequest);
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(ballinaMayoral);
+    assertTrue(optSummary.isPresent());
+    assertTrue(optSummary.get().equalData(ballinaMayoral, GenerateAssertionsSummary.UNKNOWN_WINNER,
+        COULD_NOT_RULE_OUT_ALTERNATIVE.toString(), "", "Chuan, Bob, Alice"));
+
+    // Make an update, check that the new values have been stored.
+    // The elimination order "Chuan, Bob, Alice" apparently could not be ruled out.
+    RaireSolution.RaireResultOrError solution2 =
+        new RaireSolution.RaireResultOrError(new RaireError.InternalErrorTrimming());
+
+    // Persist the first one, check that the database contains it.
+    generateAssertionsService.persistAssertionsOrErrors(solution2, ballinaMayoralRequest);
+    Optional<GenerateAssertionsSummary> optSummary2 = summaryRepository.findByContestName(ballinaMayoral);
+    assertTrue(optSummary2.isPresent());
+    assertTrue(optSummary2.get().equalData(ballinaMayoral, GenerateAssertionsSummary.UNKNOWN_WINNER,
+        INTERNAL_ERROR.toString(), "", "Internal error"));
+  }
+
 }
