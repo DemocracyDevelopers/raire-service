@@ -340,7 +340,7 @@ public class AssertionRepositorySimpleAssertionsTests {
 
     Assertion r1 = retrieved.getFirst();
     assertEquals(NEBAssertion.class, r1.getClass());
-    assertTrue(correctDBAssertionData(8, 25, 0.0125, 5.0,
+    assertTrue(correctDBAssertionData(9, 25, 0.0125, 5.0,
         "CC", "A", List.of(), Collections.emptyMap(),
         0, 0, 0, 0,
         0, 0, 0, BigDecimal.valueOf(1),
@@ -348,7 +348,7 @@ public class AssertionRepositorySimpleAssertionsTests {
 
     Assertion r2 = retrieved.get(1);
     assertEquals(NENAssertion.class, r2.getClass());
-    assertTrue(correctDBAssertionData(9, 100, 0.05, 2.0,
+    assertTrue(correctDBAssertionData(10, 100, 0.05, 2.0,
         "CC", "B", List.of("A", "B", "CC"), Collections.emptyMap(),
         0, 0, 0, 0,
         0, 0, 0, BigDecimal.valueOf(1),
