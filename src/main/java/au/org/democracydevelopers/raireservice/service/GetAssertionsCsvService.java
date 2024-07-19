@@ -272,15 +272,15 @@ public class GetAssertionsCsvService {
           request.contestName);
       logger.error(msg);
       throw new RaireServiceException("No assertion generation summary", NO_ASSERTIONS_PRESENT);
-    } else if (summary.get().winner.isBlank()) {
+    } else if (summary.get().getWinner().isBlank()) {
       String msg = String.format("%s Failed assertion generation in contest %s. Error %s, message %s.", prefix,
-          request.contestName, summary.get().error, summary.get().message);
+          request.contestName, summary.get().getError(), summary.get().getMessage());
       logger.error(msg);
-      throw new RaireServiceException(summary.get().message, NO_ASSERTIONS_PRESENT);
+      throw new RaireServiceException(summary.get().getMessage(), NO_ASSERTIONS_PRESENT);
     }
 
     // Put the winner from the database into metadata, or put UNKNOWN_WINNER if it is blank.
-    metadata.put(WINNER_HEADER, summary.get().winner.isBlank() ? UNKNOWN_WINNER : summary.get().winner);
+    metadata.put(WINNER_HEADER, summary.get().getWinner().isBlank() ? UNKNOWN_WINNER : summary.get().getWinner());
 
     List<String> prefaceHeaders = List.of(CONTEST_NAME_HEADER, CANDIDATES_HEADER, WINNER_HEADER,
         TOTAL_AUDITABLE_BALLOTS_HEADER, RISK_LIMIT_HEADER);

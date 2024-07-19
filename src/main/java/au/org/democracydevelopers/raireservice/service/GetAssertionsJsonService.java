@@ -150,7 +150,7 @@ public class GetAssertionsJsonService {
    * Retrieve the GenerateAssertionsSummary record for this contest, and either return the winner's
    * index in the candidate list (if it is present and valid) or throw an error with the appropriate
    * error message (if either there is no record, or the record contains an error rather than a winner).
-   * We are assuming that if there is no GenerateAssetionsSummary record, there are also no assertions.
+   * We are assuming that if there is no GenerateAssertionsSummary record, there are also no assertions.
    * @return the winner, as an index in the candidate list, if there is one.
    * @throws RaireServiceException if there is no GenerateAssertionsSummaryRecord, or if it does
    *         not contain a winner.
@@ -166,20 +166,20 @@ public class GetAssertionsJsonService {
       String msg = String.format("No assertion generation summary for contest %s.", request.contestName);
       logger.debug(String.format("%s %s", prefix, msg));
       throw new RaireServiceException(msg, RaireErrorCode.NO_ASSERTIONS_PRESENT);
-    } else if (summary.get().winner.isBlank()) {
+    } else if (summary.get().getWinner().isBlank()) {
       // There is a record of a failed attempt to generate assertions. Return the error & message.
       String msg = String.format("No assertions generated for contest %s. %s %s %s %s", prefix,
-          request.contestName, summary.get().error, summary.get().message, summary.get().warning);
+          request.contestName, summary.get().getError(), summary.get().getMessage(), summary.get().getWarning());
       logger.debug(String.format("%s %s", prefix, msg));
       throw new RaireServiceException(msg, RaireErrorCode.NO_ASSERTIONS_PRESENT);
-    } else if (!request.candidates.contains(summary.get().winner)) {
+    } else if (!request.candidates.contains(summary.get().getWinner())) {
       // The recorded winner is not one of the candidates in the request.
       String msg = String.format("Inconsistent winner and candidate list. Winner: %s, Candidates %s",
-          summary.get().winner, request.candidates);
+          summary.get().getWinner(), request.candidates);
       logger.debug(String.format("%s %s", prefix, msg));
       throw new RaireServiceException(msg, RaireErrorCode.WRONG_CANDIDATE_NAMES);
     }
 
-    return request.candidates.indexOf(summary.get().winner);
+    return request.candidates.indexOf(summary.get().getWinner());
   }
 }

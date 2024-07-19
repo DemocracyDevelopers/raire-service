@@ -99,10 +99,11 @@ public class AssertionController {
     logger.debug(String.format("%s Calling raire-java with assertion generation request.",prefix));
     RaireResultOrError solution = generateAssertionsService.generateAssertions(request);
 
+    // Save the result (whether error or success) to the database.
     generateAssertionsService.persistAssertionsOrErrors(solution, request);
 
     if (solution.Ok != null) {
-      // Generation of assertions was successful, now save them to the database.
+      // Generation of assertions was successful - return a GenerateAssertionsResponse.
       logger.debug(String.format("%s Assertion generation successful: %d assertions " +
               "generated in %ss.", prefix, solution.Ok.assertions.length,
               solution.Ok.time_to_find_assertions.seconds));
@@ -110,7 +111,7 @@ public class AssertionController {
       logger.debug(String.format("%s Assertions stored in database for contest %s.",
           prefix, request.contestName));
 
-      // Form and return request response.
+      // Form and return response.
       GenerateAssertionsResponse response = new GenerateAssertionsResponse(request.contestName,
           request.candidates.get(solution.Ok.winner));
 

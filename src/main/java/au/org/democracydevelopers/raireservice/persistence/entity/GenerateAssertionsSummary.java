@@ -72,14 +72,14 @@ public class GenerateAssertionsSummary {
    * Name of the winner of the contest, as determined by raire-java.
    */
   @Column(name = "winner", updatable = false, nullable = false)
-  public String winner = "";
+  private String winner = "";
 
   /**
    * An error, if there was one, or emptystring if none. Errors mean there are no
    * assertions (nor winner).
    */
   @Column(name = "error", updatable = false, nullable = false)
-  public String error = "";
+  private String error = "";
 
   /**
    * A warning, if there was one, or emptystring if none. Warnings (e.g. TIME_OUT_TRIMMING_ASSERTIONS)
@@ -87,13 +87,13 @@ public class GenerateAssertionsSummary {
    * time allowed might be beneficial.
    */
   @Column(name = "warning", updatable = false, nullable = false)
-  public String warning = "";
+  private String warning = "";
 
   /**
    * The message associated with the error or warning, for example the names of the tied winners.
    */
   @Column(name = "message", updatable = false, nullable = false)
-  public String message = "";
+  private String message = "";
 
   /**
    * Default no-args constructor (required for persistence).
@@ -205,4 +205,24 @@ public class GenerateAssertionsSummary {
         && this.warning.equals(warning)
         && StringUtils.containsIgnoreCase(this.message, messageSubstring);
   }
+
+  /**
+   * @return the winner's name.
+   */
+  public String getWinner() {return winner;}
+
+  /**
+   * @return the error.
+   */
+  public String getError() {return error;}
+
+  /**
+   * @return the warning.
+   */
+  public String getWarning() {return warning;}
+
+  /**
+   * @return the message associated with the error.
+   */
+  public String getMessage() {return message;}
 }
