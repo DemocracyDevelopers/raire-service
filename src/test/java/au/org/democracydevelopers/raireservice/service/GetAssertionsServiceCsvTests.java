@@ -22,9 +22,7 @@ package au.org.democracydevelopers.raireservice.service;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
@@ -42,6 +40,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Test cases for csv generation, including:
@@ -180,6 +179,43 @@ public class GetAssertionsServiceCsvTests {
         () -> getAssertionsCSVService.generateCSV(request)
     );
     assertSame(ex.errorCode, WRONG_CANDIDATE_NAMES);
+  }
 
+   /**
+   * If there is a summary but no assertions, that's an error. The database should never get in to
+   * this state - make sure we fail gracefully if it does.
+   */
+  @Test
+  @Transactional
+  void successSummaryButNoAssertionsIsAnError() {
+    testUtils.log(logger, "successSummaryButNoAssertionsIsAnError");
+    GetAssertionsRequest request = new GetAssertionsRequest(
+        "Success Summary But No Assertions Contest", defaultCount,
+        List.of("Amanda", "Charlie", "Diego", "Bob"), BigDecimal.valueOf(0.1));
+
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
+        getAssertionsCSVService.generateCSV(request));
+    assertEquals(RaireServiceException.RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "No assertions have been generated for the contest"));
+  }
+
+  /**
+   * If there are assertions but no summary, that's an error. The database should never get in to
+   * this state - make sure we fail gracefully if it does.
+   */
+  @Test
+  @Transactional
+  void assertionsButNoSummaryIsAnError() {
+    testUtils.log(logger, "assertionsButNoSummaryIsAnError");
+    GetAssertionsRequest request = new GetAssertionsRequest(
+        "Assertions But No Summary Contest", defaultCount,
+        List.of("Amanda", "Charlie", "Diego", "Bob"), BigDecimal.valueOf(0.1));
+
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
+        getAssertionsCSVService.generateCSV(request));
+    assertEquals(RaireServiceException.RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "No assertion generation summary"));
   }
 }

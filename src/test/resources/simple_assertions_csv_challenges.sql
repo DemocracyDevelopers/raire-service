@@ -55,3 +55,12 @@ INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin,
 INSERT INTO assertion_assumed_continuing values (10, 'Alice');
 INSERT INTO assertion_assumed_continuing values (10, 'Chuan');
 INSERT INTO assertion_assumed_continuing values (10, 'Diego');
+
+-- Some error states, which are not supposed to happen. These are to check that we fail gracefully.
+-- Success summary but no assertions
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) VALUES (1,6,0,'IRV','Success Summary But No Assertions Contest',3,4,1);
+INSERT INTO generate_assertions_summary (contest_name, error, message, version, warning, winner) VALUES ('Success Summary But No Assertions Contest', '','',0,'', 'Amanda');
+
+-- Assertions but no success summary.
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) VALUES (1,7,0,'IRV','Assertions But No Summary Contest',3,4,1);
+INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values ('NEB','Assertions But No Summary Contest', 0.1, 0.1, 'Liesl', 112, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Amanda');

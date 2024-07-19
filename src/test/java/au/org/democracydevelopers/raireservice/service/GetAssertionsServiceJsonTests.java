@@ -38,8 +38,10 @@ import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAs
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
+
 import java.math.BigDecimal;
 import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -88,7 +90,7 @@ public class GetAssertionsServiceJsonTests {
     RaireSolution solution = service.getRaireSolution(request);
 
     // Check that the metadata has been constructed appropriately
-    assertTrue(correctMetadata(List.of("Alice","Bob"), "One NEB Assertion Contest",
+    assertTrue(correctMetadata(List.of("Alice", "Bob"), "One NEB Assertion Contest",
         BigDecimal.valueOf(0.1), defaultCount, solution.metadata, BigDecimal.class));
 
     // The RaireSolution contains a RaireResultOrError, but the error should be null.
@@ -107,8 +109,8 @@ public class GetAssertionsServiceJsonTests {
     assertEquals(1.1, aad.difficulty);
     assertEquals(320, aad.margin);
     assertTrue(aad.assertion.isNEB());
-    assertEquals(0, ((NotEliminatedBefore)aad.assertion).winner);
-    assertEquals(1, ((NotEliminatedBefore)aad.assertion).loser);
+    assertEquals(0, ((NotEliminatedBefore) aad.assertion).winner);
+    assertEquals(1, ((NotEliminatedBefore) aad.assertion).loser);
 
     // Check that current risk is 1.
     BigDecimal risk = (BigDecimal) aad.status.get(Metadata.STATUS_RISK);
@@ -129,7 +131,7 @@ public class GetAssertionsServiceJsonTests {
     RaireSolution solution = service.getRaireSolution(request);
 
     // Check that the metadata has been constructed appropriately
-    assertTrue(correctMetadata(List.of("Alice","Charlie","Diego","Bob"),
+    assertTrue(correctMetadata(List.of("Alice", "Charlie", "Diego", "Bob"),
         "One NEN Assertion Contest", BigDecimal.valueOf(0.1), defaultCount,
         solution.metadata, BigDecimal.class));
 
@@ -150,11 +152,11 @@ public class GetAssertionsServiceJsonTests {
     assertEquals(3.01, aad.difficulty);
     assertEquals(240, aad.margin);
     assertFalse(aad.assertion.isNEB());
-    assertEquals(0, ((NotEliminatedNext)aad.assertion).winner);
-    assertEquals(1, ((NotEliminatedNext)aad.assertion).loser);
+    assertEquals(0, ((NotEliminatedNext) aad.assertion).winner);
+    assertEquals(1, ((NotEliminatedNext) aad.assertion).loser);
 
     int[] continuing = {0, 1, 2, 3};
-    assertArrayEquals(continuing, ((NotEliminatedNext)aad.assertion).continuing);
+    assertArrayEquals(continuing, ((NotEliminatedNext) aad.assertion).continuing);
 
     // Check that current risk is 1.
     BigDecimal risk = (BigDecimal) aad.status.get(Metadata.STATUS_RISK);
@@ -167,7 +169,7 @@ public class GetAssertionsServiceJsonTests {
    */
   @Test
   @Transactional
-  void retrieveAssertionsInconsistentRequest1()  {
+  void retrieveAssertionsInconsistentRequest1() {
     testUtils.log(logger, "retrieveAssertionsInconsistentRequest1");
     GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository, summaryRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
@@ -181,12 +183,12 @@ public class GetAssertionsServiceJsonTests {
   }
 
   /**
-   * Retrieve assertions for a contest where the request has been setup with incorrect
+   * Retrieve assertions for a contest where the request has been set up with incorrect
    * candidate names for the given contest.
    */
   @Test
   @Transactional
-  void retrieveAssertionsInconsistentRequest2()  {
+  void retrieveAssertionsInconsistentRequest2() {
     testUtils.log(logger, "retrieveAssertionsInconsistentRequest2");
     GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository, summaryRepository);
     GetAssertionsRequest request = new GetAssertionsRequest("One NEN NEB Assertion Contest",
@@ -197,5 +199,45 @@ public class GetAssertionsServiceJsonTests {
     assertEquals(RaireErrorCode.WRONG_CANDIDATE_NAMES, ex.errorCode);
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
         "Inconsistent winner and candidate list"));
+  }
+
+  /**
+   * If there is a summary but no assertions, that's an error. The database should never get in to
+   * this state - make sure we fail gracefully if it does.
+   */
+  @Test
+  @Transactional
+  void successSummaryButNoAssertionsIsAnError() {
+    testUtils.log(logger, "successSummaryButNoAssertionsIsAnError");
+    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository, summaryRepository);
+    GetAssertionsRequest request = new GetAssertionsRequest(
+        "Success Summary But No Assertions Contest", defaultCount,
+        List.of("Amanda", "Charlie", "Diego", "Bob"), BigDecimal.valueOf(0.1));
+
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
+        service.getRaireSolution(request));
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "No assertions have been generated for the contest"));
+  }
+
+  /**
+   * If there are assertions but no summary, that's an error. The database should never get in to
+   * this state - make sure we fail gracefully if it does.
+   */
+  @Test
+  @Transactional
+  void assertionsButNoSummaryIsAnError() {
+    testUtils.log(logger, "assertionsButNoSummaryIsAnError");
+    GetAssertionsJsonService service = new GetAssertionsJsonService(assertionRepository, summaryRepository);
+    GetAssertionsRequest request = new GetAssertionsRequest(
+        "Assertions But No Summary Contest", defaultCount,
+        List.of("Amanda", "Charlie", "Diego", "Bob"), BigDecimal.valueOf(0.1));
+
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
+        service.getRaireSolution(request));
+    assertEquals(RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "No assertion generation summary"));
   }
 }
