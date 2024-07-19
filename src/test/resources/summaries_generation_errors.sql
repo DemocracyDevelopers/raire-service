@@ -5,14 +5,15 @@ INSERT INTO county (id, name) VALUES (1,'Test County');
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed)
     VALUES (1,1,0,'IRV','No summary and no assertions Contest',1,5,1);
 
--- A summary with no assertions
+-- A success summary with no assertions
+-- This is not supposed to be a reachable state. We just need to check that we fail gracefully.
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed)
     VALUES (1,2,0,'IRV','Summary but no assertions Contest',1,5,1);
 INSERT INTO generate_assertions_summary (contest_name, error, message, version, warning, winner)
     VALUES ('Summary but no assertions Contest', '','',0,'', 'Bob');
 
 -- Assertions with no summary
--- This is not supposed to be a reachable state - there can be a summary without assertions, but there shouldn't be assertions without a summary. We just need to check that we fail gracefully.
+-- This is not supposed to be a reachable state. We just need to check that we fail gracefully.
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed)
     VALUES (1,3,0,'IRV','No summary but some assertions Contest',1,5,1);
 INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner)
