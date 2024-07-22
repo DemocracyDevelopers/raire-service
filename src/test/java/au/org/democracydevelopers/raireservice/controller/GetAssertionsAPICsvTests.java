@@ -20,17 +20,22 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.ERROR_CODE_KEY;
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.NO_ASSERTIONS_PRESENT;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
-import static au.org.democracydevelopers.raireservice.testUtils.baseURL;
-import static au.org.democracydevelopers.raireservice.testUtils.defaultCountJson;
-import static au.org.democracydevelopers.raireservice.testUtils.defaultWinnerJSON;
-import static au.org.democracydevelopers.raireservice.testUtils.getAssertionsCSVEndpoint;
+import static au.org.democracydevelopers.raireservice.testUtils.*;
+import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
+
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -49,6 +54,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Tests for get-assertions endpoint with the csv request. This class automatically fires up the
@@ -98,7 +104,7 @@ public class GetAssertionsAPICsvTests {
 
     String requestAsJson =
         "{\"riskLimit\":0.10,\"contestName\":\"Lots of assertions with ties Contest\","
-            + defaultCountJson + "," + defaultWinnerJSON + "," + candidatesAsJson;
+            + defaultCountJson + "," + candidatesAsJson;
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -109,7 +115,7 @@ public class GetAssertionsAPICsvTests {
     assertNotNull(output);
     assertTrue(output.contains("Contest name,Lots of assertions with ties Contest\n"));
     assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n"));
-    assertTrue(output.contains("Winner,Chuan\n"));
+    assertTrue(output.contains("Winner,Alice\n"));
     assertTrue(output.contains("Total universe,100\n"));
     assertTrue(output.contains("Risk limit,0.10\n\n"));
     assertTrue(output.contains("Extreme item,Value,Assertion IDs"));
@@ -148,7 +154,7 @@ public class GetAssertionsAPICsvTests {
     String url = baseURL + port + getAssertionsCSVEndpoint;
     String requestAsJson =
         "{\"riskLimit\":0.10,\"contestName\":\"Lots of tricky characters Contest\","
-            + defaultCountJson + "," + "\"winner\":\"Annoying, Alice\"" + "," + trickyCharactersAsJson;
+            + defaultCountJson + "," + trickyCharactersAsJson;
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -172,7 +178,7 @@ public class GetAssertionsAPICsvTests {
     testUtils.log(logger, "testCSVDemoContest");
     String url = baseURL + port + getAssertionsCSVEndpoint;
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
-        + defaultCountJson + "," + defaultWinnerJSON + "," + candidatesAsJson;
+        + defaultCountJson + "," + candidatesAsJson;
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
@@ -181,7 +187,7 @@ public class GetAssertionsAPICsvTests {
     assertNotNull(output);
     assertTrue(output.contains("Contest name,CSV Demo Contest\n"));
     assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n"));
-    assertTrue(output.contains("Winner,Chuan\n"));
+    assertTrue(output.contains("Winner,Diego\n"));
     assertTrue(output.contains("Total universe,100\n"));
     assertTrue(output.contains("Risk limit,0.10\n\n"));
     assertTrue(output.contains("Extreme item,Value,Assertion IDs\n"));
@@ -211,14 +217,79 @@ public class GetAssertionsAPICsvTests {
     String url = baseURL + port + getAssertionsCSVEndpoint;
 
     String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
-        + defaultCountJson + "," + defaultWinnerJSON + ","
+        + defaultCountJson + ","
         + "\"candidates\":[\"Alicia\",\"Boba\",\"Chuan\",\"Diego\"]}";
 
     HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
     ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
 
     assertTrue(response.getStatusCode().is5xxServerError());
-    assertEquals(WRONG_CANDIDATE_NAMES.toString(),
-        response.getHeaders().getFirst("error_code"));
+    assertEquals(WRONG_CANDIDATE_NAMES.toString(), response.getHeaders().getFirst(ERROR_CODE_KEY));
+  }
+
+  /**
+   * A request with candidates who are inconsistent with the winner in the database is an error.
+   * (Diego is the stored winner.)
+   */
+  @Test
+  public void inconsistentWinnerAndCandidatesIsAnError() {
+    testUtils.log(logger, "wrongCandidatesIsAnError");
+    String url = baseURL + port + getAssertionsCSVEndpoint;
+
+    String requestAsJson = "{\"riskLimit\":0.10,\"contestName\":\"CSV Demo Contest\","
+        + defaultCountJson + ","
+        + "\"candidates\":[\"Alicia\",\"Boba\",\"Chuan\",\"NotDiego\"]}";
+
+    HttpEntity<String> request = new HttpEntity<>(requestAsJson, httpHeaders);
+    ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertEquals(WRONG_CANDIDATE_NAMES.toString(), response.getHeaders().getFirst(ERROR_CODE_KEY));
+  }
+
+  /**
+   * If there is a summary but no assertions, that's an error. The database should never get in to
+   * this state - make sure we fail gracefully if it does.
+   */
+  @Test
+  @Transactional
+  void successSummaryButNoAssertionsIsAnError() {
+    testUtils.log(logger, "successSummaryButNoAssertionsIsAnError");
+    String url = baseURL + port + getAssertionsCSVEndpoint;
+    final String contestName = "Success Summary But No Assertions Contest";
+
+    GetAssertionsRequest request = new GetAssertionsRequest(contestName,
+        defaultCount, List.of("Amanda", "Bob", "Charlie", "Diego"), BigDecimal.valueOf(0.1));
+    ResponseEntity<String> response
+        = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
+        "No assertions have been generated for the contest"));
+    assertEquals(NO_ASSERTIONS_PRESENT.toString(),
+        Objects.requireNonNull(response.getHeaders().get(ERROR_CODE_KEY)).getFirst());
+  }
+
+  /**
+   * If there are assertions but no summary, that's an error. The database should never get in to
+   * this state - make sure we fail gracefully if it does.
+   */
+  @Test
+  @Transactional
+  void assertionsButNoSummaryIsAnError() {
+    testUtils.log(logger, "assertionsButNoSummaryIsAnError");
+    String url = baseURL + port + getAssertionsCSVEndpoint;
+    final String contestName = "Assertions But No Summary Contest";
+
+    GetAssertionsRequest request = new GetAssertionsRequest(contestName,
+        defaultCount, List.of("Amanda", "Bob", "Charlie", "Diego"), BigDecimal.valueOf(0.1));
+    ResponseEntity<String> response
+        = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
+        "No assertion generation summary" ));
+    assertEquals(NO_ASSERTIONS_PRESENT.toString(),
+        Objects.requireNonNull(response.getHeaders().get(ERROR_CODE_KEY)).getFirst());
   }
 }

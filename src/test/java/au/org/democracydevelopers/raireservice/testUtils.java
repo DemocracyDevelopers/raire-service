@@ -53,16 +53,15 @@ public class testUtils {
   public final static String ballinaMayoral = "Ballina Mayoral";
 
   /**
-   * A default winner, used in requests - not checked.
-   */
-  public final static String defaultWinner = "Chuan";
-  public final static String defaultWinnerJSON = "\"winner\":\""+"Chuan"+"\"";
-
-  /**
    * A default ballot count, used in requests - not checked.
    */
   public final static int defaultCount = 100;
   public final static String defaultCountJson = "\"totalAuditableBallots\":"+defaultCount;
+
+  /**
+   * A default risk limit, used in requests.
+   */
+  public final static BigDecimal defaultRiskLimit = BigDecimal.valueOf(0.04);
 
   /**
    * Comparator for doubles within a specific tolerance.

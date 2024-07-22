@@ -249,7 +249,7 @@ public class AssertionRepositoryTests {
    */
   @Test
   @Transactional
-  void translateAndSaveNoAssertions(){
+  void translateAndSaveNoAssertions() throws RaireServiceException {
     testUtils.log(logger, "translateAndSaveNoAssertions");
     String[] candidates = {"Alice", "Bob", "Charlie"};
     AssertionAndDifficulty[] empty = {};
@@ -351,7 +351,7 @@ public class AssertionRepositoryTests {
   /**
    * Translate and save Alice NEB Bob in contest "One NEB Assertion Contest".
    */
-  void saveAssertionsOneNEBContest(){
+  void saveAssertionsOneNEBContest() throws RaireServiceException {
     String[] candidates = {"Alice", "Charlie", "Bob"};
     AssertionAndDifficulty aadAliceNEBBob = new AssertionAndDifficulty(
         new au.org.democracydevelopers.raire.assertions.NotEliminatedBefore(0, 2),
@@ -366,7 +366,7 @@ public class AssertionRepositoryTests {
   /**
    * Translate and save Alice NEN Charlie in contest "One NEN Assertion Contest".
    */
-  void saveAssertionsOneNENContest(){
+  void saveAssertionsOneNENContest() throws RaireServiceException {
     String[] candidates = {"Alice", "Charlie", "Diego", "Bob"};
     int[] continuing = {0, 1 ,2, 3};
     AssertionAndDifficulty aadAliceNENCharlie = new AssertionAndDifficulty(
@@ -383,7 +383,7 @@ public class AssertionRepositoryTests {
    * Translate and save Amanda NEB Liesl and Amanda NEN Wendell for the contest
    * "One NEN NEB Assertion Contest".
    */
-  void saveAssertionsOneNENOneNEBContest(){
+  void saveAssertionsOneNENOneNEBContest() throws RaireServiceException {
     String[] candidates = {"Liesl", "Wendell", "Amanda"};
     int[] continuing = {0, 1 ,2};
     AssertionAndDifficulty aadAmandaNEBLiesl = new AssertionAndDifficulty(
@@ -405,7 +405,7 @@ public class AssertionRepositoryTests {
    * Al (Bob) Jones and Alice P. Mangrove NEN West W. Westerson for the contest
    * "Multi-County Contest 1".
    */
-  void saveAssertionsMultiCountyContest(){
+  void saveAssertionsMultiCountyContest() throws RaireServiceException {
     String[] candidates = {"West W. Westerson", "Alice P. Mangrove", "Charlie C. Chaplin",
         "Al (Bob) Jones"};
 
@@ -470,10 +470,11 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNEBAssertionContest(320,
         0, 2);
 
-    Exception ex = assertThrows(IllegalArgumentException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
       assertionRepository.translateAndSaveAssertions("One NEB Assertion Contest",
         -1000, aliceCharlieBob, assertions));
 
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
         "assertion must have a positive universe size"));
   }
@@ -489,10 +490,11 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNEBAssertionContest(320,
         0, 2);
 
-    Exception ex = assertThrows(IllegalArgumentException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEB Assertion Contest",
             0, aliceCharlieBob, assertions));
 
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
         "assertion must have a positive universe size"));
   }
@@ -509,10 +511,11 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(240,
         0, 1, continuing);
 
-    Exception ex = assertThrows(IllegalArgumentException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             -2000, aliceCharlieDiegoBob, assertions));
 
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
         "assertion must have a positive universe size"));
   }
@@ -529,10 +532,11 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(240,
         0, 1, continuing);
 
-    Exception ex = assertThrows(IllegalArgumentException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             0, aliceCharlieDiegoBob, assertions));
 
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
         "assertion must have a positive universe size"));
   }
@@ -549,10 +553,11 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNEBAssertionContest(-100,
         0, 2);
 
-    Exception ex = assertThrows(IllegalArgumentException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEB Assertion Contest",
             1000, aliceCharlieBob, assertions));
 
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "non-negative margin"));
   }
 
@@ -568,10 +573,11 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(-100,
         0, 1, continuing);
 
-    Exception ex = assertThrows(IllegalArgumentException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             2000, aliceCharlieDiegoBob, assertions));
 
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "negative margin"));
   }
 
@@ -587,10 +593,11 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNEBAssertionContest(2000,
         0, 2);
 
-    Exception ex = assertThrows(IllegalArgumentException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEB Assertion Contest",
             1000, aliceCharlieBob, assertions));
 
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "less than universe size"));
   }
 
@@ -607,10 +614,11 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(3000,
         0, 1, continuing);
 
-    Exception ex = assertThrows(IllegalArgumentException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             2000, aliceCharlieDiegoBob, assertions));
 
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "less than universe size"));
   }
 
@@ -625,10 +633,11 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNEBAssertionContest(320,
         1, 1);
 
-    Exception ex = assertThrows(IllegalArgumentException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEB Assertion Contest",
             1000, aliceCharlieBob, assertions));
 
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
         "must not be the same candidate"));
   }
@@ -645,10 +654,11 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(240,
         0, 0, continuing);
 
-    Exception ex = assertThrows(IllegalArgumentException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             2000, aliceCharlieDiegoBob, assertions));
 
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
         "must not be the same candidate"));
   }
@@ -665,10 +675,11 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(240,
         0, 1, continuing);
 
-    Exception ex = assertThrows(IllegalArgumentException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             2000, aliceCharlieDiegoBob, assertions));
 
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "must also be continuing"));
   }
 
@@ -684,10 +695,11 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(240,
         0, 1, continuing);
 
-    Exception ex = assertThrows(IllegalArgumentException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             2000, aliceCharlieDiegoBob, assertions));
 
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
     assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "must also be continuing"));
   }
 
@@ -702,9 +714,12 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNEBAssertionContest(320,
         5, 2);
 
-    assertThrows(ArrayIndexOutOfBoundsException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEB Assertion Contest",
             1000, aliceCharlieBob, assertions));
+
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), " winner or loser index in a raire-java assertion being invalid with respect to the candidates list"));
   }
 
   /**
@@ -719,9 +734,12 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(240,
         5, 1, continuing);
 
-    assertThrows(ArrayIndexOutOfBoundsException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             2000, aliceCharlieDiegoBob, assertions));
+
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "winner or loser index in a raire-java assertion being invalid with respect to the candidates list"));
   }
 
   /**
@@ -735,9 +753,12 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNEBAssertionContest(320,
         2, 7);
 
-    assertThrows(ArrayIndexOutOfBoundsException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEB Assertion Contest",
             1000, aliceCharlieBob, assertions));
+
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "winner or loser index in a raire-java assertion being invalid with respect to the candidates list"));
   }
 
   /**
@@ -752,8 +773,11 @@ public class AssertionRepositoryTests {
     AssertionAndDifficulty[] assertions = formAssertionsOneNENAssertionContest(240,
         0, 7, continuing);
 
-    assertThrows(ArrayIndexOutOfBoundsException.class, () ->
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         assertionRepository.translateAndSaveAssertions("One NEN Assertion Contest",
             2000, aliceCharlieDiegoBob, assertions));
+
+    assertEquals(RaireErrorCode.INTERNAL_ERROR.toString(), ex.errorCode.toString());
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(), "winner or loser index in a raire-java assertion being invalid with respect to the candidates list"));
   }
 }

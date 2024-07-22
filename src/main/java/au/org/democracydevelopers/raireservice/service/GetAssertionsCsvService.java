@@ -20,6 +20,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.service;
 
+import static au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary.UNKNOWN_WINNER;
 import static au.org.democracydevelopers.raireservice.service.Metadata.CANDIDATES_HEADER;
 import static au.org.democracydevelopers.raireservice.service.Metadata.CONTEST_NAME_HEADER;
 import static au.org.democracydevelopers.raireservice.service.Metadata.CURRENT_RISK;
@@ -33,21 +34,19 @@ import static au.org.democracydevelopers.raireservice.service.Metadata.TOTAL_AUD
 import static au.org.democracydevelopers.raireservice.service.Metadata.WINNER_HEADER;
 import static au.org.democracydevelopers.raireservice.service.Metadata.extremumHeaders;
 import static au.org.democracydevelopers.raireservice.service.Metadata.csvHeaders;
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.NO_ASSERTIONS_PRESENT;
 import static au.org.democracydevelopers.raireservice.util.CSVUtils.escapeThenJoin;
 import static au.org.democracydevelopers.raireservice.util.CSVUtils.intListToString;
 
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
+import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
+import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.util.DoubleComparator;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,13 +62,15 @@ public class GetAssertionsCsvService {
   private final static Logger logger = LoggerFactory.getLogger(GetAssertionsCsvService.class);
 
   private final AssertionRepository assertionRepository;
+  private final GenerateAssertionsSummaryRepository generateAssertionsSummaryRepository;
 
   /**
    * All args constructor.
    * @param assertionRepository the assertion repository.
    */
-  public GetAssertionsCsvService(AssertionRepository assertionRepository) {
+  public GetAssertionsCsvService(AssertionRepository assertionRepository, GenerateAssertionsSummaryRepository generateAssertionsSummaryRepository) {
     this.assertionRepository = assertionRepository;
+    this.generateAssertionsSummaryRepository = generateAssertionsSummaryRepository;
   }
 
   /**
@@ -88,6 +89,9 @@ public class GetAssertionsCsvService {
       logger.debug(String.format("%s Preparing to export assertions as CSV for contest %s.",
           prefix, request.contestName));
 
+      // Make the metadata/summary for the top of the file,
+      String preface = makePreface(request);
+
       // Retrieve the assertions.
       List<Assertion> assertions = assertionRepository.getAssertionsThrowError(request.contestName);
 
@@ -96,11 +100,9 @@ public class GetAssertionsCsvService {
       List<Assertion> sortedAssertions
           = assertions.stream().sorted(Comparator.comparingLong(Assertion::getId)).toList();
 
-      // Write metadata/summary at the top of the file, then the extrema data, then the csv header
-      // row, then the assertion data.
+      // make the extrema data, then the csv header row, then the assertion data.
       logger.debug(String.format("%s Converting %d assertions into csv format.", prefix,
           assertions.size()));
-      String preface = makePreface(request);
       String extrema = findExtrema(sortedAssertions);
       String headers = escapeThenJoin(csvHeaders);
       String contents = makeContents(sortedAssertions, request.candidates);
@@ -253,21 +255,40 @@ public class GetAssertionsCsvService {
    * @param request the GetAssertionsRequest, used for contest name and candidate list.
    * @return a preface to the CSV file.
    */
-  private String makePreface(GetAssertionsRequest request) {
-      Map<String,String> metadata = new HashMap<>();
-      metadata.put(CONTEST_NAME_HEADER, request.contestName);
-      metadata.put(CANDIDATES_HEADER, escapeThenJoin(request.candidates));
-      metadata.put(WINNER_HEADER, request.winner);
-      metadata.put(TOTAL_AUDITABLE_BALLOTS_HEADER, ""+request.totalAuditableBallots);
-      metadata.put(RISK_LIMIT_HEADER, request.riskLimit.toString());
+  private String makePreface(GetAssertionsRequest request) throws RaireServiceException {
+    final String prefix = "[makePreface]";
 
-      List<String> prefaceHeaders = List.of(CONTEST_NAME_HEADER, CANDIDATES_HEADER, WINNER_HEADER,
-          TOTAL_AUDITABLE_BALLOTS_HEADER, RISK_LIMIT_HEADER);
+    Map<String,String> metadata = new HashMap<>();
+    metadata.put(CONTEST_NAME_HEADER, request.contestName);
+    metadata.put(CANDIDATES_HEADER, escapeThenJoin(request.candidates));
+    metadata.put(TOTAL_AUDITABLE_BALLOTS_HEADER, ""+request.totalAuditableBallots);
+    metadata.put(RISK_LIMIT_HEADER, request.riskLimit.toString());
 
-      return String.join("\n", prefaceHeaders.stream()
-          .map(h -> escapeThenJoin(List.of(h, metadata.get(h)))).toList())
-          +"\n\n"
-          + escapeThenJoin(extremumHeaders) + "\n";
+    // Throw an exception if there is no summary record in the database.
+    Optional<GenerateAssertionsSummary> summary
+        = generateAssertionsSummaryRepository.findByContestName(request.contestName);
+    if (summary.isEmpty()) {
+      String msg = String.format("%s No assertion generation summary for contest %s.", prefix,
+          request.contestName);
+      logger.error(msg);
+      throw new RaireServiceException("No assertion generation summary", NO_ASSERTIONS_PRESENT);
+    } else if (summary.get().getWinner().isBlank()) {
+      String msg = String.format("%s Failed assertion generation in contest %s. Error %s, message %s.", prefix,
+          request.contestName, summary.get().getError(), summary.get().getMessage());
+      logger.error(msg);
+      throw new RaireServiceException(summary.get().getMessage(), NO_ASSERTIONS_PRESENT);
+    }
+
+    // Put the winner from the database into metadata, or put UNKNOWN_WINNER if it is blank.
+    metadata.put(WINNER_HEADER, summary.get().getWinner().isBlank() ? UNKNOWN_WINNER : summary.get().getWinner());
+
+    List<String> prefaceHeaders = List.of(CONTEST_NAME_HEADER, CANDIDATES_HEADER, WINNER_HEADER,
+        TOTAL_AUDITABLE_BALLOTS_HEADER, RISK_LIMIT_HEADER);
+
+    return String.join("\n", prefaceHeaders.stream()
+        .map(h -> escapeThenJoin(List.of(h, metadata.get(h)))).toList())
+        + "\n\n"
+        + escapeThenJoin(extremumHeaders) + "\n";
   }
 
   /**

@@ -22,10 +22,7 @@ package au.org.democracydevelopers.raireservice.service;
 
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
-import static au.org.democracydevelopers.raireservice.testUtils.defaultWinner;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
@@ -43,6 +40,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Test cases for csv generation, including:
@@ -79,11 +77,11 @@ public class GetAssertionsServiceCsvTests {
   public void testCSVTies() throws RaireServiceException {
     testUtils.log(logger, "testCSVTies");
     GetAssertionsRequest request = new GetAssertionsRequest( "Lots of assertions with ties Contest",
-        defaultCount, candidates, "Bob", BigDecimal.valueOf(0.1));
+        defaultCount, candidates, BigDecimal.valueOf(0.1));
     String output = getAssertionsCSVService.generateCSV(request);
     assertTrue(output.contains("Contest name,Lots of assertions with ties Contest\n"));
     assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n"));
-    assertTrue(output.contains("Winner,Bob\n"));
+    assertTrue(output.contains("Winner,Alice\n"));
     assertTrue(output.contains("Total universe,"+defaultCount+"\n"));
     assertTrue(output.contains("Risk limit,0.1\n\n"));
     assertTrue(output.contains("Extreme item,Value,Assertion IDs"));
@@ -121,9 +119,9 @@ public class GetAssertionsServiceCsvTests {
   public void testCharacterEscaping() throws RaireServiceException {
     testUtils.log(logger,"testCharacterEscaping");
     GetAssertionsRequest request = new GetAssertionsRequest("Lots of tricky characters Contest",
-        defaultCount, trickyCharacters, "Winner, needs escaping", BigDecimal.valueOf(0.1));
+        defaultCount, trickyCharacters, BigDecimal.valueOf(0.1));
     String output = getAssertionsCSVService.generateCSV(request);
-    assertTrue(output.contains("Winner,\"Winner, needs escaping\""));
+    assertTrue(output.contains("Winner,\"Annoying, Alice\""));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(0)));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(1)));
     assertTrue(StringUtils.containsIgnoreCase(output, trickyCharacters.get(2)));
@@ -140,11 +138,11 @@ public class GetAssertionsServiceCsvTests {
     testUtils.log(logger,"testCsvDemoContest");
     BigDecimal riskLimit = BigDecimal.valueOf(0.03);
     GetAssertionsRequest request = new GetAssertionsRequest( "CSV Demo Contest",
-        defaultCount, candidates, defaultWinner, riskLimit);
+        defaultCount, candidates, riskLimit);
     String output = getAssertionsCSVService.generateCSV(request);
     assertTrue(output.contains("Contest name,CSV Demo Contest\n"));
     assertTrue(output.contains("Candidates,\"Alice,Bob,Chuan,Diego\"\n"));
-    assertTrue(output.contains("Winner,"+defaultWinner+"\n"));
+    assertTrue(output.contains("Winner,Diego\n"));
     assertTrue(output.contains("Total universe,"+defaultCount+"\n"));
     assertTrue(output.contains("Risk limit,"+riskLimit+"\n\n"));
     assertTrue(output.contains("Extreme item,Value,Assertion IDs\n"));
@@ -174,13 +172,50 @@ public class GetAssertionsServiceCsvTests {
     testUtils.log(logger, "wrongCandidatesIsAnError");
 
     GetAssertionsRequest request = new GetAssertionsRequest( "CSV Demo Contest", defaultCount,
-        List.of("Alicia", "Boba", "Chuan"), defaultWinner, BigDecimal.valueOf(0.05)
+        List.of("Alicia", "Boba", "Chuan"), BigDecimal.valueOf(0.05)
     );
 
     RaireServiceException ex = assertThrows(RaireServiceException.class,
         () -> getAssertionsCSVService.generateCSV(request)
     );
     assertSame(ex.errorCode, WRONG_CANDIDATE_NAMES);
+  }
 
+   /**
+   * If there is a summary but no assertions, that's an error. The database should never get in to
+   * this state - make sure we fail gracefully if it does.
+   */
+  @Test
+  @Transactional
+  void successSummaryButNoAssertionsIsAnError() {
+    testUtils.log(logger, "successSummaryButNoAssertionsIsAnError");
+    GetAssertionsRequest request = new GetAssertionsRequest(
+        "Success Summary But No Assertions Contest", defaultCount,
+        List.of("Amanda", "Charlie", "Diego", "Bob"), BigDecimal.valueOf(0.1));
+
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
+        getAssertionsCSVService.generateCSV(request));
+    assertEquals(RaireServiceException.RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "No assertions have been generated for the contest"));
+  }
+
+  /**
+   * If there are assertions but no summary, that's an error. The database should never get in to
+   * this state - make sure we fail gracefully if it does.
+   */
+  @Test
+  @Transactional
+  void assertionsButNoSummaryIsAnError() {
+    testUtils.log(logger, "assertionsButNoSummaryIsAnError");
+    GetAssertionsRequest request = new GetAssertionsRequest(
+        "Assertions But No Summary Contest", defaultCount,
+        List.of("Amanda", "Charlie", "Diego", "Bob"), BigDecimal.valueOf(0.1));
+
+    RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
+        getAssertionsCSVService.generateCSV(request));
+    assertEquals(RaireServiceException.RaireErrorCode.NO_ASSERTIONS_PRESENT, ex.errorCode);
+    assertTrue(StringUtils.containsIgnoreCase(ex.getMessage(),
+        "No assertion generation summary"));
   }
 }

@@ -9,6 +9,7 @@
 -- This contest has lots of (random/unrealistic) ties.
 INSERT INTO county (id, name) VALUES (1,'Lots of assertions with ties County');
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) VALUES (1,1,0,'IRV','Lots of assertions with ties Contest',1,5,1);
+INSERT INTO generate_assertions_summary (contest_name, error, message, version, warning, winner) VALUES ('Lots of assertions with ties Contest', '','',0,'', 'Alice');
 INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values
 ('NEB', 'Lots of assertions with ties Contest', 2.1, 0.32, 'Bob', 320, 0.04, 110, 0, 0, 100, 0, 0, 0, 0, 'Alice');
 INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values
@@ -33,6 +34,7 @@ INSERT INTO assertion_assumed_continuing values (6, 'Diego');
 -- This contest has lots of characters that need escaping.
 INSERT INTO county (id, name) VALUES (2,'Lots of tricky characters County');
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) VALUES (2,2,0,'IRV','Lots of tricky characters Contest',2,4,1);
+INSERT INTO generate_assertions_summary (contest_name, error, message, version, warning, winner) VALUES ('Lots of tricky characters Contest', '','',0,'', 'Annoying, Alice');
 INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values
 ('NEB', 'Lots of tricky characters Contest', 2.1, 0.32, '"Breaking, Bob"', 320, 0.04, 110, 0, 1, 100, 0, 0, 0, 0, 'Annoying, Alice');
 INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values
@@ -45,6 +47,7 @@ INSERT INTO assertion_assumed_continuing values (8, '"Breaking, Bob"');
 -- This contest has sensible correlated values for making a demo csv
 INSERT INTO county (id, name) VALUES (3,'CSV Demo County');
 INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) VALUES (3,3,0,'IRV','CSV Demo Contest',3,4,1);
+INSERT INTO generate_assertions_summary (contest_name, error, message, version, warning, winner) VALUES ('CSV Demo Contest', '','',0,'', 'Diego');
 INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values
 ('NEB', 'CSV Demo Contest', 5.1, 0.112, 'Alice', 112, 0.06, 55, 2, 0, 35, 0, 0, 0, 0, 'Bob');
 INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values
@@ -52,3 +55,12 @@ INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin,
 INSERT INTO assertion_assumed_continuing values (10, 'Alice');
 INSERT INTO assertion_assumed_continuing values (10, 'Chuan');
 INSERT INTO assertion_assumed_continuing values (10, 'Diego');
+
+-- Some error states, which are not supposed to happen. These are to check that we fail gracefully.
+-- Success summary but no assertions
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) VALUES (1,6,0,'IRV','Success Summary But No Assertions Contest',3,4,1);
+INSERT INTO generate_assertions_summary (contest_name, error, message, version, warning, winner) VALUES ('Success Summary But No Assertions Contest', '','',0,'', 'Amanda');
+
+-- Assertions but no success summary.
+INSERT INTO contest (county_id, id, version, description, name, sequence_number, votes_allowed, winners_allowed) VALUES (1,7,0,'IRV','Assertions But No Summary Contest',3,4,1);
+INSERT INTO assertion (assertion_type, contest_name, difficulty, diluted_margin, loser, margin, current_risk, estimated_samples_to_audit, one_vote_over_count, one_vote_under_count, optimistic_samples_to_audit, other_count, two_vote_over_count, two_vote_under_count, version, winner) values ('NEB','Assertions But No Summary Contest', 0.1, 0.1, 'Liesl', 112, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Amanda');

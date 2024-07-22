@@ -22,13 +22,14 @@ package au.org.democracydevelopers.raireservice.service;
 
 import au.org.democracydevelopers.raire.RaireProblem;
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
-import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raire.audittype.BallotComparisonOneOnDilutedMargin;
 import au.org.democracydevelopers.raire.pruning.TrimAlgorithm;
 import au.org.democracydevelopers.raire.util.VoteConsolidator;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.CVRContestInfoRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.ContestRepository;
+import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
+import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary;
 import au.org.democracydevelopers.raireservice.request.ContestRequest;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
@@ -36,10 +37,14 @@ import jakarta.transaction.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.INTERNAL_ERROR;
 
 /**
  * This class contains functionality for generating assertions for a given contest by calling
@@ -56,6 +61,8 @@ public class GenerateAssertionsService {
 
   private final AssertionRepository assertionRepository;
 
+  private final GenerateAssertionsSummaryRepository summaryRepository;
+
   /**
    * All args constructor.
    * @param cvrContestInfoRepository for extracting CVR vote data from the database.
@@ -63,10 +70,12 @@ public class GenerateAssertionsService {
    * @param assertionRepository for saving assertions to the database.
    */
   public GenerateAssertionsService(CVRContestInfoRepository cvrContestInfoRepository,
-      ContestRepository contestRepository, AssertionRepository assertionRepository){
+      ContestRepository contestRepository, AssertionRepository assertionRepository,
+      GenerateAssertionsSummaryRepository summaryRepository) {
     this.cvrContestInfoRepository = cvrContestInfoRepository;
     this.contestRepository = contestRepository;
     this.assertionRepository = assertionRepository;
+    this.summaryRepository = summaryRepository;
   }
 
   /**
@@ -188,60 +197,77 @@ public class GenerateAssertionsService {
   }
 
   /**
-   * Given successfully generated assertions stored within a RaireResult, persist these
-   * assertions to the database.
-   * @param solution RaireResult containing assertions to persist for a given contest.
+   * Given a raire result or error, persist it.
+   * If the result contains successfully generated assertions stored within a RaireResult, persist
+   * these assertions to the database and the winner in the GenerateAssertionsResponse table.
+   * If the result contains an error or warning, persist it and its message in the
+   * GenerateAssertionsResponse table.
+   * Previously-stored assertions are deleted, regardless of whether assertion generation
+   * was successful this time. Previously-stored summaries are updated.
+   * @param solution RaireResultOrError containing either assertions to persist for a given contest,
+   *                 with a winner, or an error. Note that there may be both a warning and successful
+   *                 assertion generation.
    * @param request Assertions generation request containing contest information.
    * @throws RaireServiceException when an error arises in either the translation of
-   * raire-java assertions into a form suitable for saving to the database, or in persisting these
-   * translated assertions to the database.
+   * raire-java assertions into a form suitable for saving to the database, in persisting these
+   * translated assertions and associated data to the database, or in retrieving and saving or updating
+   * the summaries. These cause the whole transaction to roll back.
+   * Note default behaviour of @Transactional is:
+   * - to commit and flush at the end of the transaction
+   * - to roll back if any RuntimeException is thrown,
+   * and we explicitly tell it to roll back for RaireServiceException too.
+   *
    */
-  @Transactional
-  public void persistAssertions(RaireResult solution, ContestRequest request)
-      throws RaireServiceException
-  {
-    final String prefix = "[persistAssertions]";
-    try{
-      // Delete any existing assertions for this contest.
-      logger.debug(String.format("%s (Database access) Proceeding to delete any assertions "+
-          "stored for contest %s (if present).", prefix, request.contestName));
-      assertionRepository.deleteByContestName(request.contestName);
+  @Transactional(rollbackOn = {RuntimeException.class, DataAccessException.class, RaireServiceException.class})
+  public void persistAssertionsOrErrors(RaireResultOrError solution, ContestRequest request)
+      throws RaireServiceException {
+    final String prefix = "[persistAssertionsOrErrors]";
 
-      // Persist assertions formed by raire-java.
+    // Retrieve an existing summary or start a new one.
+    GenerateAssertionsSummary summary;
+    final Optional<GenerateAssertionsSummary> OptSummary
+        = summaryRepository.findByContestName(request.contestName);
+    if (OptSummary.isPresent()) {
+      // A summary is already present in the database - we will update this.
+      summary = OptSummary.get();
+    } else {
+      // There is no summary for ths contest - make a new blank summary.
+      summary = new GenerateAssertionsSummary(request.contestName);
+    }
+
+    // Delete any existing assertions for this contest.
+    logger.debug(String.format("%s (Database access) Proceeding to delete any assertions " +
+        "stored for contest %s (if present).", prefix, request.contestName));
+    assertionRepository.deleteByContestName(request.contestName);
+
+    if (solution.Ok != null) {
+      // The solution is OK. Persist assertions formed by raire-java and save the winner and warning.
       logger.debug(String.format("%s Proceeding to translate and save %d assertions to the " +
-              "database for contest %s.", prefix, solution.assertions.length, request.contestName));
+          "database for contest %s.", prefix, solution.Ok.assertions.length, request.contestName));
       assertionRepository.translateAndSaveAssertions(request.contestName,
-          request.totalAuditableBallots, request.candidates.toArray(String[]::new), solution.assertions);
+          request.totalAuditableBallots, request.candidates.toArray(String[]::new), solution.Ok.assertions);
 
       logger.debug(String.format("%s Assertions persisted.", prefix));
+
+      // Update summary data, success.
+      summary.update(request.candidates, solution.Ok.winner, solution.Ok.warning_trim_timed_out);
+
+    } else if (solution.Err != null) {
+      // The solution indicates a failed assertion generation. Persist the error and message.
+
+      // Creating a RaireServiceException gives us a human-readable error message, though the
+      // exception is not thrown.
+      RaireServiceException ex = new RaireServiceException(solution.Err, request.candidates);
+
+      // Update summary data.
+      summary.update(ex.errorCode.toString(), ex.getMessage());
+    } else {
+      // This is not supposed to happen - we got neither assertions nor an error.
+      summary.update(INTERNAL_ERROR.toString(), "Internal error");
     }
-    catch(IllegalArgumentException ex){
-      final String msg = String.format("%s Invalid arguments were supplied to " +
-          "AssertionRepository::translateAndSaveAssertions. This is likely either a non-positive " +
-          "universe size, invalid margin, or invalid combination of winner, loser and list of " +
-          "assumed continuing candidates. %s", prefix, ex.getMessage());
-      logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
-    }
-    catch(ArrayIndexOutOfBoundsException ex){
-      final String msg = String.format("%s Array index out of bounds access in " +
-          "AssertionRepository::translateAndSaveAssertions. This was likely due to a winner " +
-          "or loser index in a raire-java assertion being invalid with respect to the " +
-          "candidates list for the contest. %s", prefix, ex.getMessage());
-      logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
-    }
-    catch(DataAccessException ex){
-      final String msg = String.format("%s Data access exception arose when persisting assertions. %s",
-          prefix, ex.getMessage());
-      logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
-    }
-    catch(Exception ex){
-      final String msg = String.format("%s An exception arose when persisting assertions. %s",
-          prefix, ex.getMessage());
-      logger.error(msg);
-      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
-    }
+
+    // This is redundant for an object we retrieved from the database, but necessary if we made a
+    // new one.
+    summaryRepository.save(summary);
   }
 }

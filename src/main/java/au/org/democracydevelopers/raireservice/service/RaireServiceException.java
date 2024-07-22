@@ -33,6 +33,7 @@ import au.org.democracydevelopers.raire.RaireError.TimeoutCheckingWinner;
 import au.org.democracydevelopers.raire.RaireError.TimeoutFindingAssertions;
 import au.org.democracydevelopers.raire.RaireError.TimeoutTrimmingAssertions;
 import au.org.democracydevelopers.raire.RaireError.WrongWinner;
+
 import java.util.Arrays;
 import java.util.List;
 

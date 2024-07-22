@@ -28,6 +28,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.ERROR_CODE_KEY;
+
 /**
  * Exception handler for all exceptions thrown by the AssertionController endpoints.
  */
@@ -55,7 +57,7 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     @org.springframework.web.bind.annotation.ExceptionHandler(RaireServiceException.class)
     public ResponseEntity<String> handleRaireException(RaireServiceException ex) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("error_code", String.valueOf(ex.errorCode));
+        headers.add(ERROR_CODE_KEY, String.valueOf(ex.errorCode));
 
         return new ResponseEntity<>(ex.getMessage(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
     }

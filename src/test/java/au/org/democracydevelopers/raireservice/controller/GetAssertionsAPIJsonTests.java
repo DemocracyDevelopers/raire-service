@@ -20,6 +20,8 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.ERROR_CODE_KEY;
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.NO_ASSERTIONS_PRESENT;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.WRONG_CANDIDATE_NAMES;
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static au.org.democracydevelopers.raireservice.testUtils.baseURL;
@@ -67,9 +69,9 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Tests for get-assertions endpoint. This class automatically fires up the RAIRE Microservice on a
  * random port, then runs a series of tests for correct responses to valid requests.
- * The list of tests is similar to - and in most cases identical to - the GetAssertionsJsonServiceTests.
+ * The list of tests is similar to - and in most cases identical to - the GetAssertionsServiceJsonTests.
  * Contests which will be used for validity testing are preloaded into the database using
- * src/test/resources/data.sql.
+ * src/test/resources/simple_assertions.sql.
  */
 @ActiveProfiles("simple-assertions")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -125,11 +127,12 @@ public class GetAssertionsAPIJsonTests {
 
     // Make the request.
     GetAssertionsRequest request = new GetAssertionsRequest(oneNEBAssertionContest, defaultCount,
-        List.of("Alice","Bob"), "Bob", BigDecimal.valueOf(0.1));
+        List.of("Bob","Alice"), BigDecimal.valueOf(0.1));
     ResponseEntity<RaireSolution> response
         = restTemplate.postForEntity(url, request, RaireSolution.class);
 
-    // The metadata has been constructed appropriately.
+    // The metadata has been constructed appropriately. Note reversal of candidate names to check
+    // the set, rather than the ordered list, is matched.
     assertNotNull(response.getBody());
     assertTrue(correctMetadata(List.of("Alice","Bob"), oneNEBAssertionContest, BigDecimal.valueOf(0.1),
         defaultCount, response.getBody().metadata, Double.class));
@@ -142,8 +145,8 @@ public class GetAssertionsAPIJsonTests {
         response.getBody().solution.Ok));
 
     // We expect one NEB assertion with the following data.
-    assertTrue(correctAssertionData("NEB", 320, 1.1, 0,
-        1, new ArrayList<>(), 1.0, response.getBody().solution.Ok.assertions[0]));
+    assertTrue(correctAssertionData("NEB", 320, 1.1, 1,
+        0, new ArrayList<>(), 1.0, response.getBody().solution.Ok.assertions[0]));
   }
 
   /**
@@ -156,7 +159,7 @@ public class GetAssertionsAPIJsonTests {
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     GetAssertionsRequest request =  new GetAssertionsRequest(oneNENAssertionContest, defaultCount,
-        List.of("Alice","Bob","Charlie","Diego"), "Alice", BigDecimal.valueOf(0.1));
+        List.of("Alice","Bob","Charlie","Diego"), BigDecimal.valueOf(0.1));
     ResponseEntity<RaireSolution> response = restTemplate.postForEntity(url, request, RaireSolution.class);
 
     // The metadata has been constructed appropriately
@@ -177,7 +180,7 @@ public class GetAssertionsAPIJsonTests {
 
   /**
    * Retrieve assertions for a contest where the request has been set up with incorrect
-   * candidate names for the given contest.
+   * candidate names for the saved winner (which is none of them).
    * This is a valid request in the sense that it passes Request.Validate(), but should later fail.
    */
   @Test
@@ -187,7 +190,32 @@ public class GetAssertionsAPIJsonTests {
     String url = baseURL + port + getAssertionsJSONEndpoint;
 
     GetAssertionsRequest request =  new GetAssertionsRequest(oneNEBOneNENAssertionContest,
-        defaultCount, List.of("Alice","Bob","Charlie","Diego"), "Alice", BigDecimal.valueOf(0.1));
+        defaultCount, List.of("Alice","Bob","Charlie","Diego"), BigDecimal.valueOf(0.1));
+    ResponseEntity<String> response
+        = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
+       "Inconsistent winner and candidate list"));
+    assertEquals(WRONG_CANDIDATE_NAMES.toString(),
+        Objects.requireNonNull(response.getHeaders().get(ERROR_CODE_KEY)).getFirst());
+  }
+
+  /**
+   * Retrieve assertions for a contest where the request has been set up with incorrect
+   * candidate names for the assertions, though the saved winner is one of them.
+   * This is a valid request in the sense that it passes Request.Validate(), but should later fail.
+   * The saved winner is Amanda (who is present) but the other candidates are inconsistent with the
+   * assertions.
+   */
+  @Test
+  @Transactional
+  void retrieveAssertionsIncorrectCandidateNamesRightWinnerIsAnError() {
+    testUtils.log(logger, "retrieveAssertionsIncorrectCandidateNamesRightWinnerIsAnError");
+    String url = baseURL + port + getAssertionsJSONEndpoint;
+
+    GetAssertionsRequest request = new GetAssertionsRequest(oneNEBOneNENAssertionContest,
+        defaultCount, List.of("Amanda", "Bob", "Charlie", "Diego"), BigDecimal.valueOf(0.1));
     ResponseEntity<String> response
         = restTemplate.postForEntity(url, request, String.class);
 
@@ -195,6 +223,54 @@ public class GetAssertionsAPIJsonTests {
     assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
         "candidate list provided as parameter is inconsistent"));
     assertEquals(WRONG_CANDIDATE_NAMES.toString(),
-        Objects.requireNonNull(response.getHeaders().get("error_code")).getFirst());
+        Objects.requireNonNull(response.getHeaders().get(ERROR_CODE_KEY)).getFirst());
   }
+
+  /**
+   * If there is a summary but no assertions, that's an error. The database should never get in to
+   * this state - make sure we fail gracefully if it does.
+   */
+  @Test
+  @Transactional
+  void successSummaryButNoAssertionsIsAnError() {
+    testUtils.log(logger, "successSummaryButNoAssertionsIsAnError");
+    String url = baseURL + port + getAssertionsJSONEndpoint;
+    final String contestName = "Success Summary But No Assertions Contest";
+
+    GetAssertionsRequest request = new GetAssertionsRequest(contestName,
+        defaultCount, List.of("Amanda", "Bob", "Charlie", "Diego"), BigDecimal.valueOf(0.1));
+    ResponseEntity<String> response
+        = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
+        "No assertions have been generated for the contest"));
+    assertEquals(NO_ASSERTIONS_PRESENT.toString(),
+        Objects.requireNonNull(response.getHeaders().get(ERROR_CODE_KEY)).getFirst());
+  }
+
+  /**
+   * If there are assertions but no summary, that's an error. The database should never get in to
+   * this state - make sure we fail gracefully if it does.
+   */
+  @Test
+  @Transactional
+  void assertionsButNoSummaryIsAnError() {
+    testUtils.log(logger, "assertionsButNoSummaryIsAnError");
+    String url = baseURL + port + getAssertionsJSONEndpoint;
+    final String contestName = "Assertions But No Summary Contest";
+
+    GetAssertionsRequest request = new GetAssertionsRequest(contestName,
+        defaultCount, List.of("Amanda", "Bob", "Charlie", "Diego"), BigDecimal.valueOf(0.1));
+    ResponseEntity<String> response
+        = restTemplate.postForEntity(url, request, String.class);
+
+    assertTrue(response.getStatusCode().is5xxServerError());
+    assertTrue(StringUtils.containsIgnoreCase(response.getBody(),
+        "No assertion generation summary" ));
+    assertEquals(NO_ASSERTIONS_PRESENT.toString(),
+        Objects.requireNonNull(response.getHeaders().get(ERROR_CODE_KEY)).getFirst());
+  }
+
+
 }

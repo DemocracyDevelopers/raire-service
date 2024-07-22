@@ -20,17 +20,23 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.service;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import au.org.democracydevelopers.raire.RaireError.TiedWinners;
 import au.org.democracydevelopers.raire.RaireError.TimeoutCheckingWinner;
 import au.org.democracydevelopers.raire.RaireError.TimeoutFindingAssertions;
 import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
+import au.org.democracydevelopers.raire.algorithm.RaireResult;
+import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
+import au.org.democracydevelopers.raire.time.TimeTaken;
+import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary;
+import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +53,8 @@ import org.springframework.transaction.annotation.Transactional;
  * Tests to validate the behavior of Assertion generation on a collection of particularly nasty
  * test cases designed to elicit errors. These kinds of errors _are_ expected to happen occasionally
  * in normal operation, if the input data is particularly challenging.
- * This has the same tests as GenerateAssertionsAPIWickedTests.java. Relevant data is preloaded into
+ * This has the same tests as GenerateAssertionsAPIWickedTests.java (except for the test of
+ * TimeOutTrimming assertions, which is hard to do via API). Relevant data is preloaded into
  * the test database from src/test/resources/known_testcases_votes.sql.
  * This includes
  * - a contest with tied winners,
@@ -67,12 +74,16 @@ public class GenerateAssertionsServiceWickedTests {
   @Autowired
   GenerateAssertionsService generateAssertionsService;
 
+  @Autowired
+  GenerateAssertionsSummaryRepository summaryRepository;
+
   /**
    * Names of contests, to match preloaded data.
    */
   private static final String tiedWinnersContest = "Tied Winners Contest";
   private static final String ByronMayoral = "Byron Mayoral";
   private static final String timeOutCheckingWinnersContest = "Time out checking winners contest";
+  private static final String timeOutTrimmingAssertionsContest = "Time out trimming contest";
 
   /**
    * Candidate lists for the preloaded contests.
@@ -98,21 +109,36 @@ public class GenerateAssertionsServiceWickedTests {
   private final static GenerateAssertionsRequest checkingWinnersTimeoutRequest
       = new GenerateAssertionsRequest(timeOutCheckingWinnersContest, 20,
       0.001, timeoutCheckingWinnersChoices);
+  private final static GenerateAssertionsRequest timeOutTrimmingContestRequest
+      = new GenerateAssertionsRequest(timeOutTrimmingAssertionsContest, 20, 5,
+      aliceChuanBob);
 
   /**
    * Tied winners results in raire-java returning a TiedWinners RaireError. This is a super-simple
-   * election with two candidates with one vote each.
+   * election with two candidates (Alice and Bob) with one first-preference vote each.
    */
   @Test
   @Transactional
-  void tiedWinnersThrowsTiedWinnersError() throws RaireServiceException {
-    testUtils.log(logger, "tiedWinnersThrowsTiedWinnersError");
+  void tiedWinnersThrowsTiedWinnersErrorAndStoresIt() throws RaireServiceException {
+    testUtils.log(logger, "tiedWinnersThrowsTiedWinnersErrorAndStoresIt");
     RaireResultOrError result = generateAssertionsService.generateAssertions(tiedWinnersRequest);
 
     assertNull(result.Ok);
     assertNotNull(result.Err);
 
     assertInstanceOf(TiedWinners.class, result.Err);
+
+    generateAssertionsService.persistAssertionsOrErrors(result, tiedWinnersRequest);
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(tiedWinnersContest);
+    assertTrue(optSummary.isPresent());
+    // Check that Alice and Bob are the tied winners
+    assertTrue(optSummary.get().equalData(tiedWinnersContest, "",
+        TIED_WINNERS.toString(), "", "Alice"));
+    assertTrue(optSummary.get().equalData(tiedWinnersContest, "",
+        TIED_WINNERS.toString(), "", "Bob"));
+    // and that Chuan is not
+    assertFalse(optSummary.get().equalData(tiedWinnersContest, "",
+        TIED_WINNERS.toString(), "", "Chuan"));
   }
 
   /**
@@ -121,8 +147,8 @@ public class GenerateAssertionsServiceWickedTests {
    */
   @Test
   @Transactional
-  void twentyTiedWinnersThrowsTimeOutCheckingWinnersError() throws RaireServiceException {
-    testUtils.log(logger, "twentyTiedWinnersThrowsTimeOutCheckingWinnersError");
+  void twentyTiedWinnersThrowsTimeOutCheckingWinnersErrorAndStoresIt() throws RaireServiceException {
+    testUtils.log(logger, "twentyTiedWinnersThrowsTimeOutCheckingWinnersErrorAndStoresIt");
     RaireResultOrError result = generateAssertionsService
         .generateAssertions(checkingWinnersTimeoutRequest);
 
@@ -130,6 +156,12 @@ public class GenerateAssertionsServiceWickedTests {
     assertNotNull(result.Err);
 
     assertInstanceOf(TimeoutCheckingWinner.class, result.Err);
+
+    generateAssertionsService.persistAssertionsOrErrors(result, checkingWinnersTimeoutRequest);
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(timeOutCheckingWinnersContest);
+    assertTrue(optSummary.isPresent());
+    assertTrue(optSummary.get().equalData(timeOutCheckingWinnersContest, "",
+        TIMEOUT_CHECKING_WINNER.toString(), "", "Time out checking winner"));
   }
 
   /**
@@ -137,13 +169,41 @@ public class GenerateAssertionsServiceWickedTests {
    */
   @Test
   @Transactional
-  void ByronWithShortTimeoutThrowsTimeoutGeneratingAssertionsError() throws RaireServiceException {
-    testUtils.log(logger, "ByronWithShortTimeoutThrowsTimeoutGeneratingAssertionsError");
+  void ByronWithShortTimeoutThrowsTimeoutGeneratingAssertionsErrorAndStoresIt() throws RaireServiceException {
+    testUtils.log(logger, "ByronWithShortTimeoutThrowsTimeoutGeneratingAssertionsErrorAndStoresIt");
     RaireResultOrError result = generateAssertionsService.generateAssertions(ByronShortTimeoutRequest);
 
     assertNull(result.Ok);
     assertNotNull(result.Err);
 
     assertInstanceOf(TimeoutFindingAssertions.class, result.Err);
+
+    generateAssertionsService.persistAssertionsOrErrors(result, ByronShortTimeoutRequest);
+    Optional<GenerateAssertionsSummary> optSummary = summaryRepository.findByContestName(ByronMayoral);
+    assertTrue(optSummary.isPresent());
+    assertTrue(optSummary.get().equalData(ByronMayoral, "",
+        TIMEOUT_FINDING_ASSERTIONS.toString(), "", "Time out finding assertions"));
+  }
+
+  /**
+   * Correct storage of TIMEOUT_TRIMMING_ASSERTIONS. We do not actually know how to make a set of
+   * votes that produce this result from generateAssertions, so we only test trying to store them.
+   */
+  @Test
+  @Transactional
+  void timeOutTrimmingAssertionsCorrectlyStored() throws RaireServiceException {
+    TimeTaken time = new TimeTaken(1000L, 0.5);
+
+    // The important thing about this result is setting the final boolean (warning_trim_timed_out)
+    // to true. Winner 0 happens to be Alice.
+    RaireResult result = new RaireResult(new AssertionAndDifficulty[]{}, 75.4, 200,
+        0, 3, time, time, time, true);
+    RaireResultOrError solution = new RaireResultOrError(result);
+    generateAssertionsService.persistAssertionsOrErrors(solution, timeOutTrimmingContestRequest);
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(timeOutTrimmingAssertionsContest);
+    assertTrue(optSummary.isPresent());
+    assertTrue(optSummary.get().equalData(timeOutTrimmingAssertionsContest, aliceChuanBob.getFirst(),
+        "", TIMEOUT_TRIMMING_ASSERTIONS.toString(),  ""));
   }
 }
