@@ -50,8 +50,8 @@ public class RaireServiceException extends Exception {
   public static String ERROR_CODE_KEY = "error_code";
 
   /**
-   * The error code - an enum used to describe what went wrong. Returned in the http response for
-   * colorado-rla to interpret for the user.
+   * The error code - an enum used to describe what went wrong. Stored in the GenerateAssertionsSummary
+   * for colorado-rla to read.
    */
   public RaireErrorCode errorCode;
 

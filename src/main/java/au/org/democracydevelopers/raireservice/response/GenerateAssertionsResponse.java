@@ -35,7 +35,7 @@ import java.beans.ConstructorProperties;
 public record GenerateAssertionsResponse(String contestName, boolean succeeded, boolean retry) {
 
   /**
-   * All args constructor.
+   * All args constructor, for deserialization.
    * @param contestName The name of the contest.
    * @param succeeded   Whether assertion generation succeeded.
    * @param retry       Whether it is worth retrying assertion generation.
@@ -44,7 +44,12 @@ public record GenerateAssertionsResponse(String contestName, boolean succeeded, 
   public GenerateAssertionsResponse {
   }
 
-  // Failure. If the error is one of the timeouts, it is worth retrying.
+  /**
+   * Failure. If the error is one of the timeouts, it is worth retrying.
+   * @param contestName The name of the contest.
+   * @param error       The raire error, used to determine whether retry should be recommended.
+   * Retry is set to true if the error is one of the timeouts, otherwise false.
+   */
   public GenerateAssertionsResponse(String contestName, RaireError error)  {
       this(contestName, false,
           error instanceof RaireError.TimeoutCheckingWinner

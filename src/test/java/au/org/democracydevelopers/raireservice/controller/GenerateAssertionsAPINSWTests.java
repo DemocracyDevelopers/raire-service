@@ -24,9 +24,7 @@ import static au.org.democracydevelopers.raireservice.NSWValues.expectedSolution
 import static au.org.democracydevelopers.raireservice.testUtils.baseURL;
 import static au.org.democracydevelopers.raireservice.testUtils.generateAssertionsEndpoint;
 import static au.org.democracydevelopers.raireservice.testUtils.getAssertionsJSONEndpoint;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raireservice.NSWValues.Expected;
@@ -96,10 +94,11 @@ public class GenerateAssertionsAPINSWTests {
       ResponseEntity<GenerateAssertionsResponse> response = restTemplate.postForEntity(generateUrl,
           generateRequest, GenerateAssertionsResponse.class);
 
-      // Check that generation is successful and we got the right winner.
+      // Check that generation is successful, with no retry.
       assertTrue(response.getStatusCode().is2xxSuccessful());
       assertNotNull(response.getBody());
-      assertEquals(response.getBody().winner(), expected.winner());
+      assertTrue(response.getBody().succeeded());
+      assertFalse(response.getBody().retry());
 
       // Request the assertions
       GetAssertionsRequest getRequest = new GetAssertionsRequest(expected.contestName(),
