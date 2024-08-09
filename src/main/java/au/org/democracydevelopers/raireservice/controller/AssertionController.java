@@ -95,15 +95,17 @@ public class AssertionController {
     request.Validate(contestRepository);
     logger.debug(String.format("%s Assertion generation request successfully validated.",prefix));
 
-    // Call raire-java to generate assertions, and check if it was able to do so successfully.
+    // Call raire-java to generate assertions.
     logger.debug(String.format("%s Calling raire-java with assertion generation request.",prefix));
     RaireResultOrError solution = generateAssertionsService.generateAssertions(request);
 
     // Save the result (whether error or success) to the database.
     generateAssertionsService.persistAssertionsOrErrors(solution, request);
 
+    // Check if assertion generation was successful, return appropriate response.
+
+    // Assertion generation succeeded.
     if (solution.Ok != null) {
-      // Generation of assertions was successful - return a GenerateAssertionsResponse.
       logger.debug(String.format("%s Assertion generation successful: %d assertions " +
               "generated in %ss.", prefix, solution.Ok.assertions.length,
               solution.Ok.time_to_find_assertions.seconds));
@@ -111,28 +113,29 @@ public class AssertionController {
       logger.debug(String.format("%s Assertions stored in database for contest %s.",
           prefix, request.contestName));
 
-      // Form and return response.
-      GenerateAssertionsResponse response = new GenerateAssertionsResponse(request.contestName,
-          request.candidates.get(solution.Ok.winner));
-
       logger.debug(String.format("%s Assertion generation and storage complete.", prefix));
-      return new ResponseEntity<>(response, HttpStatus.OK);
+
+      // Form and return a success response.
+      return new ResponseEntity<>(
+          new GenerateAssertionsResponse(request.contestName, solution.Ok.warning_trim_timed_out),
+          HttpStatus.OK);
+    }
+
+    // Assertion generation failed and returned error information.
+    // This is HttpStatus.OK because the http request-and-response was fine, but something was wrong
+    // with either the data or the generation process.
+    if(solution.Err != null) {
+      final String msg = "Assertion generation failed. Error from raire-java: ";
+      logger.error(String.format("%s %s %s", prefix, msg, solution.Err));
+      return new ResponseEntity<>(
+          new GenerateAssertionsResponse(request.contestName, solution.Err), HttpStatus.OK);
     }
 
     // raire-java was not able to generate assertions successfully, but did not return an error.
     // This is not supposed to happen.
-    if(solution.Err == null){
-      final String msg = "An error occurred in raire-java, yet no error information was returned.";
-      logger.error(String.format("%s %s", prefix, msg));
-      throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
-    }
-
-    // raire-java returned error information. Form and throw an exception using that data. (Note:
-    // we need to create the exception first to get a human readable message to log).
-    RaireServiceException ex = new RaireServiceException(solution.Err, request.candidates);
-    final String msg = "An error occurred in raire-java: " + ex.getMessage();
+    final String msg = "An error occurred in raire-java, yet no error information was returned.";
     logger.error(String.format("%s %s", prefix, msg));
-    throw ex;
+    throw new RaireServiceException(msg, RaireErrorCode.INTERNAL_ERROR);
   }
 
 
@@ -144,8 +147,6 @@ public class AssertionController {
    * @return the assertions, as JSON (in the case of success) or an error.
    * @throws RequestValidationException for invalid requests, such as non-existent, null, or
    *         non-IRV contest names.
-   * @throws RequestValidationException for invalid requests, such as non-existent, null, or non-IRV
-   *         contest names.
    * @throws RaireServiceException if the request is valid but assertion retrieval fails, for example
    *         if there are no assertions for the contest.
    * These exceptions are handled by ControllerExceptionHandler.

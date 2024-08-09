@@ -20,14 +20,10 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 
 package au.org.democracydevelopers.raireservice.controller;
 
-import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.TIED_WINNERS;
-import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.TIMEOUT_CHECKING_WINNER;
-import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.TIMEOUT_FINDING_ASSERTIONS;
-import static au.org.democracydevelopers.raireservice.service.RaireServiceException.ERROR_CODE_KEY;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
+import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -118,12 +114,14 @@ public class GenerateAssertionsAPIWickedTests {
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
 
     // Request for the assertions to be generated.
-    ResponseEntity<String> response = restTemplate.postForEntity(generateUrl, tiedWinnersRequest,
-        String.class);
+    ResponseEntity<GenerateAssertionsResponse> response = restTemplate.postForEntity(generateUrl, tiedWinnersRequest,
+        GenerateAssertionsResponse.class);
 
-    // Check that generation is successful and we got the right winner.
-    assertTrue(response.getStatusCode().is5xxServerError());
-    assertEquals(TIED_WINNERS.toString(), response.getHeaders().getFirst(ERROR_CODE_KEY));
+    // Check that assertion generation failed and did not recommend retry.
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertNotNull(response.getBody());
+    assertFalse(response.getBody().succeeded());
+    assertFalse(response.getBody().retry());
   }
 
    /**
@@ -138,12 +136,14 @@ public class GenerateAssertionsAPIWickedTests {
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
 
     // Request for the assertions to be generated.
-    ResponseEntity<String> response = restTemplate.postForEntity(generateUrl,
-        checkingWinnersTimeoutRequest, String.class);
+    ResponseEntity<GenerateAssertionsResponse> response = restTemplate.postForEntity(generateUrl,
+        checkingWinnersTimeoutRequest, GenerateAssertionsResponse.class);
 
-    // Check that generation is successful and we got the right winner.
-    assertTrue(response.getStatusCode().is5xxServerError());
-    assertEquals(TIMEOUT_CHECKING_WINNER.toString(), response.getHeaders().getFirst(ERROR_CODE_KEY));
+    // Check that assertion generation failed and *did* recommend retry.
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertNotNull(response.getBody());
+    assertFalse(response.getBody().succeeded());
+    assertTrue(response.getBody().retry());
   }
 
    /**
@@ -156,11 +156,13 @@ public class GenerateAssertionsAPIWickedTests {
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
 
     // Request for the assertions to be generated.
-    ResponseEntity<String> response = restTemplate.postForEntity(generateUrl,
-        ByronShortTimeoutRequest, String.class);
+    ResponseEntity<GenerateAssertionsResponse> response = restTemplate.postForEntity(generateUrl,
+        ByronShortTimeoutRequest, GenerateAssertionsResponse.class);
 
-    // Check that generation is successful and we got the right winner.
-    assertTrue(response.getStatusCode().is5xxServerError());
-    assertEquals(TIMEOUT_FINDING_ASSERTIONS.toString(), response.getHeaders().getFirst(ERROR_CODE_KEY));
+    // Check that assertion generation failed and *did* recommend retry.
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertNotNull(response.getBody());
+    assertFalse(response.getBody().succeeded());
+    assertTrue(response.getBody().retry());
   }
 }

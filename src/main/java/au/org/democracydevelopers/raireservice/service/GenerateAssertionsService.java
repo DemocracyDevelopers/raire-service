@@ -231,7 +231,7 @@ public class GenerateAssertionsService {
       // A summary is already present in the database - we will update this.
       summary = OptSummary.get();
     } else {
-      // There is no summary for ths contest - make a new blank summary.
+      // There is no summary for this contest - make a new blank summary.
       summary = new GenerateAssertionsSummary(request.contestName);
     }
 

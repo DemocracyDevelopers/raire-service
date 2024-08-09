@@ -26,6 +26,7 @@ import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import au.org.democracydevelopers.raire.RaireSolution;
 import au.org.democracydevelopers.raire.algorithm.RaireResult;
@@ -147,10 +148,11 @@ public class GenerateAssertionsAPIKnownTests {
     ResponseEntity<GenerateAssertionsResponse> response = restTemplate.postForEntity(generateUrl,
         request, GenerateAssertionsResponse.class);
 
-    // Check that generation is successful and we got the right winner.
+    // Check that generation is successful, with no retry.
     assertTrue(response.getStatusCode().is2xxSuccessful());
     assertNotNull(response.getBody());
-    assertEquals(response.getBody().winner(), "Chuan");
+    assertTrue(response.getBody().succeeded());
+    assertFalse(response.getBody().retry());
 
     // Request the assertions
     GetAssertionsRequest getRequest = new GetAssertionsRequest(guideToRaireExample1, 27,
@@ -191,10 +193,11 @@ public class GenerateAssertionsAPIKnownTests {
     ResponseEntity<GenerateAssertionsResponse> response
         = restTemplate.postForEntity(generateUrl, request, GenerateAssertionsResponse.class);
 
-    // Check that the response is successful and we got the right winner.
+    // Check that the response is successful, with no retry.
     assertTrue(response.getStatusCode().is2xxSuccessful());
     assertNotNull(response.getBody());
-    assertEquals(response.getBody().winner(), "Chuan");
+    assertTrue(response.getBody().succeeded());
+    assertFalse(response.getBody().retry());
 
     // Request the assertions
     GetAssertionsRequest getRequest = new GetAssertionsRequest(guideToRaireExample2, 41,
@@ -243,10 +246,11 @@ public class GenerateAssertionsAPIKnownTests {
     ResponseEntity<GenerateAssertionsResponse> response
         = restTemplate.postForEntity(generateUrl, request, GenerateAssertionsResponse.class);
 
-    // Check that the response is successful and we got the right winner.
+    // Check that the response is successful, with no retry.
     assertTrue(response.getStatusCode().is2xxSuccessful());
     assertNotNull(response.getBody());
-    assertEquals(response.getBody().winner(), "Alice");
+    assertTrue(response.getBody().succeeded());
+    assertFalse(response.getBody().retry());
 
     // Request the assertions
     GetAssertionsRequest getRequest = new GetAssertionsRequest(simpleContest, 147,
@@ -287,10 +291,11 @@ public class GenerateAssertionsAPIKnownTests {
     ResponseEntity<GenerateAssertionsResponse> response
         = restTemplate.postForEntity(generateUrl, request, GenerateAssertionsResponse.class);
 
-    // Check that the response is successful and we got the right winner.
+    // Check that the response is successful, with no retry.
     assertTrue(response.getStatusCode().is2xxSuccessful());
     assertNotNull(response.getBody());
-    assertEquals(response.getBody().winner(), "Alice");
+    assertTrue(response.getBody().succeeded());
+    assertFalse(response.getBody().retry());
 
     // Request the assertions
     GetAssertionsRequest getRequest = new GetAssertionsRequest(crossCountySimpleContest, 5,
@@ -331,19 +336,20 @@ public class GenerateAssertionsAPIKnownTests {
     String generateUrl = baseURL + port + generateAssertionsEndpoint;
     String getUrl = baseURL + port + getAssertionsEndpoint;
 
-     // Tell raire that the totalAuditableBallots is double the number in the database
-     // for this contest.
-     GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
+    // Tell raire that the totalAuditableBallots is double the number in the database
+    // for this contest.
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(simpleContest,
          10, 5, Arrays.stream(aliceChuanBob).toList());
 
-     // Request for the assertions to be generated.
-     ResponseEntity<GenerateAssertionsResponse> response
+    // Request for the assertions to be generated.
+    ResponseEntity<GenerateAssertionsResponse> response
          = restTemplate.postForEntity(generateUrl, request, GenerateAssertionsResponse.class);
 
-     // Check that the response is successful and we got the right winner.
-     assertTrue(response.getStatusCode().is2xxSuccessful());
-     assertNotNull(response.getBody());
-     assertEquals(response.getBody().winner(), "Alice");
+    // Check that the response is successful, with no retry.
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().succeeded());
+    assertFalse(response.getBody().retry());
 
      // Request the assertions
      GetAssertionsRequest getRequest = new GetAssertionsRequest(simpleContest, 10,
