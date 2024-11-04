@@ -114,8 +114,8 @@ public abstract class ContestRequest {
     }
 
     if(totalAuditableBallots <= 0) {
-      final String msg = String.format("%s Non-positive total auditable ballots (%d). Throwing a " +
-          "RequestValidationException.", prefix, totalAuditableBallots);
+      final String msg = String.format("%s Non-positive total auditable ballots (%d) for contest %s. Throwing a " +
+          "RequestValidationException.", prefix, totalAuditableBallots, contestName);
       logger.error(msg);
       throw new RequestValidationException(msg);
     }
