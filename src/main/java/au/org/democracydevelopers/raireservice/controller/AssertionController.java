@@ -37,11 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * This class controls the post request mappings for all requests related
@@ -198,6 +194,17 @@ public class AssertionController {
     String csv = getAssertionsCSVService.generateCSV(request);
 
     return new ResponseEntity<>(csv, HttpStatus.OK);
+  }
+
+  /**
+   * The API endpoint for raire-hello. Intended as a simple check of whether the server is
+   * reachable and OK. This endpoint takes no parameters and returns no body - only httpStatus.
+   * @return HttpStatus.OK.
+   */
+  @PostMapping(path = "/hello")
+  @ResponseBody
+  public ResponseEntity serveHello() {
+    return new ResponseEntity<>(HttpStatus.OK);
   }
 
   /**
