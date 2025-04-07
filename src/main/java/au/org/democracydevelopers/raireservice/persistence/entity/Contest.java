@@ -37,7 +37,7 @@ public class Contest {
    * Contest ID.
    */
   @Id
-  @Column(nullable = false, updatable = false)
+  @Column(nullable = false, updatable = false, insertable = false)
   @ReadOnlyProperty
   private long id;
 
@@ -45,21 +45,21 @@ public class Contest {
    * The name of the contest.
    */
   @ReadOnlyProperty
-  @Column(name = "name", nullable = false, updatable = false)
+  @Column(name = "name", nullable = false, updatable = false, insertable = false)
   private String name;
 
   /**
    * Description - should be either IRV or PLURALITY.
    */
   @ReadOnlyProperty
-  @Column(name = "description", nullable = false, updatable = false)
+  @Column(name = "description", nullable = false, updatable = false, insertable = false)
   private String description;
 
   /**
    * ID of county.
    */
   @ReadOnlyProperty
-  @Column(name = "county_id", nullable = false, updatable = false)
+  @Column(name = "county_id", nullable = false, updatable = false, insertable = false)
   private long countyID;
 
   /**

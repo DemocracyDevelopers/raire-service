@@ -51,7 +51,7 @@ public class GenerateAssertionsSummary {
    * ID.
    */
   @Id
-  @Column(updatable = false, nullable = false)
+  @Column(updatable = false, insertable = false, nullable = false)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id;
 
@@ -59,26 +59,26 @@ public class GenerateAssertionsSummary {
    * Version. Used for optimistic locking.
    */
   @Version
-  @Column(name = "version", updatable = false, nullable = false)
+  @Column(name = "version", updatable = false, insertable = false, nullable = false)
   private long version;
 
   /**
    * Name of the contest.
    */
-  @Column(name = "contest_name", unique = true, updatable = false, nullable = false)
+  @Column(name = "contest_name", unique = true, updatable = false, insertable = false, nullable = false)
   private String contestName = "";
 
   /**
    * Name of the winner of the contest, as determined by raire-java.
    */
-  @Column(name = "winner", updatable = false, nullable = false)
+  @Column(name = "winner", updatable = false, insertable = false, nullable = false)
   private String winner = "";
 
   /**
    * An error, if there was one, or emptystring if none. Errors mean there are no
    * assertions (nor winner).
    */
-  @Column(name = "error", updatable = false, nullable = false)
+  @Column(name = "error", updatable = false, insertable = false, nullable = false)
   private String error = "";
 
   /**
@@ -86,13 +86,13 @@ public class GenerateAssertionsSummary {
    * mean that assertion generation succeeded and the audit can continue, but re-running with longer
    * time allowed might be beneficial.
    */
-  @Column(name = "warning", updatable = false, nullable = false)
+  @Column(name = "warning", updatable = false, insertable = false, nullable = false)
   private String warning = "";
 
   /**
    * The message associated with the error or warning, for example the names of the tied winners.
    */
-  @Column(name = "message", updatable = false, nullable = false)
+  @Column(name = "message", updatable = false, insertable = false, nullable = false)
   private String message = "";
 
   /**
