@@ -131,7 +131,7 @@ public abstract class Assertion {
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "assertion_discrepancies", joinColumns = @JoinColumn(name = "id"))
   @MapKeyColumn(name = "cvr_id")
-  @Column(name = "discrepancy", updatable = false, nullable = false)
+  @Column(name = "discrepancy", updatable = false, insertable = false, nullable = false)
   @ReadOnlyProperty
   protected Map<Long,Integer> cvrDiscrepancy = new HashMap<>();
 
