@@ -113,7 +113,6 @@ public abstract class Assertion {
    * Note that this is always empty for NEB assertions.
    */
   @ElementCollection(fetch = FetchType.EAGER)
-  @OnDelete(action = OnDeleteAction.CASCADE)
   @CollectionTable(name = "assertion_assumed_continuing", joinColumns = @JoinColumn(name = "id"))
   @Column(updatable = false, insertable = false, nullable = false)
   @ReadOnlyProperty

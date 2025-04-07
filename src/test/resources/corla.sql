@@ -36,8 +36,7 @@ create table assertion_assumed_continuing
 (
     id                 bigint       not null
         constraint fk357sixi5a6nt1sus8jdk1pcpn
-            references assertion
-            on delete cascade,
+            references assertion,
     assumed_continuing varchar(255) not null
 );
 
