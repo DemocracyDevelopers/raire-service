@@ -51,7 +51,7 @@ public class GenerateAssertionsSummary {
    * ID.
    */
   @Id
-  @Column(updatable = false,  nullable = false)
+  @Column(updatable = false, nullable = false)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id;
 
