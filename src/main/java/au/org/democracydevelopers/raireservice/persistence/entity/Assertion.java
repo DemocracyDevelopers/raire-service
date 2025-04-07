@@ -114,7 +114,7 @@ public abstract class Assertion {
    */
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "assertion_assumed_continuing", joinColumns = @JoinColumn(name = "id"))
-  @Column(updatable = false, insertable = false, nullable = false)
+  @Column(updatable = true, insertable = true, nullable = false)
   @ReadOnlyProperty
   protected List<String> assumedContinuing = new ArrayList<>();
 
