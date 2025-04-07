@@ -32,11 +32,10 @@ create table assertion
     winner                      varchar(255)     not null
 );
 
-
-create table assertion_context
+create table assertion_assumed_continuing
 (
     id                 bigint       not null
-        constraint fki0lyp4tghtpohaa9ma6kv2174
+        constraint fk357sixi5a6nt1sus8jdk1pcpn
             references assertion,
     assumed_continuing varchar(255) not null
 );
