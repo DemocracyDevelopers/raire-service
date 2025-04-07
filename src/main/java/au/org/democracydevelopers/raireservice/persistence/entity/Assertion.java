@@ -58,7 +58,7 @@ public abstract class Assertion {
    * Assertion ID.
    */
   @Id
-  @Column(updatable = false, insertable = false, nullable = false)
+  @Column(updatable = false, nullable = false)
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @ReadOnlyProperty
   private long id;
@@ -67,32 +67,32 @@ public abstract class Assertion {
    * Version. Used for optimistic locking.
    */
   @Version
-  @Column(name = "version", updatable = false, insertable = false, nullable = false)
+  @Column(name = "version", updatable = false, nullable = false)
   @ReadOnlyProperty
   private long version;
 
   /**
    * Name of the contest for which this Assertion was generated.
    */
-  @Column(name = "contest_name", updatable = false, insertable = false, nullable = false)
+  @Column(name = "contest_name", updatable = false, nullable = false)
   @ReadOnlyProperty
   protected String contestName;
 
-  @Column(name = "winner", updatable = false, insertable = false, nullable = false)
+  @Column(name = "winner", updatable = false, nullable = false)
   @ReadOnlyProperty
   protected String winner;
 
   /**
    * Loser of the Assertion (a candidate in the contest).
    */
-  @Column(name = "loser", updatable = false, insertable = false, nullable = false)
+  @Column(name = "loser", updatable = false, nullable = false)
   @ReadOnlyProperty
   protected String loser;
 
   /**
    * Assertion margin (note: this is not the *diluted* margin).
    */
-  @Column(name = "margin", updatable = false, insertable = false, nullable = false)
+  @Column(name = "margin", updatable = false, nullable = false)
   @ReadOnlyProperty
   protected int margin;
 
@@ -101,7 +101,7 @@ public abstract class Assertion {
    * of estimating difficulty, and that these measurements are not necessarily in terms of numbers
    * of ballots. For example, one method may be: difficulty =  1 / assertion margin).
    */
-  @Column(name = "difficulty", updatable = false, insertable = false, nullable = false)
+  @Column(name = "difficulty", updatable = false, nullable = false)
   @ReadOnlyProperty
   protected double difficulty;
 
@@ -119,7 +119,7 @@ public abstract class Assertion {
    * Diluted margin for the Assertion. This is equal to the assertion margin divided by the
    * number of ballots in the relevant auditing universe.
    */
-  @Column(name = "diluted_margin", updatable = false, insertable = false, nullable = false)
+  @Column(name = "diluted_margin", updatable = false, nullable = false)
   @ReadOnlyProperty
   protected double dilutedMargin;
 
@@ -139,7 +139,7 @@ public abstract class Assertion {
    * The expected number of samples to audit overall for the Assertion, assuming overstatements
    * continue at the current rate experienced in the audit.
    */
-  @Column(name = "estimated_samples_to_audit", updatable = false, insertable = false, nullable = false)
+  @Column(name = "estimated_samples_to_audit", updatable = false, nullable = false)
   @ReadOnlyProperty
   protected int estimatedSamplesToAudit = 0;
 
@@ -147,34 +147,34 @@ public abstract class Assertion {
    * The expected number of samples to audit overall for the Assertion, assuming no further
    * overstatements will be encountered in the audit.
    */
-  @Column(name = "optimistic_samples_to_audit", updatable = false, insertable = false, nullable = false)
+  @Column(name = "optimistic_samples_to_audit", updatable = false, nullable = false)
   @ReadOnlyProperty
   protected int optimisticSamplesToAudit = 0;
 
   /**
    * The two-vote understatements recorded against the Assertion.
    */
-  @Column(name = "two_vote_under_count", updatable = false, insertable = false, nullable = false)
+  @Column(name = "two_vote_under_count", updatable = false, nullable = false)
   @ReadOnlyProperty
   protected int twoVoteUnderCount = 0;
 
   /**
    * The one-vote understatements recorded against the Assertion.
    */
-  @Column(name = "one_vote_under_count", updatable = false, insertable = false, nullable = false)
+  @Column(name = "one_vote_under_count", updatable = false, nullable = false)
   protected int oneVoteUnderCount = 0;
 
   /**
    * The one-vote overstatements recorded against the Assertion.
    */
-  @Column(name = "one_vote_over_count", updatable = false, insertable = false, nullable = false)
+  @Column(name = "one_vote_over_count", updatable = false, nullable = false)
   @ReadOnlyProperty
   protected int oneVoteOverCount = 0;
 
   /**
    * The two-vote overstatements recorded against the Assertion.
    */
-  @Column(name = "two_vote_over_count", updatable = false, insertable = false, nullable = false)
+  @Column(name = "two_vote_over_count", updatable = false, nullable = false)
   @ReadOnlyProperty
   protected int twoVoteOverCount = 0;
 
@@ -182,7 +182,7 @@ public abstract class Assertion {
    * Discrepancies recorded against the Assertion that are neither understatements nor
    * overstatements.
    */
-  @Column(name = "other_count", updatable = false, insertable = false, nullable = false)
+  @Column(name = "other_count", updatable = false, nullable = false)
   @ReadOnlyProperty
   protected int otherCount = 0;
 
@@ -190,7 +190,7 @@ public abstract class Assertion {
    * Current risk measurement recorded against the Assertion. It is initialized to 1, as prior
    * to an audit starting, and without additional information, we assume maximum risk.
    */
-  @Column(name = "current_risk", updatable = false, insertable = false, nullable = false)
+  @Column(name = "current_risk", updatable = false, nullable = false)
   @ReadOnlyProperty
   protected BigDecimal currentRisk = BigDecimal.valueOf(1);
 

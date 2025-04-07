@@ -45,7 +45,7 @@ public class CVRContestInfo {
    * CVR ID and a contest ID. These two together form a unique key.
    */
   @Id
-  @Column(name = "cvr_id", updatable = false, insertable = false, nullable = false)
+  @Column(name = "cvr_id", updatable = false, nullable = false)
   @ReadOnlyProperty
   private long cvrId;
 
@@ -54,7 +54,7 @@ public class CVRContestInfo {
    * CVR ID and a contest ID. These two together form a unique key.
    */
   @Id
-  @Column(name = "contest_id", updatable = false, insertable = false, nullable = false)
+  @Column(name = "contest_id", updatable = false, nullable = false)
   @ReadOnlyProperty
   private long contestId;
 
@@ -63,7 +63,7 @@ public class CVRContestInfo {
    * to least). This is stored in a single String in the database (for efficiency), and converted
    * into an array of String for later processing.
    */
-  @Column(name="choices", updatable = false, insertable = false, nullable = false)
+  @Column(name="choices", updatable = false, nullable = false)
   @Convert(converter = StringArrayConverter.class)
   @ReadOnlyProperty
   private String[] choices;
@@ -71,7 +71,7 @@ public class CVRContestInfo {
   /**
    * ID for the county associated with the contest associated with this CVRContestInfo.
    */
-  @Column(name = "county_id", updatable = false, insertable = false, nullable = false)
+  @Column(name = "county_id", updatable = false, nullable = false)
   @ReadOnlyProperty
   private long countyId;
 
