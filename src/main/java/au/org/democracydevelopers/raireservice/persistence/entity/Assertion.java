@@ -32,6 +32,9 @@ import java.util.HashMap;
 import java.util.List;
 import jakarta.persistence.*;
 import java.util.Map;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.ReadOnlyProperty;
@@ -111,7 +114,7 @@ public abstract class Assertion {
    */
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "assertion_assumed_continuing", joinColumns = @JoinColumn(name = "id"))
-  @Column(updatable = false, nullable = false)
+  @Column(updatable = true, insertable = true, nullable = false)
   @ReadOnlyProperty
   protected List<String> assumedContinuing = new ArrayList<>();
 
@@ -131,7 +134,7 @@ public abstract class Assertion {
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "assertion_discrepancies", joinColumns = @JoinColumn(name = "id"))
   @MapKeyColumn(name = "cvr_id")
-  @Column(name = "discrepancy", updatable = false, nullable = false)
+  @Column(name = "discrepancy", updatable = false, insertable = false, nullable = false)
   @ReadOnlyProperty
   protected Map<Long,Integer> cvrDiscrepancy = new HashMap<>();
 
