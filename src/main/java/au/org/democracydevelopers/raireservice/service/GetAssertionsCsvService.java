@@ -94,7 +94,7 @@ public class GetAssertionsCsvService {
       String extrema = findExtrema(sortedAssertions);
       String headers = escapeThenJoin(csvHeaders);
       String contents = makeContents(sortedAssertions, request.candidates);
-      String notes = NOTES + "," + SAMPLE_SIZE_NOTE + "\n," + RISK_NOTE_1 + "\n," + RISK_NOTE_2 + "\n";
+      String notes = makeNotes();
 
       logger.debug(String.format("%s %d assertions translated to csv.", prefix, assertions.size()));
       return preface + extrema + "\n\n" + headers + "\n" + contents + "\n\n" + notes;
@@ -108,6 +108,15 @@ public class GetAssertionsCsvService {
           prefix, e.getMessage()));
       throw new RaireServiceException(e.getMessage(), RaireErrorCode.INTERNAL_ERROR);
     }
+  }
+
+  /**
+   * Make the notes about sample sizes and risks - these are just hardcoded.
+   * @return the csv-formatted strings for the notes.
+   */
+  private String makeNotes() {
+    return NOTES + ",\""
+        + String.join("\"\n,\"", List.of(SAMPLE_SIZE_NOTE, RISK_NOTE_1, RISK_NOTE_2)) + "\"\n";
   }
 
   /**
