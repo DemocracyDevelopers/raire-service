@@ -86,12 +86,41 @@ public class Metadata {
    */
   public final static String OPTIMISTIC_SAMPLES = "Optimistic samples to audit";
 
-
   /**
    * The estimated samples to audit. Colorado-rla calculates this, and we retrieve it from the
    * database.
    */
   public final static String ESTIMATED_SAMPLES = "Estimated samples to audit";
+
+  /**
+   * Notes to go at the end.
+   */
+  public final static String NOTES = "Notes";
+
+  /**
+   * Notes about some counterintuitive features of the CSV and JSON data, 1: Sample sizes are
+   * initially zero, if sample size estimation hasn't run. This deserves a warning.
+   */
+  public final static String SAMPLE_SIZE_NOTE = "\"Optimistic and Estimated sample sizes will show " +
+      "zero if sample size estimation has not been run. If they still show zero after running sample " +
+      "size estimation, it means the contest is not auditable.\"";
+
+  /**
+   * Notes about some counterintuitive features of the CSV and JSON data, 2: Risk assessments may be
+   * inaccurate if the contest was not targeted.
+   */
+  public final static String RISK_NOTE_1 = "\"For cross-county non-targeted contests, colorado-rla does not guarantee " +
+      "a uniform sample. In this case, the risk value is not meaningful. Risk values for targeted contests " +
+      "and single-county contests are accurate.\"";
+
+  /**
+   * Notes about some counterintuitive features of the CSV and JSON data, 3: Risk assessments may be
+   * high simply because not many samples were taken - it doesn't mean there's a high risk of a wrong
+   * outcome.
+   */
+  public final static String RISK_NOTE_2 = "\"Non-targeted contests may have high apparent risks " +
+      "simply because there were not many samples of that contest---they are not expected to meet the risk limit.\"";
+
 
   // Other headers used in parts of the csv
   public final static String CONTEST_NAME_HEADER = "Contest name";
