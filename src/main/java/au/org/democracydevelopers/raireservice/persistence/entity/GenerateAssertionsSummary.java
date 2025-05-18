@@ -105,7 +105,7 @@ public class GenerateAssertionsSummary {
    * @param contestName Contest for which the Assertion has been created.
    * @throws RaireServiceException if the given contestName is blank.
    */
-  public GenerateAssertionsSummary(String contestName) throws RaireServiceException {
+  public GenerateAssertionsSummary(final String contestName) throws RaireServiceException {
     final String prefix = "[Generate Assertions Summary initial constructor]";
     logger.debug(String.format("%s Parameters: contest name %s; winner %s; error %s; warning %s.",
         prefix, contestName, winner, error, warning));
@@ -123,24 +123,20 @@ public class GenerateAssertionsSummary {
   }
 
   /**
-   * Update error data, remove winner and warnings, when assertion generation failed. Intended for
-   * initialization, and for subsequent runs of Generate Assertions, for the same contest, when
-   * assertion generation failed.
+   * Constructor, for failed assertion generation summary.
    * @param error   the error, if any.
    * @param message the message associated with the error (e.g. the names of tied winners).
    * @throws RaireServiceException if the error is blank.
    */
-  public GenerateAssertionsSummary(String contestName, String error, String message) throws RaireServiceException {
-  // public void update(String error, String message) throws RaireServiceException {
-    this(contestName);
+  public GenerateAssertionsSummary(final String contestName, final String error,
+                                   final String message) throws RaireServiceException {
 
+    this(contestName);
     final String prefix = "[update]";
-    logger.debug(String.format("%s %s %s.", prefix, "Updating error summary for contest ",
-        contestName));
 
     // There should not be both a winner and an error. (It's OK to have a winner and a warning.)
     if(error.isBlank()) {
-      String msg = String.format("%s Attempt to build or update GenerateAssertionsResponseOrError " +
+      final String msg = String.format("%s Attempt to build or update GenerateAssertionsResponseOrError " +
           "using the error constructor with a blank error.", prefix);
       logger.error(msg);
       throw new RaireServiceException(msg, RaireServiceException.RaireErrorCode.INTERNAL_ERROR);
@@ -151,42 +147,37 @@ public class GenerateAssertionsSummary {
     this.warning = "";
     this.message = message;
 
-    logger.debug(String.format("%s Successful update of summary for contest %s, error %s, message %s.",
-        prefix, contestName, error, message));
+    logger.debug(String.format("%s Created summary for failed assertion generation:  " +
+            "contest %s, error %s, message %s.", prefix, contestName, error, message));
   }
 
   /**
-   * Update summary data, remove errors and associated messages, when Assertion Generation Succeeded.
-   * Intended for initialization, and for subsequent runs of Generate Assertions for the same
-   * contest.
+   * Constructor, for successful assertion generation summary.
    * @param candidates   The candidate list submitted in the Generate Assertions request.
    * @param winnerIndex  The index of the winner, in the candidate list.
    * @param trimTimedOut Indication of whether the warning_trim_timed_out flag was present in
    *                     raire's response.
    * @throws RaireServiceException if the winnerIndex is not valid for the size of the candidate list.
    */
-  public GenerateAssertionsSummary(String contestName, List<String> candidates, int winnerIndex, boolean trimTimedOut)
-  // public void update(List<String> candidates, int winnerIndex, boolean trimTimedOut)
-                                                                    throws RaireServiceException {
+  public GenerateAssertionsSummary(final String contestName, final List<String> candidates,
+              final int winnerIndex, final boolean trimTimedOut) throws RaireServiceException {
     this(contestName);
+    final String prefix = "[GenerateAssertionsSummary]";
 
-    final String prefix = "[update]";
-    logger.debug(String.format("%s %s %s.", prefix, "Updating winner summary for contest ",
-        contestName));
     try {
       winner = candidates.get(winnerIndex);
       error = "";
       warning = trimTimedOut ? TIMEOUT_TRIMMING_ASSERTIONS.toString() : "";
       message = "";
 
-      logger.debug(String.format("%s Successful update of summary for contest %s, winner %s, trim time out %s.",
-          prefix, contestName, winner, trimTimedOut));
+      logger.debug(String.format("%s Created summary for successful assertion generation: " +
+              "contest %s, winner %s, trim time out %s.", prefix, contestName, winner, trimTimedOut));
     } catch (IndexOutOfBoundsException e) {
       // The winner's index was out of bounds. This can happen if the winner isn't present in the set
       // of candidates in the request.
-      String msg = String.format("Invalid winner when updating summary for contest %s, winner %d, trim time out %s," +
+      final String msg = String.format("Invalid winner when creating summary for contest %s, winner %d, trim time out %s," +
               "candidate list %s.", contestName, winnerIndex, trimTimedOut, candidates);
-      logger.debug(String.format("%s %s", prefix, msg));
+      logger.error(String.format("%s %s", prefix, msg));
       throw new RaireServiceException(msg, INTERNAL_ERROR);
     }
   }
@@ -202,8 +193,8 @@ public class GenerateAssertionsSummary {
    * @return true if contestname, winner, error and warning all match, and messageSubstring is
    * a substring of message.
    */
-  public boolean equalData(String contestName, String winner,
-                           String error, String warning, String messageSubstring) {
+  public boolean equalData(final String contestName, final String winner,
+                           final String error, final String warning, final String messageSubstring) {
     return this.contestName.equals(contestName)
         && this.winner.equals(winner)
         && this.error.equals(error)
