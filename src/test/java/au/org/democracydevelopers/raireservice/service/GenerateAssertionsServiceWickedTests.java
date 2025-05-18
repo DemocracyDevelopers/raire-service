@@ -81,7 +81,7 @@ public class GenerateAssertionsServiceWickedTests {
    * Names of contests, to match preloaded data.
    */
   private static final String tiedWinnersContest = "Tied Winners Contest";
-  private static final String ByronMayoral = "Byron Mayoral";
+  static final String ByronMayoral = "Byron Mayoral";
   private static final String timeOutCheckingWinnersContest = "Time out checking winners contest";
   private static final String timeOutTrimmingAssertionsContest = "Time out trimming contest";
 
@@ -89,7 +89,7 @@ public class GenerateAssertionsServiceWickedTests {
    * Candidate lists for the preloaded contests.
    */
   private static final List<String> aliceChuanBob = List.of("Alice", "Chuan", "Bob");
-  private static final List<String> choicesByron = List.of("HUNTER Alan","CLARKE Bruce",
+  static final List<String> choicesByron = List.of("HUNTER Alan","CLARKE Bruce",
       "COOREY Cate","ANDERSON John","MCILRATH Christopher","LYON Michael","DEY Duncan",
       "PUGH Asren","SWIVEL Mark");
   private static final List<String> timeoutCheckingWinnersChoices = List.of("A","B","C","D","E",
@@ -103,7 +103,7 @@ public class GenerateAssertionsServiceWickedTests {
   private final static GenerateAssertionsRequest tiedWinnersRequest
       = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5,
       aliceChuanBob);
-  private final static GenerateAssertionsRequest ByronShortTimeoutRequest
+  final static GenerateAssertionsRequest ByronShortTimeoutRequest
       = new GenerateAssertionsRequest(ByronMayoral, 18165, 0.001,
       choicesByron);
   private final static GenerateAssertionsRequest checkingWinnersTimeoutRequest
