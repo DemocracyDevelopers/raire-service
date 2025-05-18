@@ -21,17 +21,10 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.controller;
 
 import au.org.democracydevelopers.raire.RaireSolution;
-import au.org.democracydevelopers.raire.algorithm.RaireResult;
-import au.org.democracydevelopers.raire.assertions.AssertionAndDifficulty;
-import au.org.democracydevelopers.raire.assertions.NotEliminatedBefore;
-import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.response.GenerateAssertionsResponse;
-import au.org.democracydevelopers.raireservice.service.Metadata;
-import au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode;
 import au.org.democracydevelopers.raireservice.testUtils;
-import au.org.democracydevelopers.raireservice.util.DoubleComparator;
-import org.jetbrains.annotations.NotNull;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,17 +41,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 
 import static au.org.democracydevelopers.raireservice.NSWValues.BallotCount_12;
 import static au.org.democracydevelopers.raireservice.NSWValues.choicesContest_12;
 import static au.org.democracydevelopers.raireservice.controller.GenerateAssertionsAPIWickedTests.ByronMayoral;
+import static au.org.democracydevelopers.raireservice.controller.GenerateAssertionsAPIWickedTests.ByronShortTimeoutRequest;
 import static au.org.democracydevelopers.raireservice.service.GenerateAssertionsServiceMultipleCallsTests.ByronNormalTimeoutRequest;
-import static au.org.democracydevelopers.raireservice.service.RaireServiceException.ERROR_CODE_KEY;
-import static au.org.democracydevelopers.raireservice.testUtils.correctAssertionData;
-import static au.org.democracydevelopers.raireservice.testUtils.correctMetadata;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -92,33 +80,13 @@ public class GenerateAssertionsAPIMultipleCallsTests {
 
   // Get assertions endpoint - used for testing that they were generated properly.
   private final static String getAssertionsEndpoint = "/raire/get-assertions-json";
-  private static final int DEFAULT_TIME_LIMIT = 5;
   private static final BigDecimal DEFAULT_RISK_LIMIT = BigDecimal.valueOf(0.03);
-  private static final DoubleComparator doubleComparator = new DoubleComparator();
 
   @LocalServerPort
   private int port;
 
   @Autowired
   private TestRestTemplate restTemplate;
-
-  /**
-   * Names of contests, to match preloaded data.
-   */
-  private static final String guideToRaireExample1 = "Guide To Raire Example 1";
-  private static final String guideToRaireExample2 = "Guide To Raire Example 2";
-  private static final String simpleContest = "Simple Contest";
-  private static final String crossCountySimpleContest = "Cross-county Simple Contest";
-
-  /**
-   * Array of candidates: Alice, Bob, Chuan, Diego.
-   */
-  private static final String[] aliceBobChuanDiego = {"Alice", "Bob", "Chuan", "Diego"};
-
-  /**
-   * Array of candidates: Alice, Chuan, Bob.
-   */
-  private static final String[] aliceChuanBob = {"Alice", "Chuan", "Bob"};
 
   private static final GetAssertionsRequest ByronGetAssertionsRequest
       = new GetAssertionsRequest(ByronMayoral, BallotCount_12, choicesContest_12, DEFAULT_RISK_LIMIT);
@@ -168,5 +136,101 @@ public class GenerateAssertionsAPIMultipleCallsTests {
     assertTrue(getResponse.getStatusCode().is2xxSuccessful());
     assertNotNull(getResponse.getBody());
     assertEquals(firstAssertionCount, getResponse.getBody().solution.Ok.assertions.length);
+  }
+
+  /**
+  * Run assertion generation on Byron Mayoral, first with a too-short timeout, then again with a
+  * workable timeout. Verify that the error state is returned first, then replaced with success.
+  * This test doesn't do exhaustive search of the data - it just sanity-checks that first the
+  * failure result with no assertions, then the success result with some assertions, are stored.
+  */
+  @Test
+  @Transactional
+  public void ByronTimeoutsSuccessReplacesFailure() {
+    testUtils.log(logger, "ByronTimeoutsSuccessReplacesFailure");
+    String generateUrl = baseURL + port + generateAssertionsEndpoint;
+    String getUrl = baseURL + port + getAssertionsEndpoint;
+
+    // Request for the assertions to be generated, short timeout.
+    ResponseEntity<GenerateAssertionsResponse> response = restTemplate.postForEntity(generateUrl,
+        ByronShortTimeoutRequest, GenerateAssertionsResponse.class);
+
+    // Check that the request is successful, but it tells us generation failed and we should retry.
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertNotNull(response.getBody());
+    assertFalse(response.getBody().succeeded());
+    assertTrue(response.getBody().retry());
+
+    // Request the assertions
+    ResponseEntity<String> getResponse
+        = restTemplate.postForEntity(getUrl, ByronGetAssertionsRequest, String.class);
+
+    // Check there are none.
+    assertFalse(getResponse.getStatusCode().is2xxSuccessful());
+    assertTrue(StringUtils.containsIgnoreCase(getResponse.getBody(), "No assertions"));
+
+    // Repeat the request, with a normal timeout.
+    response = restTemplate.postForEntity(generateUrl, ByronNormalTimeoutRequest, GenerateAssertionsResponse.class);
+
+    // Check that generation is successful, with no retry.
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().succeeded());
+    assertFalse(response.getBody().retry());
+
+    // Request the assertions again
+    ResponseEntity<RaireSolution> getResponse2 = restTemplate.postForEntity(getUrl, ByronGetAssertionsRequest, RaireSolution.class);
+
+    // Check for success, and that we have some assertions.
+    assertTrue(getResponse2.getStatusCode().is2xxSuccessful());
+    assertNotNull(getResponse2.getBody());
+    assertTrue(getResponse2.getBody().solution.Ok.assertions.length > 0);
+  }
+
+  /**
+   * The same as ByronTimeoutsSuccessReplacesFailure, but in the opposite order: success first,
+   * to be replaced by failure.
+   */
+  @Test
+  @Transactional
+  public void ByronTimeoutsFailureReplacesSuccess() {
+    testUtils.log(logger, "ByronTimeoutsFailureReplacesSuccess");
+    String generateUrl = baseURL + port + generateAssertionsEndpoint;
+    String getUrl = baseURL + port + getAssertionsEndpoint;
+
+    // Request for the assertions to be generated, normal timeout.
+    ResponseEntity<GenerateAssertionsResponse> response = restTemplate.postForEntity(generateUrl,
+        ByronNormalTimeoutRequest, GenerateAssertionsResponse.class);
+
+    // Check that generation is successful, with no retry.
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().succeeded());
+    assertFalse(response.getBody().retry());
+
+    // Request the assertions
+    ResponseEntity<RaireSolution> getResponseFirst = restTemplate.postForEntity(getUrl, ByronGetAssertionsRequest, RaireSolution.class);
+
+    // Check for success, and that we have some assertions.
+    assertTrue(getResponseFirst.getStatusCode().is2xxSuccessful());
+    assertNotNull(getResponseFirst.getBody());
+    assertTrue(getResponseFirst.getBody().solution.Ok.assertions.length > 0);
+
+    // Repeat the request, with a short timeout.
+    response = restTemplate.postForEntity(generateUrl, ByronShortTimeoutRequest, GenerateAssertionsResponse.class);
+
+    // Check that the request is successful, but it tells us generation failed and we should retry.
+    assertTrue(response.getStatusCode().is2xxSuccessful());
+    assertNotNull(response.getBody());
+    assertFalse(response.getBody().succeeded());
+    assertTrue(response.getBody().retry());
+
+    // Request the assertions
+    ResponseEntity<String> getResponse
+        = restTemplate.postForEntity(getUrl, ByronGetAssertionsRequest, String.class);
+
+    // Check there are none.
+    assertFalse(getResponse.getStatusCode().is2xxSuccessful());
+    assertTrue(StringUtils.containsIgnoreCase(getResponse.getBody(), "No assertions"));
   }
 }
