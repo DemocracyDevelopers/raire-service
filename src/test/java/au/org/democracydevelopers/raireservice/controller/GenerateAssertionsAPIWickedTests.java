@@ -68,7 +68,7 @@ public class GenerateAssertionsAPIWickedTests {
    * Names of contests, to match preloaded data.
    */
   private static final String tiedWinnersContest = "Tied Winners Contest";
-  private static final String ByronMayoral = "Byron Mayoral";
+  protected static final String ByronMayoral = "Byron Mayoral";
   private static final String timeOutCheckingWinnersContest = "Time out checking winners contest";
 
   /**

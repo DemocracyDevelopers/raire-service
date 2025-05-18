@@ -45,6 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import static au.org.democracydevelopers.raireservice.NSWValues.BallotCount_12;
 import static au.org.democracydevelopers.raireservice.NSWValues.winnerContest_12;
 import static au.org.democracydevelopers.raireservice.service.GenerateAssertionsServiceWickedTests.*;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.TIMEOUT_FINDING_ASSERTIONS;
@@ -52,6 +53,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests to validate the behaviour of Assertion generation when called successively.
+ * These are the same as the tests in GenerateAssertionsAPIMultipleCallsTests.java, but call the
+ * service directly instead of (just) the API.
  * Relevant data is preloaded into the test database from
  * src/test/resources/known_testcases_votes.sql.
  * These tests include
@@ -87,8 +90,8 @@ public class GenerateAssertionsServiceMultipleCallsTests {
   /**
    * Second request for Byron, with a normal time limit.
    */
-  final static GenerateAssertionsRequest ByronNormalTimeoutRequest
-      = new GenerateAssertionsRequest(ByronMayoral, 18165, 5,
+  public final static GenerateAssertionsRequest ByronNormalTimeoutRequest
+      = new GenerateAssertionsRequest(ByronMayoral, BallotCount_12, 5,
       choicesByron);
 
   /**
