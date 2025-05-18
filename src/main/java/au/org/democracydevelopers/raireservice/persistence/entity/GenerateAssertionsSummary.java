@@ -130,7 +130,10 @@ public class GenerateAssertionsSummary {
    * @param message the message associated with the error (e.g. the names of tied winners).
    * @throws RaireServiceException if the error is blank.
    */
-  public void update(String error, String message) throws RaireServiceException {
+  public GenerateAssertionsSummary(String contestName, String error, String message) throws RaireServiceException {
+  // public void update(String error, String message) throws RaireServiceException {
+    this(contestName);
+
     final String prefix = "[update]";
     logger.debug(String.format("%s %s %s.", prefix, "Updating error summary for contest ",
         contestName));
@@ -162,8 +165,11 @@ public class GenerateAssertionsSummary {
    *                     raire's response.
    * @throws RaireServiceException if the winnerIndex is not valid for the size of the candidate list.
    */
-  public void update(List<String> candidates, int winnerIndex, boolean trimTimedOut)
+  public GenerateAssertionsSummary(String contestName, List<String> candidates, int winnerIndex, boolean trimTimedOut)
+  // public void update(List<String> candidates, int winnerIndex, boolean trimTimedOut)
                                                                     throws RaireServiceException {
+    this(contestName);
+
     final String prefix = "[update]";
     logger.debug(String.format("%s %s %s.", prefix, "Updating winner summary for contest ",
         contestName));
@@ -183,7 +189,6 @@ public class GenerateAssertionsSummary {
       logger.debug(String.format("%s %s", prefix, msg));
       throw new RaireServiceException(msg, INTERNAL_ERROR);
     }
-
   }
 
   /**
@@ -225,4 +230,9 @@ public class GenerateAssertionsSummary {
    * @return the message associated with the error.
    */
   public String getMessage() {return message;}
+
+  /**
+   * @return the ID.
+   */
+  public long getId() {return id;}
 }
