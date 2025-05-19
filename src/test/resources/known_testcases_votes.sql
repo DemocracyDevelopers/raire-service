@@ -43,7 +43,7 @@ INSERT INTO contest (county_id, id, version, description, name, sequence_number,
 
 -- CVRs
 
--- The Guide To Raire Example 1, divided by 500
+-- The Guide To Raire Part 2 Example 1, divided by 500
 -- Note that this will _not_ have the same margins as raire-java, because of the divide by 500,
 -- but it should have the same difficulties and assertions.
 

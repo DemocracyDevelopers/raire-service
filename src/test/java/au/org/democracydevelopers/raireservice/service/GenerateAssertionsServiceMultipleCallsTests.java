@@ -26,10 +26,12 @@ import au.org.democracydevelopers.raire.RaireSolution.RaireResultOrError;
 import au.org.democracydevelopers.raire.algorithm.RaireResult;
 import au.org.democracydevelopers.raireservice.persistence.entity.Assertion;
 import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary;
+import au.org.democracydevelopers.raireservice.persistence.entity.NEBAssertion;
 import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.persistence.repository.GenerateAssertionsSummaryRepository;
 import au.org.democracydevelopers.raireservice.request.GenerateAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,18 +39,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static au.org.democracydevelopers.raireservice.NSWValues.BallotCount_12;
 import static au.org.democracydevelopers.raireservice.NSWValues.winnerContest_12;
+import static au.org.democracydevelopers.raireservice.service.GenerateAssertionsServiceKnownTests.guideToRaireExample1;
+import static au.org.democracydevelopers.raireservice.service.GenerateAssertionsServiceKnownTests.aliceBobChuanDiego;
 import static au.org.democracydevelopers.raireservice.service.GenerateAssertionsServiceWickedTests.*;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.TIMEOUT_FINDING_ASSERTIONS;
+import static au.org.democracydevelopers.raireservice.testUtils.correctDBAssertionData;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -86,6 +95,9 @@ public class GenerateAssertionsServiceMultipleCallsTests {
 
   @Autowired
   GenerateAssertionsService generateAssertionsService;
+
+  @Autowired
+  private DataSource dataSource;
 
   /**
    * Second request for Byron, with a normal time limit.
@@ -236,5 +248,95 @@ public class GenerateAssertionsServiceMultipleCallsTests {
     assertions = assertionRepository.findByContestName(ByronMayoral);
     assertEquals(0, assertions.size());
 
+  }
+
+
+  /**
+   * Run assertion generation on The Guide To Raire Example 1, with the default timeout.
+   * - The first run is the usual version contained in The Guide and in known_testcases_votes.sql.
+   * - The second run has Alice and Chuan flipped.
+   * Verify that the assertions and winner summary for the flipped version replace the assertions
+   * from the first run. The first part of this test is identical to
+   * GenerateAssertionsServiceKnownTests::ttestGuideToRairePart2Example1; the second part is the
+   * same again but with Alice and Chuan flipped.
+   */
+  @Test
+  @Transactional
+  void Example1RunsTwiceFlippedResults() throws RaireServiceException {
+    testUtils.log(logger, "Example1RunsTwiceFlippedResults");
+
+    GenerateAssertionsRequest request = new GenerateAssertionsRequest(guideToRaireExample1,
+        27, 5, Arrays.stream(aliceBobChuanDiego).toList());
+
+    RaireResultOrError result = generateAssertionsService.generateAssertions(request);
+    assertNotNull(result.Ok);
+    assertNull(result.Err);
+
+    // Sanity check; check winner.
+    assertTrue(StringUtils.containsIgnoreCase(request.candidates.get(result.Ok.winner), "Chuan"));
+    assertInstanceOf(RaireResult.class, result.Ok);
+
+    // Count the assertions for the first run.
+    int assertionCount = result.Ok.assertions.length;
+
+    // Test persistence of assertions.
+    generateAssertionsService.persistAssertionsOrErrors(result, request);
+    List<Assertion> storedAssertions = assertionRepository.findByContestName(guideToRaireExample1);
+    assertEquals(assertionCount, storedAssertions.size());
+
+    // There should be one NEB assertion: Chaun NEB Bob
+    Optional<Assertion> nebMaybeAssertion = storedAssertions.stream()
+        .filter(a -> a instanceof NEBAssertion).findFirst();
+    assertTrue(nebMaybeAssertion.isPresent());
+    NEBAssertion nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
+
+    assertTrue(correctDBAssertionData(8, 8 / 27.0, 27 / 8.0,
+        "Chuan", "Bob", List.of(), nebAssertion));
+
+    // There should be a summary with winner Chuan and no error.
+    Optional<GenerateAssertionsSummary> optSummary
+        = summaryRepository.findByContestName(guideToRaireExample1);
+    assertTrue(optSummary.isPresent());
+    GenerateAssertionsSummary firstSummary = optSummary.get();
+    firstSummary.equalData(guideToRaireExample1, "Chuan", "", "", "");
+
+    // Execute the script to delete the CVRs and replace them with new ones with Alice and Chuan flipped.
+    ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+    populator.addScript(new ClassPathResource("flipped_example_1.sql"));
+    populator.execute(this.dataSource);
+
+
+    // Run the whole test again, expecting the same thing but with Alice and Chuan flipped.
+    result = generateAssertionsService.generateAssertions(request);
+    assertNotNull(result.Ok);
+    assertNull(result.Err);
+
+    // Sanity check; check winner.
+    assertTrue(StringUtils.containsIgnoreCase(request.candidates.get(result.Ok.winner), "Alice"));
+    assertInstanceOf(RaireResult.class, result.Ok);
+
+    // Should have the same number of assertions as the first run.
+    assertEquals(assertionCount, result.Ok.assertions.length);
+
+    // Test persistence of the new assertions - they should replace the old ones.
+    generateAssertionsService.persistAssertionsOrErrors(result, request);
+    storedAssertions = assertionRepository.findByContestName(guideToRaireExample1);
+    assertEquals(assertionCount, storedAssertions.size());
+
+    // There should be one NEB assertion: Alice NEB Bob
+    nebMaybeAssertion = storedAssertions.stream()
+        .filter(a -> a instanceof NEBAssertion).findFirst();
+    assertTrue(nebMaybeAssertion.isPresent());
+    nebAssertion = (NEBAssertion) nebMaybeAssertion.get();
+
+    // Should have Alice instead of Chuan
+    assertTrue(correctDBAssertionData(8, 8 / 27.0, 27 / 8.0,
+        "Alice", "Bob", List.of(), nebAssertion));
+
+    // There should be a summary with winner Alice and no error.
+    optSummary = summaryRepository.findByContestName(guideToRaireExample1);
+    assertTrue(optSummary.isPresent());
+    GenerateAssertionsSummary secondSummary = optSummary.get();
+    secondSummary.equalData(guideToRaireExample1, "Alice", "", "", "");
   }
 }
