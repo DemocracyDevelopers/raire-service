@@ -100,7 +100,7 @@ public class GenerateAssertionsServiceKnownTests {
   private static final String oneNENAssertionContest = "Sanity Check NEN Assertion Contest";
   private static final String NEBNENAssertionContest = "Sanity Check NEB NEN Assertion Contest";
   private static final String ThreeAssertionContest = "Sanity Check 3 Assertion Contest";
-  private static final String guideToRaireExample1 = "Guide To Raire Example 1";
+  protected static final String guideToRaireExample1 = "Guide To Raire Example 1";
   private static final String guideToRaireExample2 = "Guide To Raire Example 2";
   private static final String simpleContest = "Simple Contest";
   private static final String crossCountySimpleContest = "Cross-county Simple Contest";
@@ -108,7 +108,7 @@ public class GenerateAssertionsServiceKnownTests {
   /**
    * Array of candidates: Alice, Bob, Chuan, Diego.
    */
-  private static final String[] aliceBobChuanDiego = {"Alice", "Bob", "Chuan", "Diego"};
+  protected static final String[] aliceBobChuanDiego = {"Alice", "Bob", "Chuan", "Diego"};
 
   /**
    * Array of candidates: Alice, Chuan, Bob.
@@ -380,7 +380,7 @@ public class GenerateAssertionsServiceKnownTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.generateAssertions(notEnoughBallotsRequest)
     );
-    assertSame(ex.errorCode, RaireErrorCode.INVALID_TOTAL_AUDITABLE_BALLOTS);
+    assertSame(RaireErrorCode.INVALID_TOTAL_AUDITABLE_BALLOTS, ex.errorCode);
 
     // Check there is no summary data.
     Optional<GenerateAssertionsSummary> optSummary
@@ -404,7 +404,7 @@ public class GenerateAssertionsServiceKnownTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class, () ->
         generateAssertionsService.generateAssertions(wrongCandidatesRequest)
     );
-    assertSame(ex.errorCode, RaireErrorCode.WRONG_CANDIDATE_NAMES);
+    assertSame(RaireErrorCode.WRONG_CANDIDATE_NAMES, ex.errorCode);
 
     // Check there is no summary data.
     Optional<GenerateAssertionsSummary> optSummary

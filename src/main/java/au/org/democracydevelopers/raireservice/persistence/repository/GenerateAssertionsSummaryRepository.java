@@ -25,9 +25,11 @@ import au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssert
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -48,4 +50,13 @@ public interface GenerateAssertionsSummaryRepository extends JpaRepository<Gener
   @Query(value="select a from GenerateAssertionsSummary a where a.contestName = :contestName")
   Optional<GenerateAssertionsSummary> findByContestName(@Param("contestName") String contestName);
 
+  /**
+   * Delete all summaries (there should be at most one) belonging to the contest with the given name
+   * from the database. This is Spring syntactic sugar for the corresponding 'delete' query.
+   * @param contestName The name of the contest whose assertions are to be deleted.
+   */
+  @Query(value="delete from GenerateAssertionsSummary a where a.contestName = :contestName")
+  @Modifying
+  @Transactional
+  void deleteByContestName(@Param("contestName") String contestName);
 }
