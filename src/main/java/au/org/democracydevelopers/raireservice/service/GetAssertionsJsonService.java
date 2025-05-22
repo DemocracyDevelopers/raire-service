@@ -38,6 +38,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import static au.org.democracydevelopers.raireservice.service.Metadata.*;
+
 /**
  * Collection of functions responsible for retrieving assertions from the colorado-rla database,
  * through the use of an AssertionRepository, and packaging them in a form suitable for export
@@ -93,6 +95,7 @@ public class GetAssertionsJsonService {
       metadata.put(Metadata.RISK_LIMIT, request.riskLimit);
       metadata.put(Metadata.CONTEST, request.contestName);
       metadata.put(Metadata.TOTAL_BALLOTS, request.totalAuditableBallots);
+      metadata.put(Metadata.NOTES, List.of(RISK_NOTE_1, RISK_NOTE_2));
 
       // Translate the assertions extracted from the database into AssertionAndDifficulty objects,
       // keeping track of the maximum difficulty and minimum margin.
