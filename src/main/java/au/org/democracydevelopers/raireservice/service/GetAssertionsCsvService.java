@@ -21,19 +21,7 @@ raire-service. If not, see <https://www.gnu.org/licenses/>.
 package au.org.democracydevelopers.raireservice.service;
 
 import static au.org.democracydevelopers.raireservice.persistence.entity.GenerateAssertionsSummary.UNKNOWN_WINNER;
-import static au.org.democracydevelopers.raireservice.service.Metadata.CANDIDATES_HEADER;
-import static au.org.democracydevelopers.raireservice.service.Metadata.CONTEST_NAME_HEADER;
-import static au.org.democracydevelopers.raireservice.service.Metadata.CURRENT_RISK;
-import static au.org.democracydevelopers.raireservice.service.Metadata.DIFFICULTY;
-import static au.org.democracydevelopers.raireservice.service.Metadata.DILUTED_MARGIN;
-import static au.org.democracydevelopers.raireservice.service.Metadata.ESTIMATED_SAMPLES;
-import static au.org.democracydevelopers.raireservice.service.Metadata.MARGIN;
-import static au.org.democracydevelopers.raireservice.service.Metadata.OPTIMISTIC_SAMPLES;
-import static au.org.democracydevelopers.raireservice.service.Metadata.RISK_LIMIT_HEADER;
-import static au.org.democracydevelopers.raireservice.service.Metadata.TOTAL_AUDITABLE_BALLOTS_HEADER;
-import static au.org.democracydevelopers.raireservice.service.Metadata.WINNER_HEADER;
-import static au.org.democracydevelopers.raireservice.service.Metadata.extremumHeaders;
-import static au.org.democracydevelopers.raireservice.service.Metadata.csvHeaders;
+import static au.org.democracydevelopers.raireservice.service.Metadata.*;
 import static au.org.democracydevelopers.raireservice.service.RaireServiceException.RaireErrorCode.NO_ASSERTIONS_PRESENT;
 import static au.org.democracydevelopers.raireservice.util.CSVUtils.escapeThenJoin;
 import static au.org.democracydevelopers.raireservice.util.CSVUtils.intListToString;
@@ -106,9 +94,10 @@ public class GetAssertionsCsvService {
       String extrema = findExtrema(sortedAssertions);
       String headers = escapeThenJoin(csvHeaders);
       String contents = makeContents(sortedAssertions, request.candidates);
+      String notes = makeNotes();
 
       logger.debug(String.format("%s %d assertions translated to csv.", prefix, assertions.size()));
-      return preface + extrema + "\n\n" + headers + "\n" + contents;
+      return preface + extrema + "\n\n" + headers + "\n" + contents + "\n\n" + notes;
 
     } catch(RaireServiceException ex) {
       logger.error(String.format("%s RaireServiceException caught. Passing to caller: %s",
@@ -119,6 +108,15 @@ public class GetAssertionsCsvService {
           prefix, e.getMessage()));
       throw new RaireServiceException(e.getMessage(), RaireErrorCode.INTERNAL_ERROR);
     }
+  }
+
+  /**
+   * Make the notes about sample sizes and risks - these are just hardcoded.
+   * @return the csv-formatted strings for the notes.
+   */
+  private String makeNotes() {
+    return NOTES + ",\""
+        + String.join("\"\n,\"", List.of(SAMPLE_SIZE_NOTE, RISK_NOTE_1, RISK_NOTE_2)) + "\"\n";
   }
 
   /**
