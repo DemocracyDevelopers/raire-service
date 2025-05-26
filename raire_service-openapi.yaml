@@ -1,0 +1,249 @@
+openapi: "3.1.0"
+info:
+  title: "raire_service API"
+  description: "raire_service API"
+  version: "1.0.0"
+servers:
+  - url: "https://raire_service"
+paths:
+  /raire/generate-assertions:
+    post:
+      summary: "Attempts to generate assertions for an IRV contest; returns a summary."
+      operationId: "serve"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateAssertionsRequest"
+        required: true
+      responses:
+        "200":
+          description: "Success response, which may include assertion-generation failures for specific contests."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateAssertionsResponse"
+        "400":
+          description: "Bad request.  Input validation errors, for example the contest does not exist or is not IRV, or the
+candidate list is null or the timeout is non-positive."
+        "415":
+          description: "Unsupported media type. The endpoint was called without data or header."
+        "500":
+          description: "Internal server error. Generation failed for a reason that shouldn't have
+           happened, e.g. no votes in the database, an invalid number of candidates, or a candidate 
+           list that does not match the candidates in the vote database."
+
+  /raire/get-assertions-json:
+    post:
+      summary: "POST raire/get-assertions-json"
+      operationId: "serveJson"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetAssertionsRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            description: "A collection of raire assertions, with metadata, suitable for the assertion visualizer."
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RaireSolution"
+        "400":
+          description: "Bad request.  Input validation errors, for example the contest does not exist or is not IRV, or the
+candidate list is null or the timeout is non-positive."
+        "415":
+          description: "Unsupported media type. The endpoint was called without data or header."
+        "500":
+          description: "Internal server error. For example, no assertions could be retrieved from 
+          the database."
+  /raire/get-assertions-csv:
+    post:
+      summary: "POST raire/get-assertions-csv"
+      operationId: "serveCSV"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GetAssertionsRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            description: "A CSV file describing the assertions, with metadata."
+            '*/*':
+              schema:
+                type: "string"
+        "400":
+          description: "Bad request.  Input validation errors, for example the contest does not exist or is not IRV, or the
+candidate list is null or the timeout is non-positive."
+        "415":
+          description: "Unsupported media type. The endpoint was called without data or header."
+        "500":
+          description: "Internal server error. For example, no assertions could be retrieved from 
+          the database."
+  /raire/hello:
+    post:
+      summary: "POST raire/hello"
+      operationId: "serveHello"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseEntity"
+components:
+  schemas:
+    GenerateAssertionsRequest:
+      type: "object"
+      properties:
+        timeLimitSeconds:
+          description: "The elapsed (clock) time allowed for assertion generation."
+          type: "number"
+          format: "double"
+        contestName:
+          description: "The name of the contest."
+          type: "string"
+        totalAuditableBallots:
+          description: "The total number of ballots in the universe - relevant for difficulty estimation."
+          type: "integer"
+          format: "int32"
+        candidates:
+          description: "The name of each candidate."
+          type: "array"
+          items:
+            type: "string"
+    GenerateAssertionsResponse:
+      type: "object"
+      properties:
+        contestName:
+          description: "The name of the contest."
+          type: "string"
+        succeeded:
+          description: "Flag indicating whether assertion generation succeeded."
+          type: "boolean"
+        retry:
+          description: "Flag indicating whether a retry is recommended, i.e. if a (better) solution 
+          might be found given more time."
+          type: "boolean"
+    BigDecimal:
+      type: "object"
+      properties: { }
+    GetAssertionsRequest:
+      type: "object"
+      properties:
+        riskLimit:
+          $ref: "#/components/schemas/BigDecimal"
+        contestName:
+          description: "The name of the contest."
+          type: "string"
+        totalAuditableBallots:
+          description: "The total number of ballots in the universe - relevant for difficulty estimation."
+          type: "integer"
+          format: "int32"
+        candidates:
+          description: "The name of each candidate."
+          type: "array"
+          items:
+            type: "string"
+    Assertion:
+      description: "Describes the winner, loser and (for NEN assertions) the assumed-continuing candidates."
+      type: "object"
+      properties: { }
+    AssertionAndDifficulty:
+      type: "object"
+      properties:
+        assertion:
+          $ref: "#/components/schemas/Assertion"
+        difficulty:
+          description: "Estimated auditing difficulty."
+          type: "number"
+          format: "double"
+        margin:
+          description: "Absolute margin (difference between winner and loser)."
+          type: "integer"
+          format: "int32"
+        status:
+          description: "Not filled in by the raire-service, but can be used during audits to store risk or confirmation status."
+          type: "string"
+    TimeTaken:
+      type: "object"
+      properties:
+        work:
+          type: "integer"
+          format: "int64"
+        seconds:
+          type: "number"
+          format: "double"
+    RaireResult:
+      description: "An array of assertions, together with some data summarizing the overall result"
+      type: "object"
+      properties:
+        assertions:
+          description: "The array of assertions."
+          type: "array"
+          items:
+            $ref: "#/components/schemas/AssertionAndDifficulty"
+        difficulty:
+          description: "The maximum difficulty of any assertion in the array."
+          type: "number"
+          format: "double"
+        margin:
+          description: "The minimum margin of any assertion in the array."
+          type: "integer"
+          format: "int32"
+        winner:
+          descrption: "The index in the candidate list of the winner, as implied by the assertions."
+          type: "integer"
+          format: "int32"
+        num_candidates:
+          description: "The total number of candidates."
+          type: "integer"
+          format: "int32"
+        time_to_determine_winners:
+          description: "The time taken to determine the winners, both computational work and clock time (sec)."
+          $ref: "#/components/schemas/TimeTaken"
+        time_to_find_assertions:
+          description: "The time taken to compute the assertions, both computational work and clock time (sec)."
+          $ref: "#/components/schemas/TimeTaken"
+        time_to_trim_assertions:
+          description: "The time taken to trim redundant assertions, both computational work and clock time (sec)."
+          $ref: "#/components/schemas/TimeTaken"
+        warning_trim_timed_out:
+          description: "Flag indicating whether trimming redundant assertions timed out."
+          type: "boolean"
+    RaireError:
+      description: "One of TIED_WINNERS, INVALID_TOTAL_AUDITABLE_BALLOTS, TIMEOUT_CHECKING_WINNER, 
+      TIMEOUT_FINDING_ASSERTIONS, COULD_NOT_RULE_OUT_ALTERNATIVE, WRONG_CANDIDATE_NAMES, 
+      NO_ASSERTIONS_PRESENT, NO_VOTES_PRESENT, INTERNAL_ERROR."
+      type: "object"
+      properties: { }
+    RaireResultOrError:
+      type: "object"
+      properties:
+        Ok:
+          $ref: "#/components/schemas/RaireResult"
+        Err:
+          $ref: "#/components/schemas/RaireError"
+    RaireSolution:
+      type: "object"
+      properties:
+        metadata:
+          description: "Any extra information, e.g. the contest name, candidate list and risk limit ."
+          type: "string"
+        solution:
+          $ref: "#/components/schemas/RaireResultOrError"
+    HttpHeaders:
+      type: "object"
+      properties: { }
+    ResponseEntity:
+      type: "object"
+      properties:
+        headers:
+          $ref: "#/components/schemas/HttpHeaders"
+      required:
+        - "headers"
