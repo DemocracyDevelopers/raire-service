@@ -37,7 +37,6 @@ import jakarta.transaction.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -203,7 +202,7 @@ public class GenerateAssertionsService {
    * If the result contains an error or warning, persist it and its message in the
    * GenerateAssertionsResponse table.
    * Previously-stored assertions are deleted, regardless of whether assertion generation
-   * was successful this time. Previously-stored summaries are updated.
+   * was successful this time. Previously-stored summaries are replaced.
    * @param solution RaireResultOrError containing either assertions to persist for a given contest,
    *                 with a winner, or an error. Note that there may be both a warning and successful
    *                 assertion generation.
@@ -219,21 +218,14 @@ public class GenerateAssertionsService {
    *
    */
   @Transactional(rollbackOn = {RuntimeException.class, DataAccessException.class, RaireServiceException.class})
-  public void persistAssertionsOrErrors(RaireResultOrError solution, ContestRequest request)
+  public void persistAssertionsOrErrors(final RaireResultOrError solution, final ContestRequest request)
       throws RaireServiceException {
     final String prefix = "[persistAssertionsOrErrors]";
 
-    // Retrieve an existing summary or start a new one.
     GenerateAssertionsSummary summary;
-    final Optional<GenerateAssertionsSummary> OptSummary
-        = summaryRepository.findByContestName(request.contestName);
-    if (OptSummary.isPresent()) {
-      // A summary is already present in the database - we will update this.
-      summary = OptSummary.get();
-    } else {
-      // There is no summary for this contest - make a new blank summary.
-      summary = new GenerateAssertionsSummary(request.contestName);
-    }
+
+    // Delete the old summary.
+    summaryRepository.deleteByContestName(request.contestName);
 
     // Delete any existing assertions for this contest.
     logger.debug(String.format("%s (Database access) Proceeding to delete any assertions " +
@@ -241,7 +233,7 @@ public class GenerateAssertionsService {
     assertionRepository.deleteByContestName(request.contestName);
 
     if (solution.Ok != null) {
-      // The solution is OK. Persist assertions formed by raire-java and save the winner and warning.
+      // The solution is OK. Persist assertions formed by raire-java and save the winner and warning (if any).
       logger.debug(String.format("%s Proceeding to translate and save %d assertions to the " +
           "database for contest %s.", prefix, solution.Ok.assertions.length, request.contestName));
       assertionRepository.translateAndSaveAssertions(request.contestName,
@@ -249,25 +241,33 @@ public class GenerateAssertionsService {
 
       logger.debug(String.format("%s Assertions persisted.", prefix));
 
-      // Update summary data, success.
-      summary.update(request.candidates, solution.Ok.winner, solution.Ok.warning_trim_timed_out);
+      // Make a new summary with success info.
+      summary = new GenerateAssertionsSummary(request.contestName, request.candidates,
+          solution.Ok.winner, solution.Ok.warning_trim_timed_out);
 
     } else if (solution.Err != null) {
       // The solution indicates a failed assertion generation. Persist the error and message.
+      logger.debug(String.format("%s Assertion generation failed with error %s for contest %s. " +
+          "Replacing generate assertions summary and deleting any prior assertions.", prefix,
+          solution.Err, request.contestName));
 
       // Creating a RaireServiceException gives us a human-readable error message, though the
       // exception is not thrown.
-      RaireServiceException ex = new RaireServiceException(solution.Err, request.candidates);
+      final RaireServiceException ex = new RaireServiceException(solution.Err, request.candidates);
 
-      // Update summary data.
-      summary.update(ex.errorCode.toString(), ex.getMessage());
+      // Make a new summary with failure info.
+      summary = new GenerateAssertionsSummary(request.contestName, ex.errorCode.toString(), ex.getMessage());
+
     } else {
       // This is not supposed to happen - we got neither assertions nor an error.
-      summary.update(INTERNAL_ERROR.toString(), "Internal error");
+      logger.debug(String.format("%s Assertion generation failed with an internal error for contest %s. " +
+          "Replacing generate assertions summary and deleting any prior assertions.", prefix,
+          request.contestName));
+
+      summary = new GenerateAssertionsSummary(request.contestName, INTERNAL_ERROR.toString(),
+          "Internal error");
     }
 
-    // This is redundant for an object we retrieved from the database, but necessary if we made a
-    // new one.
     summaryRepository.save(summary);
   }
 }

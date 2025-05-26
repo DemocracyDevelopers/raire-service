@@ -68,7 +68,7 @@ public class GenerateAssertionsAPIWickedTests {
    * Names of contests, to match preloaded data.
    */
   private static final String tiedWinnersContest = "Tied Winners Contest";
-  private static final String ByronMayoral = "Byron Mayoral";
+  protected static final String ByronMayoral = "Byron Mayoral";
   private static final String timeOutCheckingWinnersContest = "Time out checking winners contest";
 
   /**
@@ -89,7 +89,7 @@ public class GenerateAssertionsAPIWickedTests {
   private final static GenerateAssertionsRequest tiedWinnersRequest
       = new GenerateAssertionsRequest(tiedWinnersContest, 2, 5,
       aliceChuanBob);
-  private final static GenerateAssertionsRequest ByronShortTimeoutRequest
+  protected final static GenerateAssertionsRequest ByronShortTimeoutRequest
       = new GenerateAssertionsRequest(ByronMayoral, 18165, 0.001,
       choicesByron);
   private final static GenerateAssertionsRequest checkingWinnersTimeoutRequest
