@@ -24,7 +24,6 @@ import static au.org.democracydevelopers.raireservice.service.RaireServiceExcept
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static org.junit.jupiter.api.Assertions.*;
 
-import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.math.BigDecimal;
