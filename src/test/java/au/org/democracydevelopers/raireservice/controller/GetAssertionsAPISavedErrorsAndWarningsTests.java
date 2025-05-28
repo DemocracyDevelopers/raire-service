@@ -121,8 +121,6 @@ public class GetAssertionsAPISavedErrorsAndWarningsTests {
             aliceAndBob, NO_ASSERTIONS_PRESENT, "No assertion generation summary"),
         Arguments.of("CSV", defaultRiskLimit, "No summary but some assertions Contest", defaultCount,
             aliceAndBob, NO_ASSERTIONS_PRESENT, "No assertion generation summary"),
-        // TODO think about the right way of dealing with, and testing, the timeout warning.
-        // See Issue https://github.com/orgs/DemocracyDevelopers/projects/1?pane=issue&itemId=63398709
         Arguments.of("JSON", defaultRiskLimit, "Timeout trimming assertions Contest", defaultCount,
             aliceAndBob, NO_ASSERTIONS_PRESENT, ""),
         Arguments.of("CSV", defaultRiskLimit, "Timeout trimming assertions Contest", defaultCount,

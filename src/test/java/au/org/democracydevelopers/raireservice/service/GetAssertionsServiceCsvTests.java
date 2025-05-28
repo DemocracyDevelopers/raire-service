@@ -24,7 +24,6 @@ import static au.org.democracydevelopers.raireservice.service.RaireServiceExcept
 import static au.org.democracydevelopers.raireservice.testUtils.defaultCount;
 import static org.junit.jupiter.api.Assertions.*;
 
-import au.org.democracydevelopers.raireservice.persistence.repository.AssertionRepository;
 import au.org.democracydevelopers.raireservice.request.GetAssertionsRequest;
 import au.org.democracydevelopers.raireservice.testUtils;
 import java.math.BigDecimal;
@@ -47,8 +46,10 @@ import org.springframework.transaction.annotation.Transactional;
  * - a basic, simple test case with two assertions (NEN and NEB),
  * - a test case with lots of ties, to test that extremum-calculation is correct,
  * - a test case with difficult characters, such as " and ' and , in the candidate names.
- * TODO Note that there are assumptions about how these characters are represented in the database,
+ * TODO - Note that there are assumptions about how these characters are represented in the database,
  * which need to be validated on real data.
+ * See <a href="https://github.com/DemocracyDevelopers/raire-service/issues/96">...</a>
+ * This might actually make more sense as a colorado-rla workflow test.
  */
 @ActiveProfiles("csv-challenges")
 @SpringBootTest
@@ -57,9 +58,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class GetAssertionsServiceCsvTests {
 
   private static final Logger logger = LoggerFactory.getLogger(GetAssertionsServiceCsvTests.class);
-
-  @Autowired
-  AssertionRepository assertionRepository;
 
   @Autowired
   GetAssertionsCsvService getAssertionsCSVService;
@@ -178,7 +176,7 @@ public class GetAssertionsServiceCsvTests {
     RaireServiceException ex = assertThrows(RaireServiceException.class,
         () -> getAssertionsCSVService.generateCSV(request)
     );
-    assertSame(ex.errorCode, WRONG_CANDIDATE_NAMES);
+    assertSame(WRONG_CANDIDATE_NAMES, ex.errorCode);
   }
 
    /**

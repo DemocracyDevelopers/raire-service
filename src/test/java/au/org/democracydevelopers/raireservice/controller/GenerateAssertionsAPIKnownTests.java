@@ -73,10 +73,6 @@ import org.springframework.transaction.annotation.Transactional;
  * Note for anyone comparing this directly with GenerateAssertionsServiceKnownTests: the
  * test for wrong candidate names is in GenerateAssertionsAPIErrorTests, along with various other
  * tests involving invalid request data.
- * TODO The GenerateAssertionsServiceTest contains tests of proper overwriting when assertion
- * generation is requested but assertions are already in the database. This is not yet complete in
- * this class, pending a decision about how to block assertion regeneration when appropriate.
- * See (<a href="https://github.com/DemocracyDevelopers/raire-service/issues/70">...</a>)
  * In each case, the test
  * - makes a request for assertion generation through the API,
  * - checks for the right winner,
