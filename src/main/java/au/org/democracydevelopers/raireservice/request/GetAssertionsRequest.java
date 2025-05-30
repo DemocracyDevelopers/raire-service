@@ -58,7 +58,7 @@ public class GetAssertionsRequest extends ContestRequest {
    * @param candidates a list of candidates by name
    * @param riskLimit the risk limit for the audit, expected to be in the range [0,1].
    */
-  @ConstructorProperties({"contestName", "totalAuditableBallots", "candidates", "winner", "riskLimit"})
+  @ConstructorProperties({"contestName", "totalAuditableBallots", "candidates", "riskLimit"})
   public GetAssertionsRequest(String contestName, int totalAuditableBallots, List<String> candidates,
       BigDecimal riskLimit) {
 
