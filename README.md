@@ -55,7 +55,7 @@ The tests in src/test/java require Docker. You will need to [Install Docker](htt
 On Linux platforms, you need to [add yourself to the docker group](https://docs.docker.com/engine/install/linux-postinstall/). This effectively grants root-level privileges to the user. If that's not what you want (and it's probably not) you can [run docker without root privileges](https://docs.docker.com/engine/security/rootless/).
 
 ## Deployment with colorado-rla
-To run an audit, clone and deploy colorado-rla by following the [developer instructions.](https://github.com/DemocracyDevelopers/colorado-rla/blob/main/docs/25_developer.md#install-and-setup).
+To run an audit, clone and deploy colorado-rla by following the [developer instructions.](https://github.com/DemocracyDevelopers/colorado-rla/blob/main/legacy-docs/25_developer.md#install-and-setup).
 
 colorado-rla's `raire_url` property tells it where to find raire. The default (`http://localhost:8080`)
 is set up so that both can run on the same machine without any change to the addresses or ports.
