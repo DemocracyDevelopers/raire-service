@@ -46,10 +46,6 @@ import org.springframework.transaction.annotation.Transactional;
  * - a basic, simple test case with two assertions (NEN and NEB),
  * - a test case with lots of ties, to test that extremum-calculation is correct,
  * - a test case with difficult characters, such as " and ' and , in the candidate names.
- * TODO - Note that there are assumptions about how these characters are represented in the database,
- * which need to be validated on real data.
- * See <a href="https://github.com/DemocracyDevelopers/raire-service/issues/96">...</a>
- * This might actually make more sense as a colorado-rla workflow test.
  */
 @ActiveProfiles("csv-challenges")
 @SpringBootTest
