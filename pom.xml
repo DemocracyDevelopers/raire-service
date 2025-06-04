@@ -21,7 +21,7 @@
     <dependency>
       <groupId>au.org.democracydevelopers</groupId>
       <artifactId>raire-java</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.3</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -45,7 +45,12 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>1.20.6</version>
+      <version>1.21.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-launcher</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -56,7 +61,7 @@
     <dependency>
     <groupId>org.testcontainers</groupId>
     <artifactId>postgresql</artifactId>
-    <version>1.20.6</version>
+    <version>1.21.1</version>
     <scope>test</scope>
 </dependency>
 
