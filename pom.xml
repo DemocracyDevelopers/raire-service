@@ -64,6 +64,7 @@
       <artifactId>commons-text</artifactId>
       <version>1.15.0</version>
     </dependency>
+
     <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers-postgresql</artifactId>
